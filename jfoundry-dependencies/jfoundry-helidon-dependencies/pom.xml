@@ -21,6 +21,19 @@
         <helidon.version>4.5.1</helidon.version>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <!-- Maven 4 cannot collect this import-only BOM as a dependency graph. -->
+                    <rulesToSkip>requireReleaseDeps</rulesToSkip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
