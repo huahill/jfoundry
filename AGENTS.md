@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 21 multi-module Maven project for a jMolecules-based, runtime-neutral DDD framework. Top-level groups are declared in `pom.xml`: `jfoundry-core` contains domain, architecture, application, infrastructure, and runtime-neutral starters; `jfoundry-runtime-integrations` contains Spring and Quarkus; `jfoundry-dependencies` and `jfoundry-verification` remain separate release and verification groups. Production code uses standard Maven paths such as `src/main/java`; tests live under `src/test/java`; module resources live under `src/main/resources` or `src/test/resources`. SQL files shipped by jfoundry are copyable templates, not auto-run migrations. Documentation is organized by language under `docs/i18n/en/` and `docs/i18n/zh/`, with the default English overview in `README.md` and the Chinese overview in `README_ZH.md`.
+This is a Java 25 multi-module Maven project for a jMolecules-based, runtime-neutral DDD framework. Top-level groups are declared in `pom.xml`: `jfoundry-core` contains domain, architecture, application, infrastructure, and runtime-neutral starters; `jfoundry-runtime-integrations` contains Spring, Quarkus, and Helidon; `jfoundry-dependencies` and `jfoundry-verification` remain separate release and verification groups. Production code uses standard Maven paths such as `src/main/java`; tests live under `src/test/java`; module resources live under `src/main/resources` or `src/test/resources`. SQL files shipped by jfoundry are copyable templates, not auto-run migrations. Documentation is organized by language under `docs/i18n/en/` and `docs/i18n/zh/`, with the default English overview in `README.md` and the Chinese overview in `README_ZH.md`.
 
 ## Build, Test, and Development Commands
 
@@ -10,12 +10,12 @@ This is a Java 21 multi-module Maven project for a jMolecules-based, runtime-neu
 - `mvn test` compiles and runs all unit, integration, and ArchUnit tests.
 - `mvn clean install` performs a full local build and installs artifacts into the local Maven repository.
 - `mvn -pl jfoundry-domain test` runs tests for one module; add `-am` when dependencies must also be built.
-- `scripts/verify-ci-matrix.sh` runs the local CI Java test matrix using `JAVA_21_HOME` and `JAVA_25_HOME`.
+- `scripts/verify-ci-matrix.sh` runs the local Java 25 release-baseline test using `JAVA_25_HOME`.
 - `mvn clean install -DskipTests` builds artifacts without executing tests; use only for local iteration.
 
 ## Coding Style & Naming Conventions
 
-Use Java 21 features where they simplify the model, especially records for immutable value objects. Follow the existing package root `org.jfoundry.*` and standard Maven layout. Keep domain modules free of Spring and persistence dependencies; place Spring auto-configuration under `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, Spring runtime adapters under `jfoundry-runtime-integrations/jfoundry-spring/runtime`, persistence and broker adapters under `jfoundry-core/jfoundry-infrastructure`, reusable architecture test rules under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`, and internal middleware verification under `jfoundry-verification`. Name tests with a `*Test` suffix. No formatter plugin is configured, so match the surrounding Java style: four-space indentation, clear method names, and concise English Javadocs/comments only where API intent or non-obvious behavior needs explanation.
+Use Java 25 features where they simplify the model, especially records for immutable value objects. Follow the existing package root `org.jfoundry.*` and standard Maven layout. Keep domain modules free of Spring and persistence dependencies; place Spring auto-configuration under `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, Spring runtime adapters under `jfoundry-runtime-integrations/jfoundry-spring/runtime`, persistence and broker adapters under `jfoundry-core/jfoundry-infrastructure`, reusable architecture test rules under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`, and internal middleware verification under `jfoundry-verification`. Name tests with a `*Test` suffix. No formatter plugin is configured, so match the surrounding Java style: four-space indentation, clear method names, and concise English Javadocs/comments only where API intent or non-obvious behavior needs explanation.
 
 ## Architecture Boundaries
 
@@ -48,7 +48,7 @@ Tests use JUnit Jupiter, Spring Boot test support where needed, and ArchUnit for
 
 Mockito's Java agent is opt-in per module. The root POM keeps the common Surefire/Failsafe `argLine` template with an empty `mockito.javaagent.argLine`; only modules whose tests directly use Mockito or whose test framework loads Mockito should override it with `-javaagent:${org.mockito:mockito-core:jar}` and have a test dependency that resolves `mockito-core`.
 
-For changes involving build logic, dependency management, test infrastructure, CI workflows, Maven plugin configuration, Java baseline compatibility, or runtime compatibility, run `scripts/verify-ci-matrix.sh` before committing or pushing when both local JDKs are available. If only one JDK is available, run the available local verification and state the missing matrix coverage.
+For changes involving build logic, dependency management, test infrastructure, CI workflows, Maven plugin configuration, Java baseline compatibility, or runtime compatibility, run `scripts/verify-ci-matrix.sh` before committing or pushing when Java 25 is available. If Java 25 is unavailable, do not claim release-baseline verification.
 
 ## Documentation Sync
 
@@ -72,7 +72,7 @@ Keep `main` history linear. Do not use `git merge` to integrate completed work i
 
 Javadocs and documentation comments in source code must follow the Language Policy. There is no Javadoc i18n mechanism for comment bodies; generated documentation uses the text from source comments. Keep comments concise and focused on API intent; avoid restating obvious implementation details.
 
-Use Java 23 Markdown documentation comments (`///`) for all new or modified Java API documentation. Do not introduce traditional `/** ... */` block comments. The Java 21 compilation baseline treats `///` as ordinary comments, so Spring Boot configuration metadata must not rely on them for property descriptions. For `@ConfigurationProperties` IDE descriptions, add or update `META-INF/additional-spring-configuration-metadata.json` instead.
+Use Java 23 Markdown documentation comments (`///`) for all new or modified Java API documentation. Do not introduce traditional `/** ... */` block comments. Spring Boot configuration metadata must not rely on documentation comments for property descriptions. For `@ConfigurationProperties` IDE descriptions, add or update `META-INF/additional-spring-configuration-metadata.json` instead.
 
 ## Project Skills
 

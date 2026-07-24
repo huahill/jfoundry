@@ -8,7 +8,7 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 
 ## Prerequisites
 
-- Java 21 or newer.
+- Java 25.
 - Maven 3.9.0 or newer.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.

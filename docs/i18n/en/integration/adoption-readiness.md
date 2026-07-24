@@ -22,7 +22,7 @@ the domain, architecture, project shape, and runtime constraints are understood.
 |---------|--------------------|----------------------|
 | `domain-architecture-skills` | Ready for use in real projects as design-time guidance | Standard domain and architecture workflow for AI-assisted development, with human review of business meaning |
 | jfoundry | Suitable for controlled adoption in real projects within the validated stack | Optional business framework, pinned to an immutable version and subject to project production gates |
-| Domain Architecture plugin plus optional jfoundry landing | Proven as an end-to-end sequence from requirements and modeling through architecture selection, optional framework landing, implementation, and acceptance, with separately maintained Hexagonal and Onion Simple variants | Preferred first for Java 21, Spring Boot, MyBatis-Plus, PostgreSQL, Kafka, and Redis projects |
+| Domain Architecture plugin plus optional jfoundry landing | Proven as an end-to-end sequence from requirements and modeling through architecture selection, optional framework landing, implementation, and acceptance, with separately maintained Hexagonal and Onion Simple variants | Preferred first for Java 25, Spring Boot, MyBatis-Plus, PostgreSQL, Kafka, and Redis projects |
 
 The last row means this concrete sequence:
 
@@ -122,7 +122,7 @@ from Hexagonal Port/Adapter conventions.
 
 The strongest evidence currently applies to:
 
-- Java 21 business applications, with Java 25 covered by the jfoundry CI compatibility matrix.
+- Java 25 business applications.
 - Spring Boot 3.5.x and Spring Framework 6.2.x.
 - Quarkus 3.37.3 CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
   JVM consumer smoke test and a Native Image CI gate.

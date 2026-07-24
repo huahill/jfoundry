@@ -72,12 +72,12 @@ Check:
 
 ## Release Compatibility
 
-For stable 1.x:
+For the first release line:
 
-- Java compile target: 21
-- Runtime Java baseline: 21
+- Java compile target: 25
+- Runtime Java baseline: 25
 - Spring Boot: 3.5.x
 - Spring Framework: 6.2.x
 - Maven release tool: 3.9.x
 
-Do not silently move 1.x to Spring Boot 4, Spring Framework 7, Java 25 compile target, or Jakarta EE 11. Treat that as a 2.x compatibility line unless the project explicitly changes release policy.
+Do not silently move the first release line to Spring Boot 4, Spring Framework 7, or Jakarta EE 11. Treat that as a separate compatibility line unless the project explicitly changes release policy.

@@ -20,7 +20,7 @@
 |------|----------|----------|
 | `domain-architecture-skills` | 可以作为设计期指导直接用于真实项目 | AI 辅助开发的标准领域与架构工作流，但业务含义仍需人工负责 |
 | jfoundry | 可以在已验证技术栈内受控用于真实项目 | 可选业务框架，固定不可变版本，并通过具体项目的生产准入检查 |
-| Domain Architecture 插件 + 可选 jfoundry 落地 | 已通过分别维护的 Hexagonal 与 Onion Simple 变体，证明可以从需求、建模、架构选择和可选框架落地，一直支撑到实现与验收 | 优先用于 Java 21、Spring Boot、MyBatis-Plus、PostgreSQL、Kafka 和 Redis 项目 |
+| Domain Architecture 插件 + 可选 jfoundry 落地 | 已通过分别维护的 Hexagonal 与 Onion Simple 变体，证明可以从需求、建模、架构选择和可选框架落地，一直支撑到实现与验收 | 优先用于 Java 25、Spring Boot、MyBatis-Plus、PostgreSQL、Kafka 和 Redis 项目 |
 
 表格最后一行具体指以下顺序：
 
@@ -99,7 +99,7 @@ Hexagonal Port/Adapter 约定分离。
 
 当前最强证据适用于：
 
-- Java 21 业务应用；Java 25 由 jfoundry CI 兼容矩阵覆盖。
+- Java 25 业务应用。
 - Spring Boot 3.5.x 和 Spring Framework 6.2.x。
 - Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 消费者
   smoke test 和 Native Image CI gate。

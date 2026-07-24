@@ -30,13 +30,10 @@ run_tests() {
     )
 }
 
-JAVA_21_HOME="${JAVA_21_HOME:-}"
 JAVA_25_HOME="${JAVA_25_HOME:-}"
 
-require_jdk "JAVA_21_HOME" "${JAVA_21_HOME}"
 require_jdk "JAVA_25_HOME" "${JAVA_25_HOME}"
 
-run_tests "21" "${JAVA_21_HOME}"
 run_tests "25" "${JAVA_25_HOME}"
 
-echo "CI Java test matrix completed successfully."
+echo "Java 25 release-baseline test completed successfully."
