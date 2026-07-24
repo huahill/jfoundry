@@ -12,6 +12,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Proxy;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -153,6 +155,19 @@ class JpaInboxMessageStoreTest {
         assertThat(loadUnrelatedEntity().getDescription()).isEqualTo("after");
     }
 
+    @Test
+    void usesJpqlForPortableStateTransitions() {
+        JpaInboxMessageStore portableStore = new JpaInboxMessageStore(
+                entityManagerRejectingNativeQueries(entityManager),
+                (manager, messageId, consumerName, now) -> false);
+        persist(failed("retry", "billing", "temporary failure"));
+        persist(InboxMessage.processing("failure", "billing"));
+
+        inTransaction(() -> portableStore.tryStartProcessing("retry", "billing"));
+        inTransaction(() -> portableStore.markProcessed("retry", "billing"));
+        inTransaction(() -> portableStore.markFailed("failure", "billing", "temporary failure"));
+    }
+
     private void persist(InboxMessage message) {
         inTransaction(() -> entityManager.persist(JpaInboxMessageEntity.fromMessage(message)));
     }
@@ -227,5 +242,21 @@ class JpaInboxMessageStoreTest {
             entityManager.getTransaction().rollback();
             throw exception;
         }
+    }
+
+    private static EntityManager entityManagerRejectingNativeQueries(EntityManager delegate) {
+        return (EntityManager) Proxy.newProxyInstance(
+                JpaInboxMessageStoreTest.class.getClassLoader(),
+                new Class<?>[]{EntityManager.class},
+                (proxy, method, arguments) -> {
+                    if ("createNativeQuery".equals(method.getName())) {
+                        throw new AssertionError("Portable Inbox state transitions must use JPQL");
+                    }
+                    try {
+                        return method.invoke(delegate, arguments);
+                    } catch (InvocationTargetException exception) {
+                        throw exception.getCause();
+                    }
+                });
     }
 }

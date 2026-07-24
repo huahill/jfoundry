@@ -7,8 +7,6 @@ import org.jfoundry.application.outbox.OutboxMessageStatus;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,17 +49,17 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
 
     @Override
     public void markAsPublished(String eventId, String claimToken) {
-        entityManager.createNativeQuery("""
-                update jfoundry_outbox_event
-                   set status = ?1, last_attempt_at = ?2, updated_at = ?2,
-                       claimed_at = null, claimed_by = null, claim_token = null
-                 where event_id = ?3 and status = ?4 and claim_token = ?5
+        entityManager.createQuery("""
+                update JpaOutboxMessageEntity e
+                   set e.status = :published, e.lastAttemptAt = :publishedAt, e.updatedAt = :publishedAt,
+                       e.claimedAt = null, e.claimedBy = null, e.claimToken = null
+                 where e.eventId = :eventId and e.status = :dispatching and e.claimToken = :claimToken
                 """)
-                .setParameter(1, OutboxMessageStatus.PUBLISHED.name())
-                .setParameter(2, utcTimestamp(Instant.now()))
-                .setParameter(3, eventId)
-                .setParameter(4, OutboxMessageStatus.DISPATCHING.name())
-                .setParameter(5, claimToken)
+                .setParameter("published", OutboxMessageStatus.PUBLISHED.name())
+                .setParameter("publishedAt", Instant.now())
+                .setParameter("eventId", eventId)
+                .setParameter("dispatching", OutboxMessageStatus.DISPATCHING.name())
+                .setParameter("claimToken", claimToken)
                 .executeUpdate();
         entityManager.clear();
     }
@@ -246,10 +244,6 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
             typedQuery.setParameter("excludedEventIds", excludedEventIds);
         }
         return typedQuery;
-    }
-
-    private static LocalDateTime utcTimestamp(Instant instant) {
-        return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
     }
 
     private static void requirePositive(int value, String name) {

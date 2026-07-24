@@ -111,6 +111,18 @@ class JpaOutboxMessageStoreTest {
     }
 
     @Test
+    void usesJpqlForClaimTokenGuardedPublication() {
+        append(pending("evt-1", Instant.now()));
+        OutboxMessage claim = inTransactionResult(() -> store.claimDispatchable(1, "node-a").get(0));
+        JpaOutboxMessageStore portableStore = new JpaOutboxMessageStore(
+                entityManagerRejectingNativeQueries(entityManager));
+
+        inTransaction(() -> portableStore.markAsPublished("evt-1", claim.getClaimToken()));
+
+        assertThat(load("evt-1").getStatus()).isEqualTo(OutboxMessageStatus.PUBLISHED);
+    }
+
+    @Test
     void failureRetryDeadLetterAndReactivationFollowTheCoreStateMachine() {
         append(pending("evt-1", Instant.now()));
         OutboxMessage firstClaim = inTransactionResult(() -> store.claimDispatchable(1, "node-a").get(0));
@@ -432,5 +444,17 @@ class JpaOutboxMessageStoreTest {
         } catch (InvocationTargetException exception) {
             throw exception.getCause();
         }
+    }
+
+    private static EntityManager entityManagerRejectingNativeQueries(EntityManager delegate) {
+        return (EntityManager) Proxy.newProxyInstance(
+                JpaOutboxMessageStoreTest.class.getClassLoader(),
+                new Class<?>[]{EntityManager.class},
+                (proxy, method, arguments) -> {
+                    if ("createNativeQuery".equals(method.getName())) {
+                        throw new AssertionError("Portable Outbox state transitions must use JPQL");
+                    }
+                    return invoke(delegate, method, arguments);
+                });
     }
 }
