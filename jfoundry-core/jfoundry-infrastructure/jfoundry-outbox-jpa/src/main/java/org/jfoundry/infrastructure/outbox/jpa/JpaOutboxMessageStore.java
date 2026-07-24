@@ -10,7 +10,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /// Jakarta Persistence implementation of the Outbox persistence SPI.
@@ -123,10 +125,11 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
         String claimToken = UUID.randomUUID().toString();
         Instant eligibilityTime = Instant.now();
         List<OutboxMessage> claimed = new ArrayList<>(limit);
+        Set<String> attemptedEventIds = new HashSet<>();
 
         while (claimed.size() < limit) {
             int remaining = limit - claimed.size();
-            List<OutboxMessage> candidates = dispatchableQuery(eligibilityTime)
+            List<OutboxMessage> candidates = dispatchableQuery(eligibilityTime, attemptedEventIds)
                     .setMaxResults(remaining)
                     .getResultStream()
                     .map(JpaOutboxMessageEntity::toMessage)
@@ -135,8 +138,8 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
             if (candidates.isEmpty()) {
                 break;
             }
-            int claimedFromPage = 0;
             for (OutboxMessage candidate : candidates) {
+                attemptedEventIds.add(candidate.getEventId());
                 Instant claimedAt = Instant.now();
                 int updated = entityManager.createQuery("""
                         update JpaOutboxMessageEntity e
@@ -158,11 +161,7 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
                     candidate.setClaimedBy(claimerId);
                     candidate.setClaimToken(claimToken);
                     claimed.add(candidate);
-                    claimedFromPage++;
                 }
-            }
-            if (claimedFromPage == 0) {
-                break;
             }
         }
         return claimed;
@@ -226,15 +225,27 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
     }
 
     private jakarta.persistence.TypedQuery<JpaOutboxMessageEntity> dispatchableQuery(Instant now) {
-        return entityManager.createQuery("""
+        return dispatchableQuery(now, Set.of());
+    }
+
+    private jakarta.persistence.TypedQuery<JpaOutboxMessageEntity> dispatchableQuery(
+            Instant now, Set<String> excludedEventIds) {
+        String query = """
                 select e from JpaOutboxMessageEntity e
                  where (e.status = :pending or e.status = :failed)
                    and (e.nextRetryAt is null or e.nextRetryAt <= :now)
+                """ + (excludedEventIds.isEmpty() ? "" : " and e.eventId not in :excludedEventIds") + """
                  order by e.occurredAt asc, e.eventId asc
-                """, JpaOutboxMessageEntity.class)
+                """;
+        jakarta.persistence.TypedQuery<JpaOutboxMessageEntity> typedQuery = entityManager.createQuery(
+                query, JpaOutboxMessageEntity.class)
                 .setParameter("pending", OutboxMessageStatus.PENDING.name())
                 .setParameter("failed", OutboxMessageStatus.FAILED.name())
                 .setParameter("now", now);
+        if (!excludedEventIds.isEmpty()) {
+            typedQuery.setParameter("excludedEventIds", excludedEventIds);
+        }
+        return typedQuery;
     }
 
     private static LocalDateTime utcTimestamp(Instant instant) {

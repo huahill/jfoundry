@@ -291,6 +291,34 @@ class JpaOutboxMessageStoreTest {
     }
 
     @Test
+    void losingClaimCasRetriesWithTheNextDispatchableCandidate() {
+        Instant occurredAt = Instant.now();
+        append(pending("first", occurredAt));
+        append(pending("second", occurredAt.plusSeconds(1)));
+        EntityManager winnerManager = entityManagerFactory.createEntityManager();
+        EntityManager loserManager = entityManagerFactory.createEntityManager();
+        try {
+            JpaOutboxMessageStore winnerStore = new JpaOutboxMessageStore(winnerManager);
+            AtomicBoolean winnerClaimed = new AtomicBoolean();
+            JpaOutboxMessageStore loserStore = new JpaOutboxMessageStore(
+                    entityManagerThatRunsBeforeBulkUpdate(loserManager, "e.status = :candidateStatus", () -> {
+                        if (winnerClaimed.compareAndSet(false, true)) {
+                            inTransaction(winnerManager, () -> winnerStore.claimDispatchable(1, "winner"));
+                        }
+                    }));
+
+            List<OutboxMessage> claimed = inTransactionResult(loserManager, () -> loserStore.claimDispatchable(1, "loser"));
+
+            assertThat(claimed).extracting(OutboxMessage::getEventId).containsExactly("second");
+            assertThat(load("first").getClaimedBy()).isEqualTo("winner");
+            assertThat(load("second").getClaimedBy()).isEqualTo("loser");
+        } finally {
+            winnerManager.close();
+            loserManager.close();
+        }
+    }
+
+    @Test
     void validatesClaimRecoveryAndCleanupInputs() {
         assertThatThrownBy(() -> store.claimDispatchable(0, "node-a"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("limit");
