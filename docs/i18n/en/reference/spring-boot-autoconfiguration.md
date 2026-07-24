@@ -22,7 +22,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-inbox-spring-boot-starter` | Inbox core and `InboxTemplate` | Inbox table store |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` adapter and supported-database claim strategy | Database migration execution, claim support for database products other than PostgreSQL and MySQL |
-| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business MyBatis-Plus persistence entry point: base auto-configuration, shared persistence runtime support, and the MyBatis-Plus Boot starter | The framework-neutral `jfoundry-infrastructure-mybatis-plus-starter`, Outbox/Inbox stores |
+| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business MyBatis-Plus persistence entry point: base auto-configuration, shared persistence runtime support, and the MyBatis-Plus Boot starter | The runtime-neutral `jfoundry-persistence-mybatis-plus-starter`, Outbox/Inbox stores |
 | `jfoundry-persistence-jpa-spring-boot-starter` | jfoundry JPA adapter for one managed entity graph per aggregate, shared Spring transaction persistence context, Spring Boot JPA runtime | Detached aggregate merge, manual multi-table or multi-graph synchronization algorithms, Outbox and Inbox stores |
 | `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` exception handling | Messaging, Outbox, Inbox |
 

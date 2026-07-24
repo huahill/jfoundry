@@ -5,12 +5,12 @@
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-starters</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-infrastructure-jpa-starter</artifactId>
-    <name>jfoundry-infrastructure-jpa-starter</name>
-    <description>Starter for infrastructure-layer Jakarta Persistence adapters with jfoundry.</description>
+    <artifactId>jfoundry-persistence-mybatis-plus-starter</artifactId>
+    <name>jfoundry-persistence-mybatis-plus-starter</name>
+    <description>Runtime-neutral dependency starter for jfoundry MyBatis-Plus persistence adapters.</description>
 
     <dependencies>
         <dependency>
@@ -19,7 +19,11 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-persistence-jpa</artifactId>
+            <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
         </dependency>
     </dependencies>
 
@@ -28,7 +32,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration><skip>true</skip></configuration>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -37,11 +43,15 @@
                     <execution>
                         <id>attach-empty-javadoc</id>
                         <phase>package</phase>
-                        <goals><goal>jar</goal></goals>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
                         <configuration>
                             <classesDirectory>${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder</classesDirectory>
                             <classifier>javadoc</classifier>
-                            <includes><include>README.md</include></includes>
+                            <includes>
+                                <include>README.md</include>
+                            </includes>
                         </configuration>
                     </execution>
                 </executions>

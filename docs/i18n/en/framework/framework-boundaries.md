@@ -12,7 +12,7 @@ such as jMolecules and `slf4j-api` may appear in core modules when they express 
 `jfoundry-core` is a directory group for runtime-neutral framework modules. It contains the domain,
 architecture, application, infrastructure, and runtime-neutral starter aggregates; it does not change
 the Onion dependency direction within those modules. `jfoundry-runtime-integrations` groups concrete
-runtime integrations: Spring uses `runtime/` and `boot-starters/`, Quarkus uses `runtime/`,
+runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`, Quarkus uses `runtime/`,
 `deployment/`, and `integration-tests/`, and Helidon uses `runtime/` and `integration-tests/`.
 
 ## Module Roles
@@ -22,6 +22,7 @@ runtime integrations: Spring uses `runtime/` and `boot-starters/`, Quarkus uses 
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
 | Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-event-core`, `jfoundry-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-mybatis-plus`, `jfoundry-persistence-jpa`, `jfoundry-messaging-jackson`, Outbox/Inbox MyBatis-Plus and JPA stores, JobRunr dispatch adapter |
+| Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, `jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
 | Quarkus runtime integration | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`, `deployment/*` |
@@ -37,7 +38,11 @@ runtime integrations: Spring uses `runtime/` and `boot-starters/`, Quarkus uses 
 - Helidon CDI lifecycle, JTA, JAX-RS, scheduling, and JPA integration belong under
   `jfoundry-runtime-integrations/jfoundry-helidon/runtime`; consumer verification belongs under its
   `integration-tests` directory. Helidon has no JFoundry deployment module or starter layer.
-- Starters are dependency entry points only; they must not contain runtime behavior.
+- Starters are dependency entry points only; they must not contain runtime behavior. Keep Domain and
+  Application starters at `jfoundry-core/jfoundry-starters`; place runtime-neutral infrastructure
+  adapter starters directly under `jfoundry-core/jfoundry-starters/infrastructure`. Their artifact IDs
+  use capability and technology names, such as `jfoundry-persistence-jpa-starter`; do not add an
+  intermediate aggregator POM or further directory levels.
 - Framework-neutral database, serializer, and scheduler adapters belong under
   `jfoundry-core/jfoundry-infrastructure`.
 - Broker client `MessageSender` adapters belong to their runtime integration. The application-layer

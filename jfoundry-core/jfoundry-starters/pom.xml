@@ -11,12 +11,12 @@
     <artifactId>jfoundry-starters</artifactId>
     <packaging>pom</packaging>
     <name>jfoundry-starters</name>
-    <description>Non-Spring starter modules for jfoundry business-layer capabilities.</description>
+    <description>Runtime-neutral dependency starters for jfoundry core capabilities.</description>
 
     <modules>
         <module>jfoundry-domain-starter</module>
         <module>jfoundry-application-starter</module>
-        <module>jfoundry-infrastructure-mybatis-plus-starter</module>
-        <module>jfoundry-infrastructure-jpa-starter</module>
+        <module>infrastructure/jfoundry-persistence-mybatis-plus-starter</module>
+        <module>infrastructure/jfoundry-persistence-jpa-starter</module>
     </modules>
 </project>

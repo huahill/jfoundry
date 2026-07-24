@@ -28,7 +28,7 @@
 |------|----------|
 | Domain | `jfoundry-domain-starter` |
 | Application | `jfoundry-application-starter` |
-| Infrastructure | 所选技术的 infrastructure starter，例如 `jfoundry-infrastructure-mybatis-plus-starter` |
+| Infrastructure | 所选运行时无关能力 starter，例如 `jfoundry-persistence-mybatis-plus-starter` |
 | Spring Boot 装配 | `jfoundry-spring-boot-starter` 加上实际需要的运行时能力 starter |
 | Quarkus 事务集成 | `jfoundry-quarkus-runtime` |
 

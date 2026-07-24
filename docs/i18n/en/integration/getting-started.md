@@ -32,7 +32,7 @@ Keep dependencies in the layer that owns them:
 |--------|---------------------|
 | Domain | `jfoundry-domain-starter` |
 | Application | `jfoundry-application-starter` |
-| Infrastructure | The selected technology's infrastructure starter, such as `jfoundry-infrastructure-mybatis-plus-starter` |
+| Infrastructure | The selected runtime-neutral capability starter, such as `jfoundry-persistence-mybatis-plus-starter` |
 | Spring Boot assembly | `jfoundry-spring-boot-starter` plus only the required runtime capability starters |
 | Quarkus transaction integration | `jfoundry-quarkus-runtime` |
 
