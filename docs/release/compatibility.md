@@ -39,7 +39,9 @@ starter or runtime capability into a business application by default.
 
 `org.javassist:javassist` is managed explicitly because `rocketmq-client:5.5.0` brings
 `rocketmq-remoting -> reflections:0.9.11 -> javassist:3.21.0-GA`, whose POM emits a
-Maven 4 model warning. The managed version keeps the Maven 4 compatibility gate clean.
+Maven 4 model warning. Maven 4 also reports imported-BOM conflicts from supported runtime
+ecosystems; the compatibility gate verifies successful package resolution rather than requiring
+a warning-free effective model.
 
 ## Verification Evidence
 
@@ -51,8 +53,8 @@ Recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`.
 | Package artifacts | `./mvnw -DskipTests package` | PASS |
 | Integration tests | `./mvnw -pl jfoundry-verification/jfoundry-middleware-integration-tests -am -Pit verify` | PASS, 28 integration tests with Docker 29.5.3/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
-| Maven 4 validate | Maven `4.0.0-rc-5`, `mvn -B -DskipTests validate -e` | PASS, no model warnings |
-| Maven 4 package | Maven `4.0.0-rc-5`, `mvn -B -DskipTests package` | PASS |
+| Maven 4 validate | Maven `4.0.0-rc-5`, `mvn -B -DskipTests validate -e` | PASS |
+| Maven 4 package | Maven `4.0.0-rc-5`, `mvn -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
 | Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | PASS on Java 21 |
 | Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
 
