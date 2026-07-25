@@ -99,6 +99,9 @@ jobs:
           java-version: 25
           cache: maven
 
+      - name: Install reactor artifacts
+        run: ./mvnw -B -DskipTests install
+
       - name: Run Quarkus PostgreSQL integration tests
         run: >
           ./mvnw -B

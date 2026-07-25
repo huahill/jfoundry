@@ -74,7 +74,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
-            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -175,6 +174,19 @@
                 <quarkus.native.enabled>true</quarkus.native.enabled>
                 <skipITs>false</skipITs>
             </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.quarkus</groupId>
+                        <artifactId>quarkus-maven-plugin</artifactId>
+                        <configuration>
+                            <systemProperties>
+                                <quarkus.datasource.db-kind>postgresql</quarkus.datasource.db-kind>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 </project>
