@@ -14,7 +14,7 @@ public final class MySqlJpaInboxClaimStrategy implements JpaInboxClaimStrategy {
 
     @Override
     public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now) {
-        LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now);
+        LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now).toLocalDateTime();
         String attemptedId = UUID.randomUUID().toString();
         entityManager.createNativeQuery("""
                 insert into jfoundry_inbox_message

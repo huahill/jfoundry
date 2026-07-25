@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.inbox.jpa;
 
 import org.junit.jupiter.api.Test;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
@@ -16,9 +17,11 @@ class InstantUtcConverterTest {
     void preservesEpochWhenWritingAnInstantFromANonUtcOffset() {
         Instant instant = OffsetDateTime.parse("2026-07-16T20:34:56.123456+08:00").toInstant();
 
-        LocalDateTime databaseValue = converter.convertToDatabaseColumn(instant);
+        Timestamp databaseValue = converter.convertToDatabaseColumn(instant);
 
-        assertThat(databaseValue).isEqualTo(LocalDateTime.parse("2026-07-16T12:34:56.123456"));
+        assertThat(databaseValue).isInstanceOf(Timestamp.class);
+        assertThat(databaseValue.toLocalDateTime())
+                .isEqualTo(LocalDateTime.parse("2026-07-16T12:34:56.123456"));
         assertThat(converter.convertToEntityAttribute(databaseValue)).isEqualTo(instant);
     }
 

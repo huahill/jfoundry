@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.outbox.jpa;
 
 import org.junit.jupiter.api.Test;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -16,9 +17,11 @@ class InstantUtcConverterTest {
     void roundTripsInstantsAsUtcLocalDateTimes() {
         Instant instant = Instant.parse("2026-07-16T12:34:56.123456Z");
 
-        LocalDateTime databaseValue = converter.convertToDatabaseColumn(instant);
+        Timestamp databaseValue = converter.convertToDatabaseColumn(instant);
 
-        assertThat(databaseValue).isEqualTo(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
+        assertThat(databaseValue).isInstanceOf(Timestamp.class);
+        assertThat(databaseValue.toLocalDateTime())
+                .isEqualTo(LocalDateTime.ofInstant(instant, ZoneOffset.UTC));
         assertThat(converter.convertToEntityAttribute(databaseValue)).isEqualTo(instant);
     }
 

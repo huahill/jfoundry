@@ -14,7 +14,7 @@ public final class PostgreSqlJpaInboxClaimStrategy implements JpaInboxClaimStrat
 
     @Override
     public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now) {
-        LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now);
+        LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now).toLocalDateTime();
         return entityManager.createNativeQuery("""
                 insert into jfoundry_inbox_message
                     (id, message_id, consumer_name, status, created_at, updated_at)
