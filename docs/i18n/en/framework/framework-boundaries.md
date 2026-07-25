@@ -12,7 +12,7 @@ such as jMolecules and `slf4j-api` may appear in core modules when they express 
 `jfoundry-core` is a directory group for runtime-neutral framework modules. It contains the domain,
 architecture, application, infrastructure, and runtime-neutral starter aggregates; it does not change
 the Onion dependency direction within those modules. `jfoundry-runtime-integrations` groups concrete
-runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`, Quarkus uses `runtime/`,
+runtime integrations: Spring uses `runtime/`, `autoconfigure/`, `starters/`, and `integration-tests/`, Quarkus uses `runtime/`,
 `deployment/`, and `integration-tests/`, and Helidon uses `runtime/` and `integration-tests/`.
 
 ## Module Roles
@@ -25,9 +25,11 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`,
 | Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, `jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
+| Spring integration tests | `jfoundry-runtime-integrations/jfoundry-spring/integration-tests/*` |
 | Quarkus runtime integration | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`, `deployment/*` |
-| Helidon MP runtime integration | `jfoundry-runtime-integrations/jfoundry-helidon/runtime/*`, `integration-tests/*` |
-| Verification | `jfoundry-verification/*` |
+| Quarkus integration tests | `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/*` |
+| Helidon MP runtime integration | `jfoundry-runtime-integrations/jfoundry-helidon/runtime/*` |
+| Helidon integration tests | `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/*` |
 
 ## Placement Rules
 
@@ -35,9 +37,14 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`,
   and Spring-side client wrappers belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/runtime`.
 - Spring Boot conditions, `@ConfigurationProperties`, bean wiring, metadata, and
   `AutoConfiguration.imports` belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`.
+- Spring middleware and Testcontainers verification belongs under
+  `jfoundry-runtime-integrations/jfoundry-spring/integration-tests`.
+- Quarkus runtime, middleware, Testcontainers, and Native Image verification belongs under
+  `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests`.
 - Helidon CDI lifecycle, JTA, JAX-RS, scheduling, and JPA integration belong under
-  `jfoundry-runtime-integrations/jfoundry-helidon/runtime`; consumer verification belongs under its
-  `integration-tests` directory. Helidon has no JFoundry deployment module or starter layer.
+  `jfoundry-runtime-integrations/jfoundry-helidon/runtime`; runtime, middleware, Testcontainers, and Native Image
+  verification belongs under `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests`. Helidon has no
+  JFoundry deployment module or starter layer.
 - Starters are dependency entry points only; they must not contain runtime behavior. Keep Domain and
   Application starters at `jfoundry-core/jfoundry-starters`; place runtime-neutral infrastructure
   adapter starters directly under `jfoundry-core/jfoundry-starters/infrastructure`. Their artifact IDs
@@ -47,8 +54,9 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`,
   `jfoundry-core/jfoundry-infrastructure`.
 - Broker client `MessageSender` adapters belong to their runtime integration. The application-layer
   `MessageSender` and `SendResult` contracts remain runtime-neutral.
-- Middleware integration tests and Testcontainers compatibility checks belong under
-  `jfoundry-verification`.
+- Runtime-specific middleware integration tests and Testcontainers compatibility checks belong in the affected
+  runtime's `integration-tests` directory. Framework-neutral tests stay next to their core or infrastructure
+  implementation.
 
 ## Reliable Messaging Boundary
 

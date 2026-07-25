@@ -81,8 +81,8 @@ jobs:
           java-version: 25
           cache: maven
 
-      - name: Run middleware integration tests
-        run: ./mvnw -B -pl jfoundry-verification/jfoundry-middleware-integration-tests -am -Pit verify
+      - name: Run Spring middleware integration tests
+        run: ./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/integration-tests/jfoundry-spring-integration-tests -am -Pit verify
 
   quarkus-native:
     name: Quarkus Native Image

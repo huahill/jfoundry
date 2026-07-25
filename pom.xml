@@ -79,7 +79,6 @@
         <module>jfoundry-runtime-integrations/jfoundry-spring</module>
         <module>jfoundry-runtime-integrations/jfoundry-quarkus</module>
         <module>jfoundry-runtime-integrations/jfoundry-helidon</module>
-        <module>jfoundry-verification</module>
     </modules>
 
     <dependencyManagement>

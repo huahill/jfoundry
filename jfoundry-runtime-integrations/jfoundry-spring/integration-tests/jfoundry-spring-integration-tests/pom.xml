@@ -3,14 +3,14 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-verification</artifactId>
+        <artifactId>jfoundry-spring</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-middleware-integration-tests</artifactId>
-    <name>jfoundry-middleware-integration-tests</name>
-    <description>Middleware-backed integration verification for Inbox, Outbox, and messaging adapters.</description>
+    <artifactId>jfoundry-spring-integration-tests</artifactId>
+    <name>jfoundry-spring-integration-tests</name>
+    <description>Spring runtime integration verification.</description>
 
     <dependencies>
         <dependency>

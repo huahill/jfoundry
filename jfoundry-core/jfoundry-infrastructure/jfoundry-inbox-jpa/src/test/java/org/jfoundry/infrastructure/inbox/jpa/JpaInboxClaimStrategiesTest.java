@@ -34,7 +34,7 @@ class JpaInboxClaimStrategiesTest {
                 .hasMessageContaining("JpaInboxClaimStrategy");
     }
 
-    // H2 cannot execute PostgreSQL ON CONFLICT; planned jfoundry-verification middleware tests cover real PostgreSQL/MySQL.
+    // H2 cannot execute PostgreSQL ON CONFLICT; runtime integration tests cover real PostgreSQL/MySQL.
     @Test
     void postgresUsesNoConflictInsertAndReturnsWhetherTheRowWasInserted() {
         RecordedNativeQuery recorded = new RecordedNativeQuery(1);

@@ -6,7 +6,7 @@
 
 jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micronaut、CDI 或 Jakarta EE 运行时集成 API。jMolecules 和 `slf4j-api` 等稳定且低侵入的库只有在表达契约时才可进入 core。
 
-`jfoundry-core` 是运行时无关框架模块的目录分组，包含 domain、architecture、application、infrastructure 和运行时无关 starter 聚合；它不改变这些模块内部的 Onion 依赖方向。`jfoundry-runtime-integrations` 聚合具体运行时集成：Spring 使用 `runtime/`、`autoconfigure/` 和 `starters/`，Quarkus 使用 `runtime/`、`deployment/` 和 `integration-tests/`，Helidon 使用 `runtime/` 和 `integration-tests/`。
+`jfoundry-core` 是运行时无关框架模块的目录分组，包含 domain、architecture、application、infrastructure 和运行时无关 starter 聚合；它不改变这些模块内部的 Onion 依赖方向。`jfoundry-runtime-integrations` 聚合具体运行时集成：Spring 使用 `runtime/`、`autoconfigure/`、`starters/` 和 `integration-tests/`，Quarkus 使用 `runtime/`、`deployment/` 和 `integration-tests/`，Helidon 使用 `runtime/` 和 `integration-tests/`。
 
 ## 模块职责
 
@@ -18,22 +18,26 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 运行时无关 starter 组合 | Domain 与 Application starter 位于 `jfoundry-core/jfoundry-starters`；以能力命名的基础设施适配器 starter 位于 `jfoundry-core/jfoundry-starters/infrastructure` |
 | Spring 运行时集成 | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`、`jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
+| Spring 集成测试 | `jfoundry-runtime-integrations/jfoundry-spring/integration-tests/*` |
 | Quarkus 运行时集成 | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`、`deployment/*` |
-| Helidon MP 运行时集成 | `jfoundry-runtime-integrations/jfoundry-helidon/runtime/*`、`integration-tests/*` |
-| 验证 | `jfoundry-verification/*` |
+| Quarkus 集成测试 | `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/*` |
+| Helidon MP 运行时集成 | `jfoundry-runtime-integrations/jfoundry-helidon/runtime/*` |
+| Helidon 集成测试 | `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/*` |
 
 ## 放置规则
 
 - Spring Framework 生命周期、事务同步、调度、事件发布、MVC API 和 Spring 侧 client wrapper 位于 `../../../../jfoundry-runtime-integrations/jfoundry-spring/runtime`。
 - Spring Boot 条件、`@ConfigurationProperties`、Bean 装配、metadata 和 `AutoConfiguration.imports` 位于 `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`。
-- Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime-integrations/jfoundry-helidon/runtime`；consumer 验证位于其 `integration-tests` 目录。Helidon 没有 JFoundry deployment 模块或 starter 层。
+- Spring 中间件和 Testcontainers 验证位于 `jfoundry-runtime-integrations/jfoundry-spring/integration-tests`。
+- Quarkus 运行时、中间件、Testcontainers 和 Native Image 验证位于 `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests`。
+- Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime-integrations/jfoundry-helidon/runtime`；运行时、中间件、Testcontainers 和 Native Image 验证位于 `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests`。Helidon 没有 JFoundry deployment 模块或 starter 层。
 - Starter 只是依赖入口，不得承载运行时行为。Domain 与 Application starter 保持在
   `jfoundry-core/jfoundry-starters`；运行时无关的基础设施 adapter starter 直接位于
   `jfoundry-core/jfoundry-starters/infrastructure`。其 artifactId 使用能力与技术名称，例如
   `jfoundry-persistence-jpa-starter`；不得增加中间聚合 POM 或继续增加目录层级。
 - 运行时无关的数据库、serializer 和 scheduler adapter 位于 `jfoundry-core/jfoundry-infrastructure`。
 - Broker client `MessageSender` adapter 位于各自的运行时集成；应用层 `MessageSender` 与 `SendResult` 契约仍保持运行时无关。
-- 中间件集成测试和 Testcontainers 兼容性验证位于 `jfoundry-verification`。
+- 运行时特定的中间件集成测试和 Testcontainers 兼容性验证位于相应运行时的 `integration-tests` 目录；运行时无关测试紧邻其所验证的 core 或 infrastructure 实现。
 
 ## 可靠消息边界
 
