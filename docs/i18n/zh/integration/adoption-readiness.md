@@ -20,7 +20,7 @@
 |------|----------|----------|
 | `domain-architecture-skills` | 可以作为设计期指导直接用于真实项目 | AI 辅助开发的标准领域与架构工作流，但业务含义仍需人工负责 |
 | jfoundry | 可以在已验证技术栈内受控用于真实项目 | 可选业务框架，固定不可变版本，并通过具体项目的生产准入检查 |
-| Domain Architecture 插件 + 可选 jfoundry 落地 | 已通过分别维护的 Hexagonal 与 Onion Simple 变体，证明可以从需求、建模、架构选择和可选框架落地，一直支撑到实现与验收 | 优先用于 Java 25、Spring Boot、MyBatis-Plus、PostgreSQL、Kafka 和 Redis 项目 |
+| 领域架构插件 + 可选 jfoundry 落地 | 已通过分别维护的 Hexagonal 与 Onion Simple 变体，证明可以从需求、建模、架构选择和可选框架落地，一直支撑到实现与验收 | 优先用于 Java 25、Spring Boot、MyBatis-Plus、PostgreSQL、Kafka 和 Redis 项目 |
 
 表格最后一行具体指以下顺序：
 
@@ -50,7 +50,7 @@ jfoundry 不只是项目脚手架。它的主要价值是为业务应用中反�
   可执行规则，而不只停留在包名和文档中。
 - 事务边界、聚合持久化生命周期、乐观并发、持久化异常翻译、领域事件、Outbox、Inbox、消息 SPI
   和分布式锁减少了业务项目的重复基础设施设计。
-- 按能力拆分模块和 starter，使持久化、消息中间件、Outbox、Inbox 和锁保持可选。
+- 按能力拆分模块和启动器，使持久化、消息中间件、Outbox、Inbox 和锁保持可选。
 - 多表聚合的从表同步具有业务特性时，仍由业务适配器明确表达。框架不通过反射推导聚合还原，也不
   用 ORM 魔法隐藏这项责任。
 
@@ -75,23 +75,23 @@ jfoundry 不只是项目脚手架。它的主要价值是为业务应用中反�
 的 Hexagonal 与 Onion Simple 变体验证。截至评估日期，已记录的证据包括：
 
 - jfoundry 在 Java 21 和 Java 25 下完成 67 模块测试矩阵。
-- 插件发布的全部 skill、Codex plugin manifest 和 Claude marketplace 元数据通过校验。
+- 插件发布的全部技能、Codex 插件清单和 Claude 市场元数据通过校验。
 - 两个架构变体均通过同一套完整自动化测试，其中包含 5 个基于容器的端到端场景。
 - 端到端环境包含两个独立 PostgreSQL、Kafka、Redis 和两个 Spring Boot 应用上下文。
-- JPA 与 MyBatis-Plus Outbox/Inbox store 均通过 PostgreSQL、MySQL 的 Testcontainers 验证，其中包括数据库相关的 JPA Inbox claim。
+- JPA 与 MyBatis-Plus Outbox/Inbox 存储均通过 PostgreSQL、MySQL 的 Testcontainers 验证，其中包括数据库相关的 JPA Inbox 领取策略。
 - 覆盖支付成功与失败、Inbox 重复投递、并发月度额度控制，以及事务回滚且不写审批 Outbox。
 - 另外独立执行了从 HTTP 审批、经过 Kafka、最终形成 `PAID` 查询投影的本地完整链路。
-- Onion 验证覆盖显式 Domain、Application、Infrastructure Ring、向内依赖规则、DDD Repository
+- Onion 验证覆盖显式领域、应用、基础设施环、向内依赖规则、DDD Repository
   位置、职责优先的应用契约命名，以及与 Hexagonal 变体相同的按需 CQRS 结构。
 
 | 验证对象 | 已验证证据 | 不能由此推出 |
 |----------|------------|--------------|
-| Hexagonal 变体（`main`） | 显式 Primary/Secondary Port 与 Adapter、能力内嵌方向包、中立的应用层共享视图、严格 ArchUnit 规则 | Hexagonal 是默认架构，或每个应用都需要全套角色 |
-| Onion Simple 变体（`onion-architecture`） | 显式 Domain/Application/Infrastructure Ring、向内依赖、DDD 与职责优先命名、同一套验收测试 | Onion 定义 Port/Adapter 语义，或包级 Ring 已提供 Maven 模块隔离 |
+| Hexagonal 变体（`main`） | 显式主端口/次端口与适配器、能力内嵌方向包、中立的应用层共享视图、严格 ArchUnit 规则 | Hexagonal 是默认架构，或每个应用都需要全套角色 |
+| Onion Simple 变体（`onion-architecture`） | 显式领域/应用/基础设施环、向内依赖、DDD 与职责优先命名、同一套验收测试 | Onion 不定义 Port/Adapter 语义，或包级环已提供 Maven 模块隔离 |
 | 共同业务基线 | 相同聚合行为、数据库模型、集成契约、CQRS、Outbox/Inbox、锁、中间件拓扑和验收场景 | 两种风格可互换、应混用，或在所有项目中具有相同组织权衡 |
 
 Demo 不是只确认最初设计，也实际暴露了框架和指导缺陷。相应修复涉及聚合持久化跟踪、乐观并发、
-异常边界、Outbox 集成契约、PostgreSQL Inbox 幂等、可移植 JSON、broker 选择、自动装配顺序和
+异常边界、Outbox 集成契约、PostgreSQL Inbox 幂等、可移植 JSON、消息代理选择、自动装配顺序和
 Spring AOP 代理基础设施，也包括架构风格语义、能力优先包结构，以及将架构中立 CQRS 规则与
 Hexagonal Port/Adapter 约定分离。
 
@@ -101,16 +101,16 @@ Hexagonal Port/Adapter 约定分离。
 
 - Java 25 业务应用。
 - Spring Boot 3.5.x 和 Spring Framework 6.2.x。
-- Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 消费者
-  smoke test 和 Native Image CI gate。
-- Helidon MP 4.5.1 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox store、调度与 JAX-RS Problem Details。
-  其 GraalVM 25 consumer 已验证 CDI/Web 启动和 Problem Details 响应；Native JTA 与 JPA 仍受上游实验性
+- Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 运行时集成验证
+  和原生镜像 CI 验证任务。
+- Helidon MP 4.5.1 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
+  其 GraalVM 25 使用方已验证 CDI/Web 启动和 Problem Details 响应；原生 JTA 与 JPA 仍受上游实验性
   限制，可复现的失败记录见 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
 - MyBatis-Plus 业务持久化与 PostgreSQL。
-- JPA 与 MyBatis-Plus Outbox/Inbox store 与 PostgreSQL、MySQL。
+- JPA 与 MyBatis-Plus Outbox/Inbox 存储与 PostgreSQL、MySQL。
 - Kafka 集成、Redis/Redisson 分布式锁、事务性 Outbox 和消费端 Inbox。
-- DDD 建模、分别验证的 Hexagonal Architecture 或 Onion Simple Architecture，以及不使用
-  Event Sourcing 的按需 CQRS。
+- DDD 建模、分别验证的 Hexagonal 或 Onion Simple 架构，以及不使用
+  事件溯源的按需 CQRS。
 - 使用独立集成契约和运行时装配模块的 Maven 多模块项目。
 
 没有验证其他运行时，不会阻止项目在上述技术栈中采用；它只表示不能在缺少同等测试证据时，把结论
@@ -120,11 +120,11 @@ Hexagonal Port/Adapter 约定分离。
 
 当前证据尚不能确认：
 
-- Onion Ring 拆分为独立 Maven 模块后的编译期隔离。本次 Onion 变体是在一个应用模块内使用
-  包级 Ring 和 ArchUnit 依赖规则完成验证。
+- Onion 环拆分为独立 Maven 模块后的编译期隔离。本次 Onion 变体是在一个应用模块内使用
+  包级环和 ArchUnit 依赖规则完成验证。
 - 在已有生产项目中切换架构风格的迁移成本或组织效果。本 Demo 验证的是两个分别维护的变体，
   不是生产迁移。
-- Helidon broker 投递、Redisson 锁、JobRunr 和可工作的 Helidon Native JTA/JPA 路径。不得从 Spring 或
+- Helidon 消息代理投递、Redisson 锁、JobRunr 和可工作的 Helidon 原生 JTA/JPA 路径。不得从 Spring 或
   Quarkus 能力自动推断这些能力。Micronaut 尚无运行时集成。
 - 其他 ORM、数据库或消息中间件组合。
 - 应用安全、可观测性、部署、容量、性能、灾难恢复和长期生产运行。
@@ -156,7 +156,7 @@ jfoundry 不应为了兼容而在运行时框架无关的架构模块中引入 S
 5. 使用项目实际选择的数据库、消息中间件、部署拓扑和故障策略，重新运行完整应用验收链路。
 6. 增加项目自有的认证授权、密钥、审计、指标、链路追踪、健康检查、告警、迁移与回滚、备份恢复、
    负载和故障注入准入项。
-7. 保留明确的退出路径：jfoundry 持久化基类是可选支持，适配器可以直接实现 Port，低复杂度模块也
+7. 保留明确的退出路径：jfoundry 持久化基类是可选支持，适配器可以直接实现端口，低复杂度模块也
    可以采用更简单的应用模式。
 
 ## 结论

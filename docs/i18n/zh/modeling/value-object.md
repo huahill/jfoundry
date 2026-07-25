@@ -24,7 +24,7 @@ public record Money(BigDecimal amount, String currency) implements ValueObject {
 
 Java 21 `record` 天生满足 ValueObject 的三大契约：
 
-1. **不可变** —— 所有字段 final，无 setter
+1. **不可变** —— 所有字段均为 final，没有设值方法
 2. **值相等** —— 自动生成 equals/hashCode，基于字段值而非身份
 3. **final** —— record 不能被继承，防止子类破坏不可变性
 
@@ -36,12 +36,12 @@ public final class Money implements ValueObject {
     private final String currency;
 
     public Money(BigDecimal amount, String currency) {
-        // validation in constructor
+        // Validate constructor arguments.
         this.amount = amount;
         this.currency = currency;
     }
 
-    // getters
+    // Accessors.
 
     @Override
     public boolean equals(Object o) { /* value-based equals */ }

@@ -39,6 +39,10 @@ As an open-source framework, source-level artifacts must be friendly to the wide
 - Source comments must be written in English. This includes Java Javadocs, `package-info.java`, inline comments, test documentation comments, configuration property comments, architecture rule explanations, SQL comments, XML/POM comments, YAML/properties comments, and other resource comments shipped in jars.
 - Use `jMolecules` as the prose spelling for the upstream project. Keep lowercase forms only when they are exact technical identifiers, such as `org.jmolecules`, `jmolecules-*` artifact IDs, property names, package names, class names, method names, URLs, or string literals.
 - Public documentation may be localized, but languages must not be mixed in the same document. `README.md` is the default English overview; `README_ZH.md` is the Chinese overview. Detailed documentation should use matching language-specific paths under `docs/i18n/en/` and `docs/i18n/zh/`, keeping the same conceptual structure when practical.
+- Chinese documentation uses Chinese explanatory prose. Retain English only for exact technical identifiers,
+  artifact coordinates, class and annotation names, configuration keys, code, and established architecture
+  role names when translating them would reduce precision. Prefer terms such as "运行时", "适配器", "启动器",
+  "存储", "派发器", "配置档", "使用方", "原生镜像", and "CI 验证任务" in prose.
 - Commit messages, release notes intended for repository history, Maven metadata, generated documentation text, and PR descriptions should be written in English.
 - When editing existing Chinese comments in source files, translate them to English instead of adding new Chinese comments nearby. Do not translate user-facing Chinese documentation unless the file is meant to be English.
 

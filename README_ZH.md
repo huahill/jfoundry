@@ -48,13 +48,13 @@
 - **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[JPA](docs/i18n/zh/implementations/jpa.md)或 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md)。
 - **可靠消息**：先阅读[可靠消息](docs/i18n/zh/capabilities/reliable-messaging.md)，再从对应的 [JPA](docs/i18n/zh/implementations/jpa.md) 或 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 指南中选择其存储实现。
-- **Spring Boot**：通过 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md) 使用 starter 与条件化自动配置组装已选择的能力；其属性、条件与 Bean 优先级见 [Spring Boot 自动配置参考](docs/i18n/zh/reference/spring-boot-autoconfiguration.md)。
-- **Quarkus**：通过 [Quarkus 运行时集成](docs/i18n/zh/implementations/quarkus.md) 使用显式 extension 组合接入 CDI 事务、REST Problem Details、领域事件分发、基于 JPA 的可靠消息、Kafka 与 RabbitMQ 投递并验证 Native Image。
-- **Helidon MP**：通过 [Helidon MP 运行时集成](docs/i18n/zh/implementations/helidon.md) 显式组合 CDI/JTA、JPA、Outbox/Inbox 与 REST Problem Details。其 Native Image 当前验证 CDI/Web；Helidon Narayana JTA 的 Native 执行仍是上游实验性能力。
+- **Spring Boot**：通过 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md) 使用启动器与条件化自动配置组装已选择的能力；其属性、条件与 Bean 优先级见 [Spring Boot 自动配置参考](docs/i18n/zh/reference/spring-boot-autoconfiguration.md)。
+- **Quarkus**：通过 [Quarkus 运行时集成](docs/i18n/zh/implementations/quarkus.md) 使用显式扩展组合接入 CDI 事务、REST Problem Details、领域事件分发、基于 JPA 的可靠消息、Kafka 与 RabbitMQ 投递并验证原生镜像。
+- **Helidon MP**：通过 [Helidon MP 运行时集成](docs/i18n/zh/implementations/helidon.md) 显式组合 CDI/JTA、JPA、Outbox/Inbox 与 REST Problem Details。其原生镜像当前验证 CDI/Web；Helidon Narayana JTA 的原生执行仍是上游实验性能力。
 
 ## 最小接入
 
-所有应用都引入运行时无关 BOM，再只添加应用需要的 starter 与能力实现。Spring Boot、Quarkus 与 Helidon 应用还要额外引入各自的运行时 BOM；运行时 BOM 只管理平台生态版本，不能替代 JFoundry BOM。
+所有应用都引入运行时无关 BOM，再只添加应用需要的启动器与能力实现。Spring Boot、Quarkus 与 Helidon 应用还要额外引入各自的运行时 BOM；运行时 BOM 只管理平台生态版本，不能替代 JFoundry BOM。
 
 ```xml
 <dependencyManagement>

@@ -43,8 +43,8 @@ class CiArchitectureTest {
 
 | 规则 | 作用 |
 |------|------|
-| `value_objects_must_be_final` | ValueObject 实现类必须 final 或 record |
-| `value_object_fields_must_be_final` | ValueObject 字段必须全部 final |
+| `value_objects_must_be_final` | ValueObject 实现类必须为 final 或 record |
+| `value_object_fields_must_be_final` | ValueObject 字段必须全部为 final |
 | `value_objects_must_implement_equals_and_hashCode` | ValueObject 必须实现 equals/hashCode |
 
 ### ArchitectureStyleRules
@@ -52,8 +52,8 @@ class CiArchitectureTest {
 | 规则 | 作用 |
 |------|------|
 | `hexagonal_must_be_declared` | Hexagonal 主架构入口要求分析范围内至少存在一个 Hexagonal 角色注解 |
-| `onion_simple_must_be_declared` | Onion Simple 主架构入口要求分析范围内至少存在一个 simplified Ring 注解 |
-| `onion_classical_must_be_declared` | Onion Classical 主架构入口要求分析范围内至少存在一个 classical Ring 注解 |
+| `onion_simple_must_be_declared` | Onion Simple 主架构入口要求分析范围内至少存在一个简化环注解 |
+| `onion_classical_must_be_declared` | Onion Classical 主架构入口要求分析范围内至少存在一个经典环注解 |
 | `hexagonal_and_onion_must_not_be_mixed` | 同一个 ArchUnit 分析范围内禁止同时使用 Hexagonal 与 Onion 主架构风格 |
 
 ### FrameworkModuleRules
@@ -61,27 +61,27 @@ class CiArchitectureTest {
 | 规则 | 作用 |
 |------|------|
 | `framework_should_use_jmolecules_architecture_annotations_internally` | JFoundry 框架内部直接使用 jMolecules 架构注解，不依赖 JFoundry 包装注解；包装注解作为业务项目门面保留 |
-| `domain_packages_should_be_onion_domain_ring` | `org.jfoundry.domain..` 必须标注 Onion simplified `DomainRing` |
-| `application_packages_should_be_onion_application_ring` | `org.jfoundry.application..` 必须标注 Onion simplified `ApplicationRing` |
-| `infrastructure_packages_should_be_onion_infrastructure_ring` | `org.jfoundry.infrastructure..` 必须标注 Onion simplified `InfrastructureRing` |
+| `domain_packages_should_be_onion_domain_ring` | `org.jfoundry.domain..` 必须标注 Onion 简化 `DomainRing` |
+| `application_packages_should_be_onion_application_ring` | `org.jfoundry.application..` 必须标注 Onion 简化 `ApplicationRing` |
+| `infrastructure_packages_should_be_onion_infrastructure_ring` | `org.jfoundry.infrastructure..` 必须标注 Onion 简化 `InfrastructureRing` |
 
 ### CqrsRules 与 HexagonalConventionRules
 
-`CqrsRules` 只包含与具体主架构风格无关的 CQRS 命令、查询模型、Handler 和 Dispatcher
+`CqrsRules` 只包含与具体主架构风格无关的 CQRS 命令、查询模型、处理器和派发器
 位置及依赖规则，不再导入 Hexagonal 的 Port/Adapter 角色。Secondary Port 与 Secondary
 Adapter 不应暴露 CQRS 入口模型这一规则属于 `HexagonalConventionRules`。因此 Onion 项目
-可以组合 Ring 规则与通用 CQRS 规则，而不需要虚构 Hexagonal 角色。
+可以组合环规则与通用 CQRS 规则，而不需要虚构 Hexagonal 角色。
 
 `HexagonalConventionRules` 同时接受全局和能力内嵌的 `port.in` / `port.out` 包。它还禁止
 Primary Port 依赖出站 Port 包，并禁止 Secondary Port 依赖入站 Port 包；两个方向共享的
-模型应放在中立的 application capability 包。这两条方向检查由
+模型应放在中立的应用能力包。这两条方向检查由
 `hexagonalConventions()` 和 `hexagonalStrict()` 启用，Onion 入口不会导入。
 
 Adapter 的方向包名是独立的项目约定。项目应在 `adapter.in` / `adapter.out` 与
 `adapter.primary` / `adapter.secondary` 中选择一套，并以对应枚举值启用
 `hexagonalAdapterPackageConvention(...)`。两套名称表达的是相同的 Primary/Secondary Adapter
 角色；选择其一可避免别名成为混杂的包组织轴。该规则刻意不纳入 `hexagonalStrict()`，因为
-Hexagonal Architecture 本身不强制任一包名；Onion 项目不使用该规则。
+Hexagonal 架构本身不强制任一包名；Onion 项目不使用该规则。
 
 ### AggregateRepositoryConventionRules
 
@@ -91,7 +91,7 @@ Hexagonal Architecture 本身不强制任一包名；Onion 项目不使用该规
 |------|------|
 | `aggregate_repositories_must_not_expose_query_condition_types` | `AggregateRepository` 子接口方法签名和继承关系中禁止暴露 MyBatis-Plus `Wrapper`、Spring Data JPA `Specification` 等通用条件 API |
 | `aggregate_repositories_must_not_expose_paging_types` | `AggregateRepository` 子接口禁止暴露 `Page`、`IPage`、`Pageable` 等分页 API |
-| `aggregate_repositories_must_not_expose_persistence_service_types` | `AggregateRepository` 子接口禁止暴露 `BaseMapper`、`IService`、Spring Data Repository 等持久化 service/mapper API |
+| `aggregate_repositories_must_not_expose_persistence_service_types` | `AggregateRepository` 子接口禁止暴露 `BaseMapper`、`IService`、Spring Data Repository 等持久化服务或映射器 API |
 
 启用方式：
 
@@ -131,7 +131,7 @@ ArchTests hexagonalRules = JFoundryRules.hexagonalStrict();
 
 Hexagonal、Onion Simple 和 Onion Classical 主架构入口会在分析范围内完全没有对应架构注解时
 直接失败，避免规则因没有匹配对象而空集通过。该守卫只要求所选风格至少被声明一次，不要求局部
-分析范围必须同时包含所有角色或 Ring。
+分析范围必须同时包含所有角色或环。
 
 若只想启用某一类底层规则，请直接使用 `PersistenceRules`、`ValueObjectRules` 或
 `ArchitectureStyleRules` 等具体规则类；`JFoundryRules` 只提供主架构风格入口。

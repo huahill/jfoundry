@@ -38,8 +38,8 @@
 |------|----------|
 | Domain | `jfoundry-domain-starter` |
 | Application | `jfoundry-application-starter` |
-| Infrastructure | 所选运行时无关能力 starter，例如 `jfoundry-persistence-mybatis-plus-starter` |
-| Spring Boot 装配 | `jfoundry-spring-boot-starter` 加上实际需要的运行时能力 starter |
+| Infrastructure | 所选运行时无关能力启动器，例如 `jfoundry-persistence-mybatis-plus-starter` |
+| Spring Boot 装配 | `jfoundry-spring-boot-starter` 加上实际需要的运行时能力启动器 |
 | Quarkus 运行时集成 | `jfoundry-quarkus-runtime` |
 | Helidon MP 运行时集成 | `jfoundry-helidon-runtime` |
 
@@ -47,7 +47,7 @@ Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业
 
 ## 装配最小 Spring Boot 运行时
 
-使用业务 MyBatis-Plus 持久化的 Spring Boot 应用，在运行时模块中先引入基础与 MyBatis-Plus runtime starter：
+使用业务 MyBatis-Plus 持久化的 Spring Boot 应用，在运行时模块中先引入基础与 MyBatis-Plus 运行时启动器：
 
 ```xml
 <dependencies>
@@ -62,15 +62,15 @@ Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业
 </dependencies>
 ```
 
-配置应用的数据源，并将持久化 adapter 保留在 infrastructure 模块。MyBatis-Plus runtime starter 不会引入 Outbox 或 Inbox store。JPA 运行时则将 MyBatis-Plus runtime starter 替换为 `jfoundry-persistence-jpa-spring-boot-starter`；它同样将 Outbox 和 Inbox store 保持为显式选择。准确的实现边界见 [MyBatis-Plus](../implementations/mybatis-plus.md)、[JPA](../implementations/jpa.md)和 [Spring Boot 运行时装配](../implementations/spring-boot.md)。
+配置应用的数据源，并将持久化适配器保留在基础设施模块。MyBatis-Plus 运行时启动器不会引入 Outbox 或 Inbox 存储。JPA 运行时则将 MyBatis-Plus 运行时启动器替换为 `jfoundry-persistence-jpa-spring-boot-starter`；它同样将 Outbox 和 Inbox 存储保持为显式选择。准确的实现边界见 [MyBatis-Plus](../implementations/mybatis-plus.md)、[JPA](../implementations/jpa.md)和 [Spring Boot 运行时装配](../implementations/spring-boot.md)。
 
 ## 仅在需要时追加能力
 
 - 用例需要时加入[应用事务](../capabilities/application-transactions.md)或[分布式锁](../capabilities/distributed-locks.md)。
-- 只有需要跨进程投递或消费端幂等时，才加入[可靠消息：Outbox 与 Inbox](../capabilities/reliable-messaging.md)，并显式选择 store。
-- messaging、broker、Web MVC 和 scheduling starter 只为对应能力添加。
+- 只有需要跨进程投递或消费端幂等时，才加入[可靠消息：Outbox 与 Inbox](../capabilities/reliable-messaging.md)，并显式选择存储实现。
+- 消息、消息代理、Web MVC 和调度启动器只为对应能力添加。
 
-[Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)是单个 starter、配置项和注册条件的唯一目录。
+[Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)是单个启动器、配置项和注册条件的唯一目录。
 
 各运行时的依赖配置、能力组合与验证见 [Spring Boot 运行时装配](../implementations/spring-boot.md)、
 [Quarkus 运行时集成](../implementations/quarkus.md) 和

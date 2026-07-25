@@ -9,9 +9,9 @@
 ```text
 聚合记录领域事件
   -> 应用服务边界提取事件
-  -> 外部化选择 topic、key 和 payload
+  -> 外部化选择主题、键和消息载荷
   -> 与业务变更在同一数据库事务写入 Outbox 行
-  -> dispatcher claim 后经由 MessageSender 发送
+  -> 派发器领取后经由 MessageSender 发送
   -> 消费端使用 InboxTemplate 实现幂等
 ```
 
@@ -19,12 +19,12 @@
 
 ## Payload 契约
 
-将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。消费者应将 envelope 反序列化为各自的版本化契约。应选择保持 wire format 可移植且不暴露 JVM 类型名的 payload serializer。
+将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。消费者应将消息信封反序列化为各自的版本化契约。应选择保持线格式可移植且不暴露 JVM 类型名的消息载荷序列化器。
 
 ## Outbox 状态机
 
 - `PENDING`：已写入，等待派发。
-- `DISPATCHING`：已被 dispatcher claim。
+- `DISPATCHING`：已被派发器领取。
 - `PUBLISHED`：发送成功。
 - `FAILED`：本次发送失败，等待重试。
 - `DEAD_LETTERED`：超过最大重试次数。
@@ -33,9 +33,9 @@ Recovery 将卡住的 `DISPATCHING` 消息恢复为 `PENDING`。Cleanup 只删�
 
 ## 运行时事务边界
 
-`OutboxTemplate.append(...)` 加入业务事务，不会自行开启独立事务。Spring Boot runtime 的派发则使用三个独立的短数据库事务：领取记录、在数据库事务外发送每条已领取的 payload、再记录发送结果。Recovery 和每个 cleanup 批次也在独立事务中执行。JPA 和 MyBatis-Plus store 均遵循这一语义。
+`OutboxTemplate.append(...)` 加入业务事务，不会自行开启独立事务。Spring Boot 运行时的派发则使用三个独立的短数据库事务：领取记录、在数据库事务外发送每条已领取的消息载荷、再记录发送结果。恢复和每个清理批次也在独立事务中执行。JPA 和 MyBatis-Plus 存储均遵循这一语义。
 
-`InboxTemplate` 先在新事务中领取消息。handler 与 `PROCESSED` 状态迁移在第二个独立事务中执行。handler 失败时，该事务回滚，新的事务会记录 `FAILED`，然后重新抛出原始异常。只有存在 `TransactionRunner` 时，Boot 才会创建具备该语义的 template。直接使用 `new InboxTemplate(store)` 属于手工 runtime API，调用方必须为 store 提供所需的事务边界。
+`InboxTemplate` 先在新事务中领取消息。处理器与 `PROCESSED` 状态迁移在第二个独立事务中执行。处理器失败时，该事务回滚，新的事务会记录 `FAILED`，然后重新抛出原始异常。只有存在 `TransactionRunner` 时，Boot 才会创建具备该语义的模板。直接使用 `new InboxTemplate(store)` 属于手工运行时 API，调用方必须为存储提供所需的事务边界。
 
 ## SQL 模板
 
@@ -47,13 +47,13 @@ jfoundry/sql/outbox/postgresql/create_outbox_event.sql
 jfoundry/sql/inbox/common/create_inbox_message.sql
 ```
 
-## 选择 Store
+## 选择存储实现
 
 | 需求 | 指南 |
 |------|------|
-| MyBatis-Plus Outbox 和 Inbox store | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| JPA Outbox 和 Inbox store，包括数据库相关的 Inbox claim | [JPA](../implementations/jpa.md) |
-| Quarkus Outbox runtime、自动领域事件外部化与 Kafka 投递 | [Quarkus](../implementations/quarkus.md) |
-| Spring Boot 能力装配和 dispatcher 配置 | [Spring Boot](../implementations/spring-boot.md) |
+| MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
+| JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../implementations/jpa.md) |
+| Quarkus Outbox 运行时、自动领域事件外部化与 Kafka 投递 | [Quarkus](../implementations/quarkus.md) |
+| Spring Boot 能力装配和派发器配置 | [Spring Boot](../implementations/spring-boot.md) |
 
-Starter、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。
+启动器、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。
