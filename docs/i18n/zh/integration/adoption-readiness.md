@@ -104,7 +104,8 @@ Hexagonal Port/Adapter 约定分离。
 - Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 消费者
   smoke test 和 Native Image CI gate。
 - Helidon MP 4.5.1 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox store、调度与 JAX-RS Problem Details。
-  其 GraalVM 25 consumer 已验证 CDI/Web 启动和 Problem Details 响应；Native JTA 执行仍受上游实验性限制。
+  其 GraalVM 25 consumer 已验证 CDI/Web 启动和 Problem Details 响应；Native JTA 与 JPA 仍受上游实验性
+  限制，可复现的失败记录见 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
 - MyBatis-Plus 业务持久化与 PostgreSQL。
 - JPA 与 MyBatis-Plus Outbox/Inbox store 与 PostgreSQL、MySQL。
 - Kafka 集成、Redis/Redisson 分布式锁、事务性 Outbox 和消费端 Inbox。
@@ -123,7 +124,7 @@ Hexagonal Port/Adapter 约定分离。
   包级 Ring 和 ArchUnit 依赖规则完成验证。
 - 在已有生产项目中切换架构风格的迁移成本或组织效果。本 Demo 验证的是两个分别维护的变体，
   不是生产迁移。
-- Helidon broker 投递、Redisson 锁、JobRunr 和可工作的 Helidon Native JTA 路径。不得从 Spring 或
+- Helidon broker 投递、Redisson 锁、JobRunr 和可工作的 Helidon Native JTA/JPA 路径。不得从 Spring 或
   Quarkus 能力自动推断这些能力。Micronaut 尚无运行时集成。
 - 其他 ORM、数据库或消息中间件组合。
 - 应用安全、可观测性、部署、容量、性能、灾难恢复和长期生产运行。

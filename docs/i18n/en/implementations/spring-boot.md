@@ -116,9 +116,23 @@ Auto-configured defaults are replaceable. Application beans take precedence for 
 `TransactionRunner`, `PersistenceFailureTranslator`, `AggregatePersistenceContext`,
 `MessageSender`, `PayloadSerializer`, Outbox/Inbox stores, and their store-specific strategies.
 
-## Verified Scope
+## Verification
 
-The repository validates Spring Boot JVM assembly, starter dependency boundaries, auto-configuration,
-and internal middleware integration. Native Image is a Quarkus acceptance target in this repository;
-this guide does not claim an equivalent Spring Native/Image verification matrix. See
-[Quarkus Runtime Integration](quarkus.md) for Quarkus-specific composition and Native Image scope.
+The runtime-local integration profile validates Spring Boot assembly, starter dependency boundaries,
+auto-configuration, and middleware paths against Testcontainers services, including MySQL, PostgreSQL,
+Kafka, and RabbitMQ:
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pit verify
+```
+
+The same module also contains a minimal AOT consumer. On GraalVM Native Image, the `native` profile
+builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready` returns `ready`:
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pnative package
+```

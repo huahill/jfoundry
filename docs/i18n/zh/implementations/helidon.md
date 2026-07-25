@@ -83,6 +83,19 @@ dispatcher 属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
 adapter 不替代应用通用的 JAX-RS 错误策略。
 
+## PostgreSQL/JTA 中间件验证
+
+运行时本地的 JVM 集成 profile 会通过 Testcontainers 启动 PostgreSQL，并验证真实的 JTA
+`TransactionRunner` 回调与 JPA `EntityManager`。Helidon 的 CDI JPA 集成使用标准
+`META-INF/persistence.xml` persistence unit 描述符，并通过 CDI 解析具名 JTA datasource；验证覆盖的
+正是这一装配模型。该 profile 保持显式启用，因此普通模块测试不需要 Docker：
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+  -am -Pjvm-integration verify
+```
+
 ## Native Image 状态
 
 Helidon consumer 已用 GraalVM Native Image 构建，并验证 CDI 发现、应用启动和 Problem Details HTTP
@@ -95,10 +108,14 @@ mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integrat
   -am -Pnative-image package
 ```
 
-Helidon MP 4.5.1 将 Narayana JTA 的 Native Image 支持标为实验性。Native consumer 可以启动并提供
-Problem Details，但执行 `TransactionRunner` 时会因 Helidon CDI transaction-manager delegate 未在镜像中
-初始化而失败。JVM JTA 仍受支持。JFoundry 不会复制或替换 Narayana 来掩盖该上游限制，因此在 Helidon
-提供可用的受支持路径前，Native JTA 不能作为验收结论。
+Helidon MP 4.5.1 将 Narayana JTA 的 Native Image 支持标为实验性。在 macOS ARM64 上使用 GraalVM Community
+25.0.2 时，启用 JPA 的 consumer 会在镜像生成阶段失败：
+`JpaExtension.processPersistenceXmls` 会使 `org.xml.sax.helpers.LocatorImpl` 进入 image heap。
+仅包含 Native CDI/Web 的 consumer 可以启动并提供 Problem Details，但执行 `TransactionRunner` 时仍会因
+Helidon CDI transaction-manager delegate 未在镜像中初始化而失败。JVM JTA 仍受支持。可复现环境、JVM
+对照结果与 Native 失败栈已记录在 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
+JFoundry 不会复制或替换 Narayana 来掩盖该上游限制，因此在 Helidon 提供可用的受支持路径前，Native JTA 与
+JPA 都不能作为验收结论。
 
 ## 延后集成
 

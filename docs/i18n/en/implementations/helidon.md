@@ -90,6 +90,20 @@ alternative.
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
 general JAX-RS error policy.
 
+## PostgreSQL/JTA Middleware Verification
+
+The runtime-local JVM integration profile starts PostgreSQL through Testcontainers and verifies a
+real JTA `TransactionRunner` callback with a JPA `EntityManager`. Helidon's CDI JPA integration
+uses the standard `META-INF/persistence.xml` persistence-unit descriptor and resolves its named JTA
+datasource through CDI; this is the same integration model the verification exercises. The profile
+is opt-in so ordinary module tests do not require Docker:
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+  -am -Pjvm-integration verify
+```
+
 ## Native Image Status
 
 The Helidon consumer is built with GraalVM Native Image and has verified CDI discovery, application
@@ -103,11 +117,16 @@ mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integrat
   -am -Pnative-image package
 ```
 
-Helidon MP 4.5.1 documents Narayana JTA Native Image support as experimental. The native consumer
-starts and serves Problem Details, but executing `TransactionRunner` currently fails because Helidon's
-CDI transaction-manager delegate is not initialized in the generated image. JVM JTA remains supported.
-JFoundry does not duplicate or replace Narayana to hide this upstream limitation, so Native JTA is not
-an acceptance claim until Helidon provides a working supported path.
+Helidon MP 4.5.1 documents Narayana JTA Native Image support as experimental. With GraalVM Community
+25.0.2 on macOS ARM64, the JPA-enabled consumer fails during image generation because
+`org.xml.sax.helpers.LocatorImpl` reaches the image heap through
+`JpaExtension.processPersistenceXmls`. The Native CDI/Web-only consumer starts and serves Problem
+Details, but executing `TransactionRunner` currently fails because Helidon's CDI transaction-manager
+delegate is not initialized in the generated image. JVM JTA remains supported. The reproducible
+environment, JVM control result, and Native failure trace are recorded on
+[Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
+JFoundry does not duplicate or replace Narayana to hide this upstream limitation, so Native JTA and
+JPA are not acceptance claims until Helidon provides working supported paths.
 
 ## Deferred Integrations
 

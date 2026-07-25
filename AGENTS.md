@@ -50,6 +50,12 @@ Mockito's Java agent is opt-in per module. The root POM keeps the common Surefir
 
 For changes involving build logic, dependency management, test infrastructure, CI workflows, Maven plugin configuration, Java baseline compatibility, or runtime compatibility, run `scripts/verify-ci-matrix.sh` before committing or pushing when Java 25 is available. If Java 25 is unavailable, do not claim release-baseline verification.
 
+Runtime integration verification must remain aligned: each supported runtime needs a runtime-local JVM
+middleware check that exercises real wiring and a Native Image consumer startup check. Document an
+upstream Native limitation explicitly instead of treating it as supported; Helidon Native JTA and
+JPA are currently accepted exceptions, tracked with reproducible evidence in
+[Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
+
 ## Documentation Sync
 
 When changing framework behavior, public APIs, module boundaries, starter dependencies, auto-configuration, configuration properties, SQL templates, architecture rules, compatibility baselines, or user-facing workflows, check whether README, `docs/i18n/en/`, `docs/i18n/zh/`, and `skills/maintain-jfoundry-framework` need matching updates. Documentation updates should describe the current behavior, not historical implementation details. If an English user-facing doc is updated and a corresponding Chinese doc exists, update both or state why only one language is affected.

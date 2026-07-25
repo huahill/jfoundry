@@ -66,8 +66,8 @@ jobs:
       - name: Package without tests
         run: ./mvnw -B -DskipTests package
 
-  integration:
-    name: Integration tests
+  spring-integration:
+    name: Spring middleware integration
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -83,6 +83,85 @@ jobs:
 
       - name: Run Spring middleware integration tests
         run: ./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify
+
+  quarkus-integration:
+    name: Quarkus middleware integration
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+
+      - name: Run Quarkus PostgreSQL integration tests
+        run: >
+          ./mvnw -B
+          -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests
+          -am -Pjvm-integration verify
+
+  helidon-integration:
+    name: Helidon middleware integration
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+
+      - name: Run Helidon PostgreSQL integration tests
+        run: >
+          ./mvnw -B
+          -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests
+          -am -Pjvm-integration verify
+
+  spring-native:
+    name: Spring Native Image
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: actions/setup-java@v4
+        with:
+          distribution: graalvm
+          java-version: 25
+          cache: maven
+
+      - name: Build and smoke test Spring Native Image
+        run: |
+          set -euo pipefail
+          ./mvnw -B \
+            -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+            -am -Pnative package
+
+          application=jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests/target/jfoundry-spring-integration-tests
+          "$application" --server.port=18081 >/tmp/jfoundry-spring-native.log 2>&1 &
+          application_pid=$!
+          trap 'kill "$application_pid" 2>/dev/null || true' EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error http://127.0.0.1:18081/jfoundry/native/ready | grep -qx 'ready'; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/jfoundry-spring-native.log
+          exit 1
 
   quarkus-native:
     name: Quarkus Native Image

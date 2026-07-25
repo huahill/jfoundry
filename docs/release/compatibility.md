@@ -57,6 +57,9 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Unit tests | `./mvnw -B clean test` | PASS on Java 25 |
 | Package artifacts | `./mvnw -B -DskipTests package` | PASS on Java 25 |
 | Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Spring Native Image consumer smoke test | GraalVM 25, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
+| Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
 | Maven 4 validate | Maven `4.0.0-rc-5`, `mvn -B -DskipTests validate -e` | PASS |
 | Maven 4 package | Maven `4.0.0-rc-5`, `mvn -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
@@ -66,10 +69,15 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
 
-Helidon MP 4.5.1 Narayana JTA Native Image support is experimental. The Helidon Native consumer
-starts and serves the JFoundry Problem Details response, but `TransactionRunner` execution fails
-because Helidon's CDI transaction-manager delegate is not initialized in the image. JVM Helidon JTA
-is supported; Native JTA execution is not a release acceptance claim until upstream support works.
+Helidon MP 4.5.1 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
+macOS ARM64, adding Helidon's JPA integration also fails image generation through
+`JpaExtension.processPersistenceXmls`, with `org.xml.sax.helpers.LocatorImpl` retained in the image
+heap. The Native CDI/Web consumer starts and serves the JFoundry Problem Details response, but
+`TransactionRunner` execution fails because Helidon's CDI transaction-manager delegate is not
+initialized in the image. The environment, JVM PostgreSQL/JTA/JPA control result, and Native failure
+trace are recorded in [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
+JVM Helidon JTA is supported; Native JTA and JPA are not release acceptance claims until upstream
+support works.
 
 ## Future Framework Upgrade Line
 
@@ -98,7 +106,8 @@ Spring Boot 4.x, Spring Framework 7.x, Maven, and CI evidence.
 - `./mvnw -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
 - Java 25 release-baseline test in CI
 - Maven 4 compatibility matrix in CI
-- Quarkus Native Image smoke test in CI
+- Spring and Quarkus Native Image smoke tests in CI
+- Quarkus and Helidon PostgreSQL middleware integration tests in CI
 - Helidon Native CDI/Web smoke test with GraalVM 25; do not gate on Helidon Native JTA until its
   upstream implementation becomes supported
 - Maven Central metadata guard in the `release` profile

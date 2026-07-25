@@ -295,6 +295,18 @@ Quarkus Web 边界命名，Problem Details 是当前已实现的能力：
 Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它不会推断 Quarkus 未提供的响应头。未知异常
 和其他 HTTP 状态会继续使用正常的 Quarkus 行为，而不会被转换成 JFoundry 错误。
 
+## PostgreSQL 中间件验证
+
+运行时本地的 JVM 集成 profile 会通过 Testcontainers 启动 PostgreSQL。它验证 Quarkus 的
+`TransactionRunner`、JPA Outbox store 和 datasource 装配确实会在 PostgreSQL 中持久化 Outbox
+记录，而不是使用内存测试数据库。该 profile 保持显式启用，因此普通模块测试不需要 Docker：
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
+  -am -Pjvm-integration verify
+```
+
 ## Native Image 验证
 
 仓库的 Quarkus Native CI job 会先安装扩展构件，再构建独立的消费者应用。其

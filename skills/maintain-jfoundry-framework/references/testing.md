@@ -36,9 +36,10 @@ mvn test
 | Spring runtime adapter | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/runtime/<module> -am test` |
 | Boot auto-configuration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure -am test` |
 | Spring middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
-| Quarkus JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` |
+| Spring Native Image consumer | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then probe `/jfoundry/native/ready` |
+| Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |
 | Quarkus Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
-| Helidon JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
+| Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
 | Helidon Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
 | Starter POM | `mvn -pl <starter-module> -am test` or `mvn validate` for dependency shape |
 
@@ -50,6 +51,7 @@ mvn test
 - Add persistence tests for store or repository behavior.
 - Add concurrency tests for claim, retry, idempotency, or state transition changes.
 - Add runtime-local middleware integration tests only when behavior requires a concrete runtime, real database, broker, Testcontainers, or Native Image verification; keep framework-neutral tests next to the core or infrastructure implementation.
+- Keep each supported runtime's verification explicit: a JVM middleware path that exercises real runtime wiring and a Native Image consumer startup check. Record an upstream limitation as an exception rather than claiming unsupported Native behavior. Helidon Native JTA and JPA are currently such exceptions; preserve the reproducible evidence in [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 - Mockito's Java agent is opt-in per module. When adding Mockito usage to test sources, or when a test framework loads Mockito during test startup, ensure the module has a test dependency that resolves `mockito-core` and override `mockito.javaagent.argLine` with `-javaagent:${org.mockito:mockito-core:jar}`. Do not enable the Mockito Java agent in modules that do not load Mockito during tests.
 
 When changing public API, starter dependencies, configuration properties, table schemas, or release baselines, include compatibility impact in the final report even if tests pass.

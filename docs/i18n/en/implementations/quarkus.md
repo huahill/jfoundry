@@ -337,6 +337,19 @@ adapter preserves non-entity headers supplied by the source Jakarta REST respons
 when it is present. It does not infer headers that Quarkus does not provide. Unknown exceptions and
 other HTTP statuses retain normal Quarkus behavior instead of being converted into a JFoundry error.
 
+## PostgreSQL Middleware Verification
+
+The runtime-local JVM integration profile starts PostgreSQL through Testcontainers. It verifies that
+the Quarkus `TransactionRunner`, JPA Outbox store, and Quarkus datasource wiring persist an Outbox
+record in PostgreSQL rather than an in-memory test database. The profile is deliberately opt-in so a
+regular module test does not require Docker:
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
+  -am -Pjvm-integration verify
+```
+
 ## Native Image Verification
 
 The repository's Quarkus native CI job first installs the extension artifacts and then builds a

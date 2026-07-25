@@ -83,6 +83,22 @@ Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约�
 
 自动配置的默认实现都可以替换。应用 Bean 对 `TransactionRunner`、`PersistenceFailureTranslator`、`AggregatePersistenceContext`、`MessageSender`、`PayloadSerializer`、Outbox/Inbox store 及其专用策略具有优先权。
 
-## 已验证范围
+## 验证
 
-仓库验证 Spring Boot JVM 装配、starter 依赖边界、自动配置和内部 middleware 集成。Native Image 是本仓库的 Quarkus 验收目标；本文不宣称具有等价的 Spring Native/Image 验证矩阵。Quarkus 的依赖组合和 Native Image 范围见 [Quarkus 运行时集成](quarkus.md)。
+运行时本地的集成 profile 会验证 Spring Boot 装配、starter 依赖边界、自动配置，以及通过
+Testcontainers 运行的 middleware 路径，包括 MySQL、PostgreSQL、Kafka 和 RabbitMQ：
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pit verify
+```
+
+同一模块还包含最小 AOT consumer。在 GraalVM Native Image 环境中，`native` profile 会构建它，CI 随后启动
+可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`：
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pnative package
+```

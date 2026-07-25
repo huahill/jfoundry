@@ -127,8 +127,9 @@ The strongest evidence currently applies to:
 - Quarkus 3.37.3 CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
   JVM consumer smoke test and a Native Image CI gate.
 - Helidon MP 4.5.1 CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem
-  Details. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; native
-  JTA execution remains an upstream experimental limitation.
+  Details. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
+  JTA and JPA remain upstream experimental limitations, with a reproducible failure record in
+  [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 - MyBatis-Plus business persistence with PostgreSQL.
 - JPA and MyBatis-Plus Outbox/Inbox stores with PostgreSQL and MySQL.
 - Kafka integration, Redis/Redisson distributed locking, transactional Outbox, and consumer Inbox.
@@ -148,8 +149,8 @@ The following areas are not established by the current evidence:
   rules.
 - The migration cost or organizational outcome of changing architecture style in an established
   production codebase. The demo validates two maintained variants, not a production migration.
-- Helidon broker delivery, Redisson locking, JobRunr, and a working Helidon Native JTA path. Do not
-  infer these from Spring or Quarkus capabilities. Micronaut has no runtime integration yet.
+- Helidon broker delivery, Redisson locking, JobRunr, and working Helidon Native JTA/JPA paths. Do
+  not infer these from Spring or Quarkus capabilities. Micronaut has no runtime integration yet.
 - Other ORM, database, or broker combinations.
 - Application security, observability, deployment, capacity, performance, disaster recovery, and
   long-running production operations.
