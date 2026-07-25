@@ -54,7 +54,7 @@ Dependencies point inward. This keeps runtime integrations outside the core rath
 
 ## Minimal Setup
 
-Import the runtime-neutral BOM, then add only the starters and capability implementations required by the application. Spring Boot, Quarkus, and Helidon applications can instead use their corresponding runtime BOMs described in the runtime assembly guides.
+Every application imports the runtime-neutral BOM, then adds only the starters and capability implementations it requires. A Spring Boot, Quarkus, or Helidon application additionally imports its matching runtime BOM; runtime BOMs manage their platform ecosystems and do not replace the JFoundry BOM.
 
 ```xml
 <dependencyManagement>

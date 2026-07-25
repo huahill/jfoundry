@@ -6,12 +6,20 @@ infrastructure 模块之外。
 
 ## 依赖配置
 
-先导入当前 jfoundry 发布线的 Quarkus BOM，再添加 runtime 扩展。Quarkus 会通过 runtime 扩展描述符发现
-deployment 构件；应用不应直接添加 deployment 构件。
+先导入核心 JFoundry BOM，再导入同一发布线的 Quarkus BOM，最后添加 runtime 扩展。
+`jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
+runtime 扩展描述符发现 deployment 构件；应用不应直接添加 deployment 构件。
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-quarkus-dependencies</artifactId>

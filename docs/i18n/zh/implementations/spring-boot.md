@@ -4,11 +4,20 @@ Spring Boot 是运行时无关 jfoundry core 的对等运行时集成。它通�
 
 ## 装配模型
 
-在运行时装配模块导入 `jfoundry-spring-dependencies`，再添加 `jfoundry-spring-boot-starter`。基础 starter 保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、broker、Outbox、Inbox、JobRunr 或 Redisson client。
+在运行时装配模块导入用于 JFoundry 模块版本的 `jfoundry-dependencies`，以及用于 Spring
+平台的 `jfoundry-spring-dependencies`，再添加 `jfoundry-spring-boot-starter`。基础 starter
+保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、broker、Outbox、Inbox、JobRunr 或 Redisson client。
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>

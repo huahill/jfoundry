@@ -7,14 +7,22 @@ capability is enabled by the base starter.
 
 ## Assembly Model
 
-Import `jfoundry-spring-dependencies`, then add `jfoundry-spring-boot-starter` in the runtime
-assembly module. The base starter intentionally remains small: it provides general Boot wiring and
-a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox, Inbox, JobRunr,
-or Redisson client.
+Import `jfoundry-dependencies` for JFoundry module versions and
+`jfoundry-spring-dependencies` for the Spring platform, then add
+`jfoundry-spring-boot-starter` in the runtime assembly module. The base starter intentionally
+remains small: it provides general Boot wiring and a Spring-backed `TransactionRunner`, but no
+persistence provider, broker, Outbox, Inbox, JobRunr, or Redisson client.
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>

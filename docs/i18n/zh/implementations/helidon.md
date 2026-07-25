@@ -6,11 +6,19 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 ## 依赖组合
 
-先导入 Helidon BOM，它同时管理已选择的 Helidon 平台和 JFoundry 模块：
+先导入核心 JFoundry BOM，再导入同一发布线的 Helidon BOM。Helidon BOM 只管理所选 Helidon
+平台生态版本，不管理 JFoundry 模块版本：
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-helidon-dependencies</artifactId>

@@ -54,7 +54,7 @@
 
 ## 最小接入
 
-引入运行时无关 BOM，再只添加应用需要的 starter 与能力实现。Spring Boot、Quarkus 与 Helidon 应用可分别改用运行时装配指南所述的 BOM。
+所有应用都引入运行时无关 BOM，再只添加应用需要的 starter 与能力实现。Spring Boot、Quarkus 与 Helidon 应用还要额外引入各自的运行时 BOM；运行时 BOM 只管理平台生态版本，不能替代 JFoundry BOM。
 
 ```xml
 <dependencyManagement>

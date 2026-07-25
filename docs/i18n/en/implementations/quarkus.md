@@ -6,13 +6,21 @@ outside the domain, application, and infrastructure modules.
 
 ## Dependency Setup
 
-Import the Quarkus BOM for the jfoundry release line, then add the runtime extension. The deployment
-artifact is discovered by Quarkus from the runtime extension descriptor; applications must not add it
-directly.
+Import the core JFoundry BOM, then the Quarkus BOM for the same release line, and finally add the
+runtime extension. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
+it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
+runtime extension descriptor; applications must not add it directly.
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-quarkus-dependencies</artifactId>

@@ -1,13 +1,34 @@
 # Starters And BOMs
 
-## BOM Layers
+## BOM And Parent Structure
 
-- `jfoundry-dependencies`: aggregate framework-neutral BOM exposed to users.
-- `jfoundry-modules-dependencies`: jfoundry module versions.
-- `jfoundry-foundation-dependencies`: low-level common dependencies.
-- `jfoundry-spring-official-dependencies`: Spring official ecosystem versions.
-- `jfoundry-spring-integration-dependencies`: Spring integration dependencies and optional technology versions.
-- `jfoundry-spring-dependencies`: aggregate Spring business application BOM.
+`jfoundry-boms/` is a physical source-directory grouping only. It has no aggregator POM and does not
+create a published parent or inheritance boundary.
+
+- `jfoundry-parent` is the repository's internal build parent. It imports the core
+  `jfoundry-dependencies` BOM for internal modules and must not be used as a consumer-facing BOM
+  parent.
+- `jfoundry-foundation-dependencies` manages low-level common dependency versions.
+- `jfoundry-modules-dependencies` manages JFoundry module versions.
+- `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
+  foundation and module BOMs and is the required JFoundry BOM for every external application.
+- `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, and
+  `jfoundry-helidon-dependencies` are standalone runtime BOMs. They do not import
+  `jfoundry-dependencies` and manage only their own runtime platform ecosystems.
+
+Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
+and it must directly declare its coordinates, project metadata (including licenses, developers, and
+SCM), reproducible-build properties, and release profile. Keep the root POM's corresponding metadata
+and release profile for its own publication lifecycle; Maven does not propagate them to independent
+BOMs.
+
+An external application always imports `jfoundry-dependencies`. An application using Spring Boot,
+Quarkus, or Helidon additionally imports exactly the matching runtime BOM. Do not make a runtime BOM
+implicitly carry JFoundry module versions, and do not use `jfoundry-parent` outside this repository.
+
+Runtime BOM overrides must be exceptional, platform-local, and documented with the upstream reason and
+validation scope. The Helidon `groovy-all` compatibility override is an example: it exists solely for
+Maven release dependency validation and is not a general dependency-management pattern.
 
 When adding a module or third-party dependency, update the narrowest relevant BOM and any aggregate BOM that imports it.
 

@@ -6,11 +6,19 @@ Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and applicatio
 
 ## Dependency Composition
 
-Import the Helidon BOM, which manages both the selected Helidon platform and JFoundry modules:
+Import the core JFoundry BOM, then the Helidon BOM for the same release line. The Helidon BOM manages
+the selected Helidon platform ecosystem only; it does not manage JFoundry module versions:
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-helidon-dependencies</artifactId>

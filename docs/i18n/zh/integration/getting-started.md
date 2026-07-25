@@ -4,13 +4,23 @@
 
 ## 选择 BOM 与模块边界
 
-运行时无关的应用导入 `jfoundry-dependencies`；使用 Spring Boot 装配应用时导入
-`jfoundry-spring-dependencies`；使用当前可用的 Quarkus 事务集成时导入
-`jfoundry-quarkus-dependencies`。请选择目标发布线的版本；本项目当前使用下面的开发版本：
+所有应用都导入用于 JFoundry 模块版本的 `jfoundry-dependencies`。使用受支持运行时的应用还要额外且仅导入一个
+对应的运行时 BOM：`jfoundry-spring-dependencies`、`jfoundry-quarkus-dependencies` 或
+`jfoundry-helidon-dependencies`。运行时 BOM 只管理各自的平台生态版本，不能替代核心 JFoundry BOM。请选择目标发布线的版本；本项目当前使用下面的开发版本。
+
+下面 XML 以 Spring Boot 为运行时示例。使用 Quarkus 或 Helidon 时，保留核心 BOM，并将第二个 import
+替换为对应的运行时 BOM：
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>
@@ -30,7 +40,8 @@
 | Application | `jfoundry-application-starter` |
 | Infrastructure | 所选运行时无关能力 starter，例如 `jfoundry-persistence-mybatis-plus-starter` |
 | Spring Boot 装配 | `jfoundry-spring-boot-starter` 加上实际需要的运行时能力 starter |
-| Quarkus 事务集成 | `jfoundry-quarkus-runtime` |
+| Quarkus 运行时集成 | `jfoundry-quarkus-runtime` |
+| Helidon MP 运行时集成 | `jfoundry-helidon-runtime` |
 
 Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业务项目决定架构风格。在实现因偶然依赖而增长前，先添加 ArchUnit 测试。
 
@@ -61,8 +72,9 @@ Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业
 
 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)是单个 starter、配置项和注册条件的唯一目录。
 
-Quarkus 的依赖配置、事务传播、应用服务领域事件分发和 Native Image 验证见
-[Quarkus 运行时集成](../implementations/quarkus.md)。
+各运行时的依赖配置、能力组合与验证见 [Spring Boot 运行时装配](../implementations/spring-boot.md)、
+[Quarkus 运行时集成](../implementations/quarkus.md) 和
+[Helidon MP 运行时集成](../implementations/helidon.md)。
 
 ## 阅读路径
 

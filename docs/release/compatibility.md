@@ -30,17 +30,23 @@
 | Redisson | 4.6.1 |
 | RocketMQ client | 5.5.0 |
 | Javassist override | 3.30.2-GA |
+| Helidon `groovy-all` compatibility override | 2.4.14 |
 
-Business applications aligning to this matrix should prefer the Spring dependency BOM and add
-runtime starters explicitly by capability. Quarkus and Helidon applications should instead import
-their respective runtime BOM and add only the documented runtime capabilities. Do not import every
-starter or runtime capability into a business application by default.
+Every business application aligning to this matrix imports `jfoundry-dependencies` and adds only the
+documented starters or runtime capabilities it needs. Spring Boot, Quarkus, and Helidon applications
+add exactly their matching runtime BOM alongside the core BOM. Runtime BOMs manage platform ecosystem
+versions only; they do not manage JFoundry module versions. Do not import every starter or runtime
+capability into a business application by default.
 
 `org.javassist:javassist` is managed explicitly because `rocketmq-client:5.5.0` brings
 `rocketmq-remoting -> reflections:0.9.11 -> javassist:3.21.0-GA`, whose POM emits a
 Maven 4 model warning. Maven 4 also reports imported-BOM conflicts from supported runtime
 ecosystems; the compatibility gate verifies successful package resolution rather than requiring
 a warning-free effective model.
+
+`jfoundry-helidon-dependencies` manages `org.codehaus.groovy:groovy-all:2.4.14` as a narrow
+platform-local compatibility override required by Maven release dependency validation. It is not a
+general JFoundry dependency-management rule.
 
 ## Verification Evidence
 

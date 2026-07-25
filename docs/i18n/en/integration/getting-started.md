@@ -7,14 +7,26 @@ plain runtime framework and ORM.
 
 ## Choose A BOM And Module Boundary
 
-Import `jfoundry-dependencies` for a runtime-neutral application,
-`jfoundry-spring-dependencies` when Spring Boot assembles the application, or
-`jfoundry-quarkus-dependencies` for the available Quarkus transaction integration. Select the
-version from the intended release line; this project currently uses the following development version:
+Every application imports `jfoundry-dependencies` for JFoundry module versions. An application that
+uses a supported runtime additionally imports exactly one matching runtime BOM:
+`jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, or
+`jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
+replace the core JFoundry BOM. Select versions from the intended release line; this project currently
+uses the following development version.
+
+The following XML uses Spring Boot as the runtime example. For Quarkus or Helidon, retain the core
+BOM and replace the second import with the matching runtime BOM:
 
 ```xml
 <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>
@@ -34,7 +46,8 @@ Keep dependencies in the layer that owns them:
 | Application | `jfoundry-application-starter` |
 | Infrastructure | The selected runtime-neutral capability starter, such as `jfoundry-persistence-mybatis-plus-starter` |
 | Spring Boot assembly | `jfoundry-spring-boot-starter` plus only the required runtime capability starters |
-| Quarkus transaction integration | `jfoundry-quarkus-runtime` |
+| Quarkus runtime integration | `jfoundry-quarkus-runtime` |
+| Helidon MP runtime integration | `jfoundry-helidon-runtime` |
 
 Choose Hexagonal or Onion from domain and project constraints; jfoundry does not select an
 architecture style for a business project. Add ArchUnit tests before implementation grows around
@@ -76,8 +89,10 @@ for the exact implementation boundaries.
 The [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md) is
 the canonical catalog for individual starters, properties, and registration conditions.
 
-For Quarkus dependency setup, transaction propagation, application-service domain-event dispatch,
-and Native Image verification, see [Quarkus Runtime Integration](../implementations/quarkus.md).
+For runtime-specific dependency setup, composition, and verification, see
+[Spring Boot Runtime Assembly](../implementations/spring-boot.md),
+[Quarkus Runtime Integration](../implementations/quarkus.md), and
+[Helidon MP Runtime Integration](../implementations/helidon.md).
 
 ## Reading Path
 
