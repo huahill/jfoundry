@@ -102,3 +102,16 @@ Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 
   -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative package
 ```
+
+### 本地 CI 对齐验证
+
+使用 Java 25、Docker 和 GraalVM Native Image 在本地运行两个 Spring CI 阶段：
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh spring
+```
+
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。通用
+`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。

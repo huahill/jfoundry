@@ -128,6 +128,20 @@ environment, JVM control result, and Native failure trace are recorded on
 JFoundry does not duplicate or replace Narayana to hide this upstream limitation, so Native JTA and
 JPA are not acceptance claims until Helidon provides working supported paths.
 
+### CI-Aligned Local Verification
+
+Run both Helidon CI stages locally with Java 25, Docker, and GraalVM Native Image:
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh helidon
+```
+
+Use `--stage middleware` or `--stage native` to run one stage. The native stage verifies the
+supported CDI/Web consumer and Problem Details response only; it does not claim Native JTA or JPA
+support. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
+
 ## Deferred Integrations
 
 Helidon Kafka and RabbitMQ `MessageSender` adapters, Redisson distributed locking, and JobRunr are not

@@ -136,3 +136,16 @@ builds it and CI starts the executable, then verifies `GET /jfoundry/native/read
   -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative package
 ```
+
+### CI-Aligned Local Verification
+
+Run both Spring CI stages locally with Java 25, Docker, and GraalVM Native Image:
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh spring
+```
+
+Use `--stage middleware` or `--stage native` to run one stage. The general
+`scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.

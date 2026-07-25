@@ -308,20 +308,23 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 
 ## 原生镜像验证
 
-仓库的 Quarkus 原生镜像 CI 任务会先安装扩展构件，再构建独立的使用方应用。其
+仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。其
 `@QuarkusIntegrationTest` 通过 HTTP 入口调用 `TransactionRunner`、领域事件分发、Outbox 派发、恢复和清理，针对原生可执行文件运行。
 
-在安装了 GraalVM 原生镜像的机器上，可运行相同验证：
+### 本地 CI 对齐验证
+
+使用 Java 25 和 Docker 在本地运行两个 Quarkus CI 阶段。在 Linux 上，原生阶段使用与 CI 相同的容器构建；在
+macOS 上，它使用本地 GraalVM，因为 Linux 容器生成的可执行文件无法在宿主机运行：
 
 ```bash
-./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-web-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-outbox-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-outbox-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-messaging-kafka-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-messaging-kafka-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-messaging-rabbitmq-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-messaging-rabbitmq-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-outbox-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-outbox-jpa-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-inbox-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-inbox-jpa-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-persistence-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-persistence-jpa-quarkus-deployment \
-  -am -DskipTests install
-
-./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -Pnative verify
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus
 ```
+
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。通用
+`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
+`bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
 ## 当前范围
 

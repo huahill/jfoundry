@@ -82,7 +82,7 @@ jobs:
           cache: maven
 
       - name: Run Spring middleware integration tests
-        run: ./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify
+        run: JAVA_25_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh spring --stage middleware
 
   quarkus-integration:
     name: Quarkus middleware integration
@@ -99,14 +99,8 @@ jobs:
           java-version: 25
           cache: maven
 
-      - name: Install reactor artifacts
-        run: ./mvnw -B -DskipTests install
-
       - name: Run Quarkus PostgreSQL integration tests
-        run: >
-          ./mvnw -B
-          -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests
-          -am -Pjvm-integration verify
+        run: JAVA_25_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh quarkus --stage middleware
 
   helidon-integration:
     name: Helidon middleware integration
@@ -124,10 +118,7 @@ jobs:
           cache: maven
 
       - name: Run Helidon PostgreSQL integration tests
-        run: >
-          ./mvnw -B
-          -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests
-          -am -Pjvm-integration verify
+        run: JAVA_25_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh helidon --stage middleware
 
   spring-native:
     name: Spring Native Image
@@ -145,26 +136,7 @@ jobs:
           cache: maven
 
       - name: Build and smoke test Spring Native Image
-        run: |
-          set -euo pipefail
-          ./mvnw -B \
-            -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
-            -am -Pnative package
-
-          application=jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests/target/jfoundry-spring-integration-tests
-          "$application" --server.port=18081 >/tmp/jfoundry-spring-native.log 2>&1 &
-          application_pid=$!
-          trap 'kill "$application_pid" 2>/dev/null || true' EXIT
-
-          for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error http://127.0.0.1:18081/jfoundry/native/ready | grep -qx 'ready'; then
-              exit 0
-            fi
-            sleep 1
-          done
-
-          cat /tmp/jfoundry-spring-native.log
-          exit 1
+        run: GRAALVM_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh spring --stage native
 
   quarkus-native:
     name: Quarkus Native Image
@@ -181,14 +153,8 @@ jobs:
           java-version: 25
           cache: maven
 
-      - name: Install reactor artifacts
-        run: ./mvnw -B -DskipTests install
-
       - name: Run Quarkus Native Image smoke test
-        run: >
-          ./mvnw -B
-          -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests
-          -Pnative -Dquarkus.native.container-build=true verify
+        run: JAVA_25_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh quarkus --stage native
 
   helidon-native:
     name: Helidon Native Image
@@ -206,32 +172,7 @@ jobs:
           cache: maven
 
       - name: Build and smoke test Helidon Native Image
-        run: |
-          set -euo pipefail
-          ./mvnw -B \
-            -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
-            -am -Pnative-image package
-
-          application=jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests/target/jfoundry-helidon-integration-tests
-          "$application" >/tmp/jfoundry-helidon-native.log 2>&1 &
-          application_pid=$!
-          trap 'kill "$application_pid" 2>/dev/null || true' EXIT
-
-          for attempt in $(seq 1 30); do
-            if curl -sS -D /tmp/jfoundry-helidon-problem.headers \
-                -o /tmp/jfoundry-helidon-problem.body \
-                http://127.0.0.1:7001/jfoundry/problems; then
-              if grep -q '^HTTP/1.1 400' /tmp/jfoundry-helidon-problem.headers \
-                  && grep -qi '^Content-Type: application/problem+json' /tmp/jfoundry-helidon-problem.headers \
-                  && grep -q '"status":400' /tmp/jfoundry-helidon-problem.body; then
-                exit 0
-              fi
-            fi
-            sleep 1
-          done
-
-          cat /tmp/jfoundry-helidon-native.log
-          exit 1
+        run: GRAALVM_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh helidon --stage native
 
   maven-4:
     name: Maven 4 compatibility

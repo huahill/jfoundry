@@ -117,6 +117,20 @@ Helidon CDI 事务管理器委托未在镜像中初始化而失败。JVM JTA 仍
 JFoundry 不会复制或替换 Narayana 来掩盖该上游限制，因此在 Helidon 提供可用的受支持路径前，原生 JTA 与
 JPA 都不能作为验收结论。
 
+### 本地 CI 对齐验证
+
+使用 Java 25、Docker 和 GraalVM Native Image 在本地运行两个 Helidon CI 阶段：
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh helidon
+```
+
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。原生阶段只验证受支持的 CDI/Web
+使用方与 Problem Details 响应，不将原生 JTA 或 JPA 作为验收结论。通用
+`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。
+
 ## 延后集成
 
 当前没有 Helidon Kafka 或 RabbitMQ `MessageSender` 适配器、Redisson 分布式锁或 JobRunr。不要在

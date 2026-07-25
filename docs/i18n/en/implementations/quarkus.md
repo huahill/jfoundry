@@ -352,21 +352,26 @@ regular module test does not require Docker:
 
 ## Native Image Verification
 
-The repository's Quarkus native CI job first installs the extension artifacts and then builds a
-separate consumer application. Its `@QuarkusIntegrationTest` invokes `TransactionRunner`, domain-event
-dispatch, Outbox dispatch, recovery, and cleanup through HTTP endpoints against the native executable.
+The repository's Quarkus native CI job installs the full reactor and then builds a separate consumer
+application with Quarkus container Native Image build. Its `@QuarkusIntegrationTest` invokes
+`TransactionRunner`, domain-event dispatch, Outbox dispatch, recovery, and cleanup through HTTP
+endpoints against the native executable.
 
-Run the same verification on a machine with GraalVM Native Image:
+### CI-Aligned Local Verification
+
+Run both Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
+build as CI. On macOS, it uses local GraalVM because a Linux container executable cannot run on the
+host:
 
 ```bash
-./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-web-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-outbox-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-outbox-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-messaging-kafka-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-messaging-kafka-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-messaging-rabbitmq-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-messaging-rabbitmq-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-outbox-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-outbox-jpa-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-inbox-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-inbox-jpa-quarkus-deployment,jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-persistence-jpa-quarkus-runtime,jfoundry-runtime-integrations/jfoundry-quarkus/deployment/jfoundry-persistence-jpa-quarkus-deployment \
-  -am -DskipTests install
-
-./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -Pnative verify
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus
 ```
+
+Use `--stage middleware` or `--stage native` to run one stage. To run all supported runtime checks,
+use `bash scripts/verify-runtime-ci.sh all` with both environment variables set. The general
+`scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 
