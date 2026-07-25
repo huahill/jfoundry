@@ -308,7 +308,7 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
   -am -DskipTests install
 
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests \
+  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
   -Pnative verify
 ```
 

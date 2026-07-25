@@ -54,6 +54,6 @@
         <module>runtime/jfoundry-outbox-helidon-runtime</module>
         <module>runtime/jfoundry-outbox-jpa-helidon-runtime</module>
         <module>runtime/jfoundry-inbox-jpa-helidon-runtime</module>
-        <module>integration-tests/jfoundry-helidon-integration-tests</module>
+        <module>jfoundry-helidon-integration-tests</module>
     </modules>
 </project>

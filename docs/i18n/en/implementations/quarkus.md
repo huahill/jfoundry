@@ -351,7 +351,7 @@ Run the same verification on a machine with GraalVM Native Image:
   -am -DskipTests install
 
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests \
+  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
   -Pnative verify
 ```
 

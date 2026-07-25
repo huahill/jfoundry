@@ -50,6 +50,6 @@
         <module>deployment/jfoundry-outbox-jpa-quarkus-deployment</module>
         <module>deployment/jfoundry-inbox-jpa-quarkus-deployment</module>
         <module>deployment/jfoundry-persistence-jpa-quarkus-deployment</module>
-        <module>integration-tests/jfoundry-quarkus-integration-tests</module>
+        <module>jfoundry-quarkus-integration-tests</module>
     </modules>
 </project>

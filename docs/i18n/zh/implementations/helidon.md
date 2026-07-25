@@ -91,7 +91,7 @@ Helidon consumer 已用 GraalVM Native Image 构建，并验证 CDI 发现、应
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests \
+mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

@@ -24,16 +24,16 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 - `jfoundry-runtime-integrations/jfoundry-spring/runtime`: Spring Framework adapters such as local event publishing, transaction runner, messaging sender wrappers, outbox transaction/scheduling integration, and Web MVC ProblemDetail support.
 - `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`: Spring Boot auto-configuration, conditions, properties, and runtime wiring.
 - `jfoundry-runtime-integrations/jfoundry-spring/starters`: dependency entry points only.
-- `jfoundry-runtime-integrations/jfoundry-spring/integration-tests`: Spring middleware, Testcontainers, and runtime integration verification.
+- `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`: Spring middleware, Testcontainers, and runtime integration verification.
 - `jfoundry-runtime-integrations/jfoundry-quarkus/runtime`: Quarkus runtime extension artifacts and CDI behavior.
 - `jfoundry-runtime-integrations/jfoundry-quarkus/deployment`: Quarkus build-time processors and Native Image registration.
-- `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests`: Quarkus consumer, middleware, and Native Image integration verification.
+- `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests`: Quarkus consumer and Native Image integration verification.
 - `jfoundry-runtime-integrations/jfoundry-helidon/runtime`: Helidon MP CDI, JTA, JAX-RS, scheduling, and JPA runtime behavior.
-- `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests`: Helidon MP consumer, middleware, and Native Image integration verification.
+- `jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests`: Helidon MP consumer and Native Image integration verification.
 
 Runtime-specific middleware, Testcontainers, database/broker compatibility, and profile-driven checks belong
-under the affected runtime's `integration-tests` directory. Framework-neutral tests belong beside the core or
-infrastructure implementation they verify.
+in the affected runtime's direct `jfoundry-<runtime>-integration-tests` module. Framework-neutral tests belong
+beside the core or infrastructure implementation they verify.
 
 ## Dependency Direction
 

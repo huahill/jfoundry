@@ -99,7 +99,7 @@ Native Image profile:
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests \
+mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

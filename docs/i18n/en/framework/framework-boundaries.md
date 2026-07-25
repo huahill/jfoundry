@@ -12,8 +12,8 @@ such as jMolecules and `slf4j-api` may appear in core modules when they express 
 `jfoundry-core` is a directory group for runtime-neutral framework modules. It contains the domain,
 architecture, application, infrastructure, and runtime-neutral starter aggregates; it does not change
 the Onion dependency direction within those modules. `jfoundry-runtime-integrations` groups concrete
-runtime integrations: Spring uses `runtime/`, `autoconfigure/`, `starters/`, and `integration-tests/`, Quarkus uses `runtime/`,
-`deployment/`, and `integration-tests/`, and Helidon uses `runtime/` and `integration-tests/`.
+runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`; Quarkus uses `runtime/` and
+`deployment/`; each runtime also has one direct `jfoundry-<runtime>-integration-tests` module.
 
 ## Module Roles
 
@@ -25,11 +25,11 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, `starters/`, and
 | Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, `jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
-| Spring integration tests | `jfoundry-runtime-integrations/jfoundry-spring/integration-tests/*` |
+| Spring integration tests | `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus runtime integration | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`, `deployment/*` |
-| Quarkus integration tests | `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/*` |
+| Quarkus integration tests | `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
 | Helidon MP runtime integration | `jfoundry-runtime-integrations/jfoundry-helidon/runtime/*` |
-| Helidon integration tests | `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/*` |
+| Helidon integration tests | `jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests` |
 
 ## Placement Rules
 
@@ -37,13 +37,15 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, `starters/`, and
   and Spring-side client wrappers belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/runtime`.
 - Spring Boot conditions, `@ConfigurationProperties`, bean wiring, metadata, and
   `AutoConfiguration.imports` belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`.
-- Spring middleware and Testcontainers verification belongs under
-  `jfoundry-runtime-integrations/jfoundry-spring/integration-tests`.
-- Quarkus runtime, middleware, Testcontainers, and Native Image verification belongs under
-  `jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests`.
+- Spring middleware and Testcontainers verification belongs in
+  `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`.
+- Quarkus runtime and Native Image verification belongs in
+  `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests`. Future Quarkus
+  middleware or Testcontainers verification belongs in the same module.
 - Helidon CDI lifecycle, JTA, JAX-RS, scheduling, and JPA integration belong under
-  `jfoundry-runtime-integrations/jfoundry-helidon/runtime`; runtime, middleware, Testcontainers, and Native Image
-  verification belongs under `jfoundry-runtime-integrations/jfoundry-helidon/integration-tests`. Helidon has no
+  `jfoundry-runtime-integrations/jfoundry-helidon/runtime`; current Native Image verification belongs in
+  `jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests`. Future Helidon middleware
+  or Testcontainers verification belongs in the same module. Helidon has no
   JFoundry deployment module or starter layer.
 - Starters are dependency entry points only; they must not contain runtime behavior. Keep Domain and
   Application starters at `jfoundry-core/jfoundry-starters`; place runtime-neutral infrastructure
@@ -55,7 +57,7 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, `starters/`, and
 - Broker client `MessageSender` adapters belong to their runtime integration. The application-layer
   `MessageSender` and `SendResult` contracts remain runtime-neutral.
 - Runtime-specific middleware integration tests and Testcontainers compatibility checks belong in the affected
-  runtime's `integration-tests` directory. Framework-neutral tests stay next to their core or infrastructure
+  runtime's direct integration-test module. Framework-neutral tests stay next to their core or infrastructure
   implementation.
 
 ## Reliable Messaging Boundary

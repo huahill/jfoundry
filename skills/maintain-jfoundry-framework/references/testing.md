@@ -35,11 +35,11 @@ mvn test
 | Broker sender runtime adapter | `mvn -pl <runtime messaging module> -am test` |
 | Spring runtime adapter | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/runtime/<module> -am test` |
 | Boot auto-configuration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure -am test` |
-| Spring middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/integration-tests/jfoundry-spring-integration-tests -am -Pit verify` |
-| Quarkus JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests -Pjvm-integration verify` |
-| Quarkus Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests -Pnative verify` |
-| Helidon JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
-| Helidon Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests -am -Pnative-image package` |
+| Spring middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
+| Quarkus JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` |
+| Quarkus Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
+| Helidon JVM integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
+| Helidon Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
 | Starter POM | `mvn -pl <starter-module> -am test` or `mvn validate` for dependency shape |
 
 ## Test Expectations

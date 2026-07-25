@@ -82,7 +82,7 @@ jobs:
           cache: maven
 
       - name: Run Spring middleware integration tests
-        run: ./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/integration-tests/jfoundry-spring-integration-tests -am -Pit verify
+        run: ./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify
 
   quarkus-native:
     name: Quarkus Native Image
@@ -105,7 +105,7 @@ jobs:
       - name: Run Quarkus Native Image smoke test
         run: >
           ./mvnw -B
-          -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests
+          -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests
           -Pnative -Dquarkus.native.container-build=true verify
 
   helidon-native:
@@ -127,10 +127,10 @@ jobs:
         run: |
           set -euo pipefail
           ./mvnw -B \
-            -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests \
+            -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
             -am -Pnative-image package
 
-          application=jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests/target/jfoundry-helidon-integration-tests
+          application=jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests/target/jfoundry-helidon-integration-tests
           "$application" >/tmp/jfoundry-helidon-native.log 2>&1 &
           application_pid=$!
           trap 'kill "$application_pid" 2>/dev/null || true' EXIT

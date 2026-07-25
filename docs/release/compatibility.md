@@ -56,12 +56,12 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 |------|---------|--------|
 | Unit tests | `./mvnw -B clean test` | PASS on Java 25 |
 | Package artifacts | `./mvnw -B -DskipTests package` | PASS on Java 25 |
-| Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/integration-tests/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
 | Maven 4 validate | Maven `4.0.0-rc-5`, `mvn -B -DskipTests validate -e` | PASS |
 | Maven 4 package | Maven `4.0.0-rc-5`, `mvn -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
-| Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/integration-tests/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
-| Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/integration-tests/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
+| Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
+| Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
 
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
@@ -95,7 +95,7 @@ Spring Boot 4.x, Spring Framework 7.x, Maven, and CI evidence.
 
 - `./mvnw test`
 - `./mvnw -DskipTests package`
-- `./mvnw -pl jfoundry-runtime-integrations/jfoundry-spring/integration-tests/jfoundry-spring-integration-tests -am -Pit verify`
+- `./mvnw -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
 - Java 25 release-baseline test in CI
 - Maven 4 compatibility matrix in CI
 - Quarkus Native Image smoke test in CI
