@@ -19,6 +19,8 @@
 |------------|---------|
 | Spring Boot | 3.5.16 |
 | Spring Framework | 6.2.19 |
+| Spring Cloud | 2025.0.3 |
+| Spring Cloud Alibaba | 2025.0.0.0 |
 | Quarkus | 3.37.3 |
 | Helidon MP | 4.5.1 |
 | MyBatis-Plus | 3.5.16 |
@@ -35,8 +37,10 @@
 Every business application aligning to this matrix imports `jfoundry-dependencies` and adds only the
 documented starters or runtime capabilities it needs. Spring Boot, Quarkus, and Helidon applications
 add exactly their matching runtime BOM alongside the core BOM. Runtime BOMs manage platform ecosystem
-versions only; they do not manage JFoundry module versions. Do not import every starter or runtime
-capability into a business application by default.
+versions only; they do not manage JFoundry module versions. They may manage official Cloud or
+integration BOMs that are compatible with the selected runtime baseline, but they do not add those
+libraries to an application. Applications still select each starter or client explicitly. Do not
+import every starter or runtime capability into a business application by default.
 
 `org.javassist:javassist` is managed explicitly because `rocketmq-client:5.5.0` brings
 `rocketmq-remoting -> reflections:0.9.11 -> javassist:3.21.0-GA`, whose POM emits a

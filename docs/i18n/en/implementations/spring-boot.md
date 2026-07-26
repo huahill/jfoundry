@@ -13,6 +13,10 @@ Import `jfoundry-dependencies` for JFoundry module versions and
 remains small: it provides general Boot wiring and a Spring-backed `TransactionRunner`, but no
 persistence provider, broker, Outbox, Inbox, JobRunr, or Redisson client.
 
+The Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and Spring Cloud Alibaba BOMs.
+It manages their versions only: applications still declare the selected Cloud starters explicitly,
+and that management alone does not create a JFoundry adapter for each Cloud capability.
+
 ```xml
 <dependencyManagement>
     <dependencies>

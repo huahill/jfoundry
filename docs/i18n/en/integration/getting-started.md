@@ -14,6 +14,12 @@ uses a supported runtime additionally imports exactly one matching runtime BOM:
 replace the core JFoundry BOM. Select versions from the intended release line; this project currently
 uses the following development version.
 
+Runtime BOMs may also manage official Cloud or integration BOMs compatible with their platform
+baseline. For example, the Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and
+Spring Cloud Alibaba version lines. This lets an application add a selected Cloud starter without a
+version; it does not add any Cloud starter automatically or imply that JFoundry provides an adapter
+for that starter.
+
 The following XML uses Spring Boot as the runtime example. For Quarkus or Helidon, retain the core
 BOM and replace the second import with the matching runtime BOM:
 

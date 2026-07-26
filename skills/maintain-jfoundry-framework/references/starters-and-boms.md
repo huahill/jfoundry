@@ -30,6 +30,31 @@ Runtime BOM overrides must be exceptional, platform-local, and documented with t
 validation scope. The Helidon `groovy-all` compatibility override is an example: it exists solely for
 Maven release dependency validation and is not a general dependency-management pattern.
 
+## Runtime Platform Ecosystem Scope
+
+A runtime BOM is a version-management contract for the supported runtime platform ecosystem, not only
+for dependencies used directly by JFoundry runtime adapters. It may import the runtime's official
+platform BOM and official Cloud or integration BOMs that business applications commonly compose with
+that runtime. It never adds those libraries to an application's runtime classpath by itself; the
+application still declares each selected starter or client explicitly.
+
+For example, `jfoundry-spring-dependencies` manages the aligned Spring Boot, Spring Cloud, and Spring
+Cloud Alibaba BOMs. This allows a Spring application to add an appropriate Cloud starter without a
+version while keeping the choice of configuration server, service discovery, traffic management, or
+other platform capability explicit in the application.
+
+Do not add every available ecosystem BOM to a runtime BOM. Add one only when all of the following hold:
+
+1. It is an official, maintained platform or integration BOM.
+2. Its supported version line is compatible with the runtime baseline managed by JFoundry.
+3. The dependency-management composition is validated by a versionless consumer dependency-resolution
+   check.
+4. The compatibility matrix and user-facing runtime documentation record the managed version line and
+   its scope.
+
+Managing an ecosystem BOM does not mean JFoundry provides an adapter for every library in that
+ecosystem. A JFoundry adapter remains a separate module, API, and runtime-verification decision.
+
 When adding a module or third-party dependency, update the narrowest relevant BOM and any aggregate BOM that imports it.
 
 ## Starter Rules

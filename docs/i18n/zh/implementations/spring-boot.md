@@ -8,6 +8,8 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 平台的 `jfoundry-spring-dependencies`，再添加 `jfoundry-spring-boot-starter`。基础启动器
 保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
 
+Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cloud Alibaba BOM。它只管理版本：应用仍需显式声明所选 Cloud 启动器；仅管理版本不表示 JFoundry 已为每项 Cloud 能力提供适配器。
+
 ```xml
 <dependencyManagement>
     <dependencies>
