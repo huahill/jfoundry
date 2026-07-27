@@ -1,6 +1,7 @@
 package org.jfoundry.application.outbox;
 
 import org.jfoundry.application.messaging.MessageSender;
+import org.jfoundry.application.messaging.MessagePropagation;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
@@ -23,7 +24,7 @@ class DefaultOutboxDispatchServiceTest {
     void marksClaimedMessagesPublishedWhenSendSucceeds() {
         store.messages = List.of(message("evt-1"));
         DefaultOutboxDispatchService service = new DefaultOutboxDispatchService(
-                store, (topic, key, payload) -> SendResult.ok(), 3, backoff, "pod-1");
+                store, message -> SendResult.ok(), 3, backoff, "pod-1");
 
         service.dispatch(10);
 
@@ -36,7 +37,7 @@ class DefaultOutboxDispatchServiceTest {
     @Test
     void marksMessageFailedWhenSendReturnsFailure() {
         store.messages = List.of(message("evt-1"));
-        MessageSender sender = (topic, key, payload) -> SendResult.fail("broker unavailable");
+        MessageSender sender = message -> SendResult.fail("broker unavailable");
         DefaultOutboxDispatchService service = new DefaultOutboxDispatchService(store, sender, 5, backoff, "pod-1");
 
         service.dispatch(1);
@@ -48,8 +49,8 @@ class DefaultOutboxDispatchServiceTest {
     @Test
     void marksMessageFailedWhenSenderThrowsAndContinues() {
         store.messages = List.of(message("evt-1"), message("evt-2"));
-        MessageSender sender = (topic, key, payload) -> {
-            if ("key-1".equals(key)) {
+        MessageSender sender = message -> {
+            if ("key-1".equals(message.payloadKey())) {
                 throw new IllegalStateException("boom");
             }
             return SendResult.ok();
@@ -66,7 +67,7 @@ class DefaultOutboxDispatchServiceTest {
     void claimsAndRecordsDeliveryInSeparateTransactionsWhileSendingOutsideThem() {
         store.messages = List.of(message("evt-1"));
         RecordingTransactionRunner transactions = new RecordingTransactionRunner();
-        MessageSender sender = (topic, key, payload) -> {
+        MessageSender sender = message -> {
             assertThat(transactions.inTransaction).isFalse();
             return SendResult.ok();
         };
@@ -81,6 +82,25 @@ class DefaultOutboxDispatchServiceTest {
         assertThat(transactions.options)
                 .allSatisfy(options -> assertThat(options.name()).isEmpty());
         assertThat(store.published).containsExactly("evt-1");
+    }
+
+    @Test
+    void sendsThePropagationStoredWithTheOutboxMessage() {
+        OutboxMessage message = message("evt-1");
+        message.setPropagation(MessagePropagation.from(java.util.Map.of(
+                "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01")));
+        store.messages = List.of(message);
+        java.util.concurrent.atomic.AtomicReference<org.jfoundry.application.messaging.OutboundMessage> sent =
+                new java.util.concurrent.atomic.AtomicReference<>();
+        DefaultOutboxDispatchService service = new DefaultOutboxDispatchService(
+                store, outbound -> {
+                    sent.set(outbound);
+                    return SendResult.ok();
+                }, 3, backoff, "pod-1");
+
+        service.dispatch(1);
+
+        assertThat(sent.get().propagation()).isEqualTo(message.getPropagation());
     }
 
     private OutboxMessage message(String eventId) {

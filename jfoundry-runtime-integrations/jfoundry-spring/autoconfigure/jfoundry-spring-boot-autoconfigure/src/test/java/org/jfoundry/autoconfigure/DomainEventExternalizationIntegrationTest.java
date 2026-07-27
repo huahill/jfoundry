@@ -120,8 +120,8 @@ class DomainEventExternalizationIntegrationTest {
         final List<String> receivedPayloads = new ArrayList<>();
 
         @Override
-        public SendResult send(String topic, String payloadKey, String payload) {
-            receivedPayloads.add(payload);
+        public SendResult send(org.jfoundry.application.messaging.OutboundMessage message) {
+            receivedPayloads.add(message.payload());
             return SendResult.ok();
         }
     }

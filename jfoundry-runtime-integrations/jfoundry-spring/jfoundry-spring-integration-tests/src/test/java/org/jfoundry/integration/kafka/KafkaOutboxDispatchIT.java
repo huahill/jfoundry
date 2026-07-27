@@ -121,7 +121,7 @@ class KafkaOutboxDispatchIT {
 
         new DefaultOutboxDispatchService(
                 store,
-                (topic, key, payload) -> SendResult.fail("broker down"),
+                outbound -> SendResult.fail("broker down"),
                 3,
                 retry -> Duration.ofMillis(10),
                 "it-pod").dispatch(10);
@@ -146,9 +146,10 @@ class KafkaOutboxDispatchIT {
     }
 
     private static MessageSender kafkaSender(Producer<String, String> producer) {
-        return (topic, key, payload) -> {
+        return outbound -> {
             try {
-                producer.send(new org.apache.kafka.clients.producer.ProducerRecord<>(topic, key, payload))
+                producer.send(new org.apache.kafka.clients.producer.ProducerRecord<>(
+                                outbound.topic(), outbound.payloadKey(), outbound.payload()))
                         .get(10, java.util.concurrent.TimeUnit.SECONDS);
                 return SendResult.ok();
             } catch (Exception exception) {

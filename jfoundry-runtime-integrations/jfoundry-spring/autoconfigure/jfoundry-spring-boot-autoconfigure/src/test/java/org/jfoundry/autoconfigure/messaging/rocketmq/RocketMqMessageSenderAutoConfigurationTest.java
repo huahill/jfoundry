@@ -28,7 +28,7 @@ class RocketMqMessageSenderAutoConfigurationTest {
 
     @Test
     void backsOffWhenUserProvidesMessageSender() {
-        runner.withBean(MessageSender.class, () -> (topic, key, payload) -> SendResult.ok())
+        runner.withBean(MessageSender.class, () -> outbound -> SendResult.ok())
                 .run(context -> {
                     assertThat(context).hasSingleBean(MessageSender.class);
                     assertThat(context).doesNotHaveBean(SpringRocketMqMessageSender.class);

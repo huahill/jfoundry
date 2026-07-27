@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.messaging.spring.sender;
 
 import org.apache.rocketmq.client.producer.MQProducer;
 import org.apache.rocketmq.common.message.Message;
+import org.jfoundry.application.messaging.OutboundMessage;
 import org.jfoundry.application.messaging.SendResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,7 +24,7 @@ class SpringRocketMqMessageSenderTest {
 
     @Test
     void sendsTopicKeyAndUtf8Payload() throws Exception {
-        SendResult result = sender.send("order.created", "order-1", "{}");
+        SendResult result = sender.send(OutboundMessage.of("order.created", "order-1", "{}"));
 
         assertThat(result.success()).isTrue();
         assertThat(result.errorMessage()).isNull();
@@ -37,7 +38,7 @@ class SpringRocketMqMessageSenderTest {
 
     @Test
     void omitsKeysWhenPayloadKeyIsNull() throws Exception {
-        sender.send("order.created", null, "{}");
+        sender.send(OutboundMessage.of("order.created", null, "{}"));
 
         ArgumentCaptor<Message> message = ArgumentCaptor.forClass(Message.class);
         verify(producer).send(message.capture(), eq(1_000L));
@@ -49,7 +50,7 @@ class SpringRocketMqMessageSenderTest {
         when(producer.send(any(Message.class), eq(1_000L)))
                 .thenThrow(new IllegalStateException("broker down"));
 
-        SendResult result = sender.send("order.created", "order-1", "{}");
+        SendResult result = sender.send(OutboundMessage.of("order.created", "order-1", "{}"));
 
         assertThat(result.success()).isFalse();
         assertThat(result.errorMessage()).contains("broker down");

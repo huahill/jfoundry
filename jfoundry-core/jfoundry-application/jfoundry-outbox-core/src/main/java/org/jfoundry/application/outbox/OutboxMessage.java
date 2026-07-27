@@ -1,5 +1,7 @@
 package org.jfoundry.application.outbox;
 
+import org.jfoundry.application.messaging.MessagePropagation;
+
 import java.time.Instant;
 
 /// Outbox SPI data object plus state-machine methods.
@@ -21,6 +23,7 @@ public class OutboxMessage {
     private String payloadKey;
     private String payloadType;
     private String payloadJson;
+    private MessagePropagation propagation = MessagePropagation.empty();
     private String aggregateType;
     private String aggregateId;
     private Long aggregateVersion;
@@ -135,6 +138,10 @@ public class OutboxMessage {
     public void setPayloadType(String payloadType) { this.payloadType = payloadType; }
     public String getPayloadJson() { return payloadJson; }
     public void setPayloadJson(String payloadJson) { this.payloadJson = payloadJson; }
+    public MessagePropagation getPropagation() { return propagation; }
+    public void setPropagation(MessagePropagation propagation) {
+        this.propagation = propagation == null ? MessagePropagation.empty() : propagation;
+    }
     public String getAggregateType() { return aggregateType; }
     public void setAggregateType(String aggregateType) { this.aggregateType = aggregateType; }
     public String getAggregateId() { return aggregateId; }

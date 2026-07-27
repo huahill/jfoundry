@@ -120,7 +120,7 @@ class RabbitMqOutboxDispatchIT {
 
         new DefaultOutboxDispatchService(
                 store,
-                (topic, key, payload) -> SendResult.fail("broker down"),
+                outbound -> SendResult.fail("broker down"),
                 3,
                 retry -> Duration.ofMillis(10),
                 "it-pod").dispatch(10);
@@ -145,9 +145,12 @@ class RabbitMqOutboxDispatchIT {
     }
 
     private static MessageSender rabbitMqSender(Channel channel) {
-        return (topic, key, payload) -> {
+        return outbound -> {
             try {
-                channel.basicPublish(topic, key == null ? "" : key, null, payload.getBytes(StandardCharsets.UTF_8));
+                channel.basicPublish(outbound.topic(),
+                        outbound.payloadKey() == null ? "" : outbound.payloadKey(),
+                        null,
+                        outbound.payload().getBytes(StandardCharsets.UTF_8));
                 return SendResult.ok();
             } catch (Exception exception) {
                 Throwable cause = exception.getCause() != null ? exception.getCause() : exception;

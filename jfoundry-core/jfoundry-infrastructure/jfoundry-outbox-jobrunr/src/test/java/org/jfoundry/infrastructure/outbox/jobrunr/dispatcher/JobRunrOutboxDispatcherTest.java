@@ -46,7 +46,7 @@ class JobRunrOutboxDispatcherTest {
     void dispatchMarksPublishedOnSuccess() {
         OutboxMessage message = message("evt-1");
         when(outboxRepository.claimDispatchable(anyInt(), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.ok());
+        when(messageSender.send(any())).thenReturn(SendResult.ok());
 
         dispatcher.dispatch(BATCH_SIZE);
 
@@ -58,7 +58,7 @@ class JobRunrOutboxDispatcherTest {
     void dispatchMarksFailedOnSenderException() {
         OutboxMessage message = message("evt-1");
         when(outboxRepository.claimDispatchable(anyInt(), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenThrow(new RuntimeException("kafka unavailable"));
+        when(messageSender.send(any())).thenThrow(new RuntimeException("kafka unavailable"));
 
         dispatcher.dispatch(BATCH_SIZE);
 
@@ -70,7 +70,7 @@ class JobRunrOutboxDispatcherTest {
     void dispatchMarksFailedOnSendFailureResult() {
         OutboxMessage message = message("evt-1");
         when(outboxRepository.claimDispatchable(anyInt(), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.fail("conn refused"));
+        when(messageSender.send(any())).thenReturn(SendResult.fail("conn refused"));
 
         dispatcher.dispatch(BATCH_SIZE);
 
@@ -91,13 +91,16 @@ class JobRunrOutboxDispatcherTest {
     void dispatchPassesTopicAndPayloadToSender() {
         OutboxMessage message = message("evt-1");
         when(outboxRepository.claimDispatchable(anyInt(), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.ok());
+        when(messageSender.send(any())).thenReturn(SendResult.ok());
 
         dispatcher.dispatch(BATCH_SIZE);
 
-        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
-        verify(messageSender).send(topicCaptor.capture(), eq("key-A"), eq("payload-evt-1"));
-        assertThat(topicCaptor.getValue()).isEqualTo("env.created");
+        ArgumentCaptor<org.jfoundry.application.messaging.OutboundMessage> messageCaptor =
+                ArgumentCaptor.forClass(org.jfoundry.application.messaging.OutboundMessage.class);
+        verify(messageSender).send(messageCaptor.capture());
+        assertThat(messageCaptor.getValue().topic()).isEqualTo("env.created");
+        assertThat(messageCaptor.getValue().payloadKey()).isEqualTo("key-A");
+        assertThat(messageCaptor.getValue().payload()).isEqualTo("payload-evt-1");
     }
 
     private OutboxMessage message(String eventId) {

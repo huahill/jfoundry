@@ -1,6 +1,8 @@
 package org.jfoundry.infrastructure.messaging.spring.sender;
 
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.jfoundry.application.messaging.MessageSender;
+import org.jfoundry.application.messaging.OutboundMessage;
 import org.jfoundry.application.messaging.SendResult;
 import org.springframework.kafka.core.KafkaOperations;
 
@@ -19,9 +21,13 @@ public class SpringKafkaMessageSender implements MessageSender {
     }
 
     @Override
-    public SendResult send(String topic, String payloadKey, String payload) {
+    public SendResult send(OutboundMessage message) {
         try {
-            kafkaOperations.send(topic, payloadKey, payload).get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
+            ProducerRecord<String, String> record = new ProducerRecord<>(
+                    message.topic(), message.payloadKey(), message.payload());
+            message.propagation().entries().forEach((key, value) ->
+                    record.headers().add(key, value.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            kafkaOperations.send(record).get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
             return SendResult.ok();
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();

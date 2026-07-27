@@ -23,7 +23,7 @@ class OutboxDispatcherAutoConfigurationTest {
             new ApplicationContextRunner()
                     .withConfiguration(AutoConfigurations.of(OutboxDispatcherAutoConfiguration.class))
                     .withBean(OutboxMessageStore.class, () -> mock(OutboxMessageStore.class))
-                    .withBean(MessageSender.class, () -> (topic, key, payload) -> SendResult.ok())
+                    .withBean(MessageSender.class, () -> outbound -> SendResult.ok())
                     .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                     .withBean(CountingTransactionRunner.class, CountingTransactionRunner::new);
 

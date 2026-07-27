@@ -3,10 +3,13 @@ package org.jfoundry.infrastructure.outbox.mybatis;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import org.jfoundry.application.messaging.MessagePropagation;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStatus;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /// MyBatis-Plus persistence data object for the Outbox table.
 /// <p>
@@ -24,6 +27,8 @@ public class OutboxData {
     private String payloadKey;
     private String payloadType;
     private String payloadJson;
+    private String traceparent;
+    private String tracestate;
     private String aggregateType;
     private String aggregateId;
     private Long aggregateVersion;
@@ -52,6 +57,10 @@ public class OutboxData {
     public void setPayloadType(String payloadType) { this.payloadType = payloadType; }
     public String getPayloadJson() { return payloadJson; }
     public void setPayloadJson(String payloadJson) { this.payloadJson = payloadJson; }
+    public String getTraceparent() { return traceparent; }
+    public void setTraceparent(String traceparent) { this.traceparent = traceparent; }
+    public String getTracestate() { return tracestate; }
+    public void setTracestate(String tracestate) { this.tracestate = tracestate; }
     public String getAggregateType() { return aggregateType; }
     public void setAggregateType(String aggregateType) { this.aggregateType = aggregateType; }
     public String getAggregateId() { return aggregateId; }
@@ -92,6 +101,8 @@ public class OutboxData {
         data.payloadKey = entry.getPayloadKey();
         data.payloadType = entry.getPayloadType();
         data.payloadJson = entry.getPayloadJson();
+        data.traceparent = entry.getPropagation().entries().get("traceparent");
+        data.tracestate = entry.getPropagation().entries().get("tracestate");
         data.aggregateType = entry.getAggregateType();
         data.aggregateId = entry.getAggregateId();
         data.aggregateVersion = entry.getAggregateVersion();
@@ -118,6 +129,14 @@ public class OutboxData {
         entry.setPayloadKey(data.payloadKey);
         entry.setPayloadType(data.payloadType);
         entry.setPayloadJson(data.payloadJson);
+        Map<String, String> propagation = new LinkedHashMap<>();
+        if (data.traceparent != null) {
+            propagation.put("traceparent", data.traceparent);
+        }
+        if (data.tracestate != null) {
+            propagation.put("tracestate", data.tracestate);
+        }
+        entry.setPropagation(MessagePropagation.from(propagation));
         entry.setAggregateType(data.aggregateType);
         entry.setAggregateId(data.aggregateId);
         entry.setAggregateVersion(data.aggregateVersion);

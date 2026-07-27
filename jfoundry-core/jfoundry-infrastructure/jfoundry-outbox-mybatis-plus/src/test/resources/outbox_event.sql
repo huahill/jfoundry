@@ -5,6 +5,8 @@ CREATE TABLE jfoundry_outbox_event (
     payload_key     VARCHAR(255),
     payload_type    VARCHAR(500)  NOT NULL,
     payload_json    MEDIUMTEXT    NOT NULL,  -- 16MB; supports 1MB+ payloads
+    traceparent     VARCHAR(512),
+    tracestate      VARCHAR(512),
     aggregate_type   VARCHAR(255),
     aggregate_id     VARCHAR(255),
     aggregate_version BIGINT,

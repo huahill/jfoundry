@@ -153,9 +153,9 @@ class DispatcherConcurrencyIntegrationTest {
         final Set<String> seenPayloads = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
         @Override
-        public SendResult send(String topic, String payloadKey, String payload) {
+        public SendResult send(org.jfoundry.application.messaging.OutboundMessage message) {
             sendCount.incrementAndGet();
-            seenPayloads.add(payload);
+            seenPayloads.add(message.payload());
             return SendResult.ok();
         }
     }

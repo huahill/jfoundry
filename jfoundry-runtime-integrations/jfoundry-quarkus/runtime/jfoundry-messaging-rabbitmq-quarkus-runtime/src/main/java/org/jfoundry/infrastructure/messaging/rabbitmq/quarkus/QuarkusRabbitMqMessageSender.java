@@ -10,9 +10,12 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import io.smallrye.common.annotation.Identifier;
+import com.rabbitmq.client.AMQP.BasicProperties;
 import org.jfoundry.application.messaging.MessageSender;
+import org.jfoundry.application.messaging.OutboundMessage;
 import org.jfoundry.application.messaging.SendResult;
 
+import java.util.HashMap;
 
 /// Quarkus RabbitMQ-backed {@link MessageSender}.
 @ApplicationScoped
@@ -32,12 +35,16 @@ public class QuarkusRabbitMqMessageSender implements MessageSender {
     }
 
     @Override
-    public SendResult send(String topic, String payloadKey, String payload) {
+    public SendResult send(OutboundMessage message) {
         try {
             if (!client.isConnected()) {
                 await(client.start());
             }
-            await(client.basicPublish(topic, payloadKey == null ? "" : payloadKey, Buffer.buffer(payload)));
+            BasicProperties properties = new BasicProperties.Builder()
+                    .headers(new HashMap<>(message.propagation().entries()))
+                    .build();
+            await(client.basicPublish(message.topic(), message.payloadKey() == null ? "" : message.payloadKey(),
+                    properties, Buffer.buffer(message.payload())));
             return SendResult.ok();
         } catch (Exception exception) {
             Throwable cause = exception.getCause() != null ? exception.getCause() : exception;

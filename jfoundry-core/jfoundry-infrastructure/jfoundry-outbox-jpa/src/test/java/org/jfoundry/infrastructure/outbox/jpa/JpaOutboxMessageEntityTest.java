@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Persistence;
+import org.jfoundry.application.messaging.MessagePropagation;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStatus;
 import org.junit.jupiter.api.AfterAll;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,6 +48,9 @@ class JpaOutboxMessageEntityTest {
         message.setClaimedAt(now.plusSeconds(3));
         message.setClaimedBy("node-a");
         message.setClaimToken("token-1");
+        message.setPropagation(MessagePropagation.from(Map.of(
+                "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+                "tracestate", "vendor=value")));
 
         EntityManager entityManager = entityManagerFactory.createEntityManager();
         entityManager.getTransaction().begin();
@@ -74,6 +79,7 @@ class JpaOutboxMessageEntityTest {
         assertThat(loaded.getClaimedAt()).isEqualTo(now.plusSeconds(3));
         assertThat(loaded.getClaimedBy()).isEqualTo("node-a");
         assertThat(loaded.getClaimToken()).isEqualTo("token-1");
+        assertThat(loaded.getPropagation()).isEqualTo(message.getPropagation());
         entityManager.close();
     }
 

@@ -38,7 +38,7 @@ class JobRunrDispatcherAutoConfigurationTest {
             new ApplicationContextRunner()
                     .withConfiguration(AutoConfigurations.of(JobRunrDispatcherAutoConfiguration.class))
                     .withBean(OutboxMessageStore.class, () -> mock(OutboxMessageStore.class))
-                    .withBean(MessageSender.class, () -> (MessageSender) (topic, key, payload) -> SendResult.ok())
+                    .withBean(MessageSender.class, () -> (MessageSender) outbound -> SendResult.ok())
                     .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                     .withBean(CountingTransactionRunner.class, CountingTransactionRunner::new);
 
@@ -106,7 +106,7 @@ class JobRunrDispatcherAutoConfigurationTest {
     void dispatcherIsAbsentWhenOutboxMessageStoreBeanMissing() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(JobRunrDispatcherAutoConfiguration.class))
-                .withBean(MessageSender.class, () -> (MessageSender) (topic, key, payload) -> SendResult.ok())
+                .withBean(MessageSender.class, () -> (MessageSender) outbound -> SendResult.ok())
                 .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=jobrunr")
                 .run(context -> {

@@ -34,7 +34,7 @@ class ScheduledOutboxDispatcherTest {
     void marksAsPublishedOnSendSuccess() {
         OutboxMessage message = message("evt-1");
         when(repository.claimDispatchable(eq(5), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.ok());
+        when(messageSender.send(any())).thenReturn(SendResult.ok());
 
         dispatcher.dispatch(5);
 
@@ -46,7 +46,7 @@ class ScheduledOutboxDispatcherTest {
     void marksAsFailedOnSendFailure() {
         OutboxMessage message = message("evt-1");
         when(repository.claimDispatchable(eq(5), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.fail("conn refused"));
+        when(messageSender.send(any())).thenReturn(SendResult.fail("conn refused"));
 
         dispatcher.dispatch(5);
 
@@ -59,7 +59,7 @@ class ScheduledOutboxDispatcherTest {
     void marksAsFailedOnSendException() {
         OutboxMessage message = message("evt-1");
         when(repository.claimDispatchable(eq(5), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenThrow(new RuntimeException("kafka down"));
+        when(messageSender.send(any())).thenThrow(new RuntimeException("kafka down"));
 
         dispatcher.dispatch(5);
 
@@ -72,9 +72,13 @@ class ScheduledOutboxDispatcherTest {
         OutboxMessage first = message("evt-1");
         OutboxMessage second = message("evt-2");
         when(repository.claimDispatchable(eq(5), any())).thenReturn(List.of(first, second));
-        when(messageSender.send(eq("topic"), any(), eq("payload-evt-1")))
+        when(messageSender.send(org.mockito.ArgumentMatchers.argThat(outbound ->
+                outbound != null && outbound.topic().equals("topic")
+                        && outbound.payload().equals("payload-evt-1"))))
                 .thenThrow(new RuntimeException("fail"));
-        when(messageSender.send(eq("topic"), any(), eq("payload-evt-2")))
+        when(messageSender.send(org.mockito.ArgumentMatchers.argThat(outbound ->
+                outbound != null && outbound.topic().equals("topic")
+                        && outbound.payload().equals("payload-evt-2"))))
                 .thenReturn(SendResult.ok());
 
         dispatcher.dispatch(5);
@@ -88,11 +92,13 @@ class ScheduledOutboxDispatcherTest {
         OutboxMessage message = message("evt-1");
         message.setPayloadKey("key-A");
         when(repository.claimDispatchable(eq(5), any())).thenReturn(List.of(message));
-        when(messageSender.send(any(), any(), any())).thenReturn(SendResult.ok());
+        when(messageSender.send(any())).thenReturn(SendResult.ok());
 
         dispatcher.dispatch(5);
 
-        verify(messageSender).send("topic", "key-A", "payload-evt-1");
+        verify(messageSender).send(org.mockito.ArgumentMatchers.argThat(outbound ->
+                outbound.topic().equals("topic") && outbound.payloadKey().equals("key-A")
+                        && outbound.payload().equals("payload-evt-1")));
     }
 
     private OutboxMessage message(String eventId) {

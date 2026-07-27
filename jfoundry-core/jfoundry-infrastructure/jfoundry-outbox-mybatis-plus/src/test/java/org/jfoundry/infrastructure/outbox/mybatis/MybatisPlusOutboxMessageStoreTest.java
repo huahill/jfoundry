@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.outbox.mybatis;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
+import org.jfoundry.application.messaging.MessagePropagation;
 import org.jfoundry.application.outbox.BackoffStrategy;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStatus;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,6 +53,19 @@ class MybatisPlusOutboxMessageStoreTest {
         assertThat(loaded.getAggregateType()).isEqualTo("Order");
         assertThat(loaded.getAggregateId()).isEqualTo("order-1");
         assertThat(loaded.getAggregateVersion()).isEqualTo(7L);
+    }
+
+    @Test
+    void appendPersistsTraceContextPropagation() {
+        OutboxMessage entry = pendingMessage("evt-trace-context");
+        entry.setPropagation(MessagePropagation.from(Map.of(
+                "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
+                "tracestate", "vendor=value")));
+
+        repository.append(entry);
+
+        OutboxMessage loaded = repository.findDispatchable(100, Instant.now()).getFirst();
+        assertThat(loaded.getPropagation()).isEqualTo(entry.getPropagation());
     }
 
     @Test

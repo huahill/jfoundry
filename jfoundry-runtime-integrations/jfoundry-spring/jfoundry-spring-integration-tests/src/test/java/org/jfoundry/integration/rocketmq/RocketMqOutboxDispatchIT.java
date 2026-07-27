@@ -150,7 +150,7 @@ class RocketMqOutboxDispatchIT {
 
         new DefaultOutboxDispatchService(
                 store,
-                (topic, key, payload) -> SendResult.fail("broker down"),
+                outbound -> SendResult.fail("broker down"),
                 3,
                 retry -> Duration.ofMillis(10),
                 "it-pod").dispatch(10);
@@ -174,12 +174,12 @@ class RocketMqOutboxDispatchIT {
     }
 
     private static MessageSender rocketMqSender(DefaultMQProducer producer) {
-        return (topic, key, payload) -> {
+        return outbound -> {
             try {
                 org.apache.rocketmq.common.message.Message message = new org.apache.rocketmq.common.message.Message(
-                        topic, payload.getBytes(StandardCharsets.UTF_8));
-                if (key != null) {
-                    message.setKeys(key);
+                        outbound.topic(), outbound.payload().getBytes(StandardCharsets.UTF_8));
+                if (outbound.payloadKey() != null) {
+                    message.setKeys(outbound.payloadKey());
                 }
                 producer.send(message, 10_000L);
                 return SendResult.ok();

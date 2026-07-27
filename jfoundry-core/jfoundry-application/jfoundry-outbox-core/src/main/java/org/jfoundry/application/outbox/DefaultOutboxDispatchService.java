@@ -1,6 +1,7 @@
 package org.jfoundry.application.outbox;
 
 import org.jfoundry.application.messaging.MessageSender;
+import org.jfoundry.application.messaging.OutboundMessage;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
@@ -62,7 +63,8 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
 
     private void dispatchMessage(OutboxMessage message) {
         try {
-            SendResult result = messageSender.send(message.getTopic(), message.getPayloadKey(), message.getPayloadJson());
+            SendResult result = messageSender.send(new OutboundMessage(
+                    message.getTopic(), message.getPayloadKey(), message.getPayloadJson(), message.getPropagation()));
             if (result.success()) {
                 inNewTransaction(() -> {
                     repository.markAsPublished(message.getEventId(), message.getClaimToken());

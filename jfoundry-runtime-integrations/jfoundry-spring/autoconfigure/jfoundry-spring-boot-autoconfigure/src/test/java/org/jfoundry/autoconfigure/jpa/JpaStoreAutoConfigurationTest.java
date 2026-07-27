@@ -65,7 +65,7 @@ class JpaStoreAutoConfigurationTest {
         outboxRunner
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=none")
                 .withBean(EntityManagerFactory.class, () -> mock(EntityManagerFactory.class))
-                .withBean(MessageSender.class, () -> (topic, key, payload) -> SendResult.ok())
+                .withBean(MessageSender.class, () -> outbound -> SendResult.ok())
                 .run(context -> {
                     assertThat(context).hasSingleBean(OutboxMessageStore.class);
                     assertThat(context.getBean(OutboxMessageStore.class))

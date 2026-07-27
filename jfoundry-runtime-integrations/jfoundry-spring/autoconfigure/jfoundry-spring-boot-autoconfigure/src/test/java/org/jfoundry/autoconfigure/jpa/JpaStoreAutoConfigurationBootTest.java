@@ -116,7 +116,7 @@ class JpaStoreAutoConfigurationBootTest {
 
         @Bean
         MessageSender messageSender() {
-            return (topic, key, payload) -> SendResult.ok();
+            return outbound -> SendResult.ok();
         }
     }
 }

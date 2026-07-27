@@ -5,10 +5,13 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.jfoundry.application.messaging.MessagePropagation;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStatus;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /// Jakarta Persistence mapping for a single Outbox message.
 @Entity
@@ -30,6 +33,12 @@ public class JpaOutboxMessageEntity {
 
     @Column(name = "payload_json", nullable = false, columnDefinition = "text")
     private String payloadJson;
+
+    @Column(name = "traceparent", length = 512)
+    private String traceparent;
+
+    @Column(name = "tracestate", length = 512)
+    private String tracestate;
 
     @Column(name = "aggregate_type", length = 255)
     private String aggregateType;
@@ -92,6 +101,14 @@ public class JpaOutboxMessageEntity {
         message.setPayloadKey(payloadKey);
         message.setPayloadType(payloadType);
         message.setPayloadJson(payloadJson);
+        Map<String, String> propagation = new LinkedHashMap<>();
+        if (traceparent != null) {
+            propagation.put("traceparent", traceparent);
+        }
+        if (tracestate != null) {
+            propagation.put("tracestate", tracestate);
+        }
+        message.setPropagation(MessagePropagation.from(propagation));
         message.setAggregateType(aggregateType);
         message.setAggregateId(aggregateId);
         message.setAggregateVersion(aggregateVersion);
@@ -117,6 +134,8 @@ public class JpaOutboxMessageEntity {
         payloadKey = message.getPayloadKey();
         payloadType = message.getPayloadType();
         payloadJson = message.getPayloadJson();
+        traceparent = message.getPropagation().entries().get("traceparent");
+        tracestate = message.getPropagation().entries().get("tracestate");
         aggregateType = message.getAggregateType();
         aggregateId = message.getAggregateId();
         aggregateVersion = message.getAggregateVersion();
