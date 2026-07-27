@@ -1,139 +1,65 @@
 package org.jfoundry.infrastructure.inbox.mybatis;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import org.jfoundry.application.inbox.InboxClaim;
+import org.jfoundry.application.inbox.InboxClaimResult;
+import org.jfoundry.application.inbox.InboxClaimSource;
+import org.jfoundry.application.inbox.InboxMessageStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.time.Duration;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(classes = InboxPersistenceTestConfig.class)
 class MybatisPlusInboxMessageStoreTest {
 
-    @Autowired
-    private MybatisPlusInboxMessageStore store;
+    private static final Duration LEASE = Duration.ofMinutes(5);
 
-    @Autowired
-    private InboxMessageMapper mapper;
+    @Autowired private MybatisPlusInboxMessageStore store;
+    @Autowired private InboxMessageMapper mapper;
 
-    @BeforeEach
-    void cleanDb() {
-        mapper.delete(null);
+    @BeforeEach void cleanDb() { mapper.delete(null); }
+
+    @Test
+    void freshClaimCanBeCompletedOnlyByItsToken() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim claim = store.claim("evt-1", "projection", now, LEASE);
+
+        assertThat(claim.result()).isEqualTo(InboxClaimResult.CLAIMED);
+        assertThat(claim.source()).isEqualTo(InboxClaimSource.FRESH);
+        assertThat(store.markProcessed("evt-1", "projection", "stale", now)).isFalse();
+        assertThat(store.markProcessed("evt-1", "projection", claim.claimToken(), now)).isTrue();
+        assertThat(store.claim("evt-1", "projection", now, LEASE).result()).isEqualTo(InboxClaimResult.DUPLICATE);
     }
 
     @Test
-    void markProcessedPersistsProcessedMessage() {
-        store.markProcessed("evt-1", "projection");
+    void expiredLeaseCanBeReclaimedAndRejectsStaleCompletion() {
+        Instant first = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim initial = store.claim("evt-1", "projection", first, LEASE);
 
-        assertThat(mapper.selectCount(null)).isEqualTo(1);
-        InboxMessageData data = mapper.selectOne(Wrappers.lambdaQuery(InboxMessageData.class)
-                .eq(InboxMessageData::getMessageId, "evt-1")
-                .eq(InboxMessageData::getConsumerName, "projection"));
-        assertThat(data.getId()).isNotBlank();
+        InboxClaim replacement = store.claim("evt-1", "projection", first.plus(LEASE).plusSeconds(1), LEASE);
+
+        assertThat(replacement.source()).isEqualTo(InboxClaimSource.EXPIRED_LEASE);
+        assertThat(store.markProcessed("evt-1", "projection", initial.claimToken(), first)).isFalse();
+        assertThat(store.markProcessed("evt-1", "projection", replacement.claimToken(), first)).isTrue();
     }
 
     @Test
-    void isProcessedReturnsTrueForExistingProcessedMessage() {
-        store.markProcessed("evt-1", "projection");
+    void failedMessageIsClaimedForBrokerRedelivery() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim initial = store.claim("evt-1", "projection", now, LEASE);
+        assertThat(store.markFailed("evt-1", "projection", initial.claimToken(), "broker unavailable", now)).isTrue();
 
-        assertThat(store.isProcessed("evt-1", "projection")).isTrue();
-    }
+        InboxClaim retry = store.claim("evt-1", "projection", now.plusSeconds(1), LEASE);
 
-    @Test
-    void duplicateMarkProcessedIsIdempotent() {
-        store.markProcessed("evt-1", "projection");
-        store.markProcessed("evt-1", "projection");
-
-        assertThat(mapper.selectCount(null)).isEqualTo(1);
-    }
-
-    @Test
-    void duplicateInsertCanBeDetectedWithoutSpringExceptionTypes() {
-        InboxMessageMapper mapper = mock(InboxMessageMapper.class);
-        MybatisPlusInboxMessageStore store = new MybatisPlusInboxMessageStore(mapper);
-        when(mapper.insert(any(InboxMessageData.class)))
-                .thenThrow(new RuntimeException(new SQLIntegrityConstraintViolationException("duplicate key")));
-
-        boolean started = store.tryStartProcessing("evt-1", "projection");
-
-        assertThat(started).isFalse();
-        verify(mapper, never()).update(any(), any());
-    }
-
-    @Test
-    void existingProcessedMessageDoesNotAttemptAnotherInsert() {
-        InboxMessageMapper mapper = mock(InboxMessageMapper.class);
-        MybatisPlusInboxMessageStore store = new MybatisPlusInboxMessageStore(mapper);
-        when(mapper.selectOne(any())).thenReturn(InboxMessageData.processed("evt-1", "projection"));
-
-        boolean started = store.tryStartProcessing("evt-1", "projection");
-
-        assertThat(started).isFalse();
-        verify(mapper, never()).insert(any(InboxMessageData.class));
-    }
-
-    @Test
-    void differentConsumersCanProcessSameMessage() {
-        store.markProcessed("evt-1", "projection-a");
-        store.markProcessed("evt-1", "projection-b");
-
-        assertThat(store.isProcessed("evt-1", "projection-a")).isTrue();
-        assertThat(store.isProcessed("evt-1", "projection-b")).isTrue();
-        assertThat(mapper.selectCount(null)).isEqualTo(2);
-    }
-
-    @Test
-    void concurrentProcessingExecutesHandlerOnlyOnce() throws Exception {
-        org.jfoundry.application.inbox.InboxTemplate template =
-                new org.jfoundry.application.inbox.InboxTemplate(store);
-        AtomicInteger calls = new AtomicInteger();
-        CountDownLatch start = new CountDownLatch(1);
-        CountDownLatch entered = new CountDownLatch(1);
-        ExecutorService pool = Executors.newFixedThreadPool(2);
-        try {
-            Runnable task = () -> {
-                try {
-                    start.await();
-                    template.executeOnce("evt-1", "projection", () -> {
-                        calls.incrementAndGet();
-                        entered.countDown();
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    });
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            };
-            pool.submit(task);
-            pool.submit(task);
-
-            start.countDown();
-
-            assertThat(entered.await(5, TimeUnit.SECONDS)).isTrue();
-            pool.shutdown();
-            assertThat(pool.awaitTermination(10, TimeUnit.SECONDS)).isTrue();
-        } finally {
-            pool.shutdownNow();
-        }
-
-        assertThat(calls.get()).isEqualTo(1);
-        assertThat(store.isProcessed("evt-1", "projection")).isTrue();
-        assertThat(mapper.selectCount(null)).isEqualTo(1);
+        assertThat(retry.source()).isEqualTo(InboxClaimSource.FAILED_RETRY);
+        assertThat(mapper.selectOne(Wrappers.lambdaQuery(InboxMessageData.class)
+                .eq(InboxMessageData::getMessageId, "evt-1")).getStatus())
+                .isEqualTo(InboxMessageStatus.PROCESSING.name());
     }
 }

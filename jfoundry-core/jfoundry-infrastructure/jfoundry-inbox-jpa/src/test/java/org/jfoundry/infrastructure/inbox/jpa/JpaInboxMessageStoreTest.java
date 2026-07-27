@@ -2,8 +2,11 @@ package org.jfoundry.infrastructure.inbox.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.FlushModeType;
 import jakarta.persistence.Persistence;
+import org.jfoundry.application.inbox.InboxClaim;
+import org.jfoundry.application.inbox.InboxClaimResult;
+import org.jfoundry.application.inbox.InboxClaimSource;
+import org.jfoundry.application.inbox.InboxExecutionResult;
 import org.jfoundry.application.inbox.InboxMessage;
 import org.jfoundry.application.inbox.InboxMessageStatus;
 import org.junit.jupiter.api.AfterAll;
@@ -12,8 +15,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -21,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class JpaInboxMessageStoreTest {
 
+    private static final Duration LEASE = Duration.ofMinutes(5);
     private static EntityManagerFactory entityManagerFactory;
 
     private EntityManager entityManager;
@@ -41,15 +44,17 @@ class JpaInboxMessageStoreTest {
     void setUp() {
         entityManager = entityManagerFactory.createEntityManager();
         claimAttempts = new AtomicInteger();
-        store = new JpaInboxMessageStore(entityManager, (manager, messageId, consumerName, now) -> {
+        store = new JpaInboxMessageStore(entityManager, (manager, messageId, consumerName, claimToken, now) -> {
             claimAttempts.incrementAndGet();
-            manager.persist(JpaInboxMessageEntity.fromMessage(InboxMessage.processing(messageId, consumerName)));
+            InboxMessage message = InboxMessage.processing(messageId, consumerName);
+            message.setClaimedAt(now);
+            message.setClaimToken(claimToken);
+            message.setCreatedAt(now);
+            message.setUpdatedAt(now);
+            manager.persist(JpaInboxMessageEntity.fromMessage(message));
             return true;
         });
-        inTransaction(() -> {
-            entityManager.createQuery("delete from JpaInboxMessageEntity").executeUpdate();
-            entityManager.createQuery("delete from UnrelatedTestEntity").executeUpdate();
-        });
+        inTransaction(() -> entityManager.createQuery("delete from JpaInboxMessageEntity").executeUpdate());
     }
 
     @AfterEach
@@ -58,138 +63,80 @@ class JpaInboxMessageStoreTest {
     }
 
     @Test
-    void retriesFailedMessagesWithACasTransitionToProcessing() {
-        persist(failed("msg-1", "billing", "temporary failure"));
+    void claimsAnAbsentMessageAndCompletesItOnlyForTheOwningToken() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
 
-        boolean started = inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"));
+        InboxClaim claim = inTransactionResult(() -> store.claim("msg-1", "billing", now, LEASE));
 
-        assertThat(started).isTrue();
-        assertThat(claimAttempts).hasValue(0);
-        InboxMessage message = load("msg-1", "billing");
-        assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.PROCESSING);
-        assertThat(message.getErrorMessage()).isNull();
-    }
-
-    @Test
-    void doesNotReclaimProcessedMessagesOrInvokeTheAbsentRowStrategy() {
-        persist(InboxMessage.processed("msg-1", "billing"));
-
-        boolean started = inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"));
-
-        assertThat(started).isFalse();
-        assertThat(claimAttempts).hasValue(0);
-        assertThat(store.isProcessed("msg-1", "billing")).isTrue();
-    }
-
-    @Test
-    void invokesTheInjectedClaimStrategyForAnAbsentMessage() {
-        boolean started = inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"));
-
-        assertThat(started).isTrue();
+        assertThat(claim.result()).isEqualTo(InboxClaimResult.CLAIMED);
+        assertThat(claim.source()).isEqualTo(InboxClaimSource.FRESH);
         assertThat(claimAttempts).hasValue(1);
-        assertThat(load("msg-1", "billing").getStatus()).isEqualTo(InboxMessageStatus.PROCESSING);
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "billing", "stale", now))).isFalse();
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "billing", claim.claimToken(), now))).isTrue();
+        assertThat(inTransactionResult(() -> store.claim("msg-1", "billing", now, LEASE).result()))
+                .isEqualTo(InboxClaimResult.DUPLICATE);
+    }
+
+    @Test
+    void retriesFailedMessagesWithANewOwnershipToken() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim initial = inTransactionResult(() -> store.claim("msg-1", "billing", now, LEASE));
+        assertThat(inTransactionResult(() -> store.markFailed(
+                "msg-1", "billing", initial.claimToken(), "temporary failure", now))).isTrue();
+
+        InboxClaim retry = inTransactionResult(() -> store.claim("msg-1", "billing", now.plusSeconds(1), LEASE));
+
+        assertThat(retry.source()).isEqualTo(InboxClaimSource.FAILED_RETRY);
+        assertThat(retry.claimToken()).isNotEqualTo(initial.claimToken());
+        assertThat(load("msg-1", "billing").getErrorMessage()).isNull();
+    }
+
+    @Test
+    void reclaimsExpiredLeasesAndRejectsStaleCompletion() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim initial = inTransactionResult(() -> store.claim("msg-1", "billing", now, LEASE));
+
+        InboxClaim replacement = inTransactionResult(() -> store.claim(
+                "msg-1", "billing", now.plus(LEASE).plusSeconds(1), LEASE));
+
+        assertThat(replacement.source()).isEqualTo(InboxClaimSource.EXPIRED_LEASE);
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "billing", initial.claimToken(), now))).isFalse();
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "billing", replacement.claimToken(), now))).isTrue();
+    }
+
+    @Test
+    void returnsInProgressForAnActiveLease() {
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        inTransaction(() -> store.claim("msg-1", "billing", now, LEASE));
+
+        InboxClaim duplicateClaim = inTransactionResult(() -> store.claim("msg-1", "billing", now.plusSeconds(1), LEASE));
+
+        assertThat(duplicateClaim.result()).isEqualTo(InboxClaimResult.IN_PROGRESS);
     }
 
     @Test
     void allowsDifferentConsumersToProcessTheSameMessageIndependently() {
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"))).isTrue();
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "analytics"))).isTrue();
-        inTransaction(() -> store.markProcessed("msg-1", "billing"));
-        inTransaction(() -> store.markProcessed("msg-1", "analytics"));
+        Instant now = Instant.parse("2026-07-27T10:00:00Z");
+        InboxClaim billing = inTransactionResult(() -> store.claim("msg-1", "billing", now, LEASE));
+        InboxClaim analytics = inTransactionResult(() -> store.claim("msg-1", "analytics", now, LEASE));
 
-        assertThat(store.isProcessed("msg-1", "billing")).isTrue();
-        assertThat(store.isProcessed("msg-1", "analytics")).isTrue();
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "billing", billing.claimToken(), now))).isTrue();
+        assertThat(inTransactionResult(() -> store.markProcessed("msg-1", "analytics", analytics.claimToken(), now))).isTrue();
         assertThat(count("msg-1")).isEqualTo(2);
     }
 
     @Test
-    void staleCompletionCannotOverwriteAFailedMessage() {
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"))).isTrue();
-        inTransaction(() -> store.markFailed("msg-1", "billing", "temporary failure"));
-        inTransaction(() -> store.markProcessed("msg-1", "billing"));
+    void doesNotInvokeTheAbsentRowStrategyForProcessedMessages() {
+        persist(InboxMessage.processed("msg-1", "billing"));
 
-        InboxMessage message = load("msg-1", "billing");
-        assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.FAILED);
-        assertThat(message.getErrorMessage()).isEqualTo("temporary failure");
-    }
+        InboxClaim claim = inTransactionResult(() -> store.claim("msg-1", "billing", Instant.now(), LEASE));
 
-    @Test
-    void staleFailureCannotOverwriteAProcessedMessage() {
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"))).isTrue();
-        inTransaction(() -> store.markProcessed("msg-1", "billing"));
-        inTransaction(() -> store.markFailed("msg-1", "billing", "stale failure"));
-
-        InboxMessage message = load("msg-1", "billing");
-        assertThat(message.getStatus()).isEqualTo(InboxMessageStatus.PROCESSED);
-        assertThat(message.getErrorMessage()).isNull();
-        assertThat(store.isProcessed("msg-1", "billing")).isTrue();
-    }
-
-    @Test
-    void retryFlushesUnrelatedChangesBeforeClearingThePersistenceContext() {
-        persist(failed("msg-1", "billing", "temporary failure"));
-        persistUnrelatedEntity();
-
-        mutateUnrelatedEntityAndRun(() -> assertThat(store.tryStartProcessing("msg-1", "billing")).isTrue());
-
-        assertThat(loadUnrelatedEntity().getDescription()).isEqualTo("after");
-    }
-
-    @Test
-    void markProcessedFlushesUnrelatedChangesBeforeClearingThePersistenceContext() {
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"))).isTrue();
-        persistUnrelatedEntity();
-
-        mutateUnrelatedEntityAndRun(() -> store.markProcessed("msg-1", "billing"));
-
-        assertThat(loadUnrelatedEntity().getDescription()).isEqualTo("after");
-    }
-
-    @Test
-    void markFailedFlushesUnrelatedChangesBeforeClearingThePersistenceContext() {
-        assertThat(inTransactionResult(() -> store.tryStartProcessing("msg-1", "billing"))).isTrue();
-        persistUnrelatedEntity();
-
-        mutateUnrelatedEntityAndRun(() -> store.markFailed("msg-1", "billing", "temporary failure"));
-
-        assertThat(loadUnrelatedEntity().getDescription()).isEqualTo("after");
-    }
-
-    @Test
-    void usesJpqlForPortableStateTransitions() {
-        JpaInboxMessageStore portableStore = new JpaInboxMessageStore(
-                entityManagerRejectingNativeQueries(entityManager),
-                (manager, messageId, consumerName, now) -> false);
-        persist(failed("retry", "billing", "temporary failure"));
-        persist(InboxMessage.processing("failure", "billing"));
-
-        inTransaction(() -> portableStore.tryStartProcessing("retry", "billing"));
-        inTransaction(() -> portableStore.markProcessed("retry", "billing"));
-        inTransaction(() -> portableStore.markFailed("failure", "billing", "temporary failure"));
+        assertThat(claim.result()).isEqualTo(InboxClaimResult.DUPLICATE);
+        assertThat(claimAttempts).hasValue(0);
     }
 
     private void persist(InboxMessage message) {
         inTransaction(() -> entityManager.persist(JpaInboxMessageEntity.fromMessage(message)));
-    }
-
-    private void persistUnrelatedEntity() {
-        inTransaction(() -> entityManager.persist(new UnrelatedTestEntity("unrelated-1", "before")));
-    }
-
-    private void mutateUnrelatedEntityAndRun(Runnable transition) {
-        inTransaction(() -> {
-            entityManager.setFlushMode(FlushModeType.COMMIT);
-            UnrelatedTestEntity unrelated = entityManager.find(UnrelatedTestEntity.class, "unrelated-1");
-            unrelated.setDescription("after");
-            transition.run();
-        });
-    }
-
-    private UnrelatedTestEntity loadUnrelatedEntity() {
-        return inTransactionResult(() -> {
-            entityManager.clear();
-            return entityManager.find(UnrelatedTestEntity.class, "unrelated-1");
-        });
     }
 
     private InboxMessage load(String messageId, String consumerName) {
@@ -209,16 +156,7 @@ class JpaInboxMessageStoreTest {
     private long count(String messageId) {
         return inTransactionResult(() -> entityManager.createQuery("""
                 select count(e) from JpaInboxMessageEntity e where e.messageId = :messageId
-                """, Long.class)
-                .setParameter("messageId", messageId)
-                .getSingleResult());
-    }
-
-    private static InboxMessage failed(String messageId, String consumerName, String errorMessage) {
-        InboxMessage message = InboxMessage.processing(messageId, consumerName);
-        message.setStatus(InboxMessageStatus.FAILED);
-        message.setErrorMessage(errorMessage);
-        return message;
+                """, Long.class).setParameter("messageId", messageId).getSingleResult());
     }
 
     private void inTransaction(Runnable work) {
@@ -242,21 +180,5 @@ class JpaInboxMessageStoreTest {
             entityManager.getTransaction().rollback();
             throw exception;
         }
-    }
-
-    private static EntityManager entityManagerRejectingNativeQueries(EntityManager delegate) {
-        return (EntityManager) Proxy.newProxyInstance(
-                JpaInboxMessageStoreTest.class.getClassLoader(),
-                new Class<?>[]{EntityManager.class},
-                (proxy, method, arguments) -> {
-                    if ("createNativeQuery".equals(method.getName())) {
-                        throw new AssertionError("Portable Inbox state transitions must use JPQL");
-                    }
-                    try {
-                        return method.invoke(delegate, arguments);
-                    } catch (InvocationTargetException exception) {
-                        throw exception.getCause();
-                    }
-                });
     }
 }

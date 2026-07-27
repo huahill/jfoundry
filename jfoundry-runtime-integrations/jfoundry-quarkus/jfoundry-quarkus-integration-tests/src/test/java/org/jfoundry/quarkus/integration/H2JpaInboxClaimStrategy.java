@@ -14,22 +14,25 @@ import java.util.UUID;
 class H2JpaInboxClaimStrategy implements JpaInboxClaimStrategy {
 
     @Override
-    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now) {
+    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName,
+                            String claimToken, Instant now) {
         String attemptedId = UUID.randomUUID().toString();
         LocalDateTime utcNow = LocalDateTime.ofInstant(now, ZoneOffset.UTC);
         entityManager.createNativeQuery("""
                 merge into jfoundry_inbox_message
-                    (id, message_id, consumer_name, status, created_at, updated_at)
+                    (id, message_id, consumer_name, status, claimed_at, claim_token, created_at, updated_at)
                 key (consumer_name, message_id)
                 values (coalesce((select id from jfoundry_inbox_message
-                                  where consumer_name = ?3 and message_id = ?2), ?1), ?2, ?3, ?4, ?5, ?6)
+                                  where consumer_name = ?3 and message_id = ?2), ?1), ?2, ?3, ?4, ?5, ?6, ?7, ?8)
                 """)
                 .setParameter(1, attemptedId)
                 .setParameter(2, messageId)
                 .setParameter(3, consumerName)
                 .setParameter(4, InboxMessageStatus.PROCESSING.name())
                 .setParameter(5, utcNow)
-                .setParameter(6, utcNow)
+                .setParameter(6, claimToken)
+                .setParameter(7, utcNow)
+                .setParameter(8, utcNow)
                 .executeUpdate();
         return entityManager.createQuery("""
                 select count(e) from JpaInboxMessageEntity e where e.id = :attemptedId

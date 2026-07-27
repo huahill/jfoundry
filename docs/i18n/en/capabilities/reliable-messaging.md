@@ -55,6 +55,17 @@ the transactional template only when a `TransactionRunner` is available. Direct 
 `new InboxTemplate(store)` remains a manual-runtime API: the caller must provide the transaction
 boundaries required by its store.
 
+## Inbox Ownership And Recovery
+
+Inbox persists a lease (`claimed_at`) and opaque claim token (`claim_token`) while a delivery is
+`PROCESSING`. The handler owner must present that token to record either `PROCESSED` or `FAILED`.
+This prevents an expired worker from overwriting the result of a newer owner. A redelivery claims a
+`FAILED` record immediately; an active `PROCESSING` record is skipped until its lease has expired,
+at which point it can be reclaimed with a new token. A handler failure is recorded as `FAILED` and
+then rethrown so the broker's retry, negative-acknowledgement, and dead-letter policy remains in
+control. The table change requires application migrations to add `claimed_at`, `claim_token`, and
+the `(status, claimed_at)` lookup index.
+
 ## SQL Templates
 
 SQL is supplied only as a copyable template and is never run by jfoundry. `jfoundry-outbox-core`

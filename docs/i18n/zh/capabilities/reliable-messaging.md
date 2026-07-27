@@ -37,6 +37,10 @@ Recovery 将卡住的 `DISPATCHING` 消息恢复为 `PENDING`。Cleanup 只删�
 
 `InboxTemplate` 先在新事务中领取消息。处理器与 `PROCESSED` 状态迁移在第二个独立事务中执行。处理器失败时，该事务回滚，新的事务会记录 `FAILED`，然后重新抛出原始异常。只有存在 `TransactionRunner` 时，Boot 才会创建具备该语义的模板。直接使用 `new InboxTemplate(store)` 属于手工运行时 API，调用方必须为存储提供所需的事务边界。
 
+## Inbox 所有权与恢复
+
+Inbox 在消息处于 `PROCESSING` 时持久化租约（`claimed_at`）和不透明的领取令牌（`claim_token`）。处理器所有者必须携带该令牌，才能记录 `PROCESSED` 或 `FAILED`，从而防止租约过期的处理器覆盖新所有者的结果。重投递会立即领取 `FAILED` 记录；仍在租约内的 `PROCESSING` 记录会被跳过，租约过期后才能以新令牌重新领取。处理器失败会记录为 `FAILED`，再重新抛出原始异常，因此消息代理仍可控制其重试、否定确认和死信策略。应用迁移必须为表增加 `claimed_at`、`claim_token` 以及 `(status, claimed_at)` 查询索引。
+
 ## SQL 模板
 
 SQL 仅作为可复制模板提供，jfoundry 从不自动执行。`jfoundry-outbox-core` 拥有规范 Outbox 路径，`jfoundry-inbox-core` 拥有规范 Inbox 路径。将需要的模板复制进业务应用的迁移流程：

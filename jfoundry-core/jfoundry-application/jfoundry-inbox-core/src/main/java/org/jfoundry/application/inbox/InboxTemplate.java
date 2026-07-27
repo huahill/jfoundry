@@ -5,66 +5,66 @@ import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionPropagation;
 import org.jfoundry.application.transaction.TransactionRunner;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Objects;
 
-public class InboxTemplate {
+/// Executes Inbox handlers with explicit ownership and transaction boundaries.
+public final class InboxTemplate {
+
+    private static final Duration DEFAULT_LEASE_DURATION = Duration.ofMinutes(5);
 
     private final InboxMessageStore store;
     private final TransactionRunner transactionRunner;
+    private final Clock clock;
+    private final Duration leaseDuration;
 
     public InboxTemplate(InboxMessageStore store) {
-        this(store, null);
+        this(store, null, Clock.systemUTC(), DEFAULT_LEASE_DURATION);
     }
 
-    /// Creates an Inbox template with explicit boundaries for claim, processing, and failure state.
     public InboxTemplate(InboxMessageStore store, TransactionRunner transactionRunner) {
+        this(store, transactionRunner, Clock.systemUTC(), DEFAULT_LEASE_DURATION);
+    }
+
+    public InboxTemplate(InboxMessageStore store, TransactionRunner transactionRunner, Clock clock,
+                         Duration leaseDuration) {
         this.store = Objects.requireNonNull(store, "store must not be null");
         this.transactionRunner = transactionRunner;
+        this.clock = Objects.requireNonNull(clock, "clock must not be null");
+        this.leaseDuration = Objects.requireNonNull(leaseDuration, "leaseDuration must not be null");
     }
 
-    public boolean executeOnce(String messageId, String consumerName, InboxHandler handler) {
+    public InboxExecutionResult executeOnce(String messageId, String consumerName, InboxHandler handler) {
+        if (transactionRunner == null) {
+            return new InboxProcessor(store, clock, leaseDuration).process(messageId, consumerName, handler);
+        }
         requireText(messageId, "messageId");
         requireText(consumerName, "consumerName");
         Objects.requireNonNull(handler, "handler must not be null");
 
-        if (transactionRunner == null) {
-            return executeWithoutTransaction(messageId, consumerName, handler);
-        }
-
-        if (!inNewTransaction(() -> store.tryStartProcessing(messageId, consumerName))) {
-            return false;
+        Instant now = clock.instant();
+        InboxClaim claim = inNewTransaction(() -> store.claim(messageId, consumerName, now, leaseDuration));
+        if (!claim.acquired()) {
+            return claim.executionResult();
         }
         try {
-            inNewTransaction(() -> {
+            return inNewTransaction(() -> {
                 handler.handle();
-                store.markProcessed(messageId, consumerName);
-                return null;
+                if (!store.markProcessed(messageId, consumerName, claim.claimToken(), now)) {
+                    throw new IllegalStateException("Inbox processing ownership was lost");
+                }
+                return InboxExecutionResult.PROCESSED;
             });
-            return true;
-        } catch (RuntimeException e) {
+        } catch (RuntimeException exception) {
             try {
-                inNewTransaction(() -> {
-                    store.markFailed(messageId, consumerName, e.getMessage());
-                    return null;
-                });
-            } catch (RuntimeException failureRecordingException) {
-                e.addSuppressed(failureRecordingException);
+                inNewTransaction(() -> store.markFailed(
+                        messageId, consumerName, claim.claimToken(), exception.getMessage(), now));
+            } catch (RuntimeException recordingException) {
+                exception.addSuppressed(recordingException);
             }
-            throw e;
-        }
-    }
-
-    private boolean executeWithoutTransaction(String messageId, String consumerName, InboxHandler handler) {
-        if (!store.tryStartProcessing(messageId, consumerName)) {
-            return false;
-        }
-        try {
-            handler.handle();
-            store.markProcessed(messageId, consumerName);
-            return true;
-        } catch (RuntimeException e) {
-            store.markFailed(messageId, consumerName, e.getMessage());
-            throw e;
+            throw exception;
         }
     }
 

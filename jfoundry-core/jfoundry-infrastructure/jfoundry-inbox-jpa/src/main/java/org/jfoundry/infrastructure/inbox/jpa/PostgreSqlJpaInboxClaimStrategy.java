@@ -13,12 +13,13 @@ public final class PostgreSqlJpaInboxClaimStrategy implements JpaInboxClaimStrat
     private static final InstantUtcConverter UTC_CONVERTER = new InstantUtcConverter();
 
     @Override
-    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now) {
+    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName,
+                            String claimToken, Instant now) {
         LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now).toLocalDateTime();
         return entityManager.createNativeQuery("""
                 insert into jfoundry_inbox_message
-                    (id, message_id, consumer_name, status, created_at, updated_at)
-                values (?1, ?2, ?3, ?4, ?5, ?6)
+                    (id, message_id, consumer_name, status, claimed_at, claim_token, created_at, updated_at)
+                values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
                 on conflict (consumer_name, message_id) do nothing
                 """)
                 .setParameter(1, UUID.randomUUID().toString())
@@ -26,7 +27,9 @@ public final class PostgreSqlJpaInboxClaimStrategy implements JpaInboxClaimStrat
                 .setParameter(3, consumerName)
                 .setParameter(4, InboxMessageStatus.PROCESSING.name())
                 .setParameter(5, utcNow)
-                .setParameter(6, utcNow)
+                .setParameter(6, claimToken)
+                .setParameter(7, utcNow)
+                .setParameter(8, utcNow)
                 .executeUpdate() == 1;
     }
 }

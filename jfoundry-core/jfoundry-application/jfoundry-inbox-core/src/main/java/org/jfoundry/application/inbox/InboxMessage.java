@@ -10,6 +10,8 @@ public class InboxMessage {
     private Instant processedAt;
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant claimedAt;
+    private String claimToken;
     private String errorMessage;
 
     public static InboxMessage processed(String messageId, String consumerName) {
@@ -47,6 +49,10 @@ public class InboxMessage {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public Instant getClaimedAt() { return claimedAt; }
+    public void setClaimedAt(Instant claimedAt) { this.claimedAt = claimedAt; }
+    public String getClaimToken() { return claimToken; }
+    public void setClaimToken(String claimToken) { this.claimToken = claimToken; }
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 }

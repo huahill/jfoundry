@@ -41,18 +41,20 @@ class JpaInboxClaimStrategiesTest {
         Instant now = Instant.parse("2026-07-16T10:15:30Z");
 
         boolean claimed = new PostgreSqlJpaInboxClaimStrategy()
-                .tryClaim(recorded.entityManager(), "msg-1", "billing", now);
+                .tryClaim(recorded.entityManager(), "msg-1", "billing", "claim-token", now);
 
         assertThat(claimed).isTrue();
         assertThat(recorded.sql()).containsIgnoringCase("insert into jfoundry_inbox_message")
                 .containsIgnoringCase("on conflict (consumer_name, message_id) do nothing");
-        assertThat(recorded.parameters()).containsOnlyKeys(1, 2, 3, 4, 5, 6);
+        assertThat(recorded.parameters()).containsOnlyKeys(1, 2, 3, 4, 5, 6, 7, 8);
         assertThat(recorded.parameters().get(1)).isInstanceOf(String.class);
         assertThat(recorded.parameters().get(2)).isEqualTo("msg-1");
         assertThat(recorded.parameters().get(3)).isEqualTo("billing");
         assertThat(recorded.parameters().get(4)).isEqualTo("PROCESSING");
         assertThat(recorded.parameters().get(5)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
-        assertThat(recorded.parameters().get(6)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
+        assertThat(recorded.parameters().get(6)).isEqualTo("claim-token");
+        assertThat(recorded.parameters().get(7)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
+        assertThat(recorded.parameters().get(8)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
     }
 
     @Test
@@ -61,19 +63,21 @@ class JpaInboxClaimStrategiesTest {
         Instant now = Instant.parse("2026-07-16T10:15:30Z");
 
         boolean claimed = new MySqlJpaInboxClaimStrategy()
-                .tryClaim(recorded.entityManager(), "msg-1", "billing", now);
+                .tryClaim(recorded.entityManager(), "msg-1", "billing", "claim-token", now);
 
         assertThat(claimed).isFalse();
         assertThat(recorded.sql()).containsIgnoringCase("insert into jfoundry_inbox_message")
                 .containsIgnoringCase("on duplicate key update id = id")
                 .doesNotContainIgnoringCase("insert ignore");
-        assertThat(recorded.parameters()).containsOnlyKeys(1, 2, 3, 4, 5, 6);
+        assertThat(recorded.parameters()).containsOnlyKeys(1, 2, 3, 4, 5, 6, 7, 8);
         assertThat(recorded.parameters().get(1)).isInstanceOf(String.class);
         assertThat(recorded.parameters().get(2)).isEqualTo("msg-1");
         assertThat(recorded.parameters().get(3)).isEqualTo("billing");
         assertThat(recorded.parameters().get(4)).isEqualTo("PROCESSING");
         assertThat(recorded.parameters().get(5)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
-        assertThat(recorded.parameters().get(6)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
+        assertThat(recorded.parameters().get(6)).isEqualTo("claim-token");
+        assertThat(recorded.parameters().get(7)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
+        assertThat(recorded.parameters().get(8)).isEqualTo(LocalDateTime.of(2026, 7, 16, 10, 15, 30));
     }
 
     @Test
@@ -81,7 +85,7 @@ class JpaInboxClaimStrategiesTest {
         RecordedNativeQuery recorded = new RecordedNativeQuery(1, false);
 
         assertThat(new MySqlJpaInboxClaimStrategy()
-                .tryClaim(recorded.entityManager(), "msg-1", "billing", Instant.parse("2026-07-16T10:15:30Z")))
+                .tryClaim(recorded.entityManager(), "msg-1", "billing", "claim-token", Instant.parse("2026-07-16T10:15:30Z")))
                 .isFalse();
         assertThat(recorded.lookupSql()).contains("JpaInboxMessageEntity e where e.id = :generatedId");
         assertThat(recorded.lookupId()).isEqualTo(recorded.parameters().get(1));
@@ -95,9 +99,9 @@ class JpaInboxClaimStrategiesTest {
                 entityManager.getTransaction().begin();
 
                 MySqlJpaInboxClaimStrategy strategy = new MySqlJpaInboxClaimStrategy();
-                assertThat(strategy.tryClaim(entityManager, "msg-1", "billing", Instant.now())).isTrue();
-                assertThat(strategy.tryClaim(entityManager, "msg-1", "billing", Instant.now())).isFalse();
-                assertThatThrownBy(() -> strategy.tryClaim(entityManager, "msg-2", "x".repeat(256), Instant.now()))
+                assertThat(strategy.tryClaim(entityManager, "msg-1", "billing", "token-1", Instant.now())).isTrue();
+                assertThat(strategy.tryClaim(entityManager, "msg-1", "billing", "token-2", Instant.now())).isFalse();
+                assertThatThrownBy(() -> strategy.tryClaim(entityManager, "msg-2", "x".repeat(256), "token-3", Instant.now()))
                         .hasRootCauseInstanceOf(org.h2.jdbc.JdbcSQLDataException.class);
             } finally {
                 if (entityManager.getTransaction().isActive()) {

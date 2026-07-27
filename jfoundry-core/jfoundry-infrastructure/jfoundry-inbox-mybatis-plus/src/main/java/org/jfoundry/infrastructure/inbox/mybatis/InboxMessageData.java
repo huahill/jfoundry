@@ -19,6 +19,8 @@ public class InboxMessageData {
     private Instant processedAt;
     private Instant createdAt;
     private Instant updatedAt;
+    private Instant claimedAt;
+    private String claimToken;
     private String errorMessage;
 
     public String getId() { return id; }
@@ -35,6 +37,10 @@ public class InboxMessageData {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public Instant getClaimedAt() { return claimedAt; }
+    public void setClaimedAt(Instant claimedAt) { this.claimedAt = claimedAt; }
+    public String getClaimToken() { return claimToken; }
+    public void setClaimToken(String claimToken) { this.claimToken = claimToken; }
     public String getErrorMessage() { return errorMessage; }
     public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
 
@@ -55,6 +61,8 @@ public class InboxMessageData {
         data.processedAt = message.getProcessedAt();
         data.createdAt = message.getCreatedAt();
         data.updatedAt = message.getUpdatedAt();
+        data.claimedAt = message.getClaimedAt();
+        data.claimToken = message.getClaimToken();
         data.errorMessage = message.getErrorMessage();
         return data;
     }

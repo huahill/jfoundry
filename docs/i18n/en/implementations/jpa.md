@@ -100,10 +100,11 @@ user-provided `InboxMessageStore`, `OutboxMessageStore`, `InboxTemplate`, or
 `JpaInboxClaimStrategy` takes precedence.
 
 A custom claim strategy implements
-`boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now)`.
-It must atomically create the `PROCESSING` row and return `false` for an existing delivery; include
-a concurrent duplicate-delivery test for the target database. Raw JPA/Hibernate Outbox and Inbox
-assembly must apply the transaction boundaries described by [reliable messaging](../capabilities/reliable-messaging.md).
+`boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, String claimToken, Instant now)`.
+It must atomically create the `PROCESSING` row with both the supplied token and claim time, and
+return `false` for an existing delivery; include a concurrent duplicate-delivery test for the target
+database. Raw JPA/Hibernate Outbox and Inbox assembly must apply the transaction boundaries described
+by [reliable messaging](../capabilities/reliable-messaging.md).
 
 For runtime assembly and configuration, see [Spring Boot](spring-boot.md), [Quarkus](quarkus.md),
 [Helidon MP](helidon.md), and the [auto-configuration reference](../reference/spring-boot-autoconfiguration.md).

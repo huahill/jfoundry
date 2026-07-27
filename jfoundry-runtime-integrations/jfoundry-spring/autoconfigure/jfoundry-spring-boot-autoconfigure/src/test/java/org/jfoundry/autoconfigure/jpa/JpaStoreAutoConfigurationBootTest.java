@@ -2,6 +2,7 @@ package org.jfoundry.autoconfigure.jpa;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.jfoundry.application.inbox.InboxMessage;
+import org.jfoundry.application.inbox.InboxExecutionResult;
 import org.jfoundry.application.inbox.InboxMessageStore;
 import org.jfoundry.application.inbox.InboxTemplate;
 import org.jfoundry.application.messaging.MessageSender;
@@ -95,7 +96,8 @@ class JpaStoreAutoConfigurationBootTest {
                         "select status from jfoundry_outbox_event where event_id = ?",
                         String.class,
                         "evt-transactional")).isEqualTo("PUBLISHED"));
-        assertThat(inboxTemplate.executeOnce("inbox-transactional", "projection", () -> {})).isTrue();
+        assertThat(inboxTemplate.executeOnce("inbox-transactional", "projection", () -> {}))
+                .isEqualTo(InboxExecutionResult.PROCESSED);
         assertThat(jdbcTemplate.queryForObject(
                 "select status from jfoundry_inbox_message where message_id = ? and consumer_name = ?",
                 String.class, "inbox-transactional", "projection"))
@@ -108,8 +110,13 @@ class JpaStoreAutoConfigurationBootTest {
 
         @Bean
         JpaInboxClaimStrategy h2JpaInboxClaimStrategy() {
-            return (entityManager, messageId, consumerName, now) -> {
-                entityManager.persist(JpaInboxMessageEntity.fromMessage(InboxMessage.processing(messageId, consumerName)));
+            return (entityManager, messageId, consumerName, claimToken, now) -> {
+                InboxMessage message = InboxMessage.processing(messageId, consumerName);
+                message.setClaimedAt(now);
+                message.setClaimToken(claimToken);
+                message.setCreatedAt(now);
+                message.setUpdatedAt(now);
+                entityManager.persist(JpaInboxMessageEntity.fromMessage(message));
                 return true;
             };
         }

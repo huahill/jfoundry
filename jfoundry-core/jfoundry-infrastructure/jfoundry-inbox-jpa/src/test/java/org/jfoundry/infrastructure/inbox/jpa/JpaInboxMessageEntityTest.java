@@ -35,6 +35,8 @@ class JpaInboxMessageEntityTest {
         InboxMessage message = InboxMessage.processing("msg-1", "billing");
         message.setStatus(InboxMessageStatus.FAILED);
         message.setProcessedAt(now.plusSeconds(1));
+        message.setClaimedAt(now);
+        message.setClaimToken("d1d45133-5d66-4bd1-9674-cf1bf2e4e1bf");
         message.setCreatedAt(now.minusSeconds(2));
         message.setUpdatedAt(now.plusSeconds(2));
         message.setErrorMessage("downstream unavailable");
@@ -58,6 +60,8 @@ class JpaInboxMessageEntityTest {
         assertThat(restored.getConsumerName()).isEqualTo("billing");
         assertThat(restored.getStatus()).isEqualTo(InboxMessageStatus.FAILED);
         assertThat(restored.getProcessedAt()).isEqualTo(now.plusSeconds(1));
+        assertThat(restored.getClaimedAt()).isEqualTo(now);
+        assertThat(restored.getClaimToken()).isEqualTo("d1d45133-5d66-4bd1-9674-cf1bf2e4e1bf");
         assertThat(restored.getCreatedAt()).isEqualTo(now.minusSeconds(2));
         assertThat(restored.getUpdatedAt()).isEqualTo(now.plusSeconds(2));
         assertThat(restored.getErrorMessage()).isEqualTo("downstream unavailable");
@@ -75,6 +79,7 @@ class JpaInboxMessageEntityTest {
     @Test
     void mapsTimestampColumnsWithTheExplicitUtcConverter() throws NoSuchFieldException {
         assertThat(converter("processedAt")).isEqualTo(InstantUtcConverter.class);
+        assertThat(converter("claimedAt")).isEqualTo(InstantUtcConverter.class);
         assertThat(converter("createdAt")).isEqualTo(InstantUtcConverter.class);
         assertThat(converter("updatedAt")).isEqualTo(InstantUtcConverter.class);
     }

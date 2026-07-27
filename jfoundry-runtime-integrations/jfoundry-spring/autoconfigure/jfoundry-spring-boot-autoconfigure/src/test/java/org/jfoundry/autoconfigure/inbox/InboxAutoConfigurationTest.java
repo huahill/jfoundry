@@ -1,6 +1,8 @@
 package org.jfoundry.autoconfigure.inbox;
 
 import org.jfoundry.application.inbox.InboxMessageStore;
+import org.jfoundry.application.inbox.InboxClaim;
+import org.jfoundry.application.inbox.InboxExecutionResult;
 import org.jfoundry.application.inbox.InboxTemplate;
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
@@ -65,7 +67,8 @@ class InboxAutoConfigurationTest {
         runner.withBean(InboxMessageStore.class, StubInboxMessageStore::new)
                 .run(context -> {
                     assertThat(context.getBean(InboxTemplate.class)
-                            .executeOnce("evt-1", "projection", () -> {})).isTrue();
+                            .executeOnce("evt-1", "projection", () -> {}))
+                            .isEqualTo(InboxExecutionResult.PROCESSED);
                     assertThat(context.getBean(CountingTransactionRunner.class).calls).isEqualTo(2);
                 });
     }
@@ -73,12 +76,21 @@ class InboxAutoConfigurationTest {
     static class StubInboxMessageStore implements InboxMessageStore {
 
         @Override
-        public boolean isProcessed(String messageId, String consumerName) {
-            return false;
+        public InboxClaim claim(String messageId, String consumerName, java.time.Instant now,
+                                java.time.Duration leaseDuration) {
+            return InboxClaim.fresh("claim-token");
         }
 
         @Override
-        public void markProcessed(String messageId, String consumerName) {
+        public boolean markProcessed(String messageId, String consumerName, String claimToken,
+                                     java.time.Instant now) {
+            return true;
+        }
+
+        @Override
+        public boolean markFailed(String messageId, String consumerName, String claimToken,
+                                  String errorMessage, java.time.Instant now) {
+            return true;
         }
     }
 

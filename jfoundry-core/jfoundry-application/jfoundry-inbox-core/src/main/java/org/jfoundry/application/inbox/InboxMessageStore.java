@@ -1,16 +1,14 @@
 package org.jfoundry.application.inbox;
 
+import java.time.Duration;
+import java.time.Instant;
+
+/// Persistence contract for lease-owned Inbox message processing.
 public interface InboxMessageStore {
 
-    boolean isProcessed(String messageId, String consumerName);
+    InboxClaim claim(String messageId, String consumerName, Instant now, Duration leaseDuration);
 
-    default boolean tryStartProcessing(String messageId, String consumerName) {
-        return !isProcessed(messageId, consumerName);
-    }
+    boolean markProcessed(String messageId, String consumerName, String claimToken, Instant now);
 
-    void markProcessed(String messageId, String consumerName);
-
-    default void markFailed(String messageId, String consumerName, String errorMessage) {
-        // Backward-compatible default for existing custom stores.
-    }
+    boolean markFailed(String messageId, String consumerName, String claimToken, String errorMessage, Instant now);
 }

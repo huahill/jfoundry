@@ -7,8 +7,11 @@ CREATE TABLE jfoundry_inbox_message (
     processed_at  TIMESTAMP,
     created_at    TIMESTAMP     NOT NULL,
     updated_at    TIMESTAMP     NOT NULL,
+    claimed_at    TIMESTAMP,
+    claim_token   VARCHAR(36),
     error_message VARCHAR(2000),
     PRIMARY KEY (id),
     CONSTRAINT uk_inbox_consumer_message UNIQUE (consumer_name, message_id)
 );
 CREATE INDEX idx_inbox_processed_at ON jfoundry_inbox_message (processed_at);
+CREATE INDEX idx_inbox_claim ON jfoundry_inbox_message (status, claimed_at);

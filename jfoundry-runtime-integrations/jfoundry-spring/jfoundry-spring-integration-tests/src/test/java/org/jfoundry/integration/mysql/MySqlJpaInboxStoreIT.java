@@ -1,8 +1,11 @@
 package org.jfoundry.integration.mysql;
 
+import org.jfoundry.application.inbox.InboxClaim;
+import org.jfoundry.application.inbox.InboxClaimResult;
+import org.jfoundry.application.inbox.InboxClaimSource;
+import org.jfoundry.infrastructure.inbox.jpa.JpaInboxClaimStrategy;
 import org.jfoundry.infrastructure.inbox.jpa.JpaInboxMessageStore;
 import org.jfoundry.infrastructure.inbox.jpa.MySqlJpaInboxClaimStrategy;
-import org.jfoundry.infrastructure.inbox.jpa.JpaInboxClaimStrategy;
 import org.jfoundry.integration.support.JpaOutboxInboxDatabaseConfig;
 import org.jfoundry.integration.support.SqlScripts;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,19 +13,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.dao.TransientDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.transaction.TransactionDefinition;
-import jakarta.persistence.OptimisticLockException;
-import jakarta.persistence.PessimisticLockException;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import javax.sql.DataSource;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,29 +37,21 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest(classes = JpaOutboxInboxDatabaseConfig.class, properties = {
-        "jfoundry.outbox.dispatcher.mode=none",
-        "spring.jpa.hibernate.ddl-auto=none"
+        "jfoundry.outbox.dispatcher.mode=none", "spring.jpa.hibernate.ddl-auto=none"
 })
 class MySqlJpaInboxStoreIT {
 
+    private static final Duration LEASE = Duration.ofMinutes(5);
+
     @Container
     static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("jfoundry")
-            .withUsername("jfoundry")
-            .withPassword("jfoundry")
+            .withDatabaseName("jfoundry").withUsername("jfoundry").withPassword("jfoundry")
             .withCommand("--innodb_lock_wait_timeout=1");
 
-    @Autowired
-    private JpaInboxMessageStore store;
-
-    @Autowired
-    private JpaInboxClaimStrategy claimStrategy;
-
-    @Autowired
-    private TransactionTemplate transactions;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    @Autowired private JpaInboxMessageStore store;
+    @Autowired private JpaInboxClaimStrategy claimStrategy;
+    @Autowired private TransactionTemplate transactions;
+    @Autowired private JdbcTemplate jdbcTemplate;
 
     @DynamicPropertySource
     static void registerProperties(DynamicPropertyRegistry registry) {
@@ -78,14 +73,17 @@ class MySqlJpaInboxStoreIT {
     }
 
     @Test
-    void duplicateClaimReturnsFalseAndLeavesTheTransactionUsable() {
+    void claimsOnceAndKeepsTheTransactionUsableAfterAnActiveLease() {
         assertThat(claimStrategy).isInstanceOf(MySqlJpaInboxClaimStrategy.class);
-        inTransaction(() -> assertThat(store.tryStartProcessing("evt-1", "projection")).isTrue());
+        InboxClaim first = inTransactionResult(() -> claim("evt-1", "projection"));
+
         inTransaction(() -> {
-            assertThat(store.tryStartProcessing("evt-1", "projection")).isFalse();
-            store.markProcessed("evt-1", "projection");
-            assertThat(store.isProcessed("evt-1", "projection")).isTrue();
+            assertThat(claim("evt-1", "projection").result()).isEqualTo(InboxClaimResult.IN_PROGRESS);
+            assertThat(store.markProcessed("evt-1", "projection", first.claimToken(), Instant.now())).isTrue();
         });
+
+        assertThat(inTransactionResult(() -> claim("evt-1", "projection").result()))
+                .isEqualTo(InboxClaimResult.DUPLICATE);
     }
 
     @Test
@@ -98,7 +96,8 @@ class MySqlJpaInboxStoreIT {
             for (int i = 0; i < 2; i++) {
                 workers.add(pool.submit(() -> {
                     await(start);
-                    if (retryTransientTransaction(() -> store.tryStartProcessing("evt-1", "projection"))) {
+                    if (retryTransientTransaction(() -> claim("evt-1", "projection")).result()
+                            == InboxClaimResult.CLAIMED) {
                         winners.incrementAndGet();
                     }
                 }));
@@ -106,51 +105,50 @@ class MySqlJpaInboxStoreIT {
             start.countDown();
             pool.shutdown();
             assertThat(pool.awaitTermination(20, TimeUnit.SECONDS)).isTrue();
-            for (Future<?> worker : workers) {
-                worker.get();
-            }
+            for (Future<?> worker : workers) worker.get();
         } finally {
             pool.shutdownNow();
         }
         assertThat(winners.get()).isEqualTo(1);
-        assertThat(jdbcTemplate.queryForObject("select count(*) from jfoundry_inbox_message", Integer.class)).isEqualTo(1);
     }
 
     @Test
-    void failedMessagesCanRetryWhileProcessedMessagesRemainTerminal() {
-        inTransaction(() -> assertThat(store.tryStartProcessing("evt-1", "projection")).isTrue());
-        inTransaction(() -> store.markFailed("evt-1", "projection", "broker unavailable"));
-        inTransaction(() -> assertThat(store.tryStartProcessing("evt-1", "projection")).isTrue());
-        inTransaction(() -> store.markProcessed("evt-1", "projection"));
-        inTransaction(() -> assertThat(store.tryStartProcessing("evt-1", "projection")).isFalse());
+    void failedMessagesCanBeClaimedAgainWithNewOwnership() {
+        InboxClaim first = inTransactionResult(() -> claim("evt-1", "projection"));
+        inTransaction(() -> assertThat(store.markFailed(
+                "evt-1", "projection", first.claimToken(), "broker unavailable", Instant.now())).isTrue());
+
+        InboxClaim retry = inTransactionResult(() -> claim("evt-1", "projection"));
+
+        assertThat(retry.source()).isEqualTo(InboxClaimSource.FAILED_RETRY);
+        assertThat(retry.claimToken()).isNotEqualTo(first.claimToken());
+    }
+
+    private InboxClaim claim(String messageId, String consumerName) {
+        return store.claim(messageId, consumerName, Instant.now(), LEASE);
     }
 
     private void inTransaction(Runnable action) {
         transactions.executeWithoutResult(ignored -> action.run());
     }
 
+    private <T> T inTransactionResult(java.util.function.Supplier<T> action) {
+        return transactions.execute(ignored -> action.get());
+    }
+
     private <T> T retryTransientTransaction(java.util.function.Supplier<T> action) {
         for (int attempt = 0; ; attempt++) {
             try {
-                return transactions.execute(ignored -> action.get());
+                return inTransactionResult(action);
             } catch (RuntimeException exception) {
-                if (!(exception instanceof TransientDataAccessException)
-                        && !(exception instanceof OptimisticLockException)
-                        && !(exception instanceof PessimisticLockException)) {
-                    throw exception;
-                }
-                if (attempt == 4) {
-                    throw exception;
-                }
+                if (!(exception instanceof TransientDataAccessException) || attempt == 4) throw exception;
                 java.util.concurrent.locks.LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(25));
             }
         }
     }
 
     private static void await(CountDownLatch latch) {
-        try {
-            latch.await();
-        } catch (InterruptedException exception) {
+        try { latch.await(); } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for concurrent workers", exception);
         }

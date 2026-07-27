@@ -13,13 +13,14 @@ public final class MySqlJpaInboxClaimStrategy implements JpaInboxClaimStrategy {
     private static final InstantUtcConverter UTC_CONVERTER = new InstantUtcConverter();
 
     @Override
-    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now) {
+    public boolean tryClaim(EntityManager entityManager, String messageId, String consumerName,
+                            String claimToken, Instant now) {
         LocalDateTime utcNow = UTC_CONVERTER.convertToDatabaseColumn(now).toLocalDateTime();
         String attemptedId = UUID.randomUUID().toString();
         entityManager.createNativeQuery("""
                 insert into jfoundry_inbox_message
-                    (id, message_id, consumer_name, status, created_at, updated_at)
-                values (?1, ?2, ?3, ?4, ?5, ?6)
+                    (id, message_id, consumer_name, status, claimed_at, claim_token, created_at, updated_at)
+                values (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
                 on duplicate key update id = id
                 """)
                 .setParameter(1, attemptedId)
@@ -27,7 +28,9 @@ public final class MySqlJpaInboxClaimStrategy implements JpaInboxClaimStrategy {
                 .setParameter(3, consumerName)
                 .setParameter(4, InboxMessageStatus.PROCESSING.name())
                 .setParameter(5, utcNow)
-                .setParameter(6, utcNow)
+                .setParameter(6, claimToken)
+                .setParameter(7, utcNow)
+                .setParameter(8, utcNow)
                 .executeUpdate();
         return entityManager.createQuery("""
                 select count(e) from JpaInboxMessageEntity e where e.id = :generatedId

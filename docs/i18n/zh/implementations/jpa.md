@@ -64,6 +64,6 @@ Outbox 存储使用 JPQL 读取一页可派发候选记录，并通过比较并�
 
 JPA Inbox 内置原子领取策略只支持 PostgreSQL 和 MySQL。其他数据库产品需要提供 `JpaInboxClaimStrategy`。当数据库产品未知且未提供策略时，运行时默认实现会快速失败，而不是选择通用方言行为。用户提供的 `InboxMessageStore`、`OutboxMessageStore`、`InboxTemplate` 或 `JpaInboxClaimStrategy` 优先。
 
-自定义领取策略实现 `boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, Instant now)`。它必须原子创建 `PROCESSING` 行，并在消息已存在时返回 `false`；目标数据库必须具有并发重复投递测试。原生 JPA/Hibernate 的 Outbox 和 Inbox 装配必须应用[可靠消息](../capabilities/reliable-messaging.md)描述的事务边界。
+自定义领取策略实现 `boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, String claimToken, Instant now)`。它必须以给定的令牌和领取时间原子创建 `PROCESSING` 行，并在消息已存在时返回 `false`；目标数据库必须具有并发重复投递测试。原生 JPA/Hibernate 的 Outbox 和 Inbox 装配必须应用[可靠消息](../capabilities/reliable-messaging.md)描述的事务边界。
 
 运行时装配和配置见 [Spring Boot](spring-boot.md)、[Quarkus](quarkus.md)、[Helidon MP](helidon.md)和[自动配置参考](../reference/spring-boot-autoconfiguration.md)。

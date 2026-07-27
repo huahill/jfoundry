@@ -35,6 +35,13 @@ public class JpaInboxMessageEntity {
     @Convert(converter = InstantUtcConverter.class)
     private Instant processedAt;
 
+    @Column(name = "claimed_at", columnDefinition = "timestamp")
+    @Convert(converter = InstantUtcConverter.class)
+    private Instant claimedAt;
+
+    @Column(name = "claim_token", length = 36)
+    private String claimToken;
+
     @Column(name = "created_at", nullable = false, columnDefinition = "timestamp")
     @Convert(converter = InstantUtcConverter.class)
     private Instant createdAt;
@@ -61,6 +68,8 @@ public class JpaInboxMessageEntity {
             message.setStatus(InboxMessageStatus.valueOf(status));
         }
         message.setProcessedAt(processedAt);
+        message.setClaimedAt(claimedAt);
+        message.setClaimToken(claimToken);
         message.setCreatedAt(createdAt);
         message.setUpdatedAt(updatedAt);
         message.setErrorMessage(errorMessage);
@@ -73,6 +82,8 @@ public class JpaInboxMessageEntity {
         InboxMessageStatus messageStatus = message.getStatus();
         status = messageStatus == null ? null : messageStatus.name();
         processedAt = message.getProcessedAt();
+        claimedAt = message.getClaimedAt();
+        claimToken = message.getClaimToken();
         createdAt = message.getCreatedAt();
         updatedAt = message.getUpdatedAt();
         errorMessage = message.getErrorMessage();

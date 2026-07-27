@@ -5,6 +5,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.jfoundry.application.inbox.InboxExecutionResult;
 import org.jfoundry.application.inbox.InboxTemplate;
 
 import java.util.UUID;
@@ -24,9 +25,9 @@ public class InboxJpaResource {
     public String processAndSkipDuplicate() {
         String messageId = UUID.randomUUID().toString();
         boolean first = inboxTemplate.executeOnce(messageId, "orders", () -> {
-        });
+        }) == InboxExecutionResult.PROCESSED;
         boolean duplicate = inboxTemplate.executeOnce(messageId, "orders", () -> {
-        });
+        }) == InboxExecutionResult.PROCESSED;
         return first + "," + duplicate;
     }
 
@@ -43,6 +44,6 @@ public class InboxJpaResource {
             // The second delivery verifies the Inbox retry state transition.
         }
         return Boolean.toString(inboxTemplate.executeOnce(messageId, "orders", () -> {
-        }));
+        }) == InboxExecutionResult.PROCESSED);
     }
 }

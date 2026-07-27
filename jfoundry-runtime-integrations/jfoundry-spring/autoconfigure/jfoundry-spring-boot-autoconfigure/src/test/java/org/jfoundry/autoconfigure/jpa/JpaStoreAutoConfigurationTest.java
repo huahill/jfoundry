@@ -76,7 +76,7 @@ class JpaStoreAutoConfigurationTest {
 
     @Test
     void backsOffWhenSharedEntityManagerCreatorIsMissing() {
-        JpaInboxClaimStrategy userStrategy = (entityManager, messageId, consumerName, now) -> false;
+        JpaInboxClaimStrategy userStrategy = (entityManager, messageId, consumerName, claimToken, now) -> false;
 
         outboxRunner
                 .withClassLoader(new FilteredClassLoader(SharedEntityManagerCreator.class))
@@ -174,7 +174,7 @@ class JpaStoreAutoConfigurationTest {
 
     @Test
     void backsOffFromJpaInboxClaimStrategyWhenUserProvidesOne() {
-        JpaInboxClaimStrategy userStrategy = (entityManager, messageId, consumerName, now) -> false;
+        JpaInboxClaimStrategy userStrategy = (entityManager, messageId, consumerName, claimToken, now) -> false;
 
         inboxRunner
                 .withBean(EntityManagerFactory.class, () -> mock(EntityManagerFactory.class))
