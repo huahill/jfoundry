@@ -2,20 +2,16 @@ package org.jfoundry.application.lock;
 
 import java.util.Objects;
 
-/**
- * Result of a distributed lock acquisition attempt.
- */
-public record LockHandle(String name, boolean acquired, Runnable releaseAction) {
+/// Result of a distributed lock acquisition attempt.
+public record LockHandle(LockKey key, boolean acquired, Runnable releaseAction) {
 
     public LockHandle {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name must not be blank");
-        }
+        key = Objects.requireNonNull(key, "key must not be null");
         releaseAction = Objects.requireNonNull(releaseAction, "releaseAction must not be null");
     }
 
-    public LockHandle(String name, boolean acquired) {
-        this(name, acquired, () -> {
+    public LockHandle(LockKey key, boolean acquired) {
+        this(key, acquired, () -> {
         });
     }
 

@@ -1,14 +1,14 @@
 # Distributed Locks
 
-Distributed lock support has a framework-neutral contract: `DistributedLockClient`, `LockTemplate`,
-`LockOptions`, and `@DistributedLock`. Use a lock only when mutual exclusion is part of the use-case
-semantics; it does not replace database consistency or aggregate invariants.
+Distributed lock support has a framework-neutral contract: `DistributedLockClient`, `LockExecutor`,
+`LockKey`, `LockOptions`, and `@DistributedLock`. Use a lock only when mutual exclusion is part of the
+use-case semantics; it does not replace database consistency or aggregate invariants.
 
 Programmatic usage:
 
 ```java
-lockTemplate.execute(
-        "order:" + command.orderId(),
+lockExecutor.execute(
+        new LockKey("order-confirmation", command.orderId()),
         LockOptions.builder()
                 .waitTime(Duration.ofSeconds(2))
                 .leaseTime(Duration.ofSeconds(10))
@@ -19,8 +19,13 @@ lockTemplate.execute(
         });
 ```
 
-The key identifies the protected business resource. Use a stable key that makes independent work
-concurrent and conflicting work mutually exclusive.
+`LockKey` separates a non-sensitive scope from the protected resource value. The lock client receives a
+stable hashed backend name; diagnostic string representations and lock-unavailable errors include the
+scope but not the value. Choose a stable scope and value so independent work remains concurrent while
+conflicting work is mutually exclusive. Do not put a sensitive identifier in the scope.
+
+For `@DistributedLock`, Spring derives the scope from the declaring class and method, while the annotation
+key expression supplies the value.
 
 `waitTime` controls how long a caller may wait to acquire the lock. `leaseTime` controls the lock
 lifetime when the selected lock client supports an explicit lease.

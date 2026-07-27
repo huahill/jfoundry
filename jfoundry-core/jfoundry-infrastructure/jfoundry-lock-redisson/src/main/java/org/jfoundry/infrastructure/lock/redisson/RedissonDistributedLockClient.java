@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.lock.redisson;
 
 import org.jfoundry.application.lock.DistributedLockClient;
 import org.jfoundry.application.lock.LockHandle;
+import org.jfoundry.application.lock.LockKey;
 import org.jfoundry.application.lock.LockOptions;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -10,9 +11,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Redisson {@link RLock}-based implementation of {@link DistributedLockClient}.
- */
+/// Redisson {@link RLock}-based implementation of {@link DistributedLockClient}.
 public class RedissonDistributedLockClient implements DistributedLockClient {
 
     private final RedissonClient redissonClient;
@@ -22,11 +21,11 @@ public class RedissonDistributedLockClient implements DistributedLockClient {
     }
 
     @Override
-    public LockHandle tryLock(String name, LockOptions options) throws Exception {
+    public LockHandle tryLock(LockKey key, LockOptions options) throws Exception {
         Objects.requireNonNull(options, "options must not be null");
-        RLock lock = redissonClient.getLock(name);
+        RLock lock = redissonClient.getLock(key.backendName());
         boolean acquired = tryAcquire(lock, options);
-        return new LockHandle(name, acquired, () -> unlock(lock));
+        return new LockHandle(key, acquired, () -> unlock(lock));
     }
 
     private static boolean tryAcquire(RLock lock, LockOptions options) throws InterruptedException {

@@ -1,8 +1,8 @@
 package org.jfoundry.autoconfigure.lock;
 
 import org.jfoundry.application.lock.DistributedLockClient;
+import org.jfoundry.application.lock.LockExecutor;
 import org.jfoundry.application.lock.LockHandle;
-import org.jfoundry.application.lock.LockTemplate;
 import org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration;
 import org.jfoundry.infrastructure.lock.redisson.RedissonDistributedLockClient;
 import org.jfoundry.infrastructure.lock.spring.DistributedLockInterceptor;
@@ -26,9 +26,9 @@ class DistributedLockAutoConfigurationTest {
 
     @Test
     void registersTemplateAndAdvisorWhenLockClientExists() {
-        runner.withBean(DistributedLockClient.class, () -> (name, options) -> new LockHandle(name, true))
+        runner.withBean(DistributedLockClient.class, () -> (key, options) -> new LockHandle(key, true))
                 .run(context -> {
-                    assertThat(context).hasSingleBean(LockTemplate.class);
+                    assertThat(context).hasSingleBean(LockExecutor.class);
                     assertThat(context).hasSingleBean(DistributedLockInterceptor.class);
                     assertThat(context).hasBean("distributedLockAdvisor");
                     assertThat(context.getBean("distributedLockAdvisor")).isInstanceOf(Advisor.class);
@@ -41,16 +41,16 @@ class DistributedLockAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(DistributedLockClient.class);
                     assertThat(context.getBean(DistributedLockClient.class)).isInstanceOf(RedissonDistributedLockClient.class);
-                    assertThat(context).hasSingleBean(LockTemplate.class);
+                    assertThat(context).hasSingleBean(LockExecutor.class);
                 });
     }
 
     @Test
     void canDisableAnnotationAdvisor() {
-        runner.withBean(DistributedLockClient.class, () -> (name, options) -> new LockHandle(name, true))
+        runner.withBean(DistributedLockClient.class, () -> (key, options) -> new LockHandle(key, true))
                 .withPropertyValues("jfoundry.lock.annotation.enabled=false")
                 .run(context -> {
-                    assertThat(context).hasSingleBean(LockTemplate.class);
+                    assertThat(context).hasSingleBean(LockExecutor.class);
                     assertThat(context).doesNotHaveBean(DistributedLockInterceptor.class);
                     assertThat(context).doesNotHaveBean("distributedLockAdvisor");
                 });

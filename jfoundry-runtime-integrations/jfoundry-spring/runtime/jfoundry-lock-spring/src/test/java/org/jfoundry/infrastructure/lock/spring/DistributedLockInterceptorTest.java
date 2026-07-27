@@ -3,8 +3,9 @@ package org.jfoundry.infrastructure.lock.spring;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jfoundry.application.lock.DistributedLock;
 import org.jfoundry.application.lock.LockCallback;
+import org.jfoundry.application.lock.LockExecutor;
+import org.jfoundry.application.lock.LockKey;
 import org.jfoundry.application.lock.LockOptions;
-import org.jfoundry.application.lock.LockTemplate;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.AccessibleObject;
@@ -15,29 +16,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DistributedLockInterceptorTest {
 
     @Test
-    void resolvesSpelKeyAndDelegatesToLockTemplate() throws Throwable {
-        RecordingLockTemplate lockTemplate = new RecordingLockTemplate();
-        DistributedLockInterceptor interceptor = new DistributedLockInterceptor(lockTemplate);
+    void resolvesSpelKeyAndDelegatesToSharedLockExecutor() throws Throwable {
+        RecordingLockExecutor lockExecutor = new RecordingLockExecutor();
+        DistributedLockInterceptor interceptor = new DistributedLockInterceptor(lockExecutor);
         Method method = LockedService.class.getDeclaredMethod("handle", String.class);
 
         Object result = interceptor.invoke(new SimpleMethodInvocation(new LockedService(), method, new Object[]{"42"}));
 
         assertThat(result).isEqualTo("handled:42");
-        assertThat(lockTemplate.name).isEqualTo("order:42");
-        assertThat(lockTemplate.options.waitTime()).contains(java.time.Duration.ofSeconds(2));
-        assertThat(lockTemplate.options.leaseTime()).contains(java.time.Duration.ofSeconds(10));
+        assertThat(lockExecutor.key.scope()).isEqualTo(LockedService.class.getName() + "#handle");
+        assertThat(lockExecutor.key.value()).isEqualTo("order:42");
+        assertThat(lockExecutor.options.waitTime()).contains(java.time.Duration.ofSeconds(2));
+        assertThat(lockExecutor.options.leaseTime()).contains(java.time.Duration.ofSeconds(10));
     }
 
     @Test
     void treatsPlainKeyAsLockName() throws Throwable {
-        RecordingLockTemplate lockTemplate = new RecordingLockTemplate();
-        DistributedLockInterceptor interceptor = new DistributedLockInterceptor(lockTemplate);
+        RecordingLockExecutor lockExecutor = new RecordingLockExecutor();
+        DistributedLockInterceptor interceptor = new DistributedLockInterceptor(lockExecutor);
         Method method = LockedService.class.getDeclaredMethod("handlePlain");
 
         Object result = interceptor.invoke(new SimpleMethodInvocation(new LockedService(), method, new Object[0]));
 
         assertThat(result).isEqualTo("handled");
-        assertThat(lockTemplate.name).isEqualTo("order:plain");
+        assertThat(lockExecutor.key.value()).isEqualTo("order:plain");
     }
 
     static class LockedService {
@@ -53,18 +55,14 @@ class DistributedLockInterceptorTest {
         }
     }
 
-    static class RecordingLockTemplate extends LockTemplate {
+    static class RecordingLockExecutor implements LockExecutor {
 
-        private String name;
+        private LockKey key;
         private LockOptions options;
 
-        RecordingLockTemplate() {
-            super((name, options) -> new org.jfoundry.application.lock.LockHandle(name, true));
-        }
-
         @Override
-        public <T> T execute(String name, LockOptions options, LockCallback<T> callback) throws Exception {
-            this.name = name;
+        public <T> T execute(LockKey key, LockOptions options, LockCallback<T> callback) throws Exception {
+            this.key = key;
             this.options = options;
             return callback.execute();
         }

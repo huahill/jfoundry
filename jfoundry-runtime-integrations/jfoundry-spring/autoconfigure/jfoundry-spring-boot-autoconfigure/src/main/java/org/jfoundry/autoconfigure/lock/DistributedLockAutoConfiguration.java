@@ -2,7 +2,7 @@ package org.jfoundry.autoconfigure.lock;
 
 import org.jfoundry.application.lock.DistributedLock;
 import org.jfoundry.application.lock.DistributedLockClient;
-import org.jfoundry.application.lock.LockTemplate;
+import org.jfoundry.application.lock.LockExecutor;
 import org.jfoundry.infrastructure.lock.redisson.RedissonDistributedLockClient;
 import org.jfoundry.infrastructure.lock.spring.DistributedLockInterceptor;
 import org.redisson.api.RedissonClient;
@@ -21,19 +21,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 import org.springframework.core.Ordered;
 
-/**
- * Auto-configuration for distributed lock support.
- */
+/// Auto-configuration for distributed lock support.
 @AutoConfiguration
 @AutoConfigureAfter(name = "org.redisson.spring.starter.RedissonAutoConfigurationV2")
-@ConditionalOnClass({DistributedLockClient.class, LockTemplate.class})
+@ConditionalOnClass({DistributedLockClient.class, LockExecutor.class})
 public class DistributedLockAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(DistributedLockClient.class)
     @ConditionalOnMissingBean
-    public LockTemplate lockTemplate(DistributedLockClient lockClient) {
-        return new LockTemplate(lockClient);
+    public LockExecutor lockExecutor(DistributedLockClient lockClient) {
+        return LockExecutor.create(lockClient);
     }
 
     @Configuration(proxyBeanMethods = false)
@@ -57,8 +55,8 @@ public class DistributedLockAutoConfiguration {
 
         @Bean
         @ConditionalOnMissingBean
-        public DistributedLockInterceptor distributedLockInterceptor(LockTemplate lockTemplate) {
-            return new DistributedLockInterceptor(lockTemplate);
+        public DistributedLockInterceptor distributedLockInterceptor(LockExecutor lockExecutor) {
+            return new DistributedLockInterceptor(lockExecutor);
         }
 
         @Bean

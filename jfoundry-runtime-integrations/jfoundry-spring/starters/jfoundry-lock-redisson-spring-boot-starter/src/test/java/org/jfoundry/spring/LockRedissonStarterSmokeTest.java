@@ -1,6 +1,6 @@
 package org.jfoundry.spring;
 
-import org.jfoundry.application.lock.LockTemplate;
+import org.jfoundry.application.lock.LockExecutor;
 import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -20,7 +20,7 @@ class LockRedissonStarterSmokeTest {
     void starterLoadsAutoConfigurationWithUserProvidedRedissonClient() {
         runner.run(context -> {
             assertThat(context).hasNotFailed();
-            assertThat(context).hasSingleBean(LockTemplate.class);
+            assertThat(context).hasSingleBean(LockExecutor.class);
         });
     }
 

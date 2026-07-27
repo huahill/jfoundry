@@ -3,8 +3,9 @@ package org.jfoundry.infrastructure.lock.spring;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jfoundry.application.lock.DistributedLock;
+import org.jfoundry.application.lock.LockExecutor;
+import org.jfoundry.application.lock.LockKey;
 import org.jfoundry.application.lock.LockOptions;
-import org.jfoundry.application.lock.LockTemplate;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
@@ -17,17 +18,15 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
 
-/**
- * Spring AOP interceptor that executes {@link DistributedLock} methods through {@link LockTemplate}.
- */
+/// Spring AOP interceptor that executes {@link DistributedLock} methods through {@link LockExecutor}.
 public class DistributedLockInterceptor implements MethodInterceptor {
 
-    private final LockTemplate lockTemplate;
+    private final LockExecutor lockExecutor;
     private final ExpressionParser expressionParser = new SpelExpressionParser();
     private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
-    public DistributedLockInterceptor(LockTemplate lockTemplate) {
-        this.lockTemplate = Objects.requireNonNull(lockTemplate, "lockTemplate must not be null");
+    public DistributedLockInterceptor(LockExecutor lockExecutor) {
+        this.lockExecutor = Objects.requireNonNull(lockExecutor, "lockExecutor must not be null");
     }
 
     @Override
@@ -36,14 +35,14 @@ public class DistributedLockInterceptor implements MethodInterceptor {
         if (annotation == null) {
             return invocation.proceed();
         }
-        String name = resolveKey(annotation.key(), invocation);
+        LockKey key = resolveKey(annotation.key(), invocation);
         LockOptions options = LockOptions.builder()
                 .waitTime(parseDuration(annotation.waitTime(), "waitTime"))
                 .leaseTime(parseOptionalDuration(annotation.leaseTime(), "leaseTime"))
                 .failureMode(annotation.failureMode())
                 .build();
         try {
-            return lockTemplate.execute(name, options, () -> {
+            return lockExecutor.execute(key, options, () -> {
                 try {
                     return invocation.proceed();
                 } catch (Exception ex) {
@@ -57,19 +56,23 @@ public class DistributedLockInterceptor implements MethodInterceptor {
         }
     }
 
-    private String resolveKey(String keyExpression, MethodInvocation invocation) {
+    private LockKey resolveKey(String keyExpression, MethodInvocation invocation) {
         if (keyExpression == null || keyExpression.isBlank()) {
             throw new IllegalArgumentException("Distributed lock key must not be blank");
         }
         String candidate = keyExpression.trim();
         if (!looksLikeSpelExpression(candidate)) {
-            return candidate;
+            return new LockKey(defaultScope(invocation.getMethod()), candidate);
         }
         Object value = expressionParser.parseExpression(candidate).getValue(evaluationContext(invocation));
         if (value == null || value.toString().isBlank()) {
             throw new IllegalArgumentException("Distributed lock key must not resolve to a blank value");
         }
-        return value.toString();
+        return new LockKey(defaultScope(invocation.getMethod()), value.toString());
+    }
+
+    private static String defaultScope(Method method) {
+        return method.getDeclaringClass().getName() + "#" + method.getName();
     }
 
     private static boolean looksLikeSpelExpression(String value) {

@@ -1,12 +1,12 @@
 # 分布式锁
 
-分布式锁提供框架无关的契约：`DistributedLockClient`、`LockTemplate`、`LockOptions` 和 `@DistributedLock`。只有互斥本身是用例语义的一部分时才使用锁；它不能替代数据库一致性或聚合不变量。
+分布式锁提供框架无关的契约：`DistributedLockClient`、`LockExecutor`、`LockKey`、`LockOptions` 和 `@DistributedLock`。只有互斥本身是用例语义的一部分时才使用锁；它不能替代数据库一致性或聚合不变量。
 
 编程式用法：
 
 ```java
-lockTemplate.execute(
-        "order:" + command.orderId(),
+lockExecutor.execute(
+        new LockKey("order-confirmation", command.orderId()),
         LockOptions.builder()
                 .waitTime(Duration.ofSeconds(2))
                 .leaseTime(Duration.ofSeconds(10))
@@ -17,7 +17,9 @@ lockTemplate.execute(
         });
 ```
 
-key 标识受保护的业务资源。应使用稳定的 key，使独立工作可以并发，而相互冲突的工作必须互斥。
+`LockKey` 将非敏感 scope 与受保护资源的 value 分开。锁客户端使用稳定的哈希 backend name；诊断字符串和锁获取失败异常只包含 scope，不包含 value。应选择稳定的 scope 与 value，使独立工作可以并发，而相互冲突的工作必须互斥。不要在 scope 中放置敏感标识。
+
+对于 `@DistributedLock`，Spring 使用声明类与方法推导 scope，注解的 key 表达式只提供 value。
 
 `waitTime` 控制调用方等待获取锁的最长时间。所选 lock client 支持显式租期时，`leaseTime` 控制锁的生命周期。
 
