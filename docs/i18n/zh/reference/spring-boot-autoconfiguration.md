@@ -7,6 +7,7 @@
 | 启动器 | 引入能力 | 不会引入 |
 |---------|----------|----------|
 | `jfoundry-spring-boot-starter` | Spring Boot 自动配置、Spring `TransactionRunner` 集成 | Outbox、Inbox、MyBatis-Plus 存储、消息代理客户端、JobRunr |
+| `jfoundry-observability-spring-boot-starter` | 对符合条件的 Outbox、Inbox 和锁操作进行 Micrometer Observation | 遥测 exporter、collector 或直接 OpenTelemetry 装饰器 |
 | `jfoundry-lock-redisson-spring-boot-starter` | 分布式锁核心、Spring `@DistributedLock` 拦截、Redisson 适配器、Redisson Spring Boot 启动器 | Outbox、Inbox、消息代理投递 |
 | `jfoundry-event-spring-boot-starter` | 领域事件派发、Spring 应用事件发布 | Outbox 持久化或消息代理投递 |
 | `jfoundry-messaging-spring-boot-starter` | 消息 SPI、Jackson 消息载荷序列化器和 Spring 消息运行时 | 任意 `MessageSender` 或消息代理客户端 |
@@ -56,6 +57,7 @@
 | `JFoundryAopAutoConfiguration` | Spring 规范的内部自动代理创建器 | Spring AOP 可用。领域事件和分布式锁顾问共用一个自动代理创建器，并延迟解析各自的拦截器。 |
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | 存在 `TransactionRunner` 与 `TransactionTemplate`，Spring Boot 已配置 `PlatformTransactionManager`，且没有已有 `TransactionRunner`。 |
 | `DistributedLockAutoConfiguration` | `LockExecutor`、可选 Redisson `DistributedLockClient`、可选 `@DistributedLock` 顾问 | 存在 `jfoundry-lock-core`。Redisson 适配器需要 `RedissonClient`；注解顾问需要 `DistributedLockClient` 且开启注解支持。 |
+| `MicrometerObservationAutoConfiguration` | 原始 JFoundry 操作 Bean 的 Micrometer 顾问 | 存在 `ObservationRegistry`（使用可观测性启动器时由 Actuator 提供）；存在 Micrometer Observation、Spring AOP，以及至少一个符合条件的 Outbox、Inbox 或锁操作 Bean。 |
 | `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` 注入器 | 类路径中存在 `DomainEventContext` 和 `AbstractAggregateRepository`。 |
 | `PersistenceFailureAutoConfiguration` | 默认 Spring `PersistenceFailureTranslator` 与 Repository 注入器 | 存在 `AbstractAggregateRepository`、Spring 数据访问异常和 `jfoundry-persistence-spring`；没有用户自定义翻译器。 |
 | `AggregatePersistenceContextAutoConfiguration` | 事务绑定的 `AggregatePersistenceContext` 与感知型 Repository 注入器 | 存在持久化上下文 SPI、Spring 事务支持和 `jfoundry-persistence-spring`；没有用户自定义上下文。 |

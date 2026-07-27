@@ -9,6 +9,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | Starter | Adds | Does not add |
 |---------|------|--------------|
 | `jfoundry-spring-boot-starter` | Spring Boot auto-configuration and Spring `TransactionRunner` integration | Outbox, Inbox, MyBatis-Plus stores, broker clients, JobRunr |
+| `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
 | `jfoundry-event-spring-boot-starter` | Domain event dispatch and Spring application event publishing | Outbox persistence or broker delivery |
 | `jfoundry-messaging-spring-boot-starter` | Messaging SPI, Jackson payload serializer, and Spring messaging runtime | Any `MessageSender` or broker client |
@@ -58,6 +59,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `JFoundryAopAutoConfiguration` | Spring's canonical internal auto-proxy creator | Spring AOP is available. It coordinates the domain-event and distributed-lock advisors through one auto-proxy creator and lazily resolves their interceptors. |
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | `TransactionRunner` and `TransactionTemplate` are available, Spring Boot has configured a `PlatformTransactionManager`, and no existing `TransactionRunner` exists. |
 | `DistributedLockAutoConfiguration` | `LockExecutor`, optional Redisson `DistributedLockClient`, optional `@DistributedLock` advisor | `jfoundry-lock-core` is present. Redisson adapter requires `RedissonClient`; annotation advisor requires `DistributedLockClient` and annotation support enabled. |
+| `MicrometerObservationAutoConfiguration` | Micrometer advisor for original JFoundry operation beans | An `ObservationRegistry` is available (provided by Actuator when using the observability starter); Micrometer Observation and Spring AOP are present; plus at least one eligible Outbox, Inbox, or lock operation bean. |
 | `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` injector | `DomainEventContext` and `AbstractAggregateRepository` are on the classpath. |
 | `PersistenceFailureAutoConfiguration` | Default Spring `PersistenceFailureTranslator` and repository injector | `AbstractAggregateRepository`, Spring data-access exceptions, and `jfoundry-persistence-spring` are present; no user-defined translator. |
 | `AggregatePersistenceContextAutoConfiguration` | Transaction-bound `AggregatePersistenceContext` and aware-repository injector | Persistence context SPI, Spring transaction support, and `jfoundry-persistence-spring` are present; no user-defined context. |
