@@ -13,6 +13,7 @@
 - [可靠消息：Outbox 与 Inbox](capabilities/reliable-messaging.md)
 - [应用事务](capabilities/application-transactions.md)
 - [分布式锁](capabilities/distributed-locks.md)
+- [可观测性](capabilities/observability.md)
 
 ## 实现
 

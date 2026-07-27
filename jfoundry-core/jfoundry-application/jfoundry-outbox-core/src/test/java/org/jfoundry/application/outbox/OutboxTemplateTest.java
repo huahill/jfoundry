@@ -18,6 +18,11 @@ class OutboxTemplateTest {
     private final OutboxTemplate template = new OutboxTemplate(store, serializer);
 
     @Test
+    void exposesOutboxRecorderContract() {
+        assertThat(template).isInstanceOf(OutboxRecorder.class);
+    }
+
+    @Test
     void appendsSerializedPayloadAndAggregateMetadata() {
         OutboxAppendRequest request = new OutboxAppendRequest(
                 "event-1",

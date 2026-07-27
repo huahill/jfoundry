@@ -4,13 +4,11 @@ import org.jfoundry.application.messaging.PayloadSerializer;
 
 import java.util.Objects;
 
-/**
- * Programmatic entry point for recording explicit integration messages in an Outbox.
- *
- * <p>The template serializes and appends within the caller's transaction. It does not
- * translate domain events, start a transaction, or publish to a broker.</p>
- */
-public final class OutboxTemplate {
+/// Programmatic entry point for recording explicit integration messages in an Outbox.
+/// <p>
+/// The template serializes and appends within the caller's transaction. It does not translate domain
+/// events, start a transaction, or publish to a broker.
+public final class OutboxTemplate implements OutboxRecorder {
 
     private final OutboxMessageStore store;
     private final PayloadSerializer serializer;
@@ -20,9 +18,8 @@ public final class OutboxTemplate {
         this.serializer = Objects.requireNonNull(serializer, "serializer must not be null");
     }
 
-    /**
-     * Serializes and appends one pending Outbox message.
-     */
+    /// Serializes and appends one pending Outbox message.
+    @Override
     public void append(OutboxAppendRequest request) {
         Objects.requireNonNull(request, "request must not be null");
         requireText(request.eventId(), "eventId");

@@ -18,6 +18,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class InboxTemplateTest {
 
     @Test
+    void exposesInboxMessageProcessorContract() {
+        assertThat(new InboxTemplate(new StubStore(InboxClaim.duplicate())))
+                .isInstanceOf(InboxMessageProcessor.class);
+    }
+
+    @Test
     void returnsDuplicateWithoutRunningHandler() {
         StubStore store = new StubStore(InboxClaim.duplicate());
         AtomicBoolean called = new AtomicBoolean();

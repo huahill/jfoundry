@@ -23,6 +23,7 @@
         <module>jfoundry-persistence-core</module>
         <module>jfoundry-persistence-jpa</module>
         <module>jfoundry-messaging-jackson</module>
+        <module>jfoundry-observability-otel</module>
         <module>jfoundry-lock-redisson</module>
         <module>jfoundry-inbox-mybatis-plus</module>
         <module>jfoundry-inbox-jpa</module>

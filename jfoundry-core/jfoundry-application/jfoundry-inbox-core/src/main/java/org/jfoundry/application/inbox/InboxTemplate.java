@@ -11,7 +11,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 /// Executes Inbox handlers with explicit ownership and transaction boundaries.
-public final class InboxTemplate {
+public final class InboxTemplate implements InboxMessageProcessor {
 
     private static final Duration DEFAULT_LEASE_DURATION = Duration.ofMinutes(5);
 
@@ -36,6 +36,7 @@ public final class InboxTemplate {
         this.leaseDuration = Objects.requireNonNull(leaseDuration, "leaseDuration must not be null");
     }
 
+    @Override
     public InboxExecutionResult executeOnce(String messageId, String consumerName, InboxHandler handler) {
         if (transactionRunner == null) {
             return new InboxProcessor(store, clock, leaseDuration).process(messageId, consumerName, handler);

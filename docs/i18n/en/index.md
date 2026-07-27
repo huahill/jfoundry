@@ -14,6 +14,7 @@ implementation pages explain technology-specific choices; reference pages provid
 - [Reliable Messaging: Outbox And Inbox](capabilities/reliable-messaging.md)
 - [Application Transactions](capabilities/application-transactions.md)
 - [Distributed Locks](capabilities/distributed-locks.md)
+- [Observability](capabilities/observability.md)
 
 ## Implementations
 
