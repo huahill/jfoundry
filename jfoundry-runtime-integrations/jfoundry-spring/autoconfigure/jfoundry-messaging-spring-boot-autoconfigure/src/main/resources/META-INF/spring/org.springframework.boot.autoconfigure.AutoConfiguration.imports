@@ -1,0 +1,3 @@
+org.jfoundry.autoconfigure.messaging.kafka.KafkaMessageSenderAutoConfiguration
+org.jfoundry.autoconfigure.messaging.rocketmq.RocketMqMessageSenderAutoConfiguration
+org.jfoundry.autoconfigure.messaging.rabbitmq.RabbitMqMessageSenderAutoConfiguration

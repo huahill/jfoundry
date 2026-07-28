@@ -18,6 +18,10 @@
             <artifactId>jfoundry-messaging-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-messaging-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.rocketmq</groupId>
             <artifactId>rocketmq-client</artifactId>
         </dependency>

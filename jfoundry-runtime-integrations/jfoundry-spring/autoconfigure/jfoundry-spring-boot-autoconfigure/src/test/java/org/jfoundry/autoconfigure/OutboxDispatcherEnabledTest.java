@@ -1,6 +1,8 @@
 package org.jfoundry.autoconfigure;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.jfoundry.application.messaging.MessageSender;
+import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// <p>
 /// TestApp provides an ObjectMapper bean so DomainEventOutboxRecorderAutoConfiguration's
 /// payloadSerializer can be registered normally through @ConditionalOnBean(ObjectMapper.class),
-/// completing the DomainEventOutboxRecorder dependency chain.
+/// completing the DomainEventOutboxRecorder dependency chain. It also provides a MessageSender so
+/// this test does not depend on any broker-specific auto-configuration.
 @SpringBootTest(
         classes = {OutboxDispatcherEnabledTest.TestApp.class, OutboxDispatcherEnabledTest.DisabledConfig.class},
         properties = "jfoundry.outbox.dispatcher.enabled=false"
@@ -32,6 +35,11 @@ class OutboxDispatcherEnabledTest {
         @Bean
         ObjectMapper objectMapper() {
             return new ObjectMapper();
+        }
+
+        @Bean
+        MessageSender messageSender() {
+            return outbound -> SendResult.ok();
         }
     }
 
