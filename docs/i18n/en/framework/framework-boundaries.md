@@ -20,7 +20,7 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
 | Area | Modules |
 |------|---------|
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
-| Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-event-core`, `jfoundry-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
+| Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-domain-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-mybatis-plus`, `jfoundry-persistence-jpa`, `jfoundry-messaging-jackson`, Outbox/Inbox MyBatis-Plus and JPA stores, JobRunr dispatch adapter |
 | Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |

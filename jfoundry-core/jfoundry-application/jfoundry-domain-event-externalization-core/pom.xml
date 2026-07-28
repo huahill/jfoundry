@@ -8,18 +8,22 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-event-core</artifactId>
-    <name>jfoundry-event-core</name>
-    <description>In-process domain event context, batching, and dispatch contracts.</description>
+    <artifactId>jfoundry-domain-event-externalization-core</artifactId>
+    <name>jfoundry-domain-event-externalization-core</name>
+    <description>Application-layer domain event externalization contracts, metadata, and routing rules.</description>
 
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain</artifactId>
+            <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmolecules</groupId>
             <artifactId>jmolecules-onion-architecture</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jmolecules</groupId>
+            <artifactId>jmolecules-events</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

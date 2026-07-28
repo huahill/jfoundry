@@ -30,7 +30,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>runtime/jfoundry-event-spring</module>
+        <module>runtime/jfoundry-domain-event-spring</module>
         <module>runtime/jfoundry-persistence-spring</module>
         <module>runtime/jfoundry-messaging-spring</module>
         <module>runtime/jfoundry-outbox-spring</module>
@@ -40,7 +40,7 @@
         <module>runtime/jfoundry-webmvc-spring</module>
         <module>autoconfigure/jfoundry-jpa-spring-boot-support</module>
         <module>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</module>
-        <module>autoconfigure/jfoundry-event-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-lock-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-messaging-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-observability-spring-boot-autoconfigure</module>
@@ -53,7 +53,7 @@
         <module>starters/jfoundry-transaction-spring-boot-starter</module>
         <module>starters/jfoundry-observability-spring-boot-starter</module>
         <module>starters/jfoundry-webmvc-spring-boot-starter</module>
-        <module>starters/jfoundry-event-spring-boot-starter</module>
+        <module>starters/jfoundry-domain-event-spring-boot-starter</module>
         <module>starters/jfoundry-messaging-spring-boot-starter</module>
         <module>starters/jfoundry-messaging-kafka-spring-boot-starter</module>
         <module>starters/jfoundry-messaging-rocketmq-spring-boot-starter</module>

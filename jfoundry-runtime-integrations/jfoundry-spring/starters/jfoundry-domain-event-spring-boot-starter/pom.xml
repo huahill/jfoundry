@@ -8,8 +8,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-event-spring-boot-starter</artifactId>
-    <name>jfoundry-event-spring-boot-starter</name>
+    <artifactId>jfoundry-domain-event-spring-boot-starter</artifactId>
+    <name>jfoundry-domain-event-spring-boot-starter</name>
     <description>Spring Boot starter for jfoundry domain event dispatch and Spring application event publishing.</description>
 
     <dependencies>
@@ -19,15 +19,15 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-core</artifactId>
+            <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-spring</artifactId>
+            <artifactId>jfoundry-domain-event-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-spring-boot-autoconfigure</artifactId>
+            <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

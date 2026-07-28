@@ -12,8 +12,8 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Reusable ArchUnit rule or test helper | `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test` |
 | Application service marker or application-layer contract | `jfoundry-core/jfoundry-application/jfoundry-application-core` |
 | Application transaction abstraction or `TransactionRunner` contract | `jfoundry-core/jfoundry-application/jfoundry-transaction-core` |
-| Domain event dispatch contract | `jfoundry-core/jfoundry-application/jfoundry-event-core` |
-| Event externalization metadata or routing rules | `jfoundry-core/jfoundry-application/jfoundry-event-externalization-core` |
+| Domain event dispatch contract | `jfoundry-core/jfoundry-application/jfoundry-domain-event-core` |
+| Domain event externalization metadata or routing rules | `jfoundry-core/jfoundry-application/jfoundry-domain-event-externalization-core` |
 | Message sending or payload serialization SPI | `jfoundry-core/jfoundry-application/jfoundry-messaging-core` |
 | Outbox state, store contract, dispatcher service, retry/backoff core | `jfoundry-core/jfoundry-application/jfoundry-outbox-core` |
 | Inbox state, store contract, `InboxTemplate` | `jfoundry-core/jfoundry-application/jfoundry-inbox-core` |
@@ -24,7 +24,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Broker `MessageSender` adapter | Matching runtime integration module, such as `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-messaging-spring` or `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/jfoundry-messaging-<broker>-quarkus-runtime` |
 | Payload serializer adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-messaging-jackson` |
 | Pure JobRunr dispatcher adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-jobrunr` |
-| Spring Framework local event adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-event-spring` |
+| Spring Framework local domain-event adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-domain-event-spring` |
 | Spring transaction adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-transaction-spring` |
 | Spring messaging transport adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-messaging-spring` |
 | Spring Outbox transaction/scheduling adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-outbox-spring` |

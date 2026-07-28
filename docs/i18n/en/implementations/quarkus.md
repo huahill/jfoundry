@@ -52,7 +52,7 @@ artifact automatically.
 | Spring Boot capability | Quarkus dependency composition |
 |---|---|
 | `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` |
-| `jfoundry-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
+| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-outbox-jpa-quarkus-runtime` and `jfoundry-outbox-quarkus-runtime` when dispatching is required |
 | `jfoundry-inbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-inbox-jpa-quarkus-runtime` |

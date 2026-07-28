@@ -45,7 +45,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 | 需求 | 添加 | 边界 |
 |---|---|---|
 | 本地应用事务 | `jfoundry-spring-boot-starter` | 提供 Spring `TransactionRunner`，应用可替换。 |
-| 本地领域事件监听 | `jfoundry-event-spring-boot-starter` | 通过 Spring 应用事件发布领域事件；不是 Outbox 或消息代理。 |
+| 本地领域事件监听 | `jfoundry-domain-event-spring-boot-starter` | 通过 Spring 应用事件发布领域事件；不是 Outbox 或消息代理。 |
 | MyBatis-Plus 聚合持久化 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 仅业务聚合持久化，不含 Outbox/Inbox 存储。 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
 | RFC 9457 Web MVC 错误响应 | `jfoundry-webmvc-spring-boot-starter` | 仅 HTTP 入站适配。 |

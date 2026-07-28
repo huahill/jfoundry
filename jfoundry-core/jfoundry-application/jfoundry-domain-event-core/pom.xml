@@ -3,35 +3,28 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring</artifactId>
+        <artifactId>jfoundry-application</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-event-spring</artifactId>
-    <name>jfoundry-event-spring</name>
-    <description>Spring runtime adapter for publishing jfoundry domain events as Spring application events.</description>
+    <artifactId>jfoundry-domain-event-core</artifactId>
+    <name>jfoundry-domain-event-core</name>
+    <description>In-process domain event context, batching, and dispatch contracts.</description>
 
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-core</artifactId>
+            <artifactId>jfoundry-domain</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmolecules</groupId>
             <artifactId>jmolecules-onion-architecture</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -42,11 +35,6 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

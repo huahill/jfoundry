@@ -49,7 +49,7 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 | Spring Boot 能力 | Quarkus 依赖组合 |
 |---|---|
 | `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` |
-| `jfoundry-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
+| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-outbox-jpa-quarkus-runtime`；需要派发时再加 `jfoundry-outbox-quarkus-runtime` |
 | `jfoundry-inbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-inbox-jpa-quarkus-runtime` |

@@ -10,7 +10,7 @@
 | `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` 集成 | 事务管理器；它只适配 Spring Boot 或应用已经提供的管理器 |
 | `jfoundry-observability-spring-boot-starter` | 对符合条件的 Outbox、Inbox 和锁操作进行 Micrometer Observation | 遥测 exporter、collector 或直接 OpenTelemetry 装饰器 |
 | `jfoundry-lock-redisson-spring-boot-starter` | 分布式锁核心、Spring `@DistributedLock` 拦截、Redisson 适配器、Redisson Spring Boot 启动器 | Outbox、Inbox、消息代理投递 |
-| `jfoundry-event-spring-boot-starter` | 领域事件派发、Spring 应用事件发布 | Outbox 持久化或消息代理投递 |
+| `jfoundry-domain-event-spring-boot-starter` | 领域事件派发、Spring 应用事件发布 | Outbox 持久化或消息代理投递 |
 | `jfoundry-messaging-spring-boot-starter` | 消息 SPI、Jackson 消息载荷序列化器和 Spring 消息运行时 | 任意 `MessageSender` 或消息代理客户端 |
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` 适配器，在 Boot 创建 `KafkaOperations` 后选择 | Outbox 存储 |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` 适配器 | Outbox 存储 |

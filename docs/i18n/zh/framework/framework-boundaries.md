@@ -13,7 +13,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 区域 | 模块 |
 |------|------|
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
-| 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-event-core`、`jfoundry-event-externalization-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-inbox-core` |
+| 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-domain-event-externalization-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-inbox-core` |
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
 | 运行时无关启动器组合 | 领域与应用启动器位于 `jfoundry-core/jfoundry-starters`；以能力命名的基础设施适配器启动器位于 `jfoundry-core/jfoundry-starters/infrastructure` |
 | Spring 运行时集成 | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |

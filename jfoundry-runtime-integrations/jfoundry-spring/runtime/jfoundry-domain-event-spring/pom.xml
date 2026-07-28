@@ -3,32 +3,35 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-application</artifactId>
+        <artifactId>jfoundry-spring</artifactId>
         <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-event-externalization-core</artifactId>
-    <name>jfoundry-event-externalization-core</name>
-    <description>Application-layer domain event externalization contracts, metadata, and routing rules.</description>
+    <artifactId>jfoundry-domain-event-spring</artifactId>
+    <name>jfoundry-domain-event-spring</name>
+    <description>Spring runtime adapter for publishing jfoundry domain events as Spring application events.</description>
 
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-core</artifactId>
+            <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmolecules</groupId>
             <artifactId>jmolecules-onion-architecture</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jmolecules</groupId>
-            <artifactId>jmolecules-events</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
@@ -39,6 +42,11 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

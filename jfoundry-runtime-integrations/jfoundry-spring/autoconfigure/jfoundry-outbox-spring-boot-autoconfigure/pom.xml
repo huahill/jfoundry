@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-externalization-core</artifactId>
+            <artifactId>jfoundry-domain-event-externalization-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -168,7 +168,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-spring-boot-autoconfigure</artifactId>
+            <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

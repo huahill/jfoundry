@@ -6,7 +6,7 @@
   <dependencies>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-helidon-runtime</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-core</artifactId></dependency>
-    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-event-externalization-core</artifactId></dependency>
+    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-externalization-core</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-core</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-jackson</artifactId></dependency>
     <dependency><groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>

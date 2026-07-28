@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-externalization-core</artifactId>
+            <artifactId>jfoundry-domain-event-externalization-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

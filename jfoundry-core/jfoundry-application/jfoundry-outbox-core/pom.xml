@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-core</artifactId>
+            <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
