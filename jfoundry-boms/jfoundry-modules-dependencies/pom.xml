@@ -345,7 +345,12 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
+        <artifactId>jfoundry-jpa-spring-boot-support</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-transaction-spring-boot-autoconfigure</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -391,6 +396,11 @@
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-transaction-spring-boot-starter</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

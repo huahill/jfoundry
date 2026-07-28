@@ -30,7 +30,7 @@ import org.springframework.context.annotation.Bean;
 /// Applications do not need to component-scan {@code org.jfoundry.infrastructure.outbox.jobrunr};
 /// the Spring Boot starter registers this configuration through
 /// {@code META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports} in
-/// jfoundry-spring-boot-autoconfigure.
+/// jfoundry-outbox-spring-boot-autoconfigure.
 /// <p>
 /// batchSize, maxRetries, and cron are all read from {@link OutboxDispatcherProperties}, matching
 /// scheduled-mode behavior with the same {@code jfoundry.outbox.dispatcher.*} configuration.

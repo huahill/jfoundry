@@ -8,7 +8,8 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 
 | Starter | Adds | Does not add |
 |---------|------|--------------|
-| `jfoundry-spring-boot-starter` | Spring Boot auto-configuration and Spring `TransactionRunner` integration | Outbox, Inbox, MyBatis-Plus stores, broker clients, JobRunr |
+| `jfoundry-spring-boot-starter` | Minimal Spring Boot baseline for jfoundry capability starters | Transaction integration, Outbox, Inbox, persistence, broker clients, JobRunr |
+| `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` integration | A transaction manager; it adapts one supplied by Spring Boot or the application |
 | `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
 | `jfoundry-event-spring-boot-starter` | Domain event dispatch and Spring application event publishing | Outbox persistence or broker delivery |
@@ -84,6 +85,8 @@ technology-specific setup, use the [implementation guides](../implementations/sp
   application `MessageSender` before enabling Outbox delivery.
 - `TransactionRunnerAutoConfiguration` runs after Spring Boot transaction auto-configuration so
   JDBC, JPA, or JTA transaction managers are visible before its bean conditions are evaluated.
+- Transaction support is explicit. Inbox and Outbox starters include the transaction starter because
+  their templates and dispatchers require a `TransactionRunner`; the baseline starter does not.
 - Domain-event, distributed-lock, and observability starters use Spring Boot's standard AOP
   auto-configuration through `spring-boot-starter-aop`. Proxy strategy and AOP opt-out therefore
   follow Spring Boot's `spring.aop.*` properties; jfoundry does not register its own proxy creator.

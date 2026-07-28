@@ -6,7 +6,8 @@
 
 | 启动器 | 引入能力 | 不会引入 |
 |---------|----------|----------|
-| `jfoundry-spring-boot-starter` | Spring Boot 自动配置、Spring `TransactionRunner` 集成 | Outbox、Inbox、MyBatis-Plus 存储、消息代理客户端、JobRunr |
+| `jfoundry-spring-boot-starter` | jfoundry 能力启动器的最小 Spring Boot 基线 | 事务集成、Outbox、Inbox、持久化、消息代理客户端、JobRunr |
+| `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` 集成 | 事务管理器；它只适配 Spring Boot 或应用已经提供的管理器 |
 | `jfoundry-observability-spring-boot-starter` | 对符合条件的 Outbox、Inbox 和锁操作进行 Micrometer Observation | 遥测 exporter、collector 或直接 OpenTelemetry 装饰器 |
 | `jfoundry-lock-redisson-spring-boot-starter` | 分布式锁核心、Spring `@DistributedLock` 拦截、Redisson 适配器、Redisson Spring Boot 启动器 | Outbox、Inbox、消息代理投递 |
 | `jfoundry-event-spring-boot-starter` | 领域事件派发、Spring 应用事件发布 | Outbox 持久化或消息代理投递 |
@@ -81,6 +82,7 @@
 - jfoundry 不注册回退 `MessageSender`。启用 Outbox 投递前，应添加消息代理专用启动器或
   定义应用自己的 `MessageSender`。
 - `TransactionRunnerAutoConfiguration` 在 Spring Boot 事务自动配置之后运行，确保其 Bean 条件评估前已经可以看到 JDBC、JPA 或 JTA 事务管理器。
+- 事务是显式能力。Inbox 和 Outbox 启动器会引入事务启动器，因为其模板和派发器需要 `TransactionRunner`；基线启动器不会引入。
 - 领域事件、分布式锁和可观测性启动器通过 `spring-boot-starter-aop` 使用 Spring Boot 标准 AOP
   自动配置。代理策略和 AOP 禁用行为遵循 Spring Boot 的 `spring.aop.*` 配置；jfoundry 不再注册自己的代理创建器。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。

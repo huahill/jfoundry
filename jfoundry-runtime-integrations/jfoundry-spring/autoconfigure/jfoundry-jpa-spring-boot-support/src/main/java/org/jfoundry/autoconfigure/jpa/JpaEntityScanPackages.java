@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScanPackages;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/// Registers a framework entity package without discarding application entity scan packages.
 public final class JpaEntityScanPackages {
 
     private JpaEntityScanPackages() {

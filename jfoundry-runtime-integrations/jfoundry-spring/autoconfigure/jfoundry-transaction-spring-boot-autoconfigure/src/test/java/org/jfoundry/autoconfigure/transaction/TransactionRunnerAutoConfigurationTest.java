@@ -44,10 +44,7 @@ class TransactionRunnerAutoConfigurationTest {
 
         runner.withBean(PlatformTransactionManager.class, () -> mock(PlatformTransactionManager.class))
                 .withBean(TransactionRunner.class, () -> userRunner)
-                .run(context -> {
-                    assertThat(context).hasSingleBean(TransactionRunner.class);
-                    assertThat(context.getBean(TransactionRunner.class)).isSameAs(userRunner);
-                });
+                .run(context -> assertThat(context.getBean(TransactionRunner.class)).isSameAs(userRunner));
     }
 
     @Test

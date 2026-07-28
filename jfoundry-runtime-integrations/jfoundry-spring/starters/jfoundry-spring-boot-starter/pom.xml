@@ -11,9 +11,9 @@
     <artifactId>jfoundry-spring-boot-starter</artifactId>
     <name>jfoundry-spring-boot-starter</name>
     <description>
-        Minimal Spring Boot starter for jfoundry DDD contracts and auto-configuration.
-        Feature capabilities such as messaging, outbox, inbox, Kafka, JobRunr, and
-        MyBatis-Plus adapters are provided by dedicated starter modules.
+        Minimal Spring Boot baseline for jfoundry capability starters.
+        Transaction, messaging, Outbox, Inbox, lock, persistence, and web capabilities are
+        provided by dedicated starter modules.
     </description>
 
     <properties>
@@ -22,20 +22,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-transaction-spring</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
         </dependency>
 
         <dependency>

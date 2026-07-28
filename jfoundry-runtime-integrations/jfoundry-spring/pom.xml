@@ -38,7 +38,8 @@
         <module>runtime/jfoundry-lock-spring</module>
         <module>runtime/jfoundry-observability-spring</module>
         <module>runtime/jfoundry-webmvc-spring</module>
-        <module>autoconfigure/jfoundry-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-jpa-spring-boot-support</module>
+        <module>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-event-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-lock-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-messaging-spring-boot-autoconfigure</module>
@@ -49,6 +50,7 @@
         <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
         <module>jfoundry-spring-integration-tests</module>
         <module>starters/jfoundry-spring-boot-starter</module>
+        <module>starters/jfoundry-transaction-spring-boot-starter</module>
         <module>starters/jfoundry-observability-spring-boot-starter</module>
         <module>starters/jfoundry-webmvc-spring-boot-starter</module>
         <module>starters/jfoundry-event-spring-boot-starter</module>

@@ -24,7 +24,7 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-mybatis-plus`, `jfoundry-persistence-jpa`, `jfoundry-messaging-jackson`, Outbox/Inbox MyBatis-Plus and JPA stores, JobRunr dispatch adapter |
 | Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
-| Spring Boot integration | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`, `jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
+| Spring Boot integration | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
 | Spring integration tests | `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus runtime integration | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`, `deployment/*` |
 | Quarkus integration tests | `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
@@ -36,7 +36,7 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
 - Spring Framework lifecycle, transaction synchronization, scheduling, event publishing, MVC APIs,
   and Spring-side client wrappers belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/runtime`.
 - Spring Boot conditions, `@ConfigurationProperties`, bean wiring, metadata, and
-  `AutoConfiguration.imports` belong under `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`.
+  `AutoConfiguration.imports` belong in their capability-specific module under `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure`.
 - Spring middleware and Testcontainers verification belongs in
   `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`.
 - Quarkus runtime and Native Image verification belongs in
@@ -68,12 +68,12 @@ contract, and state machine.
 `jfoundry-outbox-spring` owns Spring runtime integration such as transaction synchronization,
 scheduled dispatching, and domain-event recording in a Spring runtime.
 
-`jfoundry-spring-boot-autoconfigure` owns Outbox configuration properties, conditions, and bean
+`jfoundry-outbox-spring-boot-autoconfigure` owns Outbox configuration properties, conditions, and bean
 wiring. `OutboxDispatcherProperties` and related properties live there because property binding is
 a Boot concern.
 
 `jfoundry-outbox-jobrunr` is a pure JobRunr dispatch adapter. Its Spring Boot auto-configuration
-also belongs under `jfoundry-spring-boot-autoconfigure`.
+also belongs under `jfoundry-outbox-spring-boot-autoconfigure`.
 
 `jfoundry-outbox-jpa` and `jfoundry-inbox-jpa` are framework-neutral Jakarta Persistence adapters.
 They implement the Outbox and Inbox store SPIs without requiring Spring or Spring Boot. Their

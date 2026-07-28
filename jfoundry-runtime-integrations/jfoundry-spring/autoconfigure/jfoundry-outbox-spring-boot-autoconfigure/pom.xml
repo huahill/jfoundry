@@ -22,7 +22,11 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
+            <artifactId>jfoundry-jpa-spring-boot-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-transaction-spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

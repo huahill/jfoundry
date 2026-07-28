@@ -17,7 +17,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
 | 运行时无关启动器组合 | 领域与应用启动器位于 `jfoundry-core/jfoundry-starters`；以能力命名的基础设施适配器启动器位于 `jfoundry-core/jfoundry-starters/infrastructure` |
 | Spring 运行时集成 | `jfoundry-runtime-integrations/jfoundry-spring/runtime/*` |
-| Spring Boot 集成 | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`、`jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
+| Spring Boot 集成 | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime-integrations/jfoundry-spring/starters/*` |
 | Spring 集成测试 | `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus 运行时集成 | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime/*`、`deployment/*` |
 | Quarkus 集成测试 | `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
@@ -27,7 +27,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 ## 放置规则
 
 - Spring Framework 生命周期、事务同步、调度、事件发布、MVC API 和 Spring 侧客户端包装器位于 `../../../../jfoundry-runtime-integrations/jfoundry-spring/runtime`。
-- Spring Boot 条件、`@ConfigurationProperties`、Bean 装配、元数据和 `AutoConfiguration.imports` 位于 `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`。
+- Spring Boot 条件、`@ConfigurationProperties`、Bean 装配、元数据和 `AutoConfiguration.imports` 位于 `../../../../jfoundry-runtime-integrations/jfoundry-spring/autoconfigure` 下对应的能力模块。
 - Spring 中间件和 Testcontainers 验证位于 `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`。
 - Quarkus 运行时和原生镜像验证位于 `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests`；未来的 Quarkus 中间件或 Testcontainers 验证也位于该模块。
 - Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime-integrations/jfoundry-helidon/runtime`；当前原生镜像验证位于 `jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests`，未来的 Helidon 中间件或 Testcontainers 验证也位于该模块。Helidon 没有 JFoundry 部署模块或启动器层。
@@ -45,9 +45,9 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 
 `jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步、scheduled dispatch 和 Spring 运行时中的领域事件记录。
 
-`jfoundry-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties` 及关联属性位于这里，因为属性绑定属于 Boot 职责。
+`jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties` 及关联属性位于这里，因为属性绑定属于 Boot 职责。
 
-`jfoundry-outbox-jobrunr` 是纯 JobRunr 派发适配器；它的 Spring Boot 自动配置也属于 `jfoundry-spring-boot-autoconfigure`。
+`jfoundry-outbox-jobrunr` 是纯 JobRunr 派发适配器；它的 Spring Boot 自动配置也属于 `jfoundry-outbox-spring-boot-autoconfigure`。
 
 `jfoundry-outbox-jpa` 和 `jfoundry-inbox-jpa` 是运行时无关的 Jakarta Persistence 适配器。它们实现 Outbox 和 Inbox 存储 SPI，不要求 Spring 或 Spring Boot。它们的 Spring Boot 启动器，即 `jfoundry-outbox-jpa-spring-boot-starter` 和 `jfoundry-inbox-jpa-spring-boot-starter`，是显式能力选择；通用 `jfoundry-persistence-jpa-spring-boot-starter` 只提供业务 JPA 运行时装配，不会引入任一存储。
 

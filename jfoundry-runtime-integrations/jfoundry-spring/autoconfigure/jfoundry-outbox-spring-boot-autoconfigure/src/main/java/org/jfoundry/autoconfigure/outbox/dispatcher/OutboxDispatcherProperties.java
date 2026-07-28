@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 /// Outbox dispatch trigger configuration.
 ///
 /// Binds the `jfoundry.outbox.dispatcher.*` prefix. This class lives in
-/// jfoundry-spring-boot-autoconfigure because it is a Spring Boot property binding model, not a
+/// jfoundry-outbox-spring-boot-autoconfigure because it is a Spring Boot property binding model, not a
 /// Spring runtime adapter contract.
 @ConfigurationProperties(prefix = "jfoundry.outbox.dispatcher")
 public class OutboxDispatcherProperties {
