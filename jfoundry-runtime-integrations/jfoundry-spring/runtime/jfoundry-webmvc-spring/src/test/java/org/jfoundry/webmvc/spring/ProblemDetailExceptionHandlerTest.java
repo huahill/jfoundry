@@ -6,6 +6,8 @@ import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.application.exception.NotFoundException;
 import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
+import org.jfoundry.problem.ProblemDescriptor;
+import org.jfoundry.problem.ProblemMapper;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,6 +24,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,6 +85,21 @@ class ProblemDetailExceptionHandlerTest {
 
         assertProblem(response, HttpStatus.CONFLICT, "DOMAIN_STATE", "Domain state conflict",
                 "urn:jfoundry:problem:domain-state");
+    }
+
+    @Test
+    void rendersAnApplicationProblemMapperBeforeJFoundryDefaults() {
+        ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
+                java.net.URI.create("https://example.test/problems/validation"), "Validation failed", 422,
+                "The request violates an application rule.", Map.of("code", "APPLICATION_VALIDATION", "field", "name")));
+        ProblemDetailExceptionHandler applicationHandler = new ProblemDetailExceptionHandler(applicationMapper);
+
+        ResponseEntity<ProblemDetail> response = applicationHandler.handleInvalidArgument(
+                new InvalidArgumentException("internal detail"));
+
+        assertProblem(response, HttpStatus.UNPROCESSABLE_ENTITY, "APPLICATION_VALIDATION", "Validation failed",
+                "https://example.test/problems/validation");
+        assertThat(response.getBody().getProperties()).containsEntry("field", "name");
     }
 
     @ParameterizedTest

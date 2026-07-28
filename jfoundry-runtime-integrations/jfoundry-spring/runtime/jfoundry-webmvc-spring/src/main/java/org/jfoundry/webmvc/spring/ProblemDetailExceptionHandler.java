@@ -6,8 +6,9 @@ import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.application.exception.NotFoundException;
 import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
-import org.jfoundry.problem.ProblemCatalog;
+import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemDescriptor;
+import org.jfoundry.problem.ProblemMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -27,34 +28,44 @@ import org.springframework.web.util.WebUtils;
 @RestControllerAdvice
 public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private final ProblemMapper problemMapper;
+
+    public ProblemDetailExceptionHandler() {
+        this(new CompositeProblemMapper(java.util.List.of()));
+    }
+
+    public ProblemDetailExceptionHandler(ProblemMapper problemMapper) {
+        this.problemMapper = java.util.Objects.requireNonNull(problemMapper, "problemMapper must not be null");
+    }
+
     @ExceptionHandler(InvalidArgumentException.class)
     public ResponseEntity<ProblemDetail> handleInvalidArgument(InvalidArgumentException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ProblemDetail> handleNotFound(NotFoundException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ProblemDetail> handleConflict(ConflictException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     @ExceptionHandler(ExternalAccessException.class)
     public ResponseEntity<ProblemDetail> handleExternalAccess(ExternalAccessException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     @ExceptionHandler(DomainRuleViolationException.class)
     public ResponseEntity<ProblemDetail> handleDomainRuleViolation(DomainRuleViolationException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     @ExceptionHandler(DomainStateException.class)
     public ResponseEntity<ProblemDetail> handleDomainState(DomainStateException exception) {
-        return problem(ProblemCatalog.forException(exception));
+        return problem(problemMapper.map(exception).orElseThrow());
     }
 
     private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
@@ -68,7 +79,7 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
                                                              HttpHeaders headers,
                                                              HttpStatusCode statusCode,
                                                              WebRequest request) {
-        ProblemDescriptor descriptor = ProblemCatalog.forHttpStatus(statusCode.value());
+        ProblemDescriptor descriptor = org.jfoundry.problem.ProblemCatalog.forHttpStatus(statusCode.value());
         if (statusCode.isSameCodeAs(HttpStatus.INTERNAL_SERVER_ERROR) && request instanceof ServletWebRequest) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, exception, WebRequest.SCOPE_REQUEST);
         }
@@ -81,7 +92,7 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
                 descriptor.detail());
         problemDetail.setTitle(descriptor.title());
         problemDetail.setType(descriptor.type());
-        problemDetail.setProperty("code", descriptor.code());
+        descriptor.extensions().forEach(problemDetail::setProperty);
         return problemDetail;
     }
 }
