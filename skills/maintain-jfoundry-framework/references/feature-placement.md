@@ -29,7 +29,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Spring messaging transport adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-messaging-spring` |
 | Spring Outbox transaction/scheduling adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-outbox-spring` |
 | Spring Web MVC ProblemDetail adapter | `jfoundry-runtime-integrations/jfoundry-spring/runtime/jfoundry-webmvc-spring` |
-| Spring Boot conditions/properties/wiring | `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure` |
+| Spring Boot conditions/properties/wiring | A capability-specific module under `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure` |
 | Spring runtime or middleware integration verification | `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus runtime extension behavior | `jfoundry-runtime-integrations/jfoundry-quarkus/runtime` |
 | Quarkus build-time processor or Native Image registration | `jfoundry-runtime-integrations/jfoundry-quarkus/deployment` |
@@ -49,7 +49,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
   transaction-scoped implementations in runtime adapters and bean-lifecycle injection in Spring
   Boot auto-configuration. Business repository constructors should not expose runtime context.
 - If the code uses Spring transaction synchronization, `ApplicationEventPublisher`, scheduling, MVC APIs, or bean lifecycle, put it under `jfoundry-runtime-integrations/jfoundry-spring/runtime`.
-- If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure`.
+- If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in the matching capability-specific module under `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure`.
 - If a test verifies middleware behavior through Spring's runtime wiring or Testcontainers, put it under `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`.
 - If the code uses Quarkus build steps, augmentation APIs, or Native Image build items, put it under `jfoundry-runtime-integrations/jfoundry-quarkus/deployment`; otherwise put Quarkus CDI runtime behavior under `jfoundry-runtime-integrations/jfoundry-quarkus/runtime`.
 - If a test verifies Quarkus runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests`.

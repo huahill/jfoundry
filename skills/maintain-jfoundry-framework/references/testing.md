@@ -34,7 +34,7 @@ mvn test
 | MyBatis-Plus adapter | `mvn -pl jfoundry-core/jfoundry-infrastructure/<module> -am test` |
 | Broker sender runtime adapter | `mvn -pl <runtime messaging module> -am test` |
 | Spring runtime adapter | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/runtime/<module> -am test` |
-| Boot auto-configuration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/jfoundry-spring-boot-autoconfigure -am test` |
+| Boot auto-configuration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/<capability-module> -am test` |
 | Spring middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
 | Spring Native Image consumer | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then probe `/jfoundry/native/ready` |
 | Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |

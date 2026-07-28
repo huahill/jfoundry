@@ -29,8 +29,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// @ApplicationService → DomainEventDispatcher → DomainEventOutboxRecorder → Outbox table →
 /// ScheduledOutboxDispatcher → CollectingMessageSender.
 /// <p>
-/// @EnableAutoConfiguration lets Spring Boot load the auto-configuration chain inside
-/// jfoundry-spring-boot-autoconfigure according to @AutoConfigureAfter ordering. The test
+/// @EnableAutoConfiguration lets Spring Boot load the capability-specific auto-configuration chain
+/// according to @AutoConfigureAfter ordering. The test
 /// application class is responsible for @MapperScan so mapper beans are registered during
 /// ConfigurationClassParser processing.
 @SpringBootTest(
