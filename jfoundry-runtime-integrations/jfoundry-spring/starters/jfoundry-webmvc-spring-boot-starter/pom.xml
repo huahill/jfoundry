@@ -22,6 +22,10 @@
             <artifactId>jfoundry-webmvc-spring</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-webmvc-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

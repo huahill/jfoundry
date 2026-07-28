@@ -125,11 +125,6 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-webmvc-spring</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-jobrunr</artifactId>
             <optional>true</optional>
         </dependency>
