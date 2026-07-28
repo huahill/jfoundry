@@ -39,6 +39,7 @@
         <module>runtime/jfoundry-observability-spring</module>
         <module>runtime/jfoundry-webmvc-spring</module>
         <module>autoconfigure/jfoundry-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-observability-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
         <module>jfoundry-spring-integration-tests</module>
         <module>starters/jfoundry-spring-boot-starter</module>

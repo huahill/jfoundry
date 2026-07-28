@@ -129,11 +129,6 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-observability-spring</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
             <groupId>org.jobrunr</groupId>
             <artifactId>jobrunr</artifactId>
             <scope>provided</scope>
@@ -195,11 +190,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-observation</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
