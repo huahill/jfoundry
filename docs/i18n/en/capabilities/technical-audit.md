@@ -1,0 +1,17 @@
+# Technical Audit
+
+Technical audit metadata belongs to a persistence snapshot, not to a domain entity or aggregate.
+JFoundry therefore does not provide `Auditable`, `AuditableEntity`, or `AuditableAggregateRoot` in
+the domain module.
+
+`jfoundry-persistence-core` defines `AuditStamp`, `AuditActorProvider`, and `AuditStamping`. An
+audit stamp contains only `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy`.
+Timestamps use `Instant`; actor fields contain a stable identifier only. When no actor is available,
+the actor field is `null`; JFoundry does not synthesize an `unknown` actor.
+
+`AuditStamping` receives a `Clock` and an `AuditActorProvider`. Insert stamping sets both creation
+and modification metadata. Update stamping preserves creation metadata and changes only the last
+modification metadata. Persistence adapters invoke update stamping only for an actual update.
+
+Business-significant submitters, approvers, and similar facts remain explicit domain state or domain
+events. Soft deletion and append-only compliance audit trails are separate capabilities.
