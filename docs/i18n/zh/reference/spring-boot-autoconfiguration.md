@@ -22,7 +22,7 @@
 | `jfoundry-inbox-spring-boot-starter` | Inbox 核心、`InboxTemplate` | Inbox 表存储 |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
-| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 业务 MyBatis-Plus 持久化入口：基础自动配置、共享持久化运行时支持和 MyBatis-Plus Boot 启动器 | 运行时无关的 `jfoundry-persistence-mybatis-plus-starter`、Outbox/Inbox 存储 |
+| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 业务 MyBatis-Plus 持久化入口：基础自动配置、共享持久化运行时支持、MyBatis-Plus Boot 启动器和默认技术审计处理器 | 运行时无关的 `jfoundry-persistence-mybatis-plus-starter`、Outbox/Inbox 存储 |
 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个由 JPA 管理的实体图的 jfoundry JPA 适配器、共享 Spring 事务持久化上下文、Spring Boot JPA 运行时 | 对分离聚合执行合并、手动多表或多实体图同步算法、Outbox 和 Inbox 存储 |
 | `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` 异常响应 | 消息、Outbox、Inbox |
 
@@ -64,6 +64,8 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` 注入器 | 类路径中存在 `DomainEventContext` 和 `AbstractAggregateRepository`。 |
 | `PersistenceFailureAutoConfiguration` | 默认 Spring `PersistenceFailureTranslator` 与 Repository 注入器 | 存在 `AbstractAggregateRepository`、Spring 数据访问异常和 `jfoundry-persistence-spring`；没有用户自定义翻译器。 |
 | `AggregatePersistenceContextAutoConfiguration` | 事务绑定的 `AggregatePersistenceContext` 与感知型 Repository 注入器 | 存在持久化上下文 SPI、Spring 事务支持和 `jfoundry-persistence-spring`；没有用户自定义上下文。 |
+| `AuditStampingAutoConfiguration` | UTC `Clock`、空的 `AuditActorProvider` 与 `AuditStamping` | 存在 `jfoundry-persistence-core`；应用 `Clock`、操作者提供器或审计服务优先。 |
+| `MybatisPlusAuditAutoConfiguration` | `MybatisPlusAuditMetaObjectHandler` | 存在 MyBatis-Plus 和 JFoundry MyBatis-Plus 适配器、可用的 `AuditStamping`，且没有应用 `MetaObjectHandler`。 |
 | `DomainEventDispatchAutoConfiguration` | `DomainEventScope`、`DomainEventContext`、派发拦截器、Spring 事件派发器、可选 Outbox 派发器 | 应用服务和派发器类型存在；配置项允许对应路径。 |
 | `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`、`OutboxTemplate`、外部化解析器、`DomainEventOutboxRecorder` | Outbox 存储和序列化器依赖可用；每种 Bean 均没有用户自定义替代。 |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | 存在 `KafkaOperations` 类和 Bean；没有已有 `MessageSender`。 |

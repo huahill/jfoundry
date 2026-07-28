@@ -22,9 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.util.WebUtils;
 
-/**
- * Maps jfoundry core exceptions to Spring MVC RFC 9457 ProblemDetail responses.
- */
+/// Maps JFoundry core exceptions to Spring MVC RFC 9457 ProblemDetail responses.
 @RestControllerAdvice
 public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -70,7 +68,7 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
 
     private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
         return ResponseEntity.status(HttpStatusCode.valueOf(descriptor.status()))
-                .body(toProblemDetail(descriptor));
+                .body(ProblemDetailRenderer.render(descriptor));
     }
 
     @Override
@@ -83,16 +81,8 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
         if (statusCode.isSameCodeAs(HttpStatus.INTERNAL_SERVER_ERROR) && request instanceof ServletWebRequest) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, exception, WebRequest.SCOPE_REQUEST);
         }
-        return super.handleExceptionInternal(exception, toProblemDetail(descriptor), headers,
+        return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
                 HttpStatusCode.valueOf(descriptor.status()), request);
     }
 
-    private static ProblemDetail toProblemDetail(ProblemDescriptor descriptor) {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatusCode.valueOf(descriptor.status()),
-                descriptor.detail());
-        problemDetail.setTitle(descriptor.title());
-        problemDetail.setType(descriptor.type());
-        descriptor.extensions().forEach(problemDetail::setProperty);
-        return problemDetail;
-    }
 }

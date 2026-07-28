@@ -294,6 +294,9 @@ Quarkus Web 边界命名，Problem Details 是当前已实现的能力：
 Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它不会推断 Quarkus 未提供的响应头。未知异常
 和其他 HTTP 状态会继续使用正常的 Quarkus 行为，而不会被转换成 JFoundry 错误。
 
+该扩展不配置安全能力。拥有认证和授权语义的 Quarkus 安全适配器可使用公开的
+`ProblemDetailsRenderer.render(...)` API 渲染自己的 `401` 或 `403` 描述符。
+
 ## PostgreSQL 中间件验证
 
 运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL。它验证 Quarkus 的

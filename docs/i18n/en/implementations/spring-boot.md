@@ -90,7 +90,10 @@ does not call `drainEvents()` in this automatic path.
 The persistence starters are named after the capability they assemble, not merely the ORM they
 pull in. `jfoundry-persistence-jpa-spring-boot-starter` assembles the JPA aggregate adapter,
 Spring transaction-bound persistence context, and Spring Boot JPA runtime. Its MyBatis-Plus peer
-does the same for MyBatis-Plus business aggregate persistence.
+does the same for MyBatis-Plus business aggregate persistence, including the default technical audit
+handler for `MybatisPlusAuditData`. The shared persistence auto-configuration supplies UTC audit
+time and an empty actor provider; applications normally contribute `AuditActorProvider` from their
+security integration.
 
 Both are deliberately separate from reliable messaging stores. Add the matching Outbox or Inbox
 starter only after the use case requires durable external publication or consumer idempotency.
@@ -115,7 +118,9 @@ inferred from a persistence change. See [reliable messaging](../capabilities/rel
 
 The Web MVC starter is an inbound adapter. It renders the shared RFC 9457 contract for supported
 jfoundry exceptions and cooperates with Spring MVC's own HTTP error handling; domain and application
-code must not select HTTP statuses directly.
+code must not select HTTP statuses directly. It intentionally does not configure authentication or
+authorization. A security adapter that owns those semantics can render its own `401` or `403`
+descriptor with `ProblemDetailRenderer.render(...)`.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that
 cannot be met by database constraints, idempotency, or local synchronization.

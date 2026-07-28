@@ -13,6 +13,7 @@ import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventContext;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatch;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatchInterceptor;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventScope;
+import org.jfoundry.infrastructure.persistence.quarkus.QuarkusAuditStampingProducer;
 import org.jfoundry.infrastructure.persistence.quarkus.QuarkusAggregatePersistenceContextBinder;
 import org.jfoundry.infrastructure.persistence.quarkus.QuarkusAggregatePersistenceContext;
 import org.jfoundry.infrastructure.transaction.quarkus.QuarkusTransactionRunner;
@@ -36,6 +37,7 @@ class QuarkusProcessor {
         return AdditionalBeanBuildItem.builder()
                 .addBeanClass(QuarkusAggregatePersistenceContext.class)
                 .addBeanClass(QuarkusAggregatePersistenceContextBinder.class)
+                .addBeanClass(QuarkusAuditStampingProducer.class)
                 .setUnremovable()
                 .setDefaultScope(DotName.createSimple(ApplicationScoped.class.getName()))
                 .build();

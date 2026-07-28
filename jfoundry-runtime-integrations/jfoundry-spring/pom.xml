@@ -47,6 +47,7 @@
         <module>autoconfigure/jfoundry-outbox-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-inbox-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-persistence-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
         <module>jfoundry-spring-integration-tests</module>
         <module>starters/jfoundry-spring-boot-starter</module>

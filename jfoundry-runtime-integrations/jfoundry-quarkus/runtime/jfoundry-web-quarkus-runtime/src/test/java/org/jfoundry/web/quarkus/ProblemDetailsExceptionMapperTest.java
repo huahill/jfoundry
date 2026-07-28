@@ -4,6 +4,7 @@ import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import org.jfoundry.application.exception.InvalidArgumentException;
+import org.jfoundry.problem.ProblemDescriptor;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -37,5 +38,20 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(response.getStatus()).isEqualTo(405);
         assertThat(response.getHeaderString(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD");
         assertThat(response.getMediaType().toString()).isEqualTo("application/problem+json");
+    }
+
+    @Test
+    void rendersDescriptorsForSecurityAdapters() {
+        Response response = ProblemDetailsRenderer.render(new ProblemDescriptor(
+                java.net.URI.create("urn:company:problem:forbidden"), "Forbidden", 403,
+                "Access is denied.", Map.of("code", "FORBIDDEN")));
+
+        assertThat(response.getStatus()).isEqualTo(403);
+        assertThat(response.getEntity()).isEqualTo(Map.of(
+                "type", "urn:company:problem:forbidden",
+                "title", "Forbidden",
+                "status", 403,
+                "detail", "Access is denied.",
+                "code", "FORBIDDEN"));
     }
 }

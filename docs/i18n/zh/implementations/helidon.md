@@ -83,6 +83,10 @@ jfoundry.outbox.dispatcher.enabled=true
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
 适配器不替代应用通用的 JAX-RS 错误策略。
 
+它不配置安全能力。拥有认证和授权语义的 Helidon 安全适配器可使用
+`ProblemDetailsRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。扩展字段在各运行时适配器中会保留
+JSON 标量、数组和对象类型。
+
 ## PostgreSQL/JTA 中间件验证
 
 运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL，并验证真实的 JTA

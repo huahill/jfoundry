@@ -360,6 +360,11 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
         <version>${project.version}</version>
       </dependency>

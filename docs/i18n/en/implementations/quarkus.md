@@ -337,6 +337,10 @@ adapter preserves non-entity headers supplied by the source Jakarta REST respons
 when it is present. It does not infer headers that Quarkus does not provide. Unknown exceptions and
 other HTTP statuses retain normal Quarkus behavior instead of being converted into a JFoundry error.
 
+The extension does not configure security. A Quarkus security adapter that owns authentication and
+authorization can render its own `401` or `403` descriptor with the public
+`ProblemDetailsRenderer.render(...)` API.
+
 ## PostgreSQL Middleware Verification
 
 The runtime-local JVM integration profile starts PostgreSQL through Testcontainers. It verifies that

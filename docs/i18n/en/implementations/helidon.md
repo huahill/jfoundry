@@ -90,6 +90,10 @@ alternative.
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
 general JAX-RS error policy.
 
+It does not configure security. A Helidon security adapter that owns authentication and authorization
+can render its own `401` or `403` descriptor with `ProblemDetailsRenderer.render(...)`. Extension
+values preserve JSON scalar, array, and object types across the runtime adapters.
+
 ## PostgreSQL/JTA Middleware Verification
 
 The runtime-local JVM integration profile starts PostgreSQL through Testcontainers and verifies a

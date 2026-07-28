@@ -24,7 +24,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-inbox-spring-boot-starter` | Inbox core and `InboxTemplate` | Inbox table store |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` adapter and supported-database claim strategy | Database migration execution, claim support for database products other than PostgreSQL and MySQL |
-| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business MyBatis-Plus persistence entry point: base auto-configuration, shared persistence runtime support, and the MyBatis-Plus Boot starter | The runtime-neutral `jfoundry-persistence-mybatis-plus-starter`, Outbox/Inbox stores |
+| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business MyBatis-Plus persistence entry point: base auto-configuration, shared persistence runtime support, the MyBatis-Plus Boot starter, and the default technical audit handler | The runtime-neutral `jfoundry-persistence-mybatis-plus-starter`, Outbox/Inbox stores |
 | `jfoundry-persistence-jpa-spring-boot-starter` | jfoundry JPA adapter for one managed entity graph per aggregate, shared Spring transaction persistence context, Spring Boot JPA runtime | Detached aggregate merge, manual multi-table or multi-graph synchronization algorithms, Outbox and Inbox stores |
 | `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` exception handling | Messaging, Outbox, Inbox |
 
@@ -67,6 +67,8 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` injector | `DomainEventContext` and `AbstractAggregateRepository` are on the classpath. |
 | `PersistenceFailureAutoConfiguration` | Default Spring `PersistenceFailureTranslator` and repository injector | `AbstractAggregateRepository`, Spring data-access exceptions, and `jfoundry-persistence-spring` are present; no user-defined translator. |
 | `AggregatePersistenceContextAutoConfiguration` | Transaction-bound `AggregatePersistenceContext` and aware-repository injector | Persistence context SPI, Spring transaction support, and `jfoundry-persistence-spring` are present; no user-defined context. |
+| `AuditStampingAutoConfiguration` | UTC `Clock`, empty `AuditActorProvider`, and `AuditStamping` | `jfoundry-persistence-core` is present; an application `Clock`, actor provider, or audit service takes precedence. |
+| `MybatisPlusAuditAutoConfiguration` | `MybatisPlusAuditMetaObjectHandler` | MyBatis-Plus and the JFoundry MyBatis-Plus adapter are present, `AuditStamping` is available, and no application `MetaObjectHandler` exists. |
 | `DomainEventDispatchAutoConfiguration` | `DomainEventScope`, `DomainEventContext`, dispatch interceptor, Spring event dispatcher, optional Outbox dispatcher | Application service and dispatcher types are present; dispatch properties allow the selected path. |
 | `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`, `OutboxTemplate`, externalization resolvers, `DomainEventOutboxRecorder` | Outbox store and serializer dependencies are available; no user-defined replacement for each bean. |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | `KafkaOperations` class and bean exist; no existing `MessageSender`. |

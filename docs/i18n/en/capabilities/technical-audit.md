@@ -13,12 +13,28 @@ the actor field is `null`; JFoundry does not synthesize an `unknown` actor.
 and modification metadata. Update stamping preserves creation metadata and changes only the last
 modification metadata. Persistence adapters invoke update stamping only for an actual update.
 
+## Runtime Assembly
+
+Spring Boot provides a UTC `Clock`, an empty `AuditActorProvider`, and an `AuditStamping` through
+`jfoundry-persistence-spring-boot-autoconfigure`. Any application `Clock`, `AuditActorProvider`, or
+`AuditStamping` bean replaces the corresponding default. A security integration normally supplies
+only `AuditActorProvider`; it owns authentication and maps its current principal to a stable actor
+identifier.
+
+`jfoundry-quarkus-runtime` and `jfoundry-helidon-runtime` provide the same UTC default through CDI.
+An application `AuditActorProvider` is used when exactly one is available. Quarkus applications can
+replace the default `AuditStamping` with a CDI bean. Helidon uses an enabled CDI alternative at
+priority `1`; an application replacing the complete service must declare an enabled
+`@Alternative` with a higher priority. Neither runtime has a JFoundry MyBatis-Plus integration.
+
 ## MyBatis-Plus
 
 `jfoundry-persistence-mybatis-plus` provides `MybatisPlusAuditData` and
-`MybatisPlusAuditMetaObjectHandler`. Register the handler with an `AuditStamping` configured by the
-application. The handler only applies to data objects derived from `MybatisPlusAuditData`; it does
-not infer audit fields from arbitrary MyBatis-Plus data objects.
+`MybatisPlusAuditMetaObjectHandler`. The Spring Boot MyBatis-Plus persistence starter registers the
+handler from the configured `AuditStamping` unless the application already has a
+`MetaObjectHandler`. Outside that Spring Boot assembly, register the handler with an application
+configured `AuditStamping`. The handler only applies to data objects derived from
+`MybatisPlusAuditData`; it does not infer audit fields from arbitrary MyBatis-Plus data objects.
 
 ## Jakarta Persistence
 

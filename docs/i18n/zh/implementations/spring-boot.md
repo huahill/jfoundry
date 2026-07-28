@@ -67,7 +67,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 
 ## 持久化
 
-持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-jpa-spring-boot-starter` 装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时；MyBatis-Plus 对应启动器则装配业务聚合的 MyBatis-Plus 持久化能力。
+持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-jpa-spring-boot-starter` 装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时；MyBatis-Plus 对应启动器则装配业务聚合的 MyBatis-Plus 持久化能力，并为 `MybatisPlusAuditData` 装配默认技术审计处理器。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
 
 二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器。聚合映射、乐观锁和仓储形态见 [JPA](jpa.md) 与 [MyBatis-Plus](mybatis-plus.md) 实现指南。
 
@@ -79,7 +79,7 @@ Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢�
 
 ## Web、锁与替换
 
-Web MVC 启动器是入站适配器。它为受支持的 jfoundry 异常输出共享 RFC 9457 契约，并与 Spring MVC 自身的 HTTP 错误处理协作；领域和应用代码不应直接选择 HTTP 状态码。
+Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常输出共享 RFC 9457 契约，并与 Spring MVC 自身的 HTTP 错误处理协作；领域和应用代码不应直接选择 HTTP 状态码。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。
 
 Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约束、幂等或本地同步不足以满足该需求时使用。
 

@@ -4,8 +4,10 @@ import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import org.jfoundry.application.exception.InvalidArgumentException;
+import org.jfoundry.problem.ProblemDescriptor;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,6 +39,35 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(response.getStatus()).isEqualTo(405);
         assertThat(response.getHeaderString(HttpHeaders.ALLOW)).isEqualTo("GET, HEAD");
         assertThat(response.getMediaType().toString()).isEqualTo("application/problem+json");
+    }
+
+    @Test
+    void rendersDescriptorsForSecurityAdapters() {
+        Response response = ProblemDetailsRenderer.render(new ProblemDescriptor(
+                java.net.URI.create("urn:company:problem:forbidden"), "Forbidden", 403,
+                "Access is denied.", java.util.Map.of("code", "FORBIDDEN")));
+
+        assertThat(response.getStatus()).isEqualTo(403);
+        JsonObject problem = (JsonObject) response.getEntity();
+        assertThat(problem.getString("code")).isEqualTo("FORBIDDEN");
+    }
+
+    @Test
+    void preservesJsonExtensionValueTypes() {
+        Response response = ProblemDetailsRenderer.render(new ProblemDescriptor(
+                java.net.URI.create("urn:company:problem:validation"), "Validation failed", 422,
+                "A field is invalid.", java.util.Map.of(
+                "attempt", 3,
+                "retryable", false,
+                "fields", java.util.List.of("name", "amount"),
+                "metadata", java.util.Map.of("source", "api"))));
+
+        JsonObject problem = (JsonObject) response.getEntity();
+        assertThat(problem.getInt("attempt")).isEqualTo(3);
+        assertThat(problem.getBoolean("retryable")).isFalse();
+        JsonArray fields = problem.getJsonArray("fields");
+        assertThat(fields.getString(0)).isEqualTo("name");
+        assertThat(problem.getJsonObject("metadata").getString("source")).isEqualTo("api");
     }
 
     @Test

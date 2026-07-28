@@ -20,6 +20,10 @@ Spring Boot 可通过 `jfoundry-persistence-mybatis-plus-spring-boot-starter` �
 jfoundry MyBatis-Plus 运行时集成；不要从运行时无关适配器推导出该支持。已支持的 Spring Boot
 装配见 [Spring Boot](spring-boot.md)，Quarkus 当前能力范围见 [Quarkus](quarkus.md)。
 
+对于继承 `MybatisPlusAuditData` 的数据对象，该 Spring Boot 启动器还会注册
+`MybatisPlusAuditMetaObjectHandler`。它使用运行时的 `AuditStamping`，并在应用提供任意
+`MetaObjectHandler` 时回退。
+
 ## Outbox 与 Inbox 存储
 
 内置 `OutboxMessageStore` 选择 `jfoundry-outbox-mybatis-plus-spring-boot-starter`，内置 `InboxMessageStore` 选择 `jfoundry-inbox-mybatis-plus-spring-boot-starter`。两者均为显式选择；`jfoundry-persistence-mybatis-plus-spring-boot-starter` 只装配业务持久化，不会引入任一存储。SQL 模板仍由业务应用迁移流程拥有。

@@ -88,6 +88,17 @@ class ProblemDetailExceptionHandlerTest {
     }
 
     @Test
+    void rendersDescriptorsForSecurityAdapters() {
+        ProblemDetail problem = ProblemDetailRenderer.render(new ProblemDescriptor(
+                java.net.URI.create("urn:company:problem:unauthenticated"), "Unauthenticated", 401,
+                "Authentication is required.", Map.of("code", "UNAUTHENTICATED")));
+
+        assertThat(problem.getStatus()).isEqualTo(401);
+        assertThat(problem.getType()).hasToString("urn:company:problem:unauthenticated");
+        assertThat(problem.getProperties()).containsEntry("code", "UNAUTHENTICATED");
+    }
+
+    @Test
     void rendersAnApplicationProblemMapperBeforeJFoundryDefaults() {
         ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/validation"), "Validation failed", 422,
