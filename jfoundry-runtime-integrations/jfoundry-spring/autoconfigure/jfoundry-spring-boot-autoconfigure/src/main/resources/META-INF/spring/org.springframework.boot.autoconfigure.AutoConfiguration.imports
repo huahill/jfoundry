@@ -1,12 +1,6 @@
 org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration
 org.jfoundry.autoconfigure.transaction.TransactionRunnerAutoConfiguration
-org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration
 org.jfoundry.autoconfigure.inbox.InboxMybatisPlusAutoConfiguration
 org.jfoundry.autoconfigure.inbox.InboxJpaEntityScanAutoConfiguration
 org.jfoundry.autoconfigure.inbox.InboxJpaAutoConfiguration
 org.jfoundry.autoconfigure.inbox.InboxAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaEntityScanAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration
-org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration
-org.jfoundry.autoconfigure.outbox.dispatcher.JobRunrDispatcherAutoConfiguration

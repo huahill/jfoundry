@@ -11,12 +11,9 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
-    <name>jfoundry-spring-boot-autoconfigure</name>
-    <description>
-        Spring Boot AutoConfiguration for jfoundry. Feature modules are optional here;
-        dedicated starters decide which capabilities enter an application's classpath.
-    </description>
+    <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
+    <name>jfoundry-outbox-spring-boot-autoconfigure</name>
+    <description>Spring Boot auto-configuration for jfoundry transactional Outbox.</description>
 
     <properties>
         <mockito.javaagent.argLine>-javaagent:${org.mockito:mockito-core:jar}</mockito.javaagent.argLine>
@@ -25,38 +22,72 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-transaction-core</artifactId>
+            <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-event-externalization-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-messaging-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-messaging-jackson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-outbox-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-inbox-core</artifactId>
+            <artifactId>jfoundry-outbox-jpa</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-inbox-mybatis-plus</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-inbox-jpa</artifactId>
-            <optional>true</optional>
+            <artifactId>jfoundry-outbox-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-transaction-spring</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- Spring Boot autoconfigure (compile): @AutoConfiguration / @ConditionalOnX are first-class citizens here -->
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-outbox-jobrunr</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jobrunr</groupId>
+            <artifactId>jobrunr</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.jmolecules.integrations</groupId>
+            <artifactId>jmolecules-jackson</artifactId>
+            <optional>true</optional>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -64,31 +95,22 @@
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-tx</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <!-- mybatis-spring: @MapperScan annotation source; the MyBatis-Plus starter provides runtime via mybatis-plus-spring-boot3-starter -->
-        <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-spring</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
-        <!-- configuration-processor: metadata for IDE auto-completion on jfoundry configuration properties -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <scope>provided</scope>
         </dependency>
 
-        <!-- Test -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -114,27 +136,9 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
             <scope>test</scope>
         </dependency>
-        <!--
-          Web test scope: required so Spring Boot's JacksonAutoConfiguration can
-          build the default ObjectMapper via Jackson2ObjectMapperBuilder, which applies all
-          registered Module beans (including JMoleculesModule), and so jMolecules Spring's
-          WebMvcConfigurer can register Identifier / Association converters on MVC's
-          ConversionService. In a real Spring Boot app, these classes are normally present
-          via spring-boot-starter-web/-webflux; here we pull them in only for integration tests.
-        -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jmolecules.integrations</groupId>
-            <artifactId>jmolecules-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -151,6 +155,26 @@
         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-application-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-inbox-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-inbox-mybatis-plus</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-inbox-jpa</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
