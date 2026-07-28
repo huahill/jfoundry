@@ -15,6 +15,10 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-inbox-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
