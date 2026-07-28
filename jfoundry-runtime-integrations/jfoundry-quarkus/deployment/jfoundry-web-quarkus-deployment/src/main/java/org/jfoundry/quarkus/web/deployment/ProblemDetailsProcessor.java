@@ -28,6 +28,7 @@ class ProblemDetailsProcessor {
                 mapper(ProblemDetailsExceptionMappers.ExternalAccessMapper.class, ExternalAccessException.class),
                 mapper(ProblemDetailsExceptionMappers.DomainRuleViolationMapper.class, DomainRuleViolationException.class),
                 mapper(ProblemDetailsExceptionMappers.DomainStateMapper.class, DomainStateException.class),
+                mapper(ProblemDetailsExceptionMappers.UnhandledExceptionMapper.class, Exception.class),
                 mapper(ProblemDetailsExceptionMappers.WebApplicationMapper.class, WebApplicationException.class)
         );
     }

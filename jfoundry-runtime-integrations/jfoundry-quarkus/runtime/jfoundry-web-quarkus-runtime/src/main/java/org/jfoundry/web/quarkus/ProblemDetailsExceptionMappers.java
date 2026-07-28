@@ -49,6 +49,10 @@ public final class ProblemDetailsExceptionMappers {
     public static final class DomainStateMapper extends JFoundryExceptionMapper<DomainStateException> {
     }
 
+    /// Maps unhandled exceptions to safe internal-server-error problem responses.
+    public static final class UnhandledExceptionMapper extends JFoundryExceptionMapper<Exception> {
+    }
+
     /// Maps supported Jakarta REST failures to problem responses.
     public static final class WebApplicationMapper implements ExceptionMapper<WebApplicationException> {
 

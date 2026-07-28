@@ -3,18 +3,20 @@ package org.jfoundry.web.quarkus;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 
 final class ProblemDetailsResponses {
 
     private static final String PROBLEM_JSON = "application/problem+json";
+    private static final CompositeProblemMapper PROBLEM_MAPPER = new CompositeProblemMapper(java.util.List.of());
 
     private ProblemDetailsResponses() {
     }
 
     static Response forException(Exception exception) {
-        return problem(ProblemCatalog.forException(exception), null);
+        return problem(PROBLEM_MAPPER.map(exception).orElseThrow(), null);
     }
 
     static Response forHttpStatus(int status, MultivaluedMap<String, Object> headers) {

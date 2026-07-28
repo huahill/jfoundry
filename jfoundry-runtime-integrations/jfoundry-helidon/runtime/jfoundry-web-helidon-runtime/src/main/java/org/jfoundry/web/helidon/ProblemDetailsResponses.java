@@ -5,18 +5,20 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
+import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 
 final class ProblemDetailsResponses {
 
     private static final String PROBLEM_JSON = "application/problem+json";
+    private static final CompositeProblemMapper PROBLEM_MAPPER = new CompositeProblemMapper(java.util.List.of());
 
     private ProblemDetailsResponses() {
     }
 
     static Response forException(Exception exception) {
-        return problem(ProblemCatalog.forException(exception), null);
+        return problem(PROBLEM_MAPPER.map(exception).orElseThrow(), null);
     }
 
     static Response forHttpStatus(int status, MultivaluedMap<String, Object> headers) {
@@ -38,12 +40,12 @@ final class ProblemDetailsResponses {
     }
 
     private static JsonObject problemJson(ProblemDescriptor descriptor) {
-        return Json.createObjectBuilder()
+        var builder = Json.createObjectBuilder()
                 .add("type", descriptor.type().toString())
                 .add("title", descriptor.title())
                 .add("status", descriptor.status())
-                .add("detail", descriptor.detail())
-                .add("code", descriptor.code())
-                .build();
+                .add("detail", descriptor.detail());
+        descriptor.extensions().forEach((name, value) -> builder.add(name, String.valueOf(value)));
+        return builder.build();
     }
 }

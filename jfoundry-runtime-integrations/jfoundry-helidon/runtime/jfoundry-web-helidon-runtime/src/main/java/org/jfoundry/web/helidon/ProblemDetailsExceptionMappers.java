@@ -37,6 +37,8 @@ public final class ProblemDetailsExceptionMappers {
     public static final class DomainRuleViolationMapper extends JFoundryExceptionMapper<DomainRuleViolationException> { }
     @Provider
     public static final class DomainStateMapper extends JFoundryExceptionMapper<DomainStateException> { }
+    @Provider
+    public static final class UnhandledExceptionMapper extends JFoundryExceptionMapper<Exception> { }
 
     @Provider
     public static final class WebApplicationMapper implements ExceptionMapper<WebApplicationException> {
