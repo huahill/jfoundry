@@ -1,5 +1,8 @@
 package org.jfoundry.autoconfigure.webmvc;
 
+import org.jfoundry.application.exception.InvalidArgumentException;
+import org.jfoundry.problem.ProblemDescriptor;
+import org.jfoundry.problem.ProblemMapper;
 import org.jfoundry.webmvc.spring.ProblemDetailExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -26,5 +29,17 @@ class WebMvcProblemDetailAutoConfigurationTest {
                     assertThat(context).hasSingleBean(ProblemDetailExceptionHandler.class);
                     assertThat(context.getBean(ProblemDetailExceptionHandler.class)).isSameAs(userHandler);
                 });
+    }
+
+    @Test
+    void composesApplicationProblemMappersIntoTheHandler() {
+        ProblemMapper mapper = exception -> java.util.Optional.of(new ProblemDescriptor(
+                java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
+                "Application detail", java.util.Map.of("code", "APPLICATION_FAILURE")));
+
+        runner.withBean(ProblemMapper.class, () -> mapper)
+                .run(context -> assertThat(context.getBean(ProblemDetailExceptionHandler.class)
+                        .handleInvalidArgument(new InvalidArgumentException("internal"))
+                        .getBody().getProperties()).containsEntry("code", "APPLICATION_FAILURE"));
     }
 }

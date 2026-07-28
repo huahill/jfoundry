@@ -1,5 +1,7 @@
 package org.jfoundry.autoconfigure.webmvc;
 
+import org.jfoundry.problem.CompositeProblemMapper;
+import org.jfoundry.problem.ProblemMapper;
 import org.jfoundry.webmvc.spring.ProblemDetailExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -20,7 +22,7 @@ public class WebMvcProblemDetailAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(ProblemDetailExceptionHandler.class)
-    public ProblemDetailExceptionHandler problemDetailExceptionHandler() {
-        return new ProblemDetailExceptionHandler();
+    public ProblemDetailExceptionHandler problemDetailExceptionHandler(java.util.List<ProblemMapper> problemMappers) {
+        return new ProblemDetailExceptionHandler(new CompositeProblemMapper(problemMappers));
     }
 }
