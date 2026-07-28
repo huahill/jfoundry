@@ -8,10 +8,10 @@ import org.jfoundry.application.lock.LockKey;
 import org.jfoundry.application.lock.LockOptions;
 import org.jfoundry.application.outbox.OutboxAppendRequest;
 import org.jfoundry.application.outbox.OutboxRecorder;
-import org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration;
 import org.jfoundry.infrastructure.observability.spring.MicrometerJFoundryObservability;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.test.util.AopTestUtils;
@@ -26,7 +26,7 @@ class MicrometerObservationAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
-                    JFoundryAopAutoConfiguration.class,
+                    AopAutoConfiguration.class,
                     MicrometerObservationAutoConfiguration.class));
 
     @Test

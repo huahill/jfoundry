@@ -24,7 +24,6 @@ import org.springframework.context.annotation.Role;
 @AutoConfiguration
 @AutoConfigureAfter(name = {
         "org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration",
-        "org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration",
         "org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration",
         "org.jfoundry.autoconfigure.inbox.InboxAutoConfiguration",
         "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration",

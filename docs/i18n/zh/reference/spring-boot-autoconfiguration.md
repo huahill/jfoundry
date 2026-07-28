@@ -54,7 +54,6 @@
 
 | 自动配置 | 注册 Bean | 主要条件 |
 |----------|-----------|----------|
-| `JFoundryAopAutoConfiguration` | Spring 规范的内部自动代理创建器 | Spring AOP 可用。领域事件和分布式锁顾问共用一个自动代理创建器，并延迟解析各自的拦截器。 |
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | 存在 `TransactionRunner` 与 `TransactionTemplate`，Spring Boot 已配置 `PlatformTransactionManager`，且没有已有 `TransactionRunner`。 |
 | `DistributedLockAutoConfiguration` | `LockExecutor`、可选 Redisson `DistributedLockClient`、可选 `@DistributedLock` 顾问 | 存在 `jfoundry-lock-core`。Redisson 适配器需要 `RedissonClient`；注解顾问需要 `DistributedLockClient` 且开启注解支持。 |
 | `MicrometerObservationAutoConfiguration` | 原始 JFoundry 操作 Bean 的 Micrometer 顾问 | 存在 `ObservationRegistry`（使用可观测性启动器时由 Actuator 提供）；存在 Micrometer Observation、Spring AOP，以及至少一个符合条件的 Outbox、Inbox 或锁操作 Bean。 |
@@ -82,7 +81,7 @@
 - jfoundry 不注册回退 `MessageSender`。启用 Outbox 投递前，应添加消息代理专用启动器或
   定义应用自己的 `MessageSender`。
 - `TransactionRunnerAutoConfiguration` 在 Spring Boot 事务自动配置之后运行，确保其 Bean 条件评估前已经可以看到 JDBC、JPA 或 JTA 事务管理器。
-- jfoundry 通过 Spring 规范的自动代理创建器注册各类顾问。其他 Spring 集成已经注册更强的
-  创建器时，Spring 的标准升级协议会保留该创建器；业务应用无需注册 jfoundry 专用代理创建器。
+- 领域事件、分布式锁和可观测性启动器通过 `spring-boot-starter-aop` 使用 Spring Boot 标准 AOP
+  自动配置。代理策略和 AOP 禁用行为遵循 Spring Boot 的 `spring.aop.*` 配置；jfoundry 不再注册自己的代理创建器。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
 - `mode=none` 表示不注册派发器、恢复任务或清理任务，即使显式开启恢复或清理也不会注册。

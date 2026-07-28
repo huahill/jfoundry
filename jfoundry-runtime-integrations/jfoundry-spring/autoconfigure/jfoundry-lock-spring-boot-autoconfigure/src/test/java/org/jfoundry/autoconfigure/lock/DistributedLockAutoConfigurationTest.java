@@ -1,9 +1,9 @@
 package org.jfoundry.autoconfigure.lock;
 
 import org.jfoundry.application.lock.DistributedLockClient;
+import org.jfoundry.application.lock.DistributedLock;
 import org.jfoundry.application.lock.LockExecutor;
 import org.jfoundry.application.lock.LockHandle;
-import org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration;
 import org.jfoundry.infrastructure.lock.redisson.RedissonDistributedLockClient;
 import org.jfoundry.infrastructure.lock.spring.DistributedLockInterceptor;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,11 @@ import org.redisson.api.RedissonClient;
 import org.springframework.aop.Advisor;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.aop.support.AopUtils;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +25,7 @@ class DistributedLockAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
-                    JFoundryAopAutoConfiguration.class,
+                    AopAutoConfiguration.class,
                     DistributedLockAutoConfiguration.class));
 
     @Test
@@ -64,5 +68,35 @@ class DistributedLockAutoConfigurationTest {
         assertThat(ordering).isNotNull();
         assertThat(ordering.name())
                 .contains("org.redisson.spring.starter.RedissonAutoConfigurationV2");
+    }
+
+    @Test
+    void appliesTheLockAdvisorUsingSpringBootAop() {
+        runner
+                .withUserConfiguration(AnnotatedServiceConfiguration.class)
+                .withBean(DistributedLockClient.class, () -> (key, options) -> new LockHandle(key, true))
+                .run(context -> {
+                    TestLockedService service = context.getBean(TestLockedService.class);
+
+                    assertThat(AopUtils.isAopProxy(service)).isTrue();
+                    assertThat(service.run()).isEqualTo("locked");
+                });
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class AnnotatedServiceConfiguration {
+
+        @Bean
+        TestLockedService testLockedService() {
+            return new TestLockedService();
+        }
+    }
+
+    static class TestLockedService {
+
+        @DistributedLock(key = "test-lock")
+        String run() {
+            return "locked";
+        }
     }
 }

@@ -7,7 +7,6 @@ import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;
-import org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchInterceptor;
 import org.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventScope;
@@ -21,6 +20,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.context.ApplicationEventPublisher;
@@ -38,7 +38,7 @@ class DomainEventDispatchAutoConfigurationTest {
 
     private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
             .withConfiguration(AutoConfigurations.of(
-                    JFoundryAopAutoConfiguration.class,
+                    AopAutoConfiguration.class,
                     DomainEventPersistenceAutoConfiguration.class,
                     DomainEventDispatchAutoConfiguration.class))
             .withBean(ApplicationEventPublisher.class, () -> event -> {

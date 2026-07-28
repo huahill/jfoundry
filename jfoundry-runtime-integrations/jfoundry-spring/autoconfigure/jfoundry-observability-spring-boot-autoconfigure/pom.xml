@@ -35,13 +35,13 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-boot-autoconfigure</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
+            <artifactId>spring-boot-starter-aop</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
