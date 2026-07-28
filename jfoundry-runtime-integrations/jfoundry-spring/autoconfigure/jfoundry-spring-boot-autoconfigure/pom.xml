@@ -50,16 +50,6 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-persistence-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-persistence-spring</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-inbox-mybatis-plus</artifactId>
             <optional>true</optional>
         </dependency>
@@ -140,6 +130,11 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
             <optional>true</optional>
         </dependency>
         <!-- mybatis-spring: @MapperScan annotation source; the MyBatis-Plus starter provides runtime via mybatis-plus-spring-boot3-starter -->

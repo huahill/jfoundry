@@ -25,6 +25,10 @@
             <artifactId>jfoundry-persistence-spring</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-persistence-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>

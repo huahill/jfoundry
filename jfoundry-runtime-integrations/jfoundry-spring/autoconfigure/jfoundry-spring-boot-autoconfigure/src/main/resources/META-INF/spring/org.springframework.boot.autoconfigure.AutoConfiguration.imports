@@ -1,6 +1,4 @@
 org.jfoundry.autoconfigure.aop.JFoundryAopAutoConfiguration
-org.jfoundry.autoconfigure.persistence.PersistenceFailureAutoConfiguration
-org.jfoundry.autoconfigure.persistence.AggregatePersistenceContextAutoConfiguration
 org.jfoundry.autoconfigure.transaction.TransactionRunnerAutoConfiguration
 org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration
 org.jfoundry.autoconfigure.inbox.InboxMybatisPlusAutoConfiguration

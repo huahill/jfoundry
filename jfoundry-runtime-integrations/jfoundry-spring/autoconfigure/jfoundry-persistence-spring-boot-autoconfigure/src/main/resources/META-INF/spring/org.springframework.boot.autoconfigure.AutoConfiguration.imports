@@ -1,0 +1,2 @@
+org.jfoundry.autoconfigure.persistence.PersistenceFailureAutoConfiguration
+org.jfoundry.autoconfigure.persistence.AggregatePersistenceContextAutoConfiguration
