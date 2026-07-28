@@ -63,7 +63,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 
 优先使用运行时无关的 `TransactionRunner` 表达可移植的应用事务边界。Spring 将该契约映射到其事务基础设施并支持六种 jfoundry 传播模式。当应用明确选择 Spring 语义时，也可以使用 Spring `@Transactional`；不要在同一用例上叠加彼此独立的事务边界，除非已明确其所有权规则。详见[应用事务](../capabilities/application-transactions.md)。
 
-事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。
+事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实；持久化注册该聚合后，运行时会在最外层 `@ApplicationService` 成功完成时提取其待派发事件。该自动路径中的应用业务代码不调用 `drainEvents()`。
 
 ## 持久化
 
@@ -75,7 +75,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 
 Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢复和清理。它不会创建数据库表，也不会虚构消息目的地；将所选 SQL 模板复制到应用自己的迁移流程中。
 
-`jfoundry-messaging-spring-boot-starter` 不会注册回退 `MessageSender`。启用投递前，必须添加一个消息代理专用启动器或提供应用 `MessageSender`，否则不存在生产投递路径。自动领域事件外部化默认关闭，只有当被标注的领域事件有意作为稳定集成契约时才启用。详见[可靠消息](../capabilities/reliable-messaging.md)。
+`jfoundry-messaging-spring-boot-starter` 不会注册回退 `MessageSender`。启用投递前，必须添加一个消息代理专用启动器或提供应用 `MessageSender`，否则不存在生产投递路径。自动 Outbox 事件记录默认关闭，通过 `jfoundry.domain.event.dispatch.outbox.enabled=true` 启用。它只写入标注 `@Externalized` 的领域事件或被 `DomainEventExternalizer` 选中的事件，绝不会从持久化变更推断消息。详见[可靠消息](../capabilities/reliable-messaging.md)。
 
 ## Web、锁与替换
 

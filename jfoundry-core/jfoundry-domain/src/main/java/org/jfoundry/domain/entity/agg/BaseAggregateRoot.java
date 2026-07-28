@@ -15,11 +15,16 @@ import java.util.List;
 /// - domain event recording and draining
 /// - jMolecules AggregateRoot marker plus EventRecordable capability
 /// <p>
-/// Aggregate roots only record domain events that occurred inside their own
-/// boundary. The application layer should call {@link #drainEvents()} at the
-/// use-case boundary to hand events off in one step and continue dispatching.
-/// The atomicity described here is limited to read-and-clear semantics under a
-/// single-threaded aggregate usage model; it is not a thread-safety guarantee.
+/// Aggregate roots explicitly record domain events that occur inside their own
+/// business behavior. Recording an event does not dispatch, externalize, or
+/// persist it.
+/// <p>
+/// A supported runtime can register a persisted aggregate and automatically
+/// drain its events after the outermost successful application-service boundary.
+/// A framework-neutral or manual runtime host can instead call
+/// {@link #drainEvents()} and dispatch the returned events itself. The atomicity
+/// described here is limited to read-and-clear semantics under a single-threaded
+/// aggregate usage model; it is not a thread-safety guarantee.
 ///
 /// @param <T> aggregate root self type
 /// @param <ID> identifier type
@@ -64,9 +69,9 @@ public abstract class BaseAggregateRoot<T extends AggregateRoot<T, ID>, ID exten
 
     /// Records a domain event.
     ///
-    /// Aggregate roots record domain events that occurred inside their own
-    /// boundary so the application layer can drain and dispatch them at the
-    /// use-case boundary.
+    /// Records a domain event that occurred inside this aggregate's business
+    /// behavior. This method only captures the fact; a runtime or manual host
+    /// later drains and dispatches it at an application boundary.
     ///
     /// @param event domain event
     protected void recordEvent(DomainEvent event) {

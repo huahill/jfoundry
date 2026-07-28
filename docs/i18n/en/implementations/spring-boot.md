@@ -80,7 +80,10 @@ The event starter activates application-service domain-event dispatch and publis
 event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
 process. A `@TransactionalEventListener` selects the desired transaction phase, such as
 `AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
-not dispatch their pending aggregate events.
+not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
+fact with `recordEvent(...)`; after persistence registers that aggregate, the runtime drains its
+pending events at the successful outermost `@ApplicationService` boundary. Application business code
+does not call `drainEvents()` in this automatic path.
 
 ## Persistence
 
@@ -103,9 +106,10 @@ process.
 
 `jfoundry-messaging-spring-boot-starter` does not register a fallback `MessageSender`. Before
 enabling dispatch, add one broker-specific starter or provide an application `MessageSender`; without
-one, no production delivery path exists. Automatic domain-event externalization is disabled by
-default and should only be enabled when the annotated domain event is intentionally a stable
-integration contract. See [reliable messaging](../capabilities/reliable-messaging.md).
+one, no production delivery path exists. Automatic Outbox event recording is disabled by default;
+enable it with `jfoundry.domain.event.dispatch.outbox.enabled=true`. It writes only an
+`@Externalized` domain event or an event selected by `DomainEventExternalizer`, never a message
+inferred from a persistence change. See [reliable messaging](../capabilities/reliable-messaging.md).
 
 ## Web, Locks, And Replacement
 

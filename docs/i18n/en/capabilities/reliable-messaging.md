@@ -9,13 +9,19 @@ for a message and consumer combination.
 ## Event Flow
 
 ```text
-aggregate records domain event
-  -> application service boundary drains events
+aggregate explicitly records domain event
+  -> automatic runtime drains events after the successful outermost application-service boundary
+     (or a manual dispatcher drains them)
   -> externalization selects topic, key, and payload
   -> Outbox row is written in the same database transaction
   -> dispatcher claims and sends through MessageSender
   -> consumer uses InboxTemplate for idempotency
 ```
+
+Automatic event collection does not infer domain facts from persistence changes or object state.
+The aggregate's business behavior explicitly records a fact with `recordEvent(...)`; in an automatic
+runtime, application business code does not normally call `drainEvents()`. That method remains the
+framework-neutral handoff SPI for runtime integrations and deliberate manual dispatch.
 
 There are two automatic externalization paths. Mark a deliberately stable public domain-event
 contract with `@Externalized` to serialize that event directly. For a versioned integration contract,
