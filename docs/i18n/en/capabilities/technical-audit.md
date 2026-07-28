@@ -13,5 +13,19 @@ the actor field is `null`; JFoundry does not synthesize an `unknown` actor.
 and modification metadata. Update stamping preserves creation metadata and changes only the last
 modification metadata. Persistence adapters invoke update stamping only for an actual update.
 
+## MyBatis-Plus
+
+`jfoundry-persistence-mybatis-plus` provides `MybatisPlusAuditData` and
+`MybatisPlusAuditMetaObjectHandler`. Register the handler with an `AuditStamping` configured by the
+application. The handler only applies to data objects derived from `MybatisPlusAuditData`; it does
+not infer audit fields from arbitrary MyBatis-Plus data objects.
+
+## Jakarta Persistence
+
+`jfoundry-persistence-jpa` provides `JpaAuditData` and `JpaAuditStamping`. Applications opt in by
+constructing their `JpaAggregateRepository` with a `JpaAuditStamping` backed by the application's
+`AuditStamping`. The repository stamps derived `JpaAuditData` entities before persist and update;
+it does not rely on JPA listener dependency injection or a global audit context.
+
 Business-significant submitters, approvers, and similar facts remain explicit domain state or domain
 events. Soft deletion and append-only compliance audit trails are separate capabilities.

@@ -29,6 +29,7 @@ public abstract class JpaAggregateRepository<
     protected final EntityManager entityManager;
     private final Class<E> entityType;
     private final JpaAggregateMapper<A, ID, E, K> mapper;
+    private final JpaAuditStamping auditStamping;
     private AggregatePersistenceContext persistenceContext;
     private final PersistenceStateKey<E> managedEntityKey;
 
@@ -36,9 +37,19 @@ public abstract class JpaAggregateRepository<
             EntityManager entityManager,
             Class<E> entityType,
             JpaAggregateMapper<A, ID, E, K> mapper) {
+        this(entityManager, entityType, mapper, null);
+    }
+
+    /// Creates a repository that applies technical audit stamps to {@link JpaAuditData} entities.
+    protected JpaAggregateRepository(
+            EntityManager entityManager,
+            Class<E> entityType,
+            JpaAggregateMapper<A, ID, E, K> mapper,
+            JpaAuditStamping auditStamping) {
         this.entityManager = Objects.requireNonNull(entityManager, "EntityManager must not be null.");
         this.entityType = Objects.requireNonNull(entityType, "Entity type must not be null.");
         this.mapper = Objects.requireNonNull(mapper, "JpaAggregateMapper must not be null.");
+        this.auditStamping = auditStamping;
         this.managedEntityKey = PersistenceStateKey.of(
                 entityType.getName() + ".managed-entity", entityType);
     }
@@ -74,6 +85,7 @@ public abstract class JpaAggregateRepository<
     protected final void doAdd(A aggregate) {
         AggregatePersistenceContext context = requirePersistenceContext();
         E entity = mapper.newEntity(aggregate);
+        stampForPersist(entity);
         entityManager.persist(entity);
         flush("add", aggregate);
         context.attach(aggregate, managedEntityKey, entity);
@@ -83,6 +95,7 @@ public abstract class JpaAggregateRepository<
     protected final void doModify(A aggregate) {
         E managedEntity = requirePersistenceContext().require(aggregate, managedEntityKey);
         mapper.apply(aggregate, managedEntity);
+        stampForUpdate(managedEntity);
         flush("modify", aggregate);
     }
 
@@ -100,6 +113,18 @@ public abstract class JpaAggregateRepository<
             throw new ConflictException(
                     operation + " optimistic lock conflict for aggregate: " + aggregate.getId(),
                     failure);
+        }
+    }
+
+    private void stampForPersist(E entity) {
+        if (auditStamping != null && entity instanceof JpaAuditData auditData) {
+            auditStamping.stampForPersist(auditData);
+        }
+    }
+
+    private void stampForUpdate(E entity) {
+        if (auditStamping != null && entity instanceof JpaAuditData auditData) {
+            auditStamping.stampForUpdate(auditData);
         }
     }
 
