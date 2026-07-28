@@ -27,7 +27,7 @@ import org.springframework.context.annotation.Role;
 import java.util.List;
 
 @AutoConfiguration
-@AutoConfigureAfter(DomainEventOutboxRecorderAutoConfiguration.class)
+@AutoConfigureAfter(name = "org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration")
 @EnableConfigurationProperties(DomainEventDispatchProperties.class)
 @ConditionalOnClass({
         ApplicationService.class,

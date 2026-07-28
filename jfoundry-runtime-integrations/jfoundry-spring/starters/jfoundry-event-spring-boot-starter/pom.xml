@@ -25,6 +25,10 @@
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-event-spring</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-event-spring-boot-autoconfigure</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

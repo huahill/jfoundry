@@ -1,0 +1,2 @@
+org.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration
+org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration

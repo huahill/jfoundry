@@ -25,27 +25,12 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-application-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-transaction-core</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-event-externalization-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-event-spring</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
