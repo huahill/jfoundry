@@ -51,6 +51,9 @@
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | `DEAD_LETTERED` 记录保留天数。 |
 | `jfoundry.outbox.cleanup.batch-size` | `1000` | 每批最多删除记录数。 |
 
+`DomainEventOutboxRecorderAutoConfiguration` 会将应用提供的全部 `DomainEventExternalizer<?>`
+Bean 注入默认记录器。应用通常只需提供这些映射，无需替换 `DomainEventOutboxRecorder`；自定义记录器仍表示显式的完整替换。
+
 ## 自动配置条件
 
 | 自动配置 | 注册 Bean | 主要条件 |

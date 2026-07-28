@@ -53,6 +53,10 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | Retention for `DEAD_LETTERED` rows. |
 | `jfoundry.outbox.cleanup.batch-size` | `1000` | Maximum rows deleted per cleanup batch. |
 
+`DomainEventOutboxRecorderAutoConfiguration` injects every application `DomainEventExternalizer<?>`
+bean into the default recorder. Applications normally provide these mappings without replacing
+`DomainEventOutboxRecorder`; a custom recorder remains an explicit full replacement.
+
 ## Auto-configuration Conditions
 
 | Auto-configuration | Registers | Main conditions |

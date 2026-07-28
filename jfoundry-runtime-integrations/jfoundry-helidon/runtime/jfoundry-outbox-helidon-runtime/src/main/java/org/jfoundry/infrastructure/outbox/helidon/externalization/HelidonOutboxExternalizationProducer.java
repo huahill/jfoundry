@@ -4,9 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
@@ -46,9 +49,14 @@ public final class HelidonOutboxExternalizationProducer {
     DomainEventOutboxRecorder domainEventOutboxRecorder(Instance<OutboxMessageStore> outboxMessageStore,
                                                          Instance<PayloadSerializer> payloadSerializer,
                                                          ExternalizationRuleResolver ruleResolver,
-                                                         AggregateRoutingResolver aggregateRoutingResolver) {
+                                                         AggregateRoutingResolver aggregateRoutingResolver,
+                                                         @Any Instance<DomainEventExternalizer<?>> externalizers) {
         return new HelidonDomainEventOutboxRecorder(
-                outboxMessageStore, payloadSerializer, ruleResolver, aggregateRoutingResolver);
+                outboxMessageStore,
+                payloadSerializer,
+                ruleResolver,
+                aggregateRoutingResolver,
+                new DomainEventExternalizationResolver(externalizers.stream().toList()));
     }
 
     private static <T> T require(Instance<T> instance, String message) {

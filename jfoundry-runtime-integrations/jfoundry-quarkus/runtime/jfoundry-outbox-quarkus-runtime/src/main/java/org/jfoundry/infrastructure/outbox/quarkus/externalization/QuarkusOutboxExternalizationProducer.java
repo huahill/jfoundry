@@ -3,9 +3,12 @@ package org.jfoundry.infrastructure.outbox.quarkus.externalization;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.arc.DefaultBean;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
@@ -50,8 +53,13 @@ public final class QuarkusOutboxExternalizationProducer {
             Instance<OutboxMessageStore> outboxMessageStore,
             PayloadSerializer payloadSerializer,
             ExternalizationRuleResolver ruleResolver,
-            AggregateRoutingResolver aggregateRoutingResolver) {
+            AggregateRoutingResolver aggregateRoutingResolver,
+            @Any Instance<DomainEventExternalizer<?>> externalizers) {
         return new DefaultDomainEventOutboxRecorder(
-                outboxMessageStore, payloadSerializer, ruleResolver, aggregateRoutingResolver);
+                outboxMessageStore,
+                payloadSerializer,
+                ruleResolver,
+                aggregateRoutingResolver,
+                new DomainEventExternalizationResolver(externalizers.stream().toList()));
     }
 }

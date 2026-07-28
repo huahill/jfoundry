@@ -3,6 +3,8 @@ package org.jfoundry.autoconfigure.event;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jfoundry.application.messaging.PayloadSerializer;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
@@ -16,6 +18,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+
+import java.util.List;
 
 /// Auto-configuration for automatic domain-event and explicit Outbox recording.
 /// <p>
@@ -85,7 +89,13 @@ public class DomainEventOutboxRecorderAutoConfiguration {
             OutboxMessageStore outboxRepository,
             ExternalizationRuleResolver ruleResolver,
             AggregateRoutingResolver aggregateRoutingResolver,
-            PayloadSerializer serializer) {
-        return new DefaultDomainEventOutboxRecorder(outboxRepository, serializer, ruleResolver, aggregateRoutingResolver);
+            PayloadSerializer serializer,
+            List<DomainEventExternalizer<?>> externalizers) {
+        return new DefaultDomainEventOutboxRecorder(
+                outboxRepository,
+                serializer,
+                ruleResolver,
+                aggregateRoutingResolver,
+                new DomainEventExternalizationResolver(externalizers));
     }
 }

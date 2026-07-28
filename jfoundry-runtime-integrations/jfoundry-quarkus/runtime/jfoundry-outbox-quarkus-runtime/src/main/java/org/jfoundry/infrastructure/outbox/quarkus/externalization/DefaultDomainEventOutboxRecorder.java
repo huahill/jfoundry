@@ -3,6 +3,8 @@ package org.jfoundry.infrastructure.outbox.quarkus.externalization;
 import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.event.externalization.AggregateRoutingMetadata;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
+import org.jfoundry.application.event.externalization.ExternalizedEvent;
 import org.jfoundry.application.event.externalization.ExternalizationRule;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
@@ -22,16 +24,28 @@ public final class DefaultDomainEventOutboxRecorder implements DomainEventOutbox
     private final PayloadSerializer payloadSerializer;
     private final ExternalizationRuleResolver ruleResolver;
     private final AggregateRoutingResolver aggregateRoutingResolver;
+    private final DomainEventExternalizationResolver externalizationResolver;
 
     public DefaultDomainEventOutboxRecorder(
             Instance<OutboxMessageStore> outboxMessageStore,
             PayloadSerializer payloadSerializer,
             ExternalizationRuleResolver ruleResolver,
             AggregateRoutingResolver aggregateRoutingResolver) {
+        this(outboxMessageStore, payloadSerializer, ruleResolver, aggregateRoutingResolver,
+                new DomainEventExternalizationResolver(List.of()));
+    }
+
+    public DefaultDomainEventOutboxRecorder(
+            Instance<OutboxMessageStore> outboxMessageStore,
+            PayloadSerializer payloadSerializer,
+            ExternalizationRuleResolver ruleResolver,
+            AggregateRoutingResolver aggregateRoutingResolver,
+            DomainEventExternalizationResolver externalizationResolver) {
         this.outboxMessageStore = outboxMessageStore;
         this.payloadSerializer = payloadSerializer;
         this.ruleResolver = ruleResolver;
         this.aggregateRoutingResolver = aggregateRoutingResolver;
+        this.externalizationResolver = externalizationResolver;
     }
 
     @Override
@@ -43,6 +57,16 @@ public final class DefaultDomainEventOutboxRecorder implements DomainEventOutbox
         for (DomainEvent event : events) {
             if (event == null) {
                 throw new IllegalArgumentException("Domain event must not be null.");
+            }
+            List<ExternalizedEvent> mappedEvents = externalizationResolver.resolve(event).orElse(null);
+            if (mappedEvents != null) {
+                if (store == null && !mappedEvents.isEmpty()) {
+                    store = requireOutboxMessageStore();
+                }
+                for (ExternalizedEvent mappedEvent : mappedEvents) {
+                    recordMapped(store, event, mappedEvent);
+                }
+                continue;
             }
             ExternalizationRule rule = ruleResolver.resolve(event).orElse(null);
             if (rule == null) {
@@ -71,6 +95,19 @@ public final class DefaultDomainEventOutboxRecorder implements DomainEventOutbox
                 aggregate != null ? aggregate.aggregateType() : null,
                 aggregate != null ? aggregate.aggregateId() : null,
                 aggregate != null ? aggregate.aggregateVersion() : null));
+    }
+
+    private void recordMapped(OutboxMessageStore store, DomainEvent sourceEvent, ExternalizedEvent mappedEvent) {
+        store.append(OutboxMessage.newPending(
+                resolveEventId(sourceEvent),
+                mappedEvent.topic(),
+                mappedEvent.payloadKey(),
+                mappedEvent.payloadType(),
+                payloadSerializer.serialize(mappedEvent.payload()),
+                resolveOccurredAt(sourceEvent),
+                mappedEvent.aggregateType(),
+                mappedEvent.aggregateId(),
+                mappedEvent.aggregateVersion()));
     }
 
     private OutboxMessageStore requireOutboxMessageStore() {

@@ -3,13 +3,14 @@ package org.jfoundry.autoconfigure;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jfoundry.application.ApplicationService;
 import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.externalization.DomainEventExternalizer;
+import org.jfoundry.application.event.externalization.ExternalizedEvent;
 import org.jfoundry.domain.event.BaseDomainEvent;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
 import org.awaitility.Awaitility;
 import org.jmolecules.ddd.types.Identifier;
-import org.jmolecules.event.annotation.Externalized;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,6 @@ class DomainEventExternalizationIntegrationTest {
     @Autowired
     private CollectingMessageSender collectingSender;
 
-    @Externalized("env.created")
     static class EnvCreatedEvent extends BaseDomainEvent {
     }
 
@@ -61,7 +61,7 @@ class DomainEventExternalizationIntegrationTest {
                 .pollInterval(100, TimeUnit.MILLISECONDS)
                 .untilAsserted(() -> assertThat(collectingSender.receivedPayloads).hasSize(1));
         assertThat(collectingSender.receivedPayloads.get(0))
-                .contains("\"eventId\":", "\"occurredAt\":")
+                .contains("\"environmentId\":\"env-1\"")
                 .doesNotContain("@class", "EnvCreatedEvent");
     }
 
@@ -83,6 +83,23 @@ class DomainEventExternalizationIntegrationTest {
         @Bean
         TestUseCase testUseCase(DomainEventContext domainEventContext) {
             return new TestUseCase(domainEventContext);
+        }
+
+        @Bean
+        DomainEventExternalizer<EnvCreatedEvent> envCreatedExternalizer() {
+            return new DomainEventExternalizer<>() {
+                @Override
+                public Class<EnvCreatedEvent> sourceEventType() {
+                    return EnvCreatedEvent.class;
+                }
+
+                @Override
+                public List<ExternalizedEvent> externalize(EnvCreatedEvent event) {
+                    return List.of(new ExternalizedEvent(
+                            "environment.v1", "environment.created.v1", new EnvironmentCreatedV1("env-1"), "env-1",
+                            "Environment", "env-1", 1L));
+                }
+            };
         }
     }
 
@@ -114,6 +131,9 @@ class DomainEventExternalizationIntegrationTest {
     }
 
     record TestAggregateId(String value) implements Identifier {
+    }
+
+    record EnvironmentCreatedV1(String environmentId) {
     }
 
     static class CollectingMessageSender implements MessageSender {

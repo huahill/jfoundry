@@ -3,6 +3,8 @@ package org.jfoundry.infrastructure.outbox.helidon.externalization;
 import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.event.externalization.AggregateRoutingMetadata;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
+import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
+import org.jfoundry.application.event.externalization.ExternalizedEvent;
 import org.jfoundry.application.event.externalization.ExternalizationRule;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
@@ -22,15 +24,26 @@ public final class HelidonDomainEventOutboxRecorder implements DomainEventOutbox
     private final Instance<PayloadSerializer> payloadSerializer;
     private final ExternalizationRuleResolver ruleResolver;
     private final AggregateRoutingResolver aggregateRoutingResolver;
+    private final DomainEventExternalizationResolver externalizationResolver;
 
     public HelidonDomainEventOutboxRecorder(Instance<OutboxMessageStore> outboxMessageStore,
                                             Instance<PayloadSerializer> payloadSerializer,
                                             ExternalizationRuleResolver ruleResolver,
                                             AggregateRoutingResolver aggregateRoutingResolver) {
+        this(outboxMessageStore, payloadSerializer, ruleResolver, aggregateRoutingResolver,
+                new DomainEventExternalizationResolver(List.of()));
+    }
+
+    public HelidonDomainEventOutboxRecorder(Instance<OutboxMessageStore> outboxMessageStore,
+                                            Instance<PayloadSerializer> payloadSerializer,
+                                            ExternalizationRuleResolver ruleResolver,
+                                            AggregateRoutingResolver aggregateRoutingResolver,
+                                            DomainEventExternalizationResolver externalizationResolver) {
         this.outboxMessageStore = outboxMessageStore;
         this.payloadSerializer = payloadSerializer;
         this.ruleResolver = ruleResolver;
         this.aggregateRoutingResolver = aggregateRoutingResolver;
+        this.externalizationResolver = externalizationResolver;
     }
 
     @Override
@@ -42,6 +55,17 @@ public final class HelidonDomainEventOutboxRecorder implements DomainEventOutbox
         for (DomainEvent event : events) {
             if (event == null) {
                 throw new IllegalArgumentException("Domain event must not be null.");
+            }
+            List<ExternalizedEvent> mappedEvents = externalizationResolver.resolve(event).orElse(null);
+            if (mappedEvents != null) {
+                if (store == null && !mappedEvents.isEmpty()) {
+                    store = require(outboxMessageStore,
+                            "Automatic domain-event externalization requires an OutboxMessageStore CDI bean");
+                }
+                for (ExternalizedEvent mappedEvent : mappedEvents) {
+                    recordMapped(store, event, mappedEvent);
+                }
+                continue;
             }
             ExternalizationRule rule = ruleResolver.resolve(event).orElse(null);
             if (rule == null) {
@@ -72,6 +96,21 @@ public final class HelidonDomainEventOutboxRecorder implements DomainEventOutbox
                 aggregate != null ? aggregate.aggregateType() : null,
                 aggregate != null ? aggregate.aggregateId() : null,
                 aggregate != null ? aggregate.aggregateVersion() : null));
+    }
+
+    private void recordMapped(OutboxMessageStore store, DomainEvent sourceEvent, ExternalizedEvent mappedEvent) {
+        store.append(OutboxMessage.newPending(
+                resolveEventId(sourceEvent),
+                mappedEvent.topic(),
+                mappedEvent.payloadKey(),
+                mappedEvent.payloadType(),
+                require(payloadSerializer,
+                        "Automatic domain-event externalization requires a PayloadSerializer CDI bean")
+                        .serialize(mappedEvent.payload()),
+                resolveOccurredAt(sourceEvent),
+                mappedEvent.aggregateType(),
+                mappedEvent.aggregateId(),
+                mappedEvent.aggregateVersion()));
     }
 
     private static <T> T require(Instance<T> instance, String message) {

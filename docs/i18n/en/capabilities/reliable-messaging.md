@@ -17,11 +17,19 @@ aggregate records domain event
   -> consumer uses InboxTemplate for idempotency
 ```
 
-Automatic externalization records only events explicitly marked as externalized; routing metadata
-alone does not externalize an event. Use automatic externalization only for a deliberately stable
-public event contract. Otherwise translate at the application boundary and append the versioned
-integration contract explicitly with `OutboxTemplate`. The template participates in the caller's
-transaction; it neither starts a transaction nor sends synchronously.
+There are two automatic externalization paths. Mark a deliberately stable public domain-event
+contract with `@Externalized` to serialize that event directly. For a versioned integration contract,
+provide a `DomainEventExternalizer<E>` bean: it maps an automatically captured domain event to zero or
+more `ExternalizedEvent` values, and the framework serializes and appends them in the current
+transaction. Each mapped value supplies a stable `payloadType`, payload, topic, key, and optional
+aggregate metadata; the source event supplies the Outbox event id and occurrence time.
+
+A matching externalizer takes precedence over `@Externalized`, including when it deliberately returns
+no messages, so a domain event is never written twice through both paths. When no externalizer matches,
+the existing opt-in annotation path remains unchanged. Mapping failures and invalid mapped metadata fail
+the business transaction. `OutboxTemplate` remains available for integration messages not derived from
+a captured domain event; it participates in the caller's transaction and neither starts one nor sends
+synchronously.
 
 ## Payload Contract
 
