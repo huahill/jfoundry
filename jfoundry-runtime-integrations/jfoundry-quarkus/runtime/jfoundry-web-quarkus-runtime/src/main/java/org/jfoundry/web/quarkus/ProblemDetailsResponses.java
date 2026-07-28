@@ -7,6 +7,9 @@ import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 final class ProblemDetailsResponses {
 
     private static final String PROBLEM_JSON = "application/problem+json";
@@ -26,7 +29,7 @@ final class ProblemDetailsResponses {
     private static Response problem(ProblemDescriptor descriptor, MultivaluedMap<String, Object> headers) {
         Response.ResponseBuilder response = Response.status(descriptor.status())
                 .type(PROBLEM_JSON)
-                .entity(descriptor);
+                .entity(problemJson(descriptor));
         if (headers != null) {
             headers.forEach((name, values) -> {
                 if (!isEntityHeader(name)) {
@@ -35,6 +38,16 @@ final class ProblemDetailsResponses {
             });
         }
         return response.build();
+    }
+
+    private static Map<String, Object> problemJson(ProblemDescriptor descriptor) {
+        Map<String, Object> problem = new LinkedHashMap<>();
+        problem.put("type", descriptor.type().toString());
+        problem.put("title", descriptor.title());
+        problem.put("status", descriptor.status());
+        problem.put("detail", descriptor.detail());
+        problem.putAll(descriptor.extensions());
+        return Map.copyOf(problem);
     }
 
     private static boolean isEntityHeader(String name) {
