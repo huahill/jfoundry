@@ -3,7 +3,7 @@ package org.jfoundry.autoconfigure.jpa;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
-import org.springframework.boot.autoconfigure.domain.EntityScanPackages;
+import org.springframework.boot.persistence.autoconfigure.EntityScanPackages;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

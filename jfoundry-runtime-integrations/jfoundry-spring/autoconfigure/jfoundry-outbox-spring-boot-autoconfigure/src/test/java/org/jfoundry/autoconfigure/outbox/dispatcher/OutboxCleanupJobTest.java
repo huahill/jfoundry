@@ -1,7 +1,7 @@
 package org.jfoundry.autoconfigure.outbox.dispatcher;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.infrastructure.outbox.mybatis.OutboxData;
 import org.jfoundry.infrastructure.outbox.mybatis.OutboxMapper;
 import org.jfoundry.application.messaging.MessageSender;

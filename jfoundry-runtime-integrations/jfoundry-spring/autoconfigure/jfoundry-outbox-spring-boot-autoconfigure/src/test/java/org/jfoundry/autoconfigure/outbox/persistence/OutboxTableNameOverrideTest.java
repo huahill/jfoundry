@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.outbox.persistence;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxMessageStatus;

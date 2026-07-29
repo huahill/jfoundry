@@ -1,15 +1,13 @@
 package org.jfoundry.infrastructure.messaging.jackson;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.jfoundry.application.messaging.PayloadSerializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
-/// Default Outbox payload serializer based on Jackson and JSR-310.
+/// Default Outbox payload serializer based on Jackson 3.
 /// <p>
-/// Disables {@code WRITE_DATES_AS_TIMESTAMPS} to emit ISO-8601 strings. It deliberately does not
-/// enable Jackson default typing: integration payloads must not expose Java class names, and the
+/// Jackson 3 serializes Java Time types as ISO-8601 strings by default. The serializer deliberately
+/// does not enable default typing: integration payloads must not expose Java class names, and the
 /// Outbox record already carries an explicit payload type alongside the JSON body.
 /// <p>
 /// Applications can replace serialization by registering their own {@link PayloadSerializer} bean.
@@ -18,16 +16,14 @@ public class JacksonPayloadSerializer implements PayloadSerializer {
     private final ObjectMapper objectMapper;
 
     public JacksonPayloadSerializer(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper.copy()
-                .registerModule(new JavaTimeModule())
-                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public String serialize(Object event) {
         try {
             return objectMapper.writeValueAsString(event);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Failed to serialize event payload: " + event.getClass().getName(), e);
         }
     }

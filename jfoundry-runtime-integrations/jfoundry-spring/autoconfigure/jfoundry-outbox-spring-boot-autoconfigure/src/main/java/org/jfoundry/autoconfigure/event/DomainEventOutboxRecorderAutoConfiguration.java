@@ -1,6 +1,5 @@
 package org.jfoundry.autoconfigure.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jfoundry.application.messaging.PayloadSerializer;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
@@ -13,11 +12,11 @@ import org.jfoundry.infrastructure.messaging.jackson.JacksonPayloadSerializer;
 import org.jfoundry.infrastructure.outbox.spring.externalization.DefaultDomainEventOutboxRecorder;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -42,12 +41,11 @@ import java.util.List;
 /// applications record an explicitly translated integration event without exposing the internal
 /// domain event as the broker contract.
 @AutoConfiguration
-@AutoConfigureAfter(
-        value = JacksonAutoConfiguration.class,
-        name = {
-                "org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration",
-                "org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration"
-        })
+@AutoConfigureAfter(name = {
+        "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration",
+        "org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration",
+        "org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration"
+})
 @ConditionalOnClass({PayloadSerializer.class, JacksonPayloadSerializer.class, OutboxMessageStore.class, DefaultDomainEventOutboxRecorder.class})
 public class DomainEventOutboxRecorderAutoConfiguration {
 

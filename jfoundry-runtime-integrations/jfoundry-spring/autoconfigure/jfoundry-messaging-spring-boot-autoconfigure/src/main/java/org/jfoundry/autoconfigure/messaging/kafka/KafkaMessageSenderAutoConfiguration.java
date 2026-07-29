@@ -4,7 +4,6 @@ import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.infrastructure.messaging.spring.sender.SpringKafkaMessageSender;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -14,7 +13,7 @@ import org.springframework.kafka.core.KafkaOperations;
 import java.time.Duration;
 
 @AutoConfiguration
-@AutoConfigureAfter(KafkaAutoConfiguration.class)
+@AutoConfigureAfter(name = "org.springframework.boot.kafka.autoconfigure.KafkaAutoConfiguration")
 @ConditionalOnClass(KafkaOperations.class)
 public class KafkaMessageSenderAutoConfiguration {
 

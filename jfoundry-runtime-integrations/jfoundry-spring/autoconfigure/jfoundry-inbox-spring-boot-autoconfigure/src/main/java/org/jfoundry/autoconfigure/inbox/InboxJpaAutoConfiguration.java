@@ -21,7 +21,7 @@ import java.sql.SQLException;
 /// Auto-configures the Jakarta Persistence Inbox store.
 @AutoConfiguration
 @AutoConfigureAfter(name = {
-        "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration",
+        "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration",
         "org.jfoundry.autoconfigure.inbox.InboxMybatisPlusAutoConfiguration"
 })
 @AutoConfigureBefore(InboxAutoConfiguration.class)

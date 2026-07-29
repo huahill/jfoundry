@@ -1,33 +1,35 @@
 # Compatibility Matrix
 
-## First Release Line
+## Supported Release Line
 
 | Area | Supported Baseline |
 |------|--------------------|
 | Java compile target | 25 |
 | Runtime Java | 25 |
-| Spring Boot | 3.5.x |
-| Spring Framework | 6.2.x |
+| Spring Boot | 4.0.x |
+| Spring Framework | 7.0.x |
 | Quarkus | 3.37.3 |
 | Helidon MP | 4.5.1 |
 | Maven release tool | 3.9.x |
 | Maven 4 | Compatibility check only while Maven 4 is preview/RC |
 
-## First Release Dependency Baseline
+## Dependency Baseline
 
 | Dependency | Version |
 |------------|---------|
-| Spring Boot | 3.5.16 |
-| Spring Framework | 6.2.19 |
-| Spring Cloud | 2025.0.3 |
-| Spring Cloud Alibaba | 2025.0.0.0 |
+| Spring Boot | 4.0.7 |
+| Spring Framework | 7.0.8 |
+| Spring Cloud | 2025.1.2 |
+| Spring Cloud Alibaba | 2025.1.0.0 |
 | Quarkus | 3.37.3 |
 | Helidon MP | 4.5.1 |
 | MyBatis-Plus | 3.5.16 |
-| MyBatis-Plus Spring Boot 3 starter | 3.5.16 |
-| Jackson | 2.21.4 |
-| Spring Kafka | 3.3.16 |
-| Spring AMQP | 3.2.12 |
+| MyBatis-Plus Spring Boot 4 starter | 3.5.16 |
+| Jackson 3 | 3.1.4 |
+| Jakarta Persistence | 3.2.0 |
+| Hibernate ORM | 7.2.19.Final |
+| Spring Kafka | 4.0.6 |
+| Spring AMQP | 4.0.4 |
 | JobRunr | 8.7.1 |
 | Redisson | 4.6.1 |
 | RocketMQ client | 5.5.0 |
@@ -41,6 +43,11 @@ versions only; they do not manage JFoundry module versions. They may manage offi
 integration BOMs that are compatible with the selected runtime baseline, but they do not add those
 libraries to an application. Applications still select each starter or client explicitly. Do not
 import every starter or runtime capability into a business application by default.
+
+JFoundry's Spring messaging starter uses Spring Boot's `spring-boot-starter-json`, which provides
+Jackson 3 as Spring Boot 4's default JSON mapper. The shipped JFoundry serializer and jMolecules
+integration use `tools.jackson.databind.ObjectMapper`; Outbox inherits this capability through the
+messaging starter. Jackson 2 compatibility modules are not supported by JFoundry.
 
 `org.javassist:javassist` is managed explicitly because `rocketmq-client:5.5.0` brings
 `rocketmq-remoting -> reflections:0.9.11 -> javassist:3.21.0-GA`, whose POM emits a
@@ -82,26 +89,6 @@ initialized in the image. The environment, JVM PostgreSQL/JTA/JPA control result
 trace are recorded in [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 JVM Helidon JTA is supported; Native JTA and JPA are not release acceptance claims until upstream
 support works.
-
-## Future Framework Upgrade Line
-
-Spring Boot 4.x should be handled as a separate compatibility line, not folded into the first
-release baseline merely because the repository now compiles on Java 25. As of 2026-06-27, Spring Boot
-4.0.7 remains a stable 4.0 maintenance release, and Spring Boot 4.1 supports Java versions
-up to Java 26. JDK 25 reached General Availability on 2025-09-16.
-
-| Area | Target Baseline |
-|------|-----------------|
-| Java compile target | 25 |
-| Runtime Java | 25 |
-| Spring Boot | 4.x |
-| Spring Framework | 7.x |
-| Jakarta EE | 11 via Spring Boot 4 dependencies |
-| Maven release tool | Maven 3.9.x until Maven 4 GA |
-| Maven 4 | Compatibility matrix first, release tool only after GA evidence |
-
-Treat this framework-upgrade line as a separate compatibility track until the repository records full
-Spring Boot 4.x, Spring Framework 7.x, Maven, and CI evidence.
 
 ## Release Gates
 

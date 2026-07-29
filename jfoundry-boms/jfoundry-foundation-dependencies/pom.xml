@@ -28,7 +28,7 @@
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     <!-- Imported BOMs -->
     <jmolecules.version>2025.0.2</jmolecules.version>
-    <junit-jupiter.version>5.12.2</junit-jupiter.version>
+    <junit-jupiter.version>6.0.3</junit-jupiter.version>
 
     <!-- Domain modeling and architecture -->
     <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
@@ -36,13 +36,13 @@
 
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.16</mybatis-plus.version>
-    <jakarta-persistence.version>3.1.0</jakarta-persistence.version>
-    <hibernate.version>6.6.53.Final</hibernate.version>
+    <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
+    <hibernate.version>7.2.19.Final</hibernate.version>
     <mysql-connector-j.version>9.7.0</mysql-connector-j.version>
     <postgresql.version>42.6.2</postgresql.version>
 
     <!-- Serialization and data binding -->
-    <jackson.version>2.21.4</jackson.version>
+    <jackson3.version>3.1.4</jackson3.version>
 
     <!-- Mapping and code generation -->
     <mapstruct.version>1.5.5.Final</mapstruct.version>
@@ -76,7 +76,7 @@
     <assertj.version>3.26.0</assertj.version>
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <mockito.version>5.17.0</mockito.version>
-    <junit-platform.version>1.12.2</junit-platform.version>
+    <junit-platform.version>6.0.3</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
   <dependencyManagement>
@@ -105,7 +105,7 @@
       </dependency>
       <dependency>
         <groupId>org.jmolecules.integrations</groupId>
-        <artifactId>jmolecules-jackson</artifactId>
+        <artifactId>jmolecules-jackson3</artifactId>
         <version>${jmolecules-integrations.version}</version>
       </dependency>
       <dependency>
@@ -163,14 +163,9 @@
 
       <!-- Serialization and data binding -->
       <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
+        <groupId>tools.jackson.core</groupId>
         <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.fasterxml.jackson.datatype</groupId>
-        <artifactId>jackson-datatype-jsr310</artifactId>
-        <version>${jackson.version}</version>
+        <version>${jackson3.version}</version>
       </dependency>
 
       <!-- Mapping and code generation -->

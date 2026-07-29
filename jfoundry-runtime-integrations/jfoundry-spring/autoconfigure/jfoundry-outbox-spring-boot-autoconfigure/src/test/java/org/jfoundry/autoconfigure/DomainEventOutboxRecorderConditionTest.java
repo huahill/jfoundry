@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.BackoffStrategy;
 import org.jfoundry.application.outbox.OutboxMessage;

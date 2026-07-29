@@ -23,7 +23,7 @@ import org.springframework.context.annotation.Role;
 /// Auto-configures Micrometer Observation for JFoundry Spring operation beans.
 @AutoConfiguration
 @AutoConfigureAfter(name = {
-        "org.springframework.boot.actuate.autoconfigure.observation.ObservationAutoConfiguration",
+        "org.springframework.boot.micrometer.observation.autoconfigure.ObservationAutoConfiguration",
         "org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration",
         "org.jfoundry.autoconfigure.inbox.InboxAutoConfiguration",
         "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration",

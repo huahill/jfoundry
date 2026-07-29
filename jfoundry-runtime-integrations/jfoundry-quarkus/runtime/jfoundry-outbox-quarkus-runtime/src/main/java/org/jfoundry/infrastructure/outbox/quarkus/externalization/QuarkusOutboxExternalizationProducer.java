@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.outbox.quarkus.externalization;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.arc.DefaultBean;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -15,6 +14,7 @@ import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
 import org.jfoundry.infrastructure.messaging.jackson.JacksonPayloadSerializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /// Produces the replaceable defaults used by Quarkus Outbox externalization.
 @ApplicationScoped
@@ -22,8 +22,8 @@ public final class QuarkusOutboxExternalizationProducer {
 
     @Produces
     @DefaultBean
-    PayloadSerializer payloadSerializer(ObjectMapper objectMapper) {
-        return new JacksonPayloadSerializer(objectMapper);
+    PayloadSerializer payloadSerializer() {
+        return new JacksonPayloadSerializer(new JsonMapper());
     }
 
     @Produces

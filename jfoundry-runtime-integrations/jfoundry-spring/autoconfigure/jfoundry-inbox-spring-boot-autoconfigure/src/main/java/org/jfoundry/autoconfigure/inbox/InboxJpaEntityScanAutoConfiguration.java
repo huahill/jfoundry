@@ -13,7 +13,7 @@ import org.springframework.core.type.AnnotationMetadata;
 
 /// Registers the Inbox entity before Spring Boot creates the JPA EntityManagerFactory.
 @AutoConfiguration
-@AutoConfigureBefore(name = "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration")
+@AutoConfigureBefore(name = "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration")
 @ConditionalOnClass({JpaInboxMessageEntity.class, JpaInboxMessageStore.class})
 @Import(InboxJpaEntityScanAutoConfiguration.EntityScanRegistrar.class)
 public class InboxJpaEntityScanAutoConfiguration {

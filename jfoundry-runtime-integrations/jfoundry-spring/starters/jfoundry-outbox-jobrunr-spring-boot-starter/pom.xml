@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.jobrunr</groupId>
-            <artifactId>jobrunr-spring-boot-3-starter</artifactId>
+            <artifactId>jobrunr-spring-boot-4-starter</artifactId>
         </dependency>
     </dependencies>
 

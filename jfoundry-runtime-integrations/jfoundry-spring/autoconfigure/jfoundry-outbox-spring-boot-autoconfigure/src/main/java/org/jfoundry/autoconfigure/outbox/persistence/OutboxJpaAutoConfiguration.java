@@ -16,7 +16,7 @@ import org.springframework.orm.jpa.SharedEntityManagerCreator;
 /// Auto-configures the Jakarta Persistence Outbox store.
 @AutoConfiguration
 @AutoConfigureAfter(name = {
-        "org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration",
+        "org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration",
         "org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration"
 })
 @AutoConfigureBefore(name = "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration")

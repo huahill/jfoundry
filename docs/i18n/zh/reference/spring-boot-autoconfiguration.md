@@ -88,7 +88,11 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   定义应用自己的 `MessageSender`。
 - `TransactionRunnerAutoConfiguration` 在 Spring Boot 事务自动配置之后运行，确保其 Bean 条件评估前已经可以看到 JDBC、JPA 或 JTA 事务管理器。
 - 事务是显式能力。Inbox 和 Outbox 启动器会引入事务启动器，因为其模板和派发器需要 `TransactionRunner`；基线启动器不会引入。
-- 领域事件、分布式锁和可观测性启动器通过 `spring-boot-starter-aop` 使用 Spring Boot 标准 AOP
+- 领域事件、分布式锁和可观测性启动器通过 `spring-boot-starter-aspectj` 使用 Spring Boot 标准 AOP
   自动配置。代理策略和 AOP 禁用行为遵循 Spring Boot 的 `spring.aop.*` 配置；jfoundry 不再注册自己的代理创建器。
+- 消息启动器使用 Spring Boot 的 `spring-boot-starter-json`，它提供 Spring Boot 4 默认的 Jackson 3
+  JSON 映射器。随 JFoundry 提供的序列化器和 jMolecules 集成使用
+  `tools.jackson.databind.ObjectMapper`；Outbox 启动器通过消息启动器继承该能力。JFoundry 不支持
+  Spring Boot 的 Jackson 2 兼容模块。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
 - `mode=none` 表示不注册派发器、恢复任务或清理任务，即使显式开启恢复或清理也不会注册。

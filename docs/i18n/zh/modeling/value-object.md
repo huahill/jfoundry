@@ -71,4 +71,4 @@ class CiArchitectureTest {
 
 ## jMolecules 生态
 
-`ValueObject` 继承 `org.jmolecules.ddd.types.ValueObject`，所以 jMolecules 工具链（`jmolecules-jackson` 序列化、`jmolecules-archunit` 规则）开箱即用。
+`ValueObject` 继承 `org.jmolecules.ddd.types.ValueObject`，所以 jMolecules 工具链（`jmolecules-jackson3` 序列化、`jmolecules-archunit` 规则）开箱即用。

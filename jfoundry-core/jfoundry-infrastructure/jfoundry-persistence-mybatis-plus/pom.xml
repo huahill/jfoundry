@@ -91,8 +91,8 @@
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
-            <version>${mybatis-plus-spring-boot3.version}</version>
+            <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+            <version>${mybatis-plus-spring-boot4.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

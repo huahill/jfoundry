@@ -24,6 +24,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DefaultDomainEventOutboxRecorderTest {
 
     @Test
+    void createsTheDefaultJacksonThreePayloadSerializerWithoutAQuarkusJacksonBean() {
+        assertThat(new QuarkusOutboxExternalizationProducer().payloadSerializer().serialize(new OrderCreatedV1("order-3")))
+                .contains("order-3");
+    }
+
+    @Test
     void ignoresUnmarkedEventsWithoutResolvingTheOutboxStore() {
         DefaultDomainEventOutboxRecorder recorder = new DefaultDomainEventOutboxRecorder(
                 unavailableOutboxStore(),

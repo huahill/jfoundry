@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.outbox.helidon.externalization;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
@@ -16,6 +15,7 @@ import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
 import org.jfoundry.infrastructure.messaging.jackson.JacksonPayloadSerializer;
+import tools.jackson.databind.json.JsonMapper;
 
 /// Produces the overridable defaults used by Helidon Outbox externalization.
 @Alternative
@@ -25,7 +25,7 @@ public final class HelidonOutboxExternalizationProducer {
 
     @Produces
     PayloadSerializer payloadSerializer() {
-        return new JacksonPayloadSerializer(new ObjectMapper().findAndRegisterModules());
+        return new JacksonPayloadSerializer(new JsonMapper());
     }
 
     @Produces

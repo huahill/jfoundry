@@ -12,7 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /// Auto-configuration for application-layer transaction boundaries.
-@AutoConfiguration(afterName = "org.springframework.boot.autoconfigure.transaction.TransactionAutoConfiguration")
+@AutoConfiguration(afterName = "org.springframework.boot.transaction.autoconfigure.TransactionAutoConfiguration")
 @ConditionalOnClass({TransactionRunner.class, TransactionTemplate.class})
 public class TransactionRunnerAutoConfiguration {
 

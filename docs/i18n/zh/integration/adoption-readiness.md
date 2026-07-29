@@ -100,7 +100,7 @@ Hexagonal Port/Adapter 约定分离。
 当前最强证据适用于：
 
 - Java 25 业务应用。
-- Spring Boot 3.5.x 和 Spring Framework 6.2.x。
+- Spring Boot 4.0.x 和 Spring Framework 7.0.x。
 - Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 运行时集成验证
   和原生镜像 CI 验证任务。
 - Helidon MP 4.5.1 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。

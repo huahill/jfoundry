@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.application.ApplicationService;
 import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.application.event.externalization.DomainEventExternalizer;

@@ -123,7 +123,7 @@ from Hexagonal Port/Adapter conventions.
 The strongest evidence currently applies to:
 
 - Java 25 business applications.
-- Spring Boot 3.5.x and Spring Framework 6.2.x.
+- Spring Boot 4.0.x and Spring Framework 7.0.x.
 - Quarkus 3.37.3 CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
   JVM consumer smoke test and a Native Image CI gate.
 - Helidon MP 4.5.1 CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem

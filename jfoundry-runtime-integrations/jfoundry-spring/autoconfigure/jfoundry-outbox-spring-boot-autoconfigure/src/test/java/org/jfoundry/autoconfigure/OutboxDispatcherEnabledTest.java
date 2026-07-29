@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.outbox.OutboxDispatcher;

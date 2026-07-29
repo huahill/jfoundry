@@ -122,8 +122,8 @@ For the first release line:
 
 - Java compile target: 25
 - Runtime Java baseline: 25
-- Spring Boot: 3.5.x
-- Spring Framework: 6.2.x
+- Spring Boot: 4.0.x
+- Spring Framework: 7.0.x
 - Maven release tool: 3.9.x
 
 Do not silently move the first release line to Spring Boot 4, Spring Framework 7, or Jakarta EE 11. Treat that as a separate compatibility line unless the project explicitly changes release policy.

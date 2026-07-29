@@ -70,11 +70,11 @@ class ProblemDetailExceptionHandlerTest {
     }
 
     @Test
-    void mapsDomainRuleViolationToUnprocessableEntityProblemDetail() {
+    void mapsDomainRuleViolationToUnprocessableContentProblemDetail() {
         ResponseEntity<ProblemDetail> response = handler.handleDomainRuleViolation(
                 new DomainRuleViolationException("Quota exceeded"));
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_ENTITY, "DOMAIN_RULE_VIOLATION", "Domain rule violation",
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "DOMAIN_RULE_VIOLATION", "Domain rule violation",
                 "urn:jfoundry:problem:domain-rule-violation");
     }
 
@@ -108,7 +108,7 @@ class ProblemDetailExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = applicationHandler.handleInvalidArgument(
                 new InvalidArgumentException("internal detail"));
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_ENTITY, "APPLICATION_VALIDATION", "Validation failed",
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_VALIDATION", "Validation failed",
                 "https://example.test/problems/validation");
         assertThat(response.getBody().getProperties()).containsEntry("field", "name");
     }

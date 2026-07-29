@@ -94,8 +94,12 @@ bean into the default recorder. Applications normally provide these mappings wit
 - Transaction support is explicit. Inbox and Outbox starters include the transaction starter because
   their templates and dispatchers require a `TransactionRunner`; the baseline starter does not.
 - Domain-event, distributed-lock, and observability starters use Spring Boot's standard AOP
-  auto-configuration through `spring-boot-starter-aop`. Proxy strategy and AOP opt-out therefore
+  auto-configuration through `spring-boot-starter-aspectj`. Proxy strategy and AOP opt-out therefore
   follow Spring Boot's `spring.aop.*` properties; jfoundry does not register its own proxy creator.
+- The messaging starter uses Spring Boot's `spring-boot-starter-json`, which provides Jackson 3 as
+  Spring Boot 4's default JSON mapper. The shipped JFoundry serializer and jMolecules integration use
+  `tools.jackson.databind.ObjectMapper`; the Outbox starter inherits this capability through messaging.
+  JFoundry does not support Spring Boot's Jackson 2 compatibility module.
 - Distributed lock support is explicit. The default Spring Boot starter does not pull Redisson.
 - `mode=none` means no dispatcher, recovery job, or cleanup job is registered, even when recovery
   or cleanup is explicitly enabled.
