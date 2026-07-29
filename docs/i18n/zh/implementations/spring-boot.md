@@ -96,8 +96,10 @@ Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 
   -am -Pit verify
 ```
 
-同一模块还包含最小 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，CI 随后启动
-可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`：
+同一模块还包含最小的 Spring Boot 4.0.7 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
+CI 随后启动可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`。这构成基础 Spring Boot 启动器与
+Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消息代理、锁或调度器适配器。各项能力必须先具备
+独立的原生镜像集成验证，才能声明受支持：
 
 ```bash
 ./mvnw -B \

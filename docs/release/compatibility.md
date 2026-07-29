@@ -68,7 +68,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Unit tests | `./mvnw -B clean test` | PASS on Java 25 |
 | Package artifacts | `./mvnw -B -DskipTests package` | PASS on Java 25 |
 | Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
-| Spring Native Image consumer smoke test | GraalVM 25, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
+| Spring Native Image base Starter/Web MVC consumer smoke test | GraalVM 25 with Spring Boot 4.0.7 AOT, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
 | Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |

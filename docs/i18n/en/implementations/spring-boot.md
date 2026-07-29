@@ -141,8 +141,11 @@ Kafka, and RabbitMQ:
   -am -Pit verify
 ```
 
-The same module also contains a minimal AOT consumer. On GraalVM Native Image, the `native` profile
-builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready` returns `ready`:
+The same module also contains a minimal Spring Boot 4.0.7 AOT consumer. On GraalVM Native Image, the
+`native` profile builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready`
+returns `ready`. This is the Native Image support claim for the base Spring Boot starter and Web MVC
+assembly. It does not certify optional persistence, broker, lock, or scheduler adapters; each such
+capability needs its own Native Image integration verification before it can be claimed as supported:
 
 ```bash
 ./mvnw -B \
