@@ -17,6 +17,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 
 /// Auto-configuration for the JobRunr Outbox Dispatcher.
 /// <p>
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.Bean;
 })
 @ConditionalOnProperty(prefix = "jfoundry.outbox.dispatcher", name = "mode", havingValue = "jobrunr")
 @EnableConfigurationProperties(OutboxDispatcherProperties.class)
+@ImportRuntimeHints(JobRunrNativeRuntimeHints.class)
 public class JobRunrDispatcherAutoConfiguration {
 
     @Bean

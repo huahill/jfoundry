@@ -73,7 +73,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-jpa</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -120,7 +119,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -135,7 +133,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-jackson</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.jmolecules.integrations</groupId>
@@ -150,7 +147,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -287,7 +283,7 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>0.10.6</version>
+                <version>1.1.6</version>
                 <extensions>true</extensions>
             </plugin>
         </plugins>
@@ -553,6 +549,104 @@
                             </execution>
                             <execution>
                                 <id>build-redisson-native-image</id>
+                                <goals><goal>compile-no-fork</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>native-jobrunr</id>
+            <dependencies>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-jobrunr-spring-boot-starter</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-jpa-spring-boot-starter</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-jdbc</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>add-native-jobrunr-source</id>
+                                <phase>generate-sources</phase>
+                                <goals><goal>add-source</goal></goals>
+                                <configuration>
+                                    <sources><source>src/native-jobrunr/java</source></sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>add-native-jobrunr-test-source</id>
+                                <phase>generate-test-sources</phase>
+                                <goals><goal>add-test-source</goal></goals>
+                                <configuration>
+                                    <sources><source>src/native-jobrunr-test/java</source></sources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes><include>**/NativeJobRunrIT.java</include></includes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals><goal>integration-test</goal><goal>verify</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <mainClass>org.jfoundry.integration.nativeimage.jobrunr.NativeJobRunrApplication</mainClass>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>process-aot-jobrunr</id>
+                                <goals><goal>process-aot</goal></goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                        <configuration>
+                            <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <imageName>jfoundry-spring-jobrunr-native</imageName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>add-jobrunr-reachability-metadata</id>
+                                <goals><goal>add-reachability-metadata</goal></goals>
+                            </execution>
+                            <execution>
+                                <id>build-jobrunr-native-image</id>
                                 <goals><goal>compile-no-fork</goal></goals>
                             </execution>
                         </executions>
