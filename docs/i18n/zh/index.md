@@ -1,6 +1,6 @@
 # jfoundry 中文文档
 
-本文档以能力为主线。能力页定义契约和行为，实现页说明技术选择，参考页提供查询材料。
+本文档以能力为主线。能力页定义契约和行为，持久化实现页与运行时集成页说明技术选择；运行时专属的配置参考由对应运行时指南链接，而不是作为技术选型入口。
 
 ## 快速开始
 
@@ -15,17 +15,16 @@
 - [分布式锁](capabilities/distributed-locks.md)
 - [可观测性](capabilities/observability.md)
 
-## 实现
+## 持久化实现
 
-- [JPA](implementations/jpa.md)
 - [MyBatis-Plus](implementations/mybatis-plus.md)
+- [JPA](implementations/jpa.md)
+
+## 运行时集成
+
 - [Spring Boot 运行时装配](implementations/spring-boot.md)
 - [Quarkus 运行时集成](implementations/quarkus.md)
 - [Helidon MP 运行时集成](implementations/helidon.md)
-
-## 参考
-
-- [Spring Boot 自动配置](reference/spring-boot-autoconfiguration.md)
 
 ## 框架语义
 

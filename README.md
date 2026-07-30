@@ -123,17 +123,16 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 - [Application Transactions](docs/i18n/en/capabilities/application-transactions.md)
 - [Distributed Locks](docs/i18n/en/capabilities/distributed-locks.md)
 
-### Implementations
+### Persistence Implementations
 
 - [JPA](docs/i18n/en/implementations/jpa.md)
 - [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md)
+
+### Runtime Integrations
+
 - [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md)
 - [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md)
 - [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md)
-
-### Reference
-
-- [Spring Boot Auto-configuration](docs/i18n/en/reference/spring-boot-autoconfiguration.md)
 
 ### Framework Semantics
 
@@ -150,6 +149,7 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 - [Compatibility Matrix](docs/release/compatibility.md)
 - [Maven Central Publishing](docs/release/maven-central.md)
+- [Native Image verification status](docs/i18n/en/integration/adoption-readiness.md): review the scoped runtime and capability evidence together with the [Compatibility Matrix](docs/release/compatibility.md); it is not a blanket support claim.
 
 For the complete documentation structure, see the [Documentation Index](docs/i18n/en/index.md).
 

@@ -1,7 +1,8 @@
 # jfoundry Documentation
 
-This documentation is capability-first. Capability pages define contracts and behavior;
-implementation pages explain technology-specific choices; reference pages provide lookup material.
+This documentation is capability-first. Capability pages define contracts and behavior; persistence
+and runtime pages explain technology-specific choices. Runtime-specific configuration reference is
+linked from its owning runtime guide rather than presented as a technology-selection entry point.
 
 ## Getting Started
 
@@ -16,17 +17,16 @@ implementation pages explain technology-specific choices; reference pages provid
 - [Distributed Locks](capabilities/distributed-locks.md)
 - [Observability](capabilities/observability.md)
 
-## Implementations
+## Persistence Implementations
 
 - [JPA](implementations/jpa.md)
 - [MyBatis-Plus](implementations/mybatis-plus.md)
+
+## Runtime Integrations
+
 - [Spring Boot Runtime Assembly](implementations/spring-boot.md)
 - [Quarkus Runtime Integration](implementations/quarkus.md)
 - [Helidon MP Runtime Integration](implementations/helidon.md)
-
-## Reference
-
-- [Spring Boot Auto-configuration](reference/spring-boot-autoconfiguration.md)
 
 ## Framework Semantics
 
