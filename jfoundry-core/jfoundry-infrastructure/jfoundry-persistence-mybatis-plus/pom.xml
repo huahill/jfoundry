@@ -11,8 +11,8 @@
     <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
     <name>jfoundry-persistence-mybatis-plus</name>
     <description>
-        MyBatis-Plus adapter for business AggregateRoot repositories:
-        MybatisPlusAggregateRepository + MybatisPlusAuditData. Pure persistence — no messaging/Outbox concerns;
+        MyBatis-Plus adapter for business AggregateRoot repositories.
+        Pure persistence — no messaging/Outbox concerns;
         Outbox MP implementation lives in jfoundry-outbox-mybatis-plus.
     </description>
 

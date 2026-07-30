@@ -3,7 +3,7 @@
 技术审计元数据属于持久化快照，不属于领域实体或聚合。因此 JFoundry 不再在领域模块提供
 `Auditable`、`AuditableEntity` 或 `AuditableAggregateRoot`。
 
-`jfoundry-persistence-core` 定义 `AuditStamp`、`AuditActorProvider` 和 `AuditStamping`。审计快照只包含
+`jfoundry-persistence-core` 定义 `AuditStamp`、`AuditStampHolder`、`AuditActorProvider` 和 `AuditStamping`。审计快照只包含
 `createdAt`、`createdBy`、`lastModifiedAt` 与 `lastModifiedBy`。时间使用 `Instant`；操作者字段仅保存稳定
 标识。没有可用操作者时字段为 `null`，JFoundry 不会伪造 `unknown` 操作者。
 
@@ -24,11 +24,10 @@
 
 ## MyBatis-Plus
 
-`jfoundry-persistence-mybatis-plus` 提供 `MybatisPlusAuditData` 和
-`MybatisPlusAuditMetaObjectHandler`。Spring Boot MyBatis-Plus 持久化启动器会使用已配置的 `AuditStamping`
-注册该处理器，除非应用已经定义 `MetaObjectHandler`。在该 Spring Boot 装配之外，应用使用自身配置的
-`AuditStamping` 注册处理器。处理器只作用于继承 `MybatisPlusAuditData` 的数据对象，不会从任意
-MyBatis-Plus 数据对象推断审计字段。
+`jfoundry-persistence-mybatis-plus` 提供 `MybatisPlusAuditMetaObjectHandler`。Spring Boot MyBatis-Plus
+持久化启动器会使用已配置的 `AuditStamping` 注册该处理器，除非应用已经定义 `MetaObjectHandler`。
+在该 Spring Boot 装配之外，应用使用自身配置的 `AuditStamping` 注册处理器。处理器只作用于实现
+`AuditStampHolder` 的数据对象；字段及 MyBatis-Plus 映射注解由应用拥有。
 
 ## Jakarta Persistence
 

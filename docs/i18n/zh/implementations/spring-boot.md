@@ -67,7 +67,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 
 ## 持久化
 
-持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-jpa-spring-boot-starter` 装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时；MyBatis-Plus 对应启动器则装配业务聚合的 MyBatis-Plus 持久化能力，并为 `MybatisPlusAuditData` 装配默认技术审计处理器。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
+持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-jpa-spring-boot-starter` 装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时；MyBatis-Plus 对应启动器则装配业务聚合的 MyBatis-Plus 持久化能力，并为实现 `AuditStampHolder` 的数据对象装配默认技术审计处理器。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
 
 二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器。聚合映射、乐观锁和仓储形态见 [JPA](jpa.md) 与 [MyBatis-Plus](mybatis-plus.md) 实现指南。
 
@@ -109,7 +109,7 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 
 `native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
 原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
-`MybatisPlusAuditData` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
+业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
 `createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于 Spring Boot 4.0.7、
 MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、Outbox/Inbox 存储、消息代理、Redisson 或
 JobRunr：

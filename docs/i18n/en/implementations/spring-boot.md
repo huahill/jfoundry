@@ -91,7 +91,7 @@ The persistence starters are named after the capability they assemble, not merel
 pull in. `jfoundry-persistence-jpa-spring-boot-starter` assembles the JPA aggregate adapter,
 Spring transaction-bound persistence context, and Spring Boot JPA runtime. Its MyBatis-Plus peer
 does the same for MyBatis-Plus business aggregate persistence, including the default technical audit
-handler for `MybatisPlusAuditData`. The shared persistence auto-configuration supplies UTC audit
+handler for data objects that opt in through `AuditStampHolder`. The shared persistence auto-configuration supplies UTC audit
 time and an empty actor provider; applications normally contribute `AuditActorProvider` from their
 security integration.
 
@@ -155,7 +155,8 @@ capability needs its own Native Image integration verification before it can be 
 
 The `native-mybatis-plus` profile separately certifies the Spring Boot MyBatis-Plus persistence
 starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, launches the generated
-Native executable, and verifies an insert, reload, update, and reload of `MybatisPlusAuditData`,
+Native executable, and verifies an insert, reload, update, and reload of a business-defined
+`AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
 claim applies to Spring Boot 4.0.7, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
 JPA, Outbox/Inbox stores, brokers, Redisson, or JobRunr:

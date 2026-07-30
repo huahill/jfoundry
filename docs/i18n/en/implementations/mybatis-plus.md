@@ -40,9 +40,10 @@ jfoundry MyBatis-Plus runtime integration; do not infer one from the runtime-neu
 [Spring Boot](spring-boot.md) for the supported assembly and [Quarkus](quarkus.md) for its current
 capability scope.
 
-For data objects derived from `MybatisPlusAuditData`, this Spring Boot starter also registers
-`MybatisPlusAuditMetaObjectHandler`. It uses the runtime's `AuditStamping` and backs off when the
-application provides any `MetaObjectHandler`.
+For persistence data objects that implement `AuditStampHolder`, this Spring Boot starter also registers
+`MybatisPlusAuditMetaObjectHandler`. Applications define their own fields and MyBatis-Plus mapping
+annotations; the handler uses the runtime's `AuditStamping` and backs off when the application provides
+any `MetaObjectHandler`.
 
 ## Outbox And Inbox Stores
 

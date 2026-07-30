@@ -4,8 +4,8 @@ Technical audit metadata belongs to a persistence snapshot, not to a domain enti
 JFoundry therefore does not provide `Auditable`, `AuditableEntity`, or `AuditableAggregateRoot` in
 the domain module.
 
-`jfoundry-persistence-core` defines `AuditStamp`, `AuditActorProvider`, and `AuditStamping`. An
-audit stamp contains only `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy`.
+`jfoundry-persistence-core` defines `AuditStamp`, `AuditStampHolder`, `AuditActorProvider`, and
+`AuditStamping`. An audit stamp contains only `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy`.
 Timestamps use `Instant`; actor fields contain a stable identifier only. When no actor is available,
 the actor field is `null`; JFoundry does not synthesize an `unknown` actor.
 
@@ -29,12 +29,11 @@ priority `1`; an application replacing the complete service must declare an enab
 
 ## MyBatis-Plus
 
-`jfoundry-persistence-mybatis-plus` provides `MybatisPlusAuditData` and
-`MybatisPlusAuditMetaObjectHandler`. The Spring Boot MyBatis-Plus persistence starter registers the
-handler from the configured `AuditStamping` unless the application already has a
-`MetaObjectHandler`. Outside that Spring Boot assembly, register the handler with an application
-configured `AuditStamping`. The handler only applies to data objects derived from
-`MybatisPlusAuditData`; it does not infer audit fields from arbitrary MyBatis-Plus data objects.
+`jfoundry-persistence-mybatis-plus` provides `MybatisPlusAuditMetaObjectHandler`. The Spring Boot
+MyBatis-Plus persistence starter registers the handler from the configured `AuditStamping` unless
+the application already has a `MetaObjectHandler`. Outside that Spring Boot assembly, register the
+handler with an application configured `AuditStamping`. The handler applies only to data objects
+that implement `AuditStampHolder`; applications own their fields and MyBatis-Plus mapping annotations.
 
 ## Jakarta Persistence
 
