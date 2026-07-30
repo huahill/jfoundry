@@ -96,8 +96,8 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 
 | Need | Guide |
 |------|-------|
-| MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../implementations/mybatis-plus.md) |
 | JPA Outbox and Inbox stores, including database-specific Inbox claiming | [JPA](../implementations/jpa.md) |
+| MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../implementations/mybatis-plus.md) |
 | Quarkus Outbox runtime, automatic domain-event externalization, and Kafka delivery | [Quarkus](../implementations/quarkus.md) |
 | Spring Boot capability assembly and dispatcher configuration | [Spring Boot](../implementations/spring-boot.md) |
 

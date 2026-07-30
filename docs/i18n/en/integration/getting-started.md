@@ -50,7 +50,7 @@ Keep dependencies in the layer that owns them:
 |--------|---------------------|
 | Domain | `jfoundry-domain-starter` |
 | Application | `jfoundry-application-starter` |
-| Infrastructure | The selected runtime-neutral capability starter, such as `jfoundry-persistence-mybatis-plus-starter` |
+| Infrastructure | The selected runtime-neutral capability starter, such as `jfoundry-persistence-jpa-starter` |
 | Spring Boot assembly | `jfoundry-spring-boot-starter` plus only the required runtime capability starters |
 | Quarkus runtime integration | `jfoundry-quarkus-runtime` |
 | Helidon MP runtime integration | `jfoundry-helidon-runtime` |
@@ -61,8 +61,8 @@ accidental dependencies.
 
 ## Assemble A Minimal Spring Boot Runtime
 
-For a Spring Boot application using business MyBatis-Plus persistence, the runtime module starts
-with the base and MyBatis-Plus runtime starters:
+For a Spring Boot application using JPA business persistence, the runtime module starts with the
+base and JPA runtime starters:
 
 ```xml
 <dependencies>
@@ -72,17 +72,18 @@ with the base and MyBatis-Plus runtime starters:
     </dependency>
     <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-starter</artifactId>
+        <artifactId>jfoundry-persistence-jpa-spring-boot-starter</artifactId>
     </dependency>
 </dependencies>
 ```
 
 Configure the application's datasource and keep its persistence adapter in the infrastructure
-module. The MyBatis-Plus runtime starter does not add Outbox or Inbox stores. For a JPA runtime,
-replace the MyBatis-Plus runtime starter with `jfoundry-persistence-jpa-spring-boot-starter`; it also leaves
-Outbox and Inbox stores explicit. See [MyBatis-Plus](../implementations/mybatis-plus.md),
-[JPA](../implementations/jpa.md), and [Spring Boot Runtime Assembly](../implementations/spring-boot.md)
-for the exact implementation boundaries.
+module. The JPA runtime starter does not add Outbox or Inbox stores. For MyBatis-Plus persistence,
+replace the JPA runtime starter with `jfoundry-persistence-mybatis-plus-spring-boot-starter`; it
+also leaves Outbox and Inbox stores explicit. See [JPA](../implementations/jpa.md),
+[MyBatis-Plus](../implementations/mybatis-plus.md), and
+[Spring Boot Runtime Assembly](../implementations/spring-boot.md) for the exact implementation
+boundaries.
 
 ## Add Capabilities Only When Needed
 

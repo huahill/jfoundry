@@ -39,7 +39,7 @@
 | 领域建模 | 聚合、值对象、领域事件、Repository 契约和领域异常 |
 | 架构 | Hexagonal 和 Onion 语义，以及 ArchUnit 规则 |
 | 应用层 | 应用服务、事务边界、CQRS 和领域事件编排 |
-| 持久化 | 聚合持久化契约，以及 JPA 和 MyBatis-Plus 实现 |
+| 持久化 | 聚合持久化契约，以及 MyBatis-Plus 和 JPA 实现 |
 | 可靠消息 | Transactional Outbox、Inbox 幂等、消息和序列化 SPI |
 | 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA、Outbox/Inbox 与 REST Problem Details 装配 |
 

@@ -54,8 +54,8 @@ database, delivery, scheduling, and distributed-lock choices.
 |---|---|---|
 | Local application transactions | `jfoundry-spring-boot-starter` | Supplies the Spring `TransactionRunner`; applications may replace it. |
 | Local domain-event listeners | `jfoundry-domain-event-spring-boot-starter` | Publishes domain events through Spring application events; it is not an Outbox or broker. |
-| Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
+| Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
 | JSON serialization contract | `jfoundry-messaging-spring-boot-starter` | Adds Spring messaging integration and the default Jackson `PayloadSerializer`, but no real sender. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |

@@ -27,6 +27,13 @@ replace the default `AuditStamping` with a CDI bean. Helidon uses an enabled CDI
 priority `1`; an application replacing the complete service must declare an enabled
 `@Alternative` with a higher priority. Neither runtime has a JFoundry MyBatis-Plus integration.
 
+## Jakarta Persistence
+
+`jfoundry-persistence-jpa` provides `JpaAuditData` and `JpaAuditStamping`. Applications opt in by
+constructing their `JpaAggregateRepository` with a `JpaAuditStamping` backed by the application's
+`AuditStamping`. The repository stamps derived `JpaAuditData` entities before persist and update;
+it does not rely on JPA listener dependency injection or a global audit context.
+
 ## MyBatis-Plus
 
 `jfoundry-persistence-mybatis-plus` provides `MybatisPlusAuditMetaObjectHandler`. The Spring Boot
@@ -34,13 +41,6 @@ MyBatis-Plus persistence starter registers the handler from the configured `Audi
 the application already has a `MetaObjectHandler`. Outside that Spring Boot assembly, register the
 handler with an application configured `AuditStamping`. The handler applies only to data objects
 that implement `AuditStampHolder`; applications own their fields and MyBatis-Plus mapping annotations.
-
-## Jakarta Persistence
-
-`jfoundry-persistence-jpa` provides `JpaAuditData` and `JpaAuditStamping`. Applications opt in by
-constructing their `JpaAggregateRepository` with a `JpaAuditStamping` backed by the application's
-`AuditStamping`. The repository stamps derived `JpaAuditData` entities before persist and update;
-it does not rely on JPA listener dependency injection or a global audit context.
 
 Business-significant submitters, approvers, and similar facts remain explicit domain state or domain
 events. Soft deletion and append-only compliance audit trails are separate capabilities.
