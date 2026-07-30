@@ -15,7 +15,7 @@ DDD projects often lose their intended boundaries in implementation: domain code
 - jMolecules-based DDD, Hexagonal, Onion, and CQRS semantics.
 - Explicit dependency direction across domain, application, infrastructure, and runtime integration.
 - Reusable ArchUnit rules for executable architecture constraints.
-- Optional production capabilities for persistence, reliable messaging, transactions, and runtime assembly.
+- Optional production capabilities for persistence, message delivery, reliable messaging, transactions, and runtime assembly.
 
 ## Architecture
 
@@ -32,6 +32,18 @@ Dependencies point inward. This keeps runtime integrations outside the core rath
 
 ![jfoundry module architecture](docs/i18n/assets/jfoundry-module-architecture.svg)
 
+## AI-Assisted Architecture Workflow
+
+[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) is the
+Domain Architecture Plugin that complements JFoundry at design time. It guides an AI coding agent
+from requirements through domain modeling and architecture decisions, then enters JFoundry only
+when JFoundry is selected. It is installed separately and is not a runtime dependency or a
+mandatory combined architecture.
+
+```text
+requirements -> domain modeling -> architecture decision -> optional jfoundry landing -> implementation handoff
+```
+
 ## Capabilities
 
 | Area | Capability |
@@ -40,6 +52,7 @@ Dependencies point inward. This keeps runtime integrations outside the core rath
 | Architecture | Hexagonal and Onion semantics with ArchUnit rules |
 | Application | Application services, transaction boundaries, CQRS, and domain-event orchestration |
 | Persistence | Aggregate persistence contracts with JPA and MyBatis-Plus implementations |
+| Message delivery | Runtime-neutral outbound transport contracts with explicit Kafka, RabbitMQ, and RocketMQ adapters |
 | Reliable messaging | Transactional Outbox, Inbox idempotency, messaging, and serialization SPI |
 | Runtime integration | Spring Framework and Spring Boot assembly; Quarkus and Helidon CDI/Jakarta Transactions, JPA, Outbox/Inbox, and REST Problem Details assembly |
 
@@ -47,6 +60,7 @@ Dependencies point inward. This keeps runtime integrations outside the core rath
 
 - **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/repository-vs-read-contracts.md).
 - **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
+- **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
 - **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md) guide.
 - **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
 - **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, REST Problem Details, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
@@ -115,10 +129,12 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 - [Getting Started](docs/i18n/en/integration/getting-started.md)
 - [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md)
+- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)
 
 ### Capabilities
 
 - [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md)
+- [Message Delivery](docs/i18n/en/capabilities/message-delivery.md)
 - [Reliable Messaging: Outbox And Inbox](docs/i18n/en/capabilities/reliable-messaging.md)
 - [Application Transactions](docs/i18n/en/capabilities/application-transactions.md)
 - [Distributed Locks](docs/i18n/en/capabilities/distributed-locks.md)

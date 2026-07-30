@@ -70,8 +70,7 @@ Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业
 ## 仅在需要时追加能力
 
 - 用例需要时加入[应用事务](../capabilities/application-transactions.md)或[分布式锁](../capabilities/distributed-locks.md)。
-- 只有需要跨进程投递或消费端幂等时，才加入[可靠消息：Outbox 与 Inbox](../capabilities/reliable-messaging.md)，并显式选择存储实现。
-- 消息、消息代理、Web MVC 和调度启动器只为对应能力添加。
+- 应用需要直接消息代理生产者时加入[消息传输](../capabilities/message-delivery.md)；只有还需要持久化发布或消费端幂等时，才加入[可靠消息：Outbox 与 Inbox](../capabilities/reliable-messaging.md)。Web MVC 和调度启动器只为对应能力添加。
 
 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)是单个启动器、配置项和注册条件的唯一目录。
 

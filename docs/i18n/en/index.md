@@ -8,10 +8,12 @@ linked from its owning runtime guide rather than presented as a technology-selec
 
 - [Getting Started](integration/getting-started.md)
 - [Adoption Readiness and Validated Scope](integration/adoption-readiness.md)
+- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills): optional AI-assisted domain modeling and architecture workflow before JFoundry landing.
 
 ## Capabilities
 
 - [Aggregate Persistence](capabilities/aggregate-persistence.md)
+- [Message Delivery](capabilities/message-delivery.md)
 - [Reliable Messaging: Outbox And Inbox](capabilities/reliable-messaging.md)
 - [Application Transactions](capabilities/application-transactions.md)
 - [Distributed Locks](capabilities/distributed-locks.md)

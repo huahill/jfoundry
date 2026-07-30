@@ -4,6 +4,10 @@ Use Transactional Outbox only when a domain event must reach another process or 
 reliably. In-process event handling does not require it. Inbox provides consumer-side idempotency
 for a message and consumer combination.
 
+For direct broker publication and transport selection, see [Message Delivery](message-delivery.md).
+Reliable messaging composes that selected transport with Outbox recording and optional Inbox
+idempotency; it does not itself select a broker.
+
 ![transactional-outbox.png](../../assets/outbox/transactional-outbox.png)
 
 ## Event Flow

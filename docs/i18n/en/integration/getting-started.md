@@ -89,9 +89,10 @@ boundaries.
 
 - Add [Application Transactions](../capabilities/application-transactions.md) or
   [Distributed Locks](../capabilities/distributed-locks.md) when the use case needs them.
-- Add [Reliable Messaging: Outbox And Inbox](../capabilities/reliable-messaging.md) only for
-  cross-process delivery or consumer idempotency; select its store explicitly.
-- Add messaging, broker, Web MVC, and scheduling starters only for their corresponding capability.
+- Add [Message Delivery](../capabilities/message-delivery.md) when the application needs a direct
+  broker producer; add [Reliable Messaging: Outbox And Inbox](../capabilities/reliable-messaging.md)
+  only when it also needs durable publication or consumer idempotency. Add Web MVC and scheduling
+  starters only for their corresponding capability.
 
 The [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md) is
 the canonical catalog for individual starters, properties, and registration conditions.

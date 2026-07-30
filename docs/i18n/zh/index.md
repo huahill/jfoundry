@@ -6,10 +6,12 @@
 
 - [接入指南](integration/getting-started.md)
 - [采用就绪度与已验证范围](integration/adoption-readiness.md)
+- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)：在 JFoundry 落地之前，可选使用的 AI 辅助领域建模与架构工作流。
 
 ## 能力
 
 - [聚合持久化](capabilities/aggregate-persistence.md)
+- [消息传输](capabilities/message-delivery.md)
 - [可靠消息：Outbox 与 Inbox](capabilities/reliable-messaging.md)
 - [应用事务](capabilities/application-transactions.md)
 - [分布式锁](capabilities/distributed-locks.md)

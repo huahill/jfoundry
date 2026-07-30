@@ -2,6 +2,8 @@
 
 只有领域事件必须可靠投递到其他进程或外部系统时，才使用 Transactional Outbox。进程内事件处理不需要它。Inbox 为一条消息与一个消费者的组合提供消费端幂等。
 
+直接发布消息代理以及选择传输适配器见[消息传输](message-delivery.md)。可靠消息将所选传输与 Outbox 记录和可选 Inbox 幂等组合，但它自身不选择消息代理。
+
 ![transactional-outbox.png](../../assets/outbox/transactional-outbox.png)
 
 ## 事件流

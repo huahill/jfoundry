@@ -15,7 +15,7 @@
 - 基于 jMolecules 的 DDD、Hexagonal、Onion 和 CQRS 语义。
 - 领域、应用、基础设施与运行时集成之间明确的依赖方向。
 - 将架构约束变为可执行测试的 ArchUnit 规则。
-- 用于持久化、可靠消息、事务和运行时装配的可选生产能力。
+- 用于持久化、消息传输、可靠消息、事务和运行时装配的可选生产能力。
 
 ## 架构
 
@@ -32,6 +32,15 @@
 
 ![jfoundry 模块架构](docs/i18n/assets/jfoundry-module-architecture.svg)
 
+## AI 辅助架构工作流
+
+[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) 是
+JFoundry 在设计期的配套插件。它帮助 AI 编程代理从需求出发完成领域建模和架构决策，仅当项目选择 JFoundry 后才进入框架落地。它需要独立安装，不是运行时依赖，也不要求采用某种固定的组合架构。
+
+```text
+需求 -> 领域建模 -> 架构决策 -> 可选的 jfoundry 落地 -> 实施交接
+```
+
 ## 能力概览
 
 | 范畴 | 能力 |
@@ -40,6 +49,7 @@
 | 架构 | Hexagonal 和 Onion 语义，以及 ArchUnit 规则 |
 | 应用层 | 应用服务、事务边界、CQRS 和领域事件编排 |
 | 持久化 | 聚合持久化契约，以及 MyBatis-Plus 和 JPA 实现 |
+| 消息传输 | 运行时无关的出站传输契约，以及显式选择的 Kafka、RabbitMQ、RocketMQ 适配器 |
 | 可靠消息 | Transactional Outbox、Inbox 幂等、消息和序列化 SPI |
 | 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA、Outbox/Inbox 与 REST Problem Details 装配 |
 
@@ -47,6 +57,7 @@
 
 - **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md)。
+- **消息传输**：通过[消息传输](docs/i18n/zh/capabilities/message-delivery.md)选择直接使用的 Kafka、RabbitMQ、RocketMQ 或应用自有传输适配器。
 - **Spring Boot + MyBatis-Plus（常用组合）**：先完成 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md)，再接入 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 聚合持久化；这是一条常见接入路径，不改变 JPA 的同等支持地位。
 - **可靠消息**：先阅读[可靠消息](docs/i18n/zh/capabilities/reliable-messaging.md)，再从对应的 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md) 指南中选择其存储实现。
 - **Spring Boot**：通过 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md) 使用启动器与条件化自动配置组装已选择的能力；其属性、条件与 Bean 优先级见 [Spring Boot 自动配置参考](docs/i18n/zh/reference/spring-boot-autoconfiguration.md)。
@@ -116,10 +127,12 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 - [接入指南](docs/i18n/zh/integration/getting-started.md)
 - [采用就绪度与已验证范围](docs/i18n/zh/integration/adoption-readiness.md)
+- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)
 
 ### 能力
 
 - [聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)
+- [消息传输](docs/i18n/zh/capabilities/message-delivery.md)
 - [可靠消息：Outbox 与 Inbox](docs/i18n/zh/capabilities/reliable-messaging.md)
 - [应用事务](docs/i18n/zh/capabilities/application-transactions.md)
 - [分布式锁](docs/i18n/zh/capabilities/distributed-locks.md)

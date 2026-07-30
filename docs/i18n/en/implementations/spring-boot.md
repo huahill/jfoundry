@@ -112,7 +112,9 @@ enabling dispatch, add one broker-specific starter or provide an application `Me
 one, no production delivery path exists. Automatic Outbox event recording is disabled by default;
 enable it with `jfoundry.domain.event.dispatch.outbox.enabled=true`. It writes only an
 `@Externalized` domain event or an event selected by `DomainEventExternalizer`, never a message
-inferred from a persistence change. See [reliable messaging](../capabilities/reliable-messaging.md).
+inferred from a persistence change. See [Message Delivery](../capabilities/message-delivery.md) for
+direct broker selection and [reliable messaging](../capabilities/reliable-messaging.md) for Outbox
+and Inbox semantics.
 
 ## Web, Locks, And Replacement
 
