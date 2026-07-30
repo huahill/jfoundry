@@ -153,9 +153,22 @@ capability needs its own Native Image integration verification before it can be 
   -am -Pnative package
 ```
 
+The `native-mybatis-plus` profile separately certifies the Spring Boot MyBatis-Plus persistence
+starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, launches the generated
+Native executable, and verifies an insert, reload, update, and reload of `MybatisPlusAuditData`,
+including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
+claim applies to Spring Boot 4.0.7, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
+JPA, Outbox/Inbox stores, brokers, Redisson, or JobRunr:
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pnative-mybatis-plus verify
+```
+
 ### CI-Aligned Local Verification
 
-Run both Spring CI stages locally with Java 25, Docker, and GraalVM Native Image:
+Run all Spring CI stages locally with Java 25, Docker, and GraalVM Native Image:
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -163,5 +176,5 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-Use `--stage middleware` or `--stage native` to run one stage. The general
+Use `--stage middleware`, `--stage native`, or `--stage native-mybatis-plus` to run one stage. The general
 `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.

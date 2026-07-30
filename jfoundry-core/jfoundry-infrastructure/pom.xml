@@ -13,11 +13,6 @@
     <description>Technical adapters for persistence, messaging brokers, outbox stores, and inbox stores.</description>
     <packaging>pom</packaging>
 
-    <properties>
-        <spring-boot.version>4.0.7</spring-boot.version>
-        <mybatis-plus-spring-boot4.version>3.5.16</mybatis-plus-spring-boot4.version>
-    </properties>
-
     <modules>
         <module>jfoundry-web-problem-details</module>
         <module>jfoundry-persistence-core</module>

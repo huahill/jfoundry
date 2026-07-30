@@ -107,9 +107,22 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
   -am -Pnative package
 ```
 
+`native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
+原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
+`MybatisPlusAuditData` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
+`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于 Spring Boot 4.0.7、
+MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、Outbox/Inbox 存储、消息代理、Redisson 或
+JobRunr：
+
+```bash
+./mvnw -B \
+  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -am -Pnative-mybatis-plus verify
+```
+
 ### 本地 CI 对齐验证
 
-使用 Java 25、Docker 和 GraalVM Native Image 在本地运行两个 Spring CI 阶段：
+使用 Java 25、Docker 和 GraalVM Native Image 在本地运行全部 Spring CI 阶段：
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -117,5 +130,5 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。通用
+使用 `--stage middleware`、`--stage native` 或 `--stage native-mybatis-plus` 可以只运行一个阶段。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。

@@ -15,7 +15,7 @@ GRAALVM_HOME="${GRAALVM_HOME:-}"
 
 usage() {
     cat <<'EOF'
-Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|native|all>]
+Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|native|native-mybatis-plus|all>]
 
 Runs the selected runtime's CI-equivalent verification. The default stage is all.
 
@@ -24,7 +24,8 @@ Environment:
   GRAALVM_HOME  GraalVM with Native Image, required for Spring and Helidon native verification,
                  and Quarkus native verification on macOS.
 
-Docker is required for all middleware verification and Quarkus native verification.
+Docker is required for all middleware verification, Spring MyBatis-Plus Native verification,
+and Quarkus native verification.
 EOF
 }
 
@@ -133,6 +134,12 @@ verify_spring() {
         run_maven "${GRAALVM_HOME}" -pl "${SPRING_INTEGRATION_MODULE}" -am -Pnative package
         spring_native_smoke_test
     fi
+
+    if [[ "${stage}" == "native-mybatis-plus" || "${stage}" == "all" ]]; then
+        require_graalvm
+        require_docker
+        run_maven "${GRAALVM_HOME}" -pl "${SPRING_INTEGRATION_MODULE}" -am -Pnative-mybatis-plus verify
+    fi
 }
 
 verify_quarkus() {
@@ -184,12 +191,12 @@ main() {
     shift
 
     if [[ $# -gt 0 ]]; then
-        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|native|all>."
+        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|native|native-mybatis-plus|all>."
         stage="$2"
     fi
 
     case "${stage}" in
-        middleware|native|all) ;;
+        middleware|native|native-mybatis-plus|all) ;;
         *) fail "Unknown stage: ${stage}" ;;
     esac
 

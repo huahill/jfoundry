@@ -23,8 +23,8 @@
 | Spring Cloud Alibaba | 2025.1.0.0 |
 | Quarkus | 3.37.3 |
 | Helidon MP | 4.5.1 |
-| MyBatis-Plus | 3.5.16 |
-| MyBatis-Plus Spring Boot 4 starter | 3.5.16 |
+| MyBatis-Plus | 3.5.17 |
+| MyBatis-Plus Spring Boot 4 starter | 3.5.17 |
 | Jackson 3 | 3.1.4 |
 | Jakarta Persistence | 3.2.0 |
 | Hibernate ORM | 7.2.19.Final |
@@ -61,7 +61,7 @@ general JFoundry dependency-management rule.
 
 ## Verification Evidence
 
-Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`.
+Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. The Spring MyBatis-Plus Native Image verification evidence was recorded on 2026-07-30 with the same GraalVM and Maven versions.
 
 | Gate | Command | Result |
 |------|---------|--------|
@@ -69,6 +69,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Package artifacts | `./mvnw -B -DskipTests package` | PASS on Java 25 |
 | Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Spring Native Image base Starter/Web MVC consumer smoke test | GraalVM 25 with Spring Boot 4.0.7 AOT, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
+| Spring Native Image MyBatis-Plus persistence integration | GraalVM 25 with Spring Boot 4.0.7, MyBatis-Plus 3.5.17 and its `mybatis-plus-spring-boot-native-image` module, PostgreSQL, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-mybatis-plus verify` | PASS on GraalVM Community 25.0.2; verifies inherited `MybatisPlusAuditData` field filling |
 | Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
@@ -98,6 +99,7 @@ support works.
 - Java 25 release-baseline test in CI
 - Maven 4 compatibility matrix in CI
 - Spring and Quarkus Native Image smoke tests in CI
+- Spring Native Image MyBatis-Plus persistence integration in CI
 - Quarkus and Helidon PostgreSQL middleware integration tests in CI
 - Helidon Native CDI/Web smoke test with GraalVM 25; do not gate on Helidon Native JTA until its
   upstream implementation becomes supported

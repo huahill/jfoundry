@@ -3,8 +3,10 @@ package org.jfoundry.autoconfigure.persistence.mybatis;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
 import org.jfoundry.autoconfigure.persistence.AuditStampingAutoConfiguration;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAuditData;
 import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAuditMetaObjectHandler;
 import org.junit.jupiter.api.Test;
+import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -36,6 +38,15 @@ class MybatisPlusAuditAutoConfigurationTest {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(MybatisPlusAuditAutoConfiguration.class))
                 .run(context -> assertThat(context).doesNotHaveBean(MetaObjectHandler.class));
+    }
+
+    @Test
+    void registersNativeReflectionHintsForInheritedAuditMapping() {
+        RuntimeHints hints = new RuntimeHints();
+
+        new MybatisPlusAuditRuntimeHints().registerHints(hints, getClass().getClassLoader());
+
+        assertThat(hints.reflection().getTypeHint(MybatisPlusAuditData.class)).isNotNull();
     }
 
     private static final class NoOpMetaObjectHandler implements MetaObjectHandler {

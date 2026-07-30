@@ -35,7 +35,7 @@
     <archunit.version>1.4.2</archunit.version>
 
     <!-- Persistence and database integration -->
-    <mybatis-plus.version>3.5.16</mybatis-plus.version>
+    <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
     <hibernate.version>7.2.19.Final</hibernate.version>
     <mysql-connector-j.version>9.7.0</mysql-connector-j.version>

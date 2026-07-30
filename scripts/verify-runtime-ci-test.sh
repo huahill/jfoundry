@@ -84,6 +84,11 @@ main spring --stage native
 assert_contains "-Pnative package"
 assert_contains "spring-native-smoke"
 
+CALLS=()
+main spring --stage native-mybatis-plus
+assert_contains "maven::-pl ${SPRING_INTEGRATION_MODULE} -am -Pnative-mybatis-plus verify"
+assert_not_contains "spring-native-smoke"
+
 GRAALVM_HOME="/graalvm"
 is_macos() {
     return 0
@@ -100,6 +105,7 @@ CALLS=()
 main all
 assert_before "-Pit verify" "spring-native-smoke"
 assert_before "spring-native-smoke" "-Pjvm-integration verify"
+assert_before "spring-native-smoke" "-Pnative-mybatis-plus verify"
 assert_contains "helidon-native-smoke"
 
 if (main unknown) >/dev/null 2>&1; then

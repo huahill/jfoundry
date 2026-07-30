@@ -138,6 +138,24 @@ jobs:
       - name: Build and smoke test Spring Native Image
         run: GRAALVM_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh spring --stage native
 
+  spring-native-mybatis-plus:
+    name: Spring Native Image (MyBatis-Plus)
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up GraalVM
+        uses: actions/setup-java@v4
+        with:
+          distribution: graalvm
+          java-version: 25
+          cache: maven
+
+      - name: Build and verify MyBatis-Plus Spring Native Image
+        run: GRAALVM_HOME="$JAVA_HOME" bash scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus
+
   quarkus-native:
     name: Quarkus Native Image
     runs-on: ubuntu-latest
