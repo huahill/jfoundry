@@ -41,9 +41,9 @@ class NativeJobRunrIT {
                 "--spring.datasource.username=" + postgresql.getUsername(),
                 "--spring.datasource.password=" + postgresql.getPassword(),
                 "--jfoundry.outbox.dispatcher.mode=jobrunr",
-                "--jfoundry.outbox.dispatcher.cron=*/1 * * * * *",
+                "--jfoundry.outbox.dispatcher.cron=*/5 * * * * *",
                 "--jobrunr.background-job-server.enabled=true",
-                "--jobrunr.background-job-server.poll-interval-in-seconds=1",
+                "--jobrunr.background-job-server.poll-interval-in-seconds=5",
                 "--jobrunr.miscellaneous.allow-anonymous-data-usage=false")
                 .redirectErrorStream(true)
                 .redirectOutput(Path.of("target/native-jobrunr.log").toFile())

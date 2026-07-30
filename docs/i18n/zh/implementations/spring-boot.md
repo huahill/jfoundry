@@ -120,6 +120,13 @@ JobRunr：
   -am -Pnative-mybatis-plus verify
 ```
 
+`native-redisson` 配置档单独认证 Redisson 4.6.1 锁 starter 与 Redis 的组合。测试在 JVM 进程中
+启动 Redis，启动生成的原生可执行程序，并验证 JFoundry `LockExecutor` 能获取和释放分布式锁。
+`native-jobrunr` 配置档单独认证 JobRunr 8.7.1 与 PostgreSQL 的 Outbox 派发。它启动生成的原生
+可执行程序、启用 JobRunr 后台服务器，并验证持久化的 Outbox 消息会被调度和发布。这些配置档不认证
+其他 Redis、JobRunr 存储、消息代理或持久化组合。业务应用的事件载荷由应用序列化时，仍需为其类型
+提供 Spring AOT binding hints。
+
 ### 本地 CI 对齐验证
 
 使用 Java 25、Docker 和 GraalVM Native Image 在本地运行全部 Spring CI 阶段：
@@ -130,5 +137,6 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-使用 `--stage middleware`、`--stage native` 或 `--stage native-mybatis-plus` 可以只运行一个阶段。通用
+使用 `--stage middleware`、`--stage native`、`--stage native-mybatis-plus`、`--stage native-redisson`
+或 `--stage native-jobrunr` 可以只运行一个阶段。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。

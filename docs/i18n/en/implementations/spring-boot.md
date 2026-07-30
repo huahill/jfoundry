@@ -167,6 +167,15 @@ JPA, Outbox/Inbox stores, brokers, Redisson, or JobRunr:
   -am -Pnative-mybatis-plus verify
 ```
 
+The `native-redisson` profile separately certifies the Redisson 4.6.1 lock starter with Redis. It
+starts Redis in the JVM test process, launches the generated Native executable, and verifies that
+the JFoundry `LockExecutor` acquires and releases a distributed lock. The `native-jobrunr` profile
+separately certifies JobRunr 8.7.1 Outbox dispatching with PostgreSQL. It launches the generated
+Native executable, enables the JobRunr background server, and verifies that a persisted Outbox
+message is scheduled and published. These profiles do not certify other Redis, JobRunr storage,
+broker, or persistence combinations. Native applications must also register their own event payload
+types for Spring AOT binding when those types are serialized by the application.
+
 ### CI-Aligned Local Verification
 
 Run all Spring CI stages locally with Java 25, Docker, and GraalVM Native Image:
@@ -177,5 +186,6 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-Use `--stage middleware`, `--stage native`, or `--stage native-mybatis-plus` to run one stage. The general
+Use `--stage middleware`, `--stage native`, `--stage native-mybatis-plus`, `--stage native-redisson`,
+or `--stage native-jobrunr` to run one stage. The general
 `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.

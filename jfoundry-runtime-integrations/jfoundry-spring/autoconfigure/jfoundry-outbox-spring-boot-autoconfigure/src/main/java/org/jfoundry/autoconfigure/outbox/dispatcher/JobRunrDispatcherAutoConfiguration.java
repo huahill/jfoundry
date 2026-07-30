@@ -7,7 +7,8 @@ import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.transaction.TransactionRunner;
 import org.jfoundry.autoconfigure.transaction.TransactionRunnerAutoConfiguration;
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher;
-import org.jobrunr.scheduling.JobScheduler;
+import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.OutboxDispatchJobRequest;
+import org.jobrunr.scheduling.JobRequestScheduler;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
@@ -36,7 +37,10 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 /// batchSize, maxRetries, and cron are all read from {@link OutboxDispatcherProperties}, matching
 /// scheduled-mode behavior with the same {@code jfoundry.outbox.dispatcher.*} configuration.
 @AutoConfiguration
-@AutoConfigureAfter(TransactionRunnerAutoConfiguration.class)
+@AutoConfigureAfter({
+        TransactionRunnerAutoConfiguration.class,
+        OutboxDispatcherAutoConfiguration.class
+})
 @ConditionalOnClass(name = {
         "org.jobrunr.jobs.annotations.Job",
         "org.jobrunr.scheduling.JobScheduler",
@@ -56,7 +60,7 @@ public class JobRunrDispatcherAutoConfiguration {
             BackoffStrategy backoffStrategy,
             TransactionRunner transactionRunner,
             OutboxDispatcherProperties properties,
-            ObjectProvider<JobScheduler> jobScheduler) {
+            ObjectProvider<JobRequestScheduler> jobRequestScheduler) {
         JobRunrOutboxDispatcher dispatcher = new JobRunrOutboxDispatcher(
                 outboxRepository,
                 messageSender,
@@ -64,10 +68,10 @@ public class JobRunrDispatcherAutoConfiguration {
                 properties.getBatchSize(),
                 properties.getMaxRetries(),
                 backoffStrategy);
-        jobScheduler.ifAvailable(scheduler -> scheduler.scheduleRecurrently(
+        jobRequestScheduler.ifAvailable(scheduler -> scheduler.scheduleRecurrently(
                 "jfoundry-outbox-dispatch",
                 properties.getCron(),
-                dispatcher::recurringDispatch));
+                new OutboxDispatchJobRequest()));
         return dispatcher;
     }
 }

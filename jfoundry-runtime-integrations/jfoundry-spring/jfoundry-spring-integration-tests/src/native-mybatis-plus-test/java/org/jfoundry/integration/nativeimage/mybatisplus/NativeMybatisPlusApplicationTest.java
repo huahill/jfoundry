@@ -46,6 +46,17 @@ class NativeMybatisPlusApplicationTest {
     }
 
     @Test
+    void exposesAReadinessEndpointWithoutMutatingPersistenceState() throws Exception {
+        HttpResponse<String> response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(
+                        URI.create("http://localhost:" + port + "/jfoundry/native/mybatis-plus/ready"))
+                .GET()
+                .build(), HttpResponse.BodyHandlers.ofString());
+
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.body()).isEqualTo("ready");
+    }
+
+    @Test
     void persistsAndUpdatesAuditDataThroughTheMybatisPlusStarter() throws Exception {
         HttpResponse<String> response = HttpClient.newHttpClient().send(HttpRequest.newBuilder(
                         URI.create("http://localhost:" + port + "/jfoundry/native/mybatis-plus/audit-record"))

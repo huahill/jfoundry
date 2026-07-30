@@ -27,6 +27,14 @@ class PersistenceFailureAutoConfigurationTest {
             .withUserConfiguration(RepositoryConfiguration.class);
 
     @Test
+    void declaresTheConcreteDefaultTranslatorTypeForAheadOfTimeProcessing() throws NoSuchMethodException {
+        assertThat(PersistenceFailureAutoConfiguration.class
+                .getDeclaredMethod("persistenceFailureTranslator")
+                .getReturnType())
+                .isEqualTo(SpringDataAccessFailureTranslator.class);
+    }
+
+    @Test
     void registersAndInjectsDefaultSpringTranslator() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(PersistenceFailureTranslator.class);

@@ -8,6 +8,7 @@ import org.jfoundry.application.transaction.TransactionRunner;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.aot.hint.annotation.RegisterReflectionForBinding;
 import org.springframework.context.annotation.Bean;
 
 import java.time.Instant;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 /// Native Image consumer used to certify JFoundry JobRunr Outbox dispatching.
 @SpringBootApplication
+@RegisterReflectionForBinding(NativeJobRunrEvent.class)
 public class NativeJobRunrApplication {
 
     static final String EVENT_ID = "native-jobrunr-event";

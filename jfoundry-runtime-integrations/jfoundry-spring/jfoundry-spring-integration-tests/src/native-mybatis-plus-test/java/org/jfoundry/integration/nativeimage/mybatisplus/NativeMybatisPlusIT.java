@@ -46,7 +46,8 @@ class NativeMybatisPlusIT {
                 .start();
 
         try {
-            assertThat(awaitSuccessfulAuditOperation(port)).contains(
+            awaitReady(port);
+            assertThat(persistAndUpdateAuditRecord(port)).contains(
                     "\"createdAtSet\":true",
                     "\"lastModifiedAtSet\":true",
                     "\"createdBy\":\"native-test\"",
@@ -74,27 +75,42 @@ class NativeMybatisPlusIT {
         }
     }
 
-    private static String awaitSuccessfulAuditOperation(int port) throws Exception {
+    private static void awaitReady(int port) throws Exception {
         Instant deadline = Instant.now().plus(Duration.ofSeconds(45));
         IOException lastFailure = null;
         while (Instant.now().isBefore(deadline)) {
             try {
                 var connection = (java.net.HttpURLConnection) new java.net.URI(
-                        "http://127.0.0.1:" + port + "/jfoundry/native/mybatis-plus/audit-record")
+                        "http://127.0.0.1:" + port + "/jfoundry/native/mybatis-plus/ready")
                         .toURL()
                         .openConnection();
-                connection.setRequestMethod("POST");
+                connection.setRequestMethod("GET");
                 connection.setConnectTimeout(1_000);
                 connection.setReadTimeout(1_000);
                 if (connection.getResponseCode() == 200) {
-                    return new String(connection.getInputStream().readAllBytes());
+                    return;
                 }
             } catch (IOException failure) {
                 lastFailure = failure;
             }
             Thread.sleep(250);
         }
-        throw new IOException("Native MyBatis-Plus application did not complete its audit operation", lastFailure);
+        throw new IOException("Native MyBatis-Plus application did not become ready", lastFailure);
+    }
+
+    private static String persistAndUpdateAuditRecord(int port) throws Exception {
+        var connection = (java.net.HttpURLConnection) new java.net.URI(
+                "http://127.0.0.1:" + port + "/jfoundry/native/mybatis-plus/audit-record")
+                .toURL()
+                .openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setConnectTimeout(1_000);
+        connection.setReadTimeout(5_000);
+        if (connection.getResponseCode() != 200) {
+            throw new IOException("Native MyBatis-Plus audit operation failed with HTTP " + connection.getResponseCode());
+        }
+        return new String(connection.getInputStream().readAllBytes());
     }
 
     private static int availablePort() throws IOException {

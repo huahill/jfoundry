@@ -20,7 +20,7 @@ public class PersistenceFailureAutoConfiguration {
             "org.springframework.dao.DataAccessException"
     })
     @ConditionalOnMissingBean(PersistenceFailureTranslator.class)
-    public PersistenceFailureTranslator persistenceFailureTranslator() {
+    public SpringDataAccessFailureTranslator persistenceFailureTranslator() {
         return new SpringDataAccessFailureTranslator();
     }
 

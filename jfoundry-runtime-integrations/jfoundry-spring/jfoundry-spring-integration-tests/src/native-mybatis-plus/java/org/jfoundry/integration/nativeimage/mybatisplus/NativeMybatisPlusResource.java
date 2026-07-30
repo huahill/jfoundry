@@ -1,5 +1,6 @@
 package org.jfoundry.integration.nativeimage.mybatisplus;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,6 +12,11 @@ class NativeMybatisPlusResource {
 
     NativeMybatisPlusResource(NativeAuditRecordMapper mapper) {
         this.mapper = mapper;
+    }
+
+    @GetMapping("/jfoundry/native/mybatis-plus/ready")
+    String ready() {
+        return "ready";
     }
 
     @PostMapping("/jfoundry/native/mybatis-plus/audit-record")

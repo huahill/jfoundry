@@ -8,11 +8,12 @@ import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxRuntimeIds;
 import org.jfoundry.application.transaction.TransactionRunner;
 import org.jobrunr.jobs.annotations.Job;
+import org.jobrunr.jobs.lambdas.JobRequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /// JobRunr trigger for the framework-neutral Outbox dispatch runtime.
-public class JobRunrOutboxDispatcher implements OutboxDispatcher {
+public class JobRunrOutboxDispatcher implements OutboxDispatcher, JobRequestHandler<OutboxDispatchJobRequest> {
 
     private static final Logger log = LoggerFactory.getLogger(JobRunrOutboxDispatcher.class);
 
@@ -64,6 +65,11 @@ public class JobRunrOutboxDispatcher implements OutboxDispatcher {
     @Job(name = "outbox-dispatch", retries = 3)
     public void recurringDispatch() {
         dispatch(batchSize);
+    }
+
+    @Override
+    public void run(OutboxDispatchJobRequest ignored) {
+        recurringDispatch();
     }
 
     @Override

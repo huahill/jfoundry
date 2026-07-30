@@ -21,50 +21,57 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-application-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-transaction-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-externalization-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-inbox-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-messaging-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-persistence-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-messaging-jackson</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -73,6 +80,7 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-jpa</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -82,26 +90,32 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-jobrunr</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-spring</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-messaging-spring</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-spring</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-transaction-spring</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-webmvc-spring</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -110,6 +124,7 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-messaging-spring-boot-autoconfigure</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -119,6 +134,7 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -129,10 +145,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jmolecules.integrations</groupId>
@@ -147,6 +159,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.h2database</groupId>
@@ -289,6 +302,13 @@
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
                 <version>1.1.6</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.maven.shared</groupId>
+                        <artifactId>maven-shared-utils</artifactId>
+                        <version>3.4.2</version>
+                    </dependency>
+                </dependencies>
                 <extensions>true</extensions>
             </plugin>
         </plugins>
@@ -368,6 +388,14 @@
         <profile>
             <id>native-mybatis-plus</id>
             <dependencies>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-persistence-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
+                </dependency>
                 <dependency>
                     <groupId>io.github.xfoundries</groupId>
                     <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-starter</artifactId>
@@ -566,6 +594,46 @@
             <dependencies>
                 <dependency>
                     <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-messaging-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-transaction-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-transaction-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-messaging-jackson</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-domain-event-externalization-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-jpa</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-jobrunr</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
                     <artifactId>jfoundry-outbox-jobrunr-spring-boot-starter</artifactId>
                 </dependency>
                 <dependency>
@@ -574,7 +642,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
+                    <artifactId>spring-boot-starter-data-jpa</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>org.postgresql</groupId>
@@ -635,6 +703,12 @@
                             <execution>
                                 <id>process-aot-jobrunr</id>
                                 <goals><goal>process-aot</goal></goals>
+                                <configuration>
+                                    <arguments>
+                                        <argument>--jfoundry.outbox.dispatcher.mode=jobrunr</argument>
+                                        <argument>--jobrunr.background-job-server.enabled=true</argument>
+                                    </arguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

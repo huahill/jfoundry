@@ -15,7 +15,7 @@ GRAALVM_HOME="${GRAALVM_HOME:-}"
 
 usage() {
     cat <<'EOF'
-Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|native|native-mybatis-plus|all>]
+Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all>]
 
 Runs the selected runtime's CI-equivalent verification. The default stage is all.
 
@@ -140,6 +140,18 @@ verify_spring() {
         require_docker
         run_maven "${GRAALVM_HOME}" -pl "${SPRING_INTEGRATION_MODULE}" -am -Pnative-mybatis-plus verify
     fi
+
+    if [[ "${stage}" == "native-redisson" || "${stage}" == "all" ]]; then
+        require_graalvm
+        require_docker
+        run_maven "${GRAALVM_HOME}" -pl "${SPRING_INTEGRATION_MODULE}" -am -Pnative-redisson verify
+    fi
+
+    if [[ "${stage}" == "native-jobrunr" || "${stage}" == "all" ]]; then
+        require_graalvm
+        require_docker
+        run_maven "${GRAALVM_HOME}" -pl "${SPRING_INTEGRATION_MODULE}" -am -Pnative-jobrunr clean verify
+    fi
 }
 
 verify_quarkus() {
@@ -191,12 +203,12 @@ main() {
     shift
 
     if [[ $# -gt 0 ]]; then
-        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|native|native-mybatis-plus|all>."
+        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all>."
         stage="$2"
     fi
 
     case "${stage}" in
-        middleware|native|native-mybatis-plus|all) ;;
+        middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all) ;;
         *) fail "Unknown stage: ${stage}" ;;
     esac
 

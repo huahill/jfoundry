@@ -11,6 +11,7 @@ import org.jfoundry.application.transaction.TransactionRunner;
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.jobrunr.scheduling.JobRequestScheduler;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -20,6 +21,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -100,6 +102,22 @@ class JobRunrDispatcherAutoConfigurationTest {
                             .as("batchSize must come from jfoundry.outbox.dispatcher.batchSize=20")
                             .isEqualTo(20);
                 });
+    }
+
+    @Test
+    void schedulesRecurringDispatchUsingAJobRequest() {
+        JobRequestScheduler jobRequestScheduler = mock(JobRequestScheduler.class);
+
+        runner
+                .withBean(JobRequestScheduler.class, () -> jobRequestScheduler)
+                .withPropertyValues(
+                        "jfoundry.outbox.dispatcher.mode=jobrunr",
+                        "jfoundry.outbox.dispatcher.cron=*/5 * * * * *"
+                )
+                .run(context -> verify(jobRequestScheduler).scheduleRecurrently(
+                        eq("jfoundry-outbox-dispatch"),
+                        eq("*/5 * * * * *"),
+                        any(org.jobrunr.jobs.lambdas.JobRequest.class)));
     }
 
     @Test
