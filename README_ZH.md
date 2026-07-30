@@ -37,6 +37,8 @@
 [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) 是
 JFoundry 在设计期的配套插件。它帮助 AI 编程代理从需求出发完成领域建模和架构决策，仅当项目选择 JFoundry 后才进入框架落地。它需要独立安装，不是运行时依赖，也不要求采用某种固定的组合架构。
 
+与 JFoundry 配合使用的验证证据和边界见[采用就绪度与已验证范围](docs/i18n/zh/integration/adoption-readiness.md)。
+
 ```text
 需求 -> 领域建模 -> 架构决策 -> 可选的 jfoundry 落地 -> 实施交接
 ```

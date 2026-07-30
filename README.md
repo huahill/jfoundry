@@ -40,6 +40,9 @@ from requirements through domain modeling and architecture decisions, then enter
 when JFoundry is selected. It is installed separately and is not a runtime dependency or a
 mandatory combined architecture.
 
+See [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md) for
+the evidence and boundaries of using the plugin together with JFoundry.
+
 ```text
 requirements -> domain modeling -> architecture decision -> optional jfoundry landing -> implementation handoff
 ```
