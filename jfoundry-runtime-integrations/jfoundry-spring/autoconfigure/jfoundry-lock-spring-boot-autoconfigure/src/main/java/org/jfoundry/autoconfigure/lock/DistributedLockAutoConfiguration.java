@@ -23,7 +23,7 @@ import org.springframework.core.Ordered;
 
 /// Auto-configuration for distributed lock support.
 @AutoConfiguration
-@AutoConfigureAfter(name = "org.redisson.spring.starter.RedissonAutoConfigurationV2")
+@AutoConfigureAfter(name = "org.redisson.spring.starter.RedissonAutoConfigurationV4")
 @ConditionalOnClass({DistributedLockClient.class, LockExecutor.class})
 public class DistributedLockAutoConfiguration {
 

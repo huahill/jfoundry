@@ -67,7 +67,7 @@ class DistributedLockAutoConfigurationTest {
 
         assertThat(ordering).isNotNull();
         assertThat(ordering.name())
-                .contains("org.redisson.spring.starter.RedissonAutoConfigurationV2");
+                .contains("org.redisson.spring.starter.RedissonAutoConfigurationV4");
     }
 
     @Test
