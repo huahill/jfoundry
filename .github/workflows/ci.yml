@@ -16,6 +16,53 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Classify changes
+    runs-on: ubuntu-latest
+    outputs:
+      run_full: ${{ steps.scope.outputs.run_full }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Classify changed paths
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_BEFORE: ${{ github.event.before }}
+          PULL_REQUEST_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "run_full=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          base="$EVENT_BEFORE"
+          if [[ "$EVENT_NAME" == "pull_request" ]]; then
+            base="$PULL_REQUEST_BASE"
+          fi
+          if [[ "$base" =~ ^0+$ ]]; then
+            base="$(git rev-list --max-parents=0 HEAD | tail -n 1)"
+          fi
+
+          run_full=false
+          while IFS= read -r changed_path; do
+            case "$changed_path" in
+              README.md|README_ZH.md|docs/*)
+                ;;
+              *)
+                run_full=true
+                break
+                ;;
+            esac
+          done < <(git diff --name-only "$base" "$GITHUB_SHA")
+
+          echo "run_full=$run_full" >> "$GITHUB_OUTPUT"
+
   docs:
     name: Documentation checks
     runs-on: ubuntu-latest
@@ -29,6 +76,8 @@ jobs:
   test:
     name: Test (Java ${{ matrix.java }})
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.run_full == 'true'
     strategy:
       fail-fast: false
       matrix:
