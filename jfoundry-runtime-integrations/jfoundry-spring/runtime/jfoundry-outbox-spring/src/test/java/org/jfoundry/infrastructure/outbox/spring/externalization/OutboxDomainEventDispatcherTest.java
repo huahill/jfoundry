@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -33,6 +34,24 @@ class OutboxDomainEventDispatcherTest {
 
         assertThat(outboxRecorder.recordCallCount).isZero();
         assertThat(outboxRecorder.recordedEvents).isEmpty();
+    }
+
+    @Test
+    void resolvesTheOutboxRecorderOnlyWhenEventsAreDispatched() {
+        RecordingOutboxRecorder outboxRecorder = new RecordingOutboxRecorder();
+        AtomicInteger resolutions = new AtomicInteger();
+        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(() -> {
+            resolutions.incrementAndGet();
+            return outboxRecorder;
+        });
+
+        dispatcher.dispatch(List.of());
+        assertThat(resolutions).hasValue(0);
+
+        dispatcher.dispatch(List.of(new TestDomainEvent("order-1")));
+
+        assertThat(resolutions).hasValue(1);
+        assertThat(outboxRecorder.recordCallCount).isEqualTo(1);
     }
 
     @Test

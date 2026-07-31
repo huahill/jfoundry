@@ -11,6 +11,7 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Role;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 @AutoConfiguration
 @AutoConfigureAfter(name = "org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration")
@@ -111,8 +113,9 @@ public class DomainEventDispatchAutoConfiguration {
         @ConditionalOnProperty(prefix = "jfoundry.domain.event.dispatch.outbox", name = "enabled",
                                havingValue = "true")
         public OutboxDomainEventDispatcher outboxDomainEventDispatcher(
-                DomainEventOutboxRecorder outboxRecorder) {
-            return new OutboxDomainEventDispatcher(outboxRecorder);
+                ObjectProvider<DomainEventOutboxRecorder> outboxRecorder) {
+            Supplier<DomainEventOutboxRecorder> outboxRecorderSupplier = outboxRecorder::getObject;
+            return new OutboxDomainEventDispatcher(outboxRecorderSupplier);
         }
     }
 }
