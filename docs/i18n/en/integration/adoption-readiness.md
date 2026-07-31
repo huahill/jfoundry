@@ -2,7 +2,7 @@
 
 This document records a point-in-time assessment of whether jfoundry and the related domain
 architecture plugin can support real business application development. It is an evidence-based
-adoption guide, not a general production certification. The assessment date is 2026-07-15.
+adoption guide, not a general production certification. The assessment date is 2026-07-31.
 
 ## Related Repositories
 
@@ -89,7 +89,8 @@ integration path. The same business rules, database model, integration contracts
 scenarios were validated with separately maintained Hexagonal and Onion Simple variants. At the
 assessment date, the recorded evidence includes:
 
-- jfoundry test matrices on Java 21 and Java 25 across the 67-module reactor.
+- jfoundry test matrices on Java 25 across the 67-module reactor, including Spring Boot Native
+  Image verification for the base runtime, MyBatis-Plus, Redisson, and JobRunr capabilities.
 - Validation of every shipped plugin skill, the Codex plugin manifest, and the Claude marketplace
   metadata.
 - Both architecture variants passed the same complete automated demo suite, including five
@@ -101,6 +102,8 @@ assessment date, the recorded evidence includes:
 - Payment success and failure, duplicate message delivery through Inbox, concurrent monthly-limit
   enforcement, and transaction rollback without an approval Outbox record.
 - A separately executed local path from HTTP approval through Kafka to the final `PAID` projection.
+- The expense approval demo's two Spring Boot applications were built as GraalVM Native Images and
+  passed the same five container-based end-to-end messaging scenarios.
 - Onion validation of explicit Domain, Application, and Infrastructure rings, inward dependency
   rules, DDD repository placement, responsibility-first application contract names, and the same
   targeted CQRS structure used by the Hexagonal variant.
@@ -123,7 +126,10 @@ from Hexagonal Port/Adapter conventions.
 The strongest evidence currently applies to:
 
 - Java 25 business applications.
-- Spring Boot 4.0.x and Spring Framework 7.0.x.
+- Spring Boot 4.0.x and Spring Framework 7.0.x, including JVM middleware integration and GraalVM
+  Native Image verification for the base runtime, MyBatis-Plus persistence, Redisson locking, and
+  JobRunr Outbox dispatching. The expense approval demo additionally verifies its Kafka, Outbox,
+  Inbox, PostgreSQL, and payment-projection path with two Native Image executables.
 - Quarkus 3.37.3 CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
   JVM consumer smoke test and a Native Image CI gate.
 - Helidon MP 4.5.1 CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem
@@ -152,6 +158,9 @@ The following areas are not established by the current evidence:
 - Helidon broker delivery, Redisson locking, JobRunr, and working Helidon Native JTA/JPA paths. Do
   not infer these from Spring or Quarkus capabilities. Micronaut has no runtime integration yet.
 - Other ORM, database, or broker combinations.
+- Native Image compatibility for an arbitrary downstream dependency graph, deployment target, or
+  application configuration. Consumers must verify their selected capability set and build-time
+  configuration, especially structural properties that influence AOT bean registration.
 - Application security, observability, deployment, capacity, performance, disaster recovery, and
   long-running production operations.
 - Compatibility across a real downstream upgrade from one stable jfoundry release to another.

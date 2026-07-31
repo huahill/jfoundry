@@ -1,7 +1,7 @@
 # 采用就绪度与已验证范围
 
 本文记录 jfoundry 与相关领域架构插件能否支撑真实业务项目开发的阶段性评估。它以可复现证据说明
-采用范围和前置条件，不是通用的生产就绪认证。评估日期为 2026-07-15。
+采用范围和前置条件，不是通用的生产就绪认证。评估日期为 2026-07-31。
 
 ## 相关仓库
 
@@ -74,13 +74,16 @@ jfoundry 不只是项目脚手架。它的主要价值是为业务应用中反�
 简单，同时覆盖完整架构与集成链路。同一套业务规则、数据库模型、集成契约和验收场景已通过分别维护
 的 Hexagonal 与 Onion Simple 变体验证。截至评估日期，已记录的证据包括：
 
-- jfoundry 在 Java 21 和 Java 25 下完成 67 模块测试矩阵。
+- jfoundry 在 Java 25 下完成 67 模块测试矩阵，其中包括基础运行时、MyBatis-Plus、Redisson 和
+  JobRunr 能力的 Spring Boot 原生镜像验证。
 - 插件发布的全部技能、Codex 插件清单和 Claude 市场元数据通过校验。
 - 两个架构变体均通过同一套完整自动化测试，其中包含 5 个基于容器的端到端场景。
 - 端到端环境包含两个独立 PostgreSQL、Kafka、Redis 和两个 Spring Boot 应用上下文。
 - JPA 与 MyBatis-Plus Outbox/Inbox 存储均通过 PostgreSQL、MySQL 的 Testcontainers 验证，其中包括数据库相关的 JPA Inbox 领取策略。
 - 覆盖支付成功与失败、Inbox 重复投递、并发月度额度控制，以及事务回滚且不写审批 Outbox。
 - 另外独立执行了从 HTTP 审批、经过 Kafka、最终形成 `PAID` 查询投影的本地完整链路。
+- 费用报销审批 Demo 的两个 Spring Boot 应用均构建为 GraalVM 原生镜像，并通过同一套五个基于容器的
+  端到端消息场景。
 - Onion 验证覆盖显式领域、应用、基础设施环、向内依赖规则、DDD Repository
   位置、职责优先的应用契约命名，以及与 Hexagonal 变体相同的按需 CQRS 结构。
 
@@ -100,7 +103,9 @@ Hexagonal Port/Adapter 约定分离。
 当前最强证据适用于：
 
 - Java 25 业务应用。
-- Spring Boot 4.0.x 和 Spring Framework 7.0.x。
+- Spring Boot 4.0.x 和 Spring Framework 7.0.x，包括 JVM 中间件集成，以及基础运行时、
+  MyBatis-Plus 持久化、Redisson 锁和 JobRunr Outbox 派发的 GraalVM 原生镜像验证。费用报销审批
+  Demo 还使用两个原生可执行文件验证 Kafka、Outbox、Inbox、PostgreSQL 和支付投影链路。
 - Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 运行时集成验证
   和原生镜像 CI 验证任务。
 - Helidon MP 4.5.1 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
@@ -127,6 +132,8 @@ Hexagonal Port/Adapter 约定分离。
 - Helidon 消息代理投递、Redisson 锁、JobRunr 和可工作的 Helidon 原生 JTA/JPA 路径。不得从 Spring 或
   Quarkus 能力自动推断这些能力。Micronaut 尚无运行时集成。
 - 其他 ORM、数据库或消息中间件组合。
+- 任意下游依赖图、部署目标或应用配置的原生镜像兼容性。使用方必须针对实际选择的能力和构建期配置
+  完成验证，尤其是会影响 AOT Bean 注册的结构化属性。
 - 应用安全、可观测性、部署、容量、性能、灾难恢复和长期生产运行。
 - 下游项目从一个 jfoundry 稳定版本升级到另一个稳定版本的兼容性。
 
