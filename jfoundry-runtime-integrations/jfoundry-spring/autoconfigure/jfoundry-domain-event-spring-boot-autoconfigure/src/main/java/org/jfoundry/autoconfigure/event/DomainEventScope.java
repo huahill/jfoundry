@@ -124,18 +124,9 @@ public class DomainEventScope {
         }
     }
 
-    private static final class TransactionEventSynchronization implements TransactionSynchronization {
-
-        private final State state;
-        private final TransactionEvents events;
-        private final DomainEventDispatcher dispatcher;
-
-        private TransactionEventSynchronization(
-                State state, TransactionEvents events, DomainEventDispatcher dispatcher) {
-            this.state = state;
-            this.events = events;
-            this.dispatcher = dispatcher;
-        }
+    private record TransactionEventSynchronization(State state, TransactionEvents events,
+                                                   DomainEventDispatcher dispatcher)
+            implements TransactionSynchronization {
 
         @Override
         public void beforeCommit(boolean readOnly) {
