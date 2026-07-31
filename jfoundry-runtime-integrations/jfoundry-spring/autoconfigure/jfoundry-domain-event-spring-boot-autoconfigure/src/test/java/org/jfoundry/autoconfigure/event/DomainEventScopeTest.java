@@ -18,6 +18,12 @@ class DomainEventScopeTest {
     private final DomainEventScope scope = new DomainEventScope();
 
     @Test
+    void bindsScopeStateUsingScopedValue() throws NoSuchFieldException {
+        assertThat(DomainEventScope.class.getDeclaredField("CURRENT").getType())
+                .isEqualTo(ScopedValue.class);
+    }
+
+    @Test
     void ignoresRegisteredAggregatesOutsideScope() {
         RecordingAggregate aggregate = new RecordingAggregate(new TestDomainEvent("outside"));
 

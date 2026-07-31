@@ -14,22 +14,23 @@ import java.util.Map;
 
 public class DomainEventScope {
 
-    private static final ThreadLocal<State> CURRENT = new ThreadLocal<>();
+    private static final ScopedValue<State> CURRENT = ScopedValue.newInstance();
 
     <T> T invoke(ScopedOperation<T> operation) throws Throwable {
         return invoke(null, operation);
     }
 
     <T> T invoke(DomainEventDispatcher dispatcher, ScopedOperation<T> operation) throws Throwable {
-        if (CURRENT.get() != null) {
+        if (CURRENT.isBound()) {
             return operation.get(false);
         }
-        CURRENT.set(new State(dispatcher));
-        try {
-            return operation.get(true);
-        } finally {
-            CURRENT.remove();
-        }
+        return ScopedValue.where(CURRENT, new State(dispatcher)).call(() -> {
+            try {
+                return operation.get(true);
+            } catch (Throwable throwable) {
+                return rethrow(throwable);
+            }
+        });
     }
 
     void register(EventRecordable aggregate) {
@@ -65,7 +66,12 @@ public class DomainEventScope {
     }
 
     private State current() {
-        return CURRENT.get();
+        return CURRENT.isBound() ? CURRENT.get() : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, E extends Throwable> T rethrow(Throwable throwable) throws E {
+        throw (E) throwable;
     }
 
     private static final class State {
