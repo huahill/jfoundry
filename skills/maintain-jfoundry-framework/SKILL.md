@@ -23,10 +23,24 @@ When framework docs, examples, or test fixtures mention DDD modeling concepts, k
    - `references/testing.md` before choosing verification commands.
    - `references/common-change-recipes.md` for recurring framework changes.
 3. Inspect existing modules and tests that already implement the same pattern.
-4. Make the smallest change that preserves framework-neutral core contracts and explicit runtime integration.
-5. Add or update focused tests next to the changed module.
-6. Run the narrowest Maven verification first, then broader verification when public APIs, starters, auto-configuration, or cross-module behavior changed.
-7. Call out compatibility impact when changing public APIs, starter dependencies, configuration properties, table schemas, event routing, or state transitions.
+4. For a shared contract or runtime lifecycle behavior, inventory every supported runtime with an equivalent capability before editing. Today that normally means Spring, Quarkus, and Helidon; do not infer that an optional capability exists in all three.
+5. Make the smallest change that preserves framework-neutral core contracts and explicit runtime integration.
+6. Add or update focused tests next to each affected runtime module. A successful test in one runtime does not validate the other runtime adapters.
+7. Run the narrowest Maven verification first, then broader verification when public APIs, starters, auto-configuration, or cross-module behavior changed.
+8. Call out compatibility impact when changing public APIs, starter dependencies, configuration properties, table schemas, event routing, or state transitions.
+
+## Cross-Runtime Consistency
+
+Before changing a framework-neutral contract or a behavior implemented by runtime adapters, make an explicit coverage table for the affected capability:
+
+| Check | Required action |
+| --- | --- |
+| Runtime inventory | Identify the Spring, Quarkus, and Helidon modules that implement the behavior, including corresponding deployment or auto-configuration modules. |
+| Semantic contract | State the externally observable behavior that must be equal across supported runtimes, such as transaction phase, event ordering, error mapping, context propagation, or retry semantics. |
+| Deliberate exception | When a runtime intentionally does not offer the capability, record the limitation and its reason in the relevant documentation or issue; do not silently omit it or add a pretend implementation. |
+| Verification | Run focused tests for every affected runtime adapter. Add parity tests for commit/rollback, ordering, failure, or lifecycle behavior when those semantics are shared. |
+
+Apply runtime-specific APIs only inside their runtime adapters. Put a shared semantic marker or contract in the framework-neutral core only when it expresses behavior needed by more than one runtime. Do not move lifecycle APIs such as Spring transaction synchronization or JTA callbacks into core merely to make the implementations look uniform.
 
 ## Non-Negotiable Boundaries
 
