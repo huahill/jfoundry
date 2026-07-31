@@ -78,6 +78,13 @@ Recent history follows Conventional Commits, for example `fix(outbox): ...`, `te
 
 Keep `main` history linear. Do not use `git merge` to integrate completed work into `main`; rebase a feature branch onto the current `main` or cherry-pick its ordered commits instead. Do not rewrite already-pushed history unless the user explicitly authorizes it; when authorized, use `git push --force-with-lease`, not `--force`.
 
+## Merge Gate
+
+Do not push directly to `main`. Create a short-lived branch and pull request for every repository change.
+The GitHub `Merge gate` status check must pass before integration. Use GitHub's `Rebase and merge` strategy
+to preserve the linear `main` history. Local verification accelerates feedback but does not replace the
+server-side merge gate.
+
 ## Documentation Comments
 
 Javadocs and documentation comments in source code must follow the Language Policy. There is no Javadoc i18n mechanism for comment bodies; generated documentation uses the text from source comments. Keep comments concise and focused on API intent; avoid restating obvious implementation details.

@@ -303,3 +303,47 @@ jobs:
 
       - name: Check Maven 4 package compatibility
         run: mvn -B -DskipTests package
+
+  merge-gate:
+    name: Merge gate
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - docs
+      - test
+      - package
+      - spring-integration
+      - quarkus-integration
+      - helidon-integration
+      - spring-native
+      - spring-native-mybatis-plus
+      - spring-native-redisson
+      - spring-native-jobrunr
+      - quarkus-native
+      - helidon-native
+      - maven-4
+    if: ${{ always() }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Test merge requirements evaluator
+        run: bash scripts/verify-merge-gate-test.sh
+
+      - name: Verify merge requirements
+        run: >-
+          bash scripts/verify-merge-gate.sh
+          "${{ needs.changes.outputs.run_full }}"
+          "${{ needs.docs.result }}"
+          "${{ needs.test.result }}"
+          "${{ needs.package.result }}"
+          "${{ needs.spring-integration.result }}"
+          "${{ needs.quarkus-integration.result }}"
+          "${{ needs.helidon-integration.result }}"
+          "${{ needs.spring-native.result }}"
+          "${{ needs.spring-native-mybatis-plus.result }}"
+          "${{ needs.spring-native-redisson.result }}"
+          "${{ needs.spring-native-jobrunr.result }}"
+          "${{ needs.quarkus-native.result }}"
+          "${{ needs.helidon-native.result }}"
+          "${{ needs.maven-4.result }}"
