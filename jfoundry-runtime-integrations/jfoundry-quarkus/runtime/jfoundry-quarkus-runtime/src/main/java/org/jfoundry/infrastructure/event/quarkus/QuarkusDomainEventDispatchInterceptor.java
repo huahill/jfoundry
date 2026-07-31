@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
+import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
 import org.jfoundry.application.event.CompositeDomainEventDispatcher;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jmolecules.event.types.DomainEvent;
@@ -42,7 +43,7 @@ public class QuarkusDomainEventDispatchInterceptor {
                             "Quarkus domain-event dispatch supports synchronous application-service methods only");
                 }
                 if (outermost && !scope.failed()) {
-                    dispatch(scope.drainEvents(), delegates);
+                    dispatch(scope.drainEvents(), delegates, scope.hasTransactionEvents());
                 }
                 return result;
             } catch (Exception exception) {
@@ -52,11 +53,16 @@ public class QuarkusDomainEventDispatchInterceptor {
         });
     }
 
-    private void dispatch(List<DomainEvent> events, List<DomainEventDispatcher> delegates) {
+    private void dispatch(List<DomainEvent> events, List<DomainEventDispatcher> delegates,
+                          boolean transactional) {
         if (events.isEmpty()) {
             return;
         }
-        if (!delegates.isEmpty()) {
+        if (transactional) {
+            delegates.stream()
+                    .filter(BeforeCommitDomainEventDispatcher.class::isInstance)
+                    .forEach(dispatcher -> dispatcher.dispatch(events));
+        } else if (!delegates.isEmpty()) {
             new CompositeDomainEventDispatcher(delegates).dispatch(events);
         }
     }

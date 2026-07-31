@@ -71,12 +71,12 @@ public class QuarkusDomainEventScope {
         if (state == null) {
             return List.of();
         }
+        return state.drainEvents();
+    }
 
-        List<DomainEvent> events = new ArrayList<>();
-        for (EventRecordable aggregate : state.context.drainRegistered()) {
-            events.addAll(aggregate.drainEvents());
-        }
-        return List.copyOf(events);
+    boolean hasTransactionEvents() {
+        State state = CURRENT.get();
+        return state != null && state.hasTransactionEvents();
     }
 
     @FunctionalInterface
@@ -106,13 +106,29 @@ public class QuarkusDomainEventScope {
             }
         }
 
+        private List<DomainEvent> drainEvents() {
+            TransactionEvents transactionEvents = existingTransactionEvents();
+            if (transactionEvents != null) {
+                return transactionEvents.events();
+            }
+            List<DomainEvent> events = new ArrayList<>();
+            for (EventRecordable aggregate : context.drainRegistered()) {
+                events.addAll(aggregate.drainEvents());
+            }
+            return List.copyOf(events);
+        }
+
+        private boolean hasTransactionEvents() {
+            return existingTransactionEvents() != null;
+        }
+
         private boolean isActiveTransaction() {
             return transactionSynchronizationRegistry.getTransactionKey() != null
                     && transactionSynchronizationRegistry.getTransactionStatus() == Status.STATUS_ACTIVE;
         }
 
         private TransactionEvents transactionEvents() {
-            TransactionEvents events = (TransactionEvents) transactionSynchronizationRegistry.getResource(this);
+            TransactionEvents events = existingTransactionEvents();
             if (events != null) {
                 return events;
             }
@@ -122,6 +138,13 @@ public class QuarkusDomainEventScope {
             transactionSynchronizationRegistry.registerInterposedSynchronization(new TransactionEventSynchronization(
                     this, created, dispatchers));
             return created;
+        }
+
+        private TransactionEvents existingTransactionEvents() {
+            if (!isActiveTransaction()) {
+                return null;
+            }
+            return (TransactionEvents) transactionSynchronizationRegistry.getResource(this);
         }
     }
 
@@ -158,9 +181,6 @@ public class QuarkusDomainEventScope {
 
         @Override
         public void beforeCompletion() {
-            if (!state.failed) {
-                dispatch(events.events(), true);
-            }
         }
 
         @Override

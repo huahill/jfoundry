@@ -70,11 +70,12 @@ public class HelidonDomainEventScope {
         if (state == null) {
             return List.of();
         }
-        List<DomainEvent> events = new ArrayList<>();
-        for (EventRecordable aggregate : state.context.drainRegistered()) {
-            events.addAll(aggregate.drainEvents());
-        }
-        return List.copyOf(events);
+        return state.drainEvents();
+    }
+
+    boolean hasTransactionEvents() {
+        State state = CURRENT.get();
+        return state != null && state.hasTransactionEvents();
     }
 
     @FunctionalInterface
@@ -103,13 +104,29 @@ public class HelidonDomainEventScope {
             }
         }
 
+        private List<DomainEvent> drainEvents() {
+            TransactionEvents transactionEvents = existingTransactionEvents();
+            if (transactionEvents != null) {
+                return transactionEvents.events();
+            }
+            List<DomainEvent> events = new ArrayList<>();
+            for (EventRecordable aggregate : context.drainRegistered()) {
+                events.addAll(aggregate.drainEvents());
+            }
+            return List.copyOf(events);
+        }
+
+        private boolean hasTransactionEvents() {
+            return existingTransactionEvents() != null;
+        }
+
         private boolean isActiveTransaction() {
             return transactionSynchronizationRegistry.getTransactionKey() != null
                     && transactionSynchronizationRegistry.getTransactionStatus() == Status.STATUS_ACTIVE;
         }
 
         private TransactionEvents transactionEvents() {
-            TransactionEvents events = (TransactionEvents) transactionSynchronizationRegistry.getResource(this);
+            TransactionEvents events = existingTransactionEvents();
             if (events != null) {
                 return events;
             }
@@ -119,6 +136,13 @@ public class HelidonDomainEventScope {
             transactionSynchronizationRegistry.registerInterposedSynchronization(new TransactionEventSynchronization(
                     this, created, dispatchers));
             return created;
+        }
+
+        private TransactionEvents existingTransactionEvents() {
+            if (!isActiveTransaction()) {
+                return null;
+            }
+            return (TransactionEvents) transactionSynchronizationRegistry.getResource(this);
         }
     }
 
@@ -155,9 +179,6 @@ public class HelidonDomainEventScope {
 
         @Override
         public void beforeCompletion() {
-            if (!state.failed) {
-                dispatch(events.events(), true);
-            }
         }
 
         @Override

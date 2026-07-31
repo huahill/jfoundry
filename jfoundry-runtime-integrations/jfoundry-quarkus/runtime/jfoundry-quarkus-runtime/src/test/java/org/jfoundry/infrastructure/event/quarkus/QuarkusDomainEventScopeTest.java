@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QuarkusDomainEventScopeTest {
 
     @Test
-    void dispatchesOutboxEventsBeforeCommitAndLocalEventsAfterCommit() throws Exception {
+    void makesOutboxEventsAvailableBeforeTransactionCompletionAndDispatchesLocalEventsAfterCommit() throws Exception {
         RecordingTransactionSynchronizationRegistry transactionRegistry =
                 new RecordingTransactionSynchronizationRegistry();
         transactionRegistry.activate();
@@ -29,6 +29,11 @@ class QuarkusDomainEventScopeTest {
 
         scope.invoke(List.of(outbox, local), outermost -> {
             scope.register(new RecordingAggregate(new TestEvent("confirmed")));
+
+            outbox.dispatch(scope.drainEvents());
+            assertThat(outbox.events).extracting(event -> ((TestEvent) event).name())
+                    .containsExactly("confirmed");
+            assertThat(local.events).isEmpty();
 
             transactionRegistry.beforeCompletion();
             assertThat(outbox.events).extracting(event -> ((TestEvent) event).name())
