@@ -81,9 +81,12 @@ event through Spring's `ApplicationEventPublisher`. An ordinary listener observe
 process. A `@TransactionalEventListener` selects the desired transaction phase, such as
 `AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
 not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
-fact with `recordEvent(...)`; after persistence registers that aggregate, the runtime drains its
-pending events at the successful outermost `@ApplicationService` boundary. Application business code
-does not call `drainEvents()` in this automatic path.
+fact with `recordEvent(...)`. When persistence registers the aggregate inside an active Spring
+transaction, the runtime dispatches its events in that transaction's `beforeCommit` phase. This makes
+the aggregate change and any Outbox row atomic, while the Spring event adapter still publishes only
+after commit. Without an active transaction, the runtime falls back to dispatching at the successful
+outermost `@ApplicationService` boundary. Application business code does not call `drainEvents()` in
+this automatic path.
 
 ## Persistence
 

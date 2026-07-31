@@ -1,9 +1,13 @@
 package org.jfoundry.autoconfigure.event;
 
+import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -75,6 +79,33 @@ class DomainEventScopeTest {
         assertThat(scope.drainEvents()).isEmpty();
         assertThat(failed.drainCount()).isZero();
         assertThat(later.drainCount()).isZero();
+    }
+
+    @Test
+    void dispatchesRegisteredEventsBeforeTransactionCommit() throws Throwable {
+        RecordingAggregate aggregate = new RecordingAggregate(new TestDomainEvent("transactional"));
+        List<DomainEvent> dispatchedEvents = new ArrayList<>();
+        DomainEventDispatcher dispatcher = dispatchedEvents::addAll;
+
+        TransactionSynchronizationManager.initSynchronization();
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        try {
+            scope.invoke(dispatcher, outermost -> {
+                scope.register(aggregate);
+
+                assertThat(dispatchedEvents).isEmpty();
+                TransactionSynchronizationManager.getSynchronizations()
+                        .forEach(synchronization -> synchronization.beforeCommit(false));
+
+                assertThat(dispatchedEvents)
+                        .extracting(event -> ((TestDomainEvent) event).name())
+                        .containsExactly("transactional");
+                return null;
+            });
+        } finally {
+            TransactionSynchronizationManager.clearSynchronization();
+            TransactionSynchronizationManager.setActualTransactionActive(false);
+        }
     }
 
     private static final class RecordingAggregate implements EventRecordable {

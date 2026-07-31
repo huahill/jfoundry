@@ -20,7 +20,7 @@ public class DomainEventDispatchInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        return scope.invoke(outermost -> {
+        return scope.invoke(dispatcher, outermost -> {
             try {
                 Object result = invocation.proceed();
                 if (outermost && !scope.failed()) {
