@@ -21,7 +21,8 @@ import org.apache.ibatis.annotations.Mapper;
 ///       by PaginationInnerInterceptor; CAS UPDATE is standard ANSI SQL
 ///       ({@code WHERE event_id=? AND status=?}) and is cross-dialect. Rows taken by concurrent
 ///       claimers fail CAS naturally and are skipped without sending.</li>
-///   <li><b>Stuck recovery</b>: {@code lambdaUpdate().set(status, PENDING).setNull(claimedAt)...},
+///   <li><b>Stuck recovery</b>: an {@code UPDATE} that restores {@code PENDING} status and clears
+///       claim metadata,
 ///       a standard conditional UPDATE.</li>
 ///   <li><b>Batch cleanup</b>: loops with {@code selectPage(N) + removeByIds}, using cross-dialect
 ///       pagination.</li>

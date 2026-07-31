@@ -11,6 +11,7 @@ import org.jfoundry.infrastructure.inbox.mybatis.InboxMessageMapper;
 import org.jfoundry.infrastructure.inbox.mybatis.MybatisPlusInboxMessageStore;
 import org.junit.jupiter.api.Test;
 import org.apache.ibatis.session.SqlSessionFactory;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 
@@ -71,6 +72,14 @@ class InboxAutoConfigurationTest {
                             .isEqualTo(InboxExecutionResult.PROCESSED);
                     assertThat(context.getBean(CountingTransactionRunner.class).calls).isEqualTo(2);
                 });
+    }
+
+    @Test
+    void bindsMapperScanToTheDefaultSqlSessionFactoryForAot() {
+        MapperScan mapperScan = InboxMybatisPlusAutoConfiguration.class
+                .getAnnotation(MapperScan.class);
+
+        assertThat(mapperScan.sqlSessionFactoryRef()).isEqualTo("sqlSessionFactory");
     }
 
     static class StubInboxMessageStore implements InboxMessageStore {

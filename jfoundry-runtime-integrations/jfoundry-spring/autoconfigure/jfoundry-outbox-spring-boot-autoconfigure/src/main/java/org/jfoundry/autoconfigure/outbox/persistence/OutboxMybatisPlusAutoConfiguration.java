@@ -38,7 +38,9 @@ import org.springframework.context.annotation.Bean;
 /// mapper is missing, bean creation fails explicitly.
 @AutoConfiguration
 @AutoConfigureAfter(name = "com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration")
-@MapperScan(basePackages = "org.jfoundry.infrastructure.outbox.mybatis")
+@MapperScan(
+        basePackages = "org.jfoundry.infrastructure.outbox.mybatis",
+        sqlSessionFactoryRef = "sqlSessionFactory")
 @ConditionalOnClass({MybatisPlusInterceptor.class, MapperScan.class, MybatisPlusOutboxMessageStore.class})
 @EnableConfigurationProperties(JfoundryOutboxProperties.class)
 public class OutboxMybatisPlusAutoConfiguration {

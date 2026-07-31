@@ -1,8 +1,8 @@
 package org.jfoundry.infrastructure.outbox.mybatis;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -45,6 +45,18 @@ import java.util.UUID;
 /// PaginationInnerInterceptor.
 public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
 
+    private static final String EVENT_ID = "event_id";
+    private static final String STATUS = "status";
+    private static final String RETRY_COUNT = "retry_count";
+    private static final String ERROR_MESSAGE = "error_message";
+    private static final String OCCURRED_AT = "occurred_at";
+    private static final String LAST_ATTEMPT_AT = "last_attempt_at";
+    private static final String NEXT_RETRY_AT = "next_retry_at";
+    private static final String UPDATED_AT = "updated_at";
+    private static final String CLAIMED_AT = "claimed_at";
+    private static final String CLAIMED_BY = "claimed_by";
+    private static final String CLAIM_TOKEN = "claim_token";
+
     private final OutboxMapper mapper;
 
     public MybatisPlusOutboxMessageStore(OutboxMapper mapper,
@@ -75,7 +87,7 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
     public List<OutboxMessage> findDispatchable(int limit, Instant now) {
         Page<OutboxData> page = new Page<>(1, limit, false);
         IPage<OutboxData> result = mapper.selectPage(page,
-                dispatchableCandidatesQuery(now).orderByAsc(OutboxData::getOccurredAt));
+                dispatchableCandidatesQuery(now).orderByAsc(OCCURRED_AT));
         return result.getRecords().stream().map(OutboxData::toMessage).toList();
     }
 
@@ -85,15 +97,15 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
     /// <p>
     /// retry-due means {@code nextRetryAt IS NULL} for never-failed rows or {@code nextRetryAt ≤ now}
     /// for rows whose retry time has arrived.
-    private static LambdaQueryWrapper<OutboxData> dispatchableCandidatesQuery(Instant now) {
-        return Wrappers.lambdaQuery(OutboxData.class)
-                .in(OutboxData::getStatus,
+    private static QueryWrapper<OutboxData> dispatchableCandidatesQuery(Instant now) {
+        return new QueryWrapper<OutboxData>()
+                .in(STATUS,
                         OutboxMessageStatus.PENDING.name(),
                         OutboxMessageStatus.FAILED.name())
                 .and(wrapper -> wrapper
-                        .isNull(OutboxData::getNextRetryAt)
+                        .isNull(NEXT_RETRY_AT)
                         .or()
-                        .le(OutboxData::getNextRetryAt, now));
+                        .le(NEXT_RETRY_AT, now));
     }
 
     @Override
@@ -136,20 +148,20 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
     }
 
     private void updateClaimedEntry(String eventId, String claimToken, OutboxData data) {
-        var update = Wrappers.lambdaUpdate(OutboxData.class)
-                .set(OutboxData::getStatus, data.getStatus())
-                .set(OutboxData::getRetryCount, data.getRetryCount())
-                .set(OutboxData::getErrorMessage, data.getErrorMessage())
-                .set(OutboxData::getLastAttemptAt, data.getLastAttemptAt())
-                .set(OutboxData::getNextRetryAt, data.getNextRetryAt())
-                .set(OutboxData::getUpdatedAt, data.getUpdatedAt())
-                .set(OutboxData::getClaimedAt, null)
-                .set(OutboxData::getClaimedBy, null)
-                .set(OutboxData::getClaimToken, null)
-                .eq(OutboxData::getEventId, eventId)
-                .eq(OutboxData::getStatus, OutboxMessageStatus.DISPATCHING.name());
+        var update = new UpdateWrapper<OutboxData>()
+                .set(STATUS, data.getStatus())
+                .set(RETRY_COUNT, data.getRetryCount())
+                .set(ERROR_MESSAGE, data.getErrorMessage())
+                .set(LAST_ATTEMPT_AT, data.getLastAttemptAt())
+                .set(NEXT_RETRY_AT, data.getNextRetryAt())
+                .set(UPDATED_AT, data.getUpdatedAt())
+                .set(CLAIMED_AT, null)
+                .set(CLAIMED_BY, null)
+                .set(CLAIM_TOKEN, null)
+                .eq(EVENT_ID, eventId)
+                .eq(STATUS, OutboxMessageStatus.DISPATCHING.name());
         if (claimToken != null) {
-            update.eq(OutboxData::getClaimToken, claimToken);
+            update.eq(CLAIM_TOKEN, claimToken);
         }
         mapper.update(null, update);
     }
@@ -200,7 +212,7 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
             // CAS order and reduces deadlock probability.
             Page<OutboxData> page = new Page<>(1, remaining, false);
             IPage<OutboxData> result = mapper.selectPage(page,
-                    dispatchableCandidatesQuery(now).orderByAsc(OutboxData::getEventId));
+                    dispatchableCandidatesQuery(now).orderByAsc(EVENT_ID));
             if (result.getRecords().isEmpty()) {
                 break;
             }
@@ -211,13 +223,13 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
                 }
                 Instant claimTime = Instant.now();
                 int updated = mapper.update(null,
-                        Wrappers.lambdaUpdate(OutboxData.class)
-                                .set(OutboxData::getStatus, OutboxMessageStatus.DISPATCHING.name())
-                                .set(OutboxData::getClaimedBy, claimerId)
-                                .set(OutboxData::getClaimToken, claimToken)
-                                .set(OutboxData::getClaimedAt, claimTime)
-                                .eq(OutboxData::getEventId, candidate.getEventId())
-                                .eq(OutboxData::getStatus, candidate.getStatus()));
+                        new UpdateWrapper<OutboxData>()
+                                .set(STATUS, OutboxMessageStatus.DISPATCHING.name())
+                                .set(CLAIMED_BY, claimerId)
+                                .set(CLAIM_TOKEN, claimToken)
+                                .set(CLAIMED_AT, claimTime)
+                                .eq(EVENT_ID, candidate.getEventId())
+                                .eq(STATUS, candidate.getStatus()));
                 if (updated == 1) {
                     // Return values reflect the post-claim state; the DB has been written and the
                     // in-memory candidate copy is synchronized.
@@ -245,13 +257,13 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
             throw new IllegalArgumentException("cutoff must not be null");
         }
         return mapper.update(null,
-                Wrappers.lambdaUpdate(OutboxData.class)
-                        .set(OutboxData::getStatus, OutboxMessageStatus.PENDING.name())
-                        .set(OutboxData::getClaimedAt, null)
-                        .set(OutboxData::getClaimedBy, null)
-                        .set(OutboxData::getClaimToken, null)
-                        .eq(OutboxData::getStatus, OutboxMessageStatus.DISPATCHING.name())
-                        .lt(OutboxData::getClaimedAt, cutoff));
+                new UpdateWrapper<OutboxData>()
+                        .set(STATUS, OutboxMessageStatus.PENDING.name())
+                        .set(CLAIMED_AT, null)
+                        .set(CLAIMED_BY, null)
+                        .set(CLAIM_TOKEN, null)
+                        .eq(STATUS, OutboxMessageStatus.DISPATCHING.name())
+                        .lt(CLAIMED_AT, cutoff));
     }
 
     /// Batch cleanup: deletes rows in the specified terminal status (PUBLISHED / DEAD_LETTERED) whose
@@ -281,10 +293,10 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
         while (true) {
             Page<OutboxData> page = new Page<>(1, batchSize, false);
             IPage<OutboxData> batch = mapper.selectPage(page,
-                    Wrappers.lambdaQuery(OutboxData.class)
-                            .eq(OutboxData::getStatus, status.name())
-                            .lt(OutboxData::getOccurredAt, cutoff)
-                            .orderByAsc(OutboxData::getEventId));
+                    new QueryWrapper<OutboxData>()
+                            .eq(STATUS, status.name())
+                            .lt(OCCURRED_AT, cutoff)
+                            .orderByAsc(EVENT_ID));
             if (batch.getRecords().isEmpty()) {
                 break;
             }
