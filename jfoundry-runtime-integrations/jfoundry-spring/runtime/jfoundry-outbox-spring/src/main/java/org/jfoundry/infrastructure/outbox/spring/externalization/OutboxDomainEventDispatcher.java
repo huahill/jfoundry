@@ -13,10 +13,6 @@ public class OutboxDomainEventDispatcher implements DomainEventDispatcher {
 
     private final Supplier<? extends DomainEventOutboxRecorder> outboxRecorderSupplier;
 
-    public OutboxDomainEventDispatcher(DomainEventOutboxRecorder outboxRecorder) {
-        this(() -> outboxRecorder);
-    }
-
     public OutboxDomainEventDispatcher(Supplier<? extends DomainEventOutboxRecorder> outboxRecorderSupplier) {
         this.outboxRecorderSupplier = outboxRecorderSupplier;
     }

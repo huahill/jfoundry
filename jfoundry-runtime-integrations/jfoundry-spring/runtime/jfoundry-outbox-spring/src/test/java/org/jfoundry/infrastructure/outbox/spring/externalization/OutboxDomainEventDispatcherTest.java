@@ -17,7 +17,7 @@ class OutboxDomainEventDispatcherTest {
     @Test
     void recordsEventsIntoOutbox() {
         RecordingOutboxRecorder outboxRecorder = new RecordingOutboxRecorder();
-        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(outboxRecorder);
+        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(() -> outboxRecorder);
         TestDomainEvent event = new TestDomainEvent("order-1");
 
         dispatcher.dispatch(List.of(event));
@@ -28,7 +28,7 @@ class OutboxDomainEventDispatcherTest {
     @Test
     void doesNothingForEmptyEventBatch() {
         RecordingOutboxRecorder outboxRecorder = new RecordingOutboxRecorder();
-        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(outboxRecorder);
+        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(() -> outboxRecorder);
 
         dispatcher.dispatch(List.of());
 
@@ -56,7 +56,8 @@ class OutboxDomainEventDispatcherTest {
 
     @Test
     void rejectsNullEventList() {
-        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(new RecordingOutboxRecorder());
+        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(
+                RecordingOutboxRecorder::new);
 
         assertThatThrownBy(() -> dispatcher.dispatch(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -66,7 +67,7 @@ class OutboxDomainEventDispatcherTest {
     @Test
     void rejectsNullEventElementBeforeRecording() {
         RecordingOutboxRecorder outboxRecorder = new RecordingOutboxRecorder();
-        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(outboxRecorder);
+        OutboxDomainEventDispatcher dispatcher = new OutboxDomainEventDispatcher(() -> outboxRecorder);
 
         assertThatThrownBy(() -> dispatcher.dispatch(Arrays.asList(new TestDomainEvent("order-1"), null)))
                 .isInstanceOf(IllegalArgumentException.class)
