@@ -1,114 +1,99 @@
 name: Release
 
 on:
-  release:
-    types:
-      - published
   workflow_dispatch:
     inputs:
-      release_version:
-        description: Release version to publish, without the leading v.
+      release_tag:
+        description: Annotated release tag to publish, for example v1.0.0-RC1.
         required: true
-      next_snapshot_version:
-        description: Next development version. Defaults to the next patch SNAPSHOT.
-        required: false
-      release_branch:
-        description: Branch to bump after publishing. Defaults to the selected branch.
-        required: false
+        type: string
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.release_tag }}
   cancel-in-progress: false
 
 permissions:
+  actions: read
   contents: read
+  security-events: read
+  attestations: write
+  id-token: write
 
 jobs:
-  resolve-release:
-    name: Resolve release versions
+  publish:
+    name: Verify and stage Maven Central release
     runs-on: ubuntu-latest
-    outputs:
-      release_version: ${{ steps.versions.outputs.release_version }}
-      next_snapshot: ${{ steps.versions.outputs.next_snapshot }}
-      release_branch: ${{ steps.versions.outputs.release_branch }}
+    environment: jfoundry
     steps:
-      - name: Resolve release versions
-        id: versions
-        env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
-          RELEASE_TARGET: ${{ github.event.release.target_commitish }}
-          INPUT_RELEASE_VERSION: ${{ inputs.release_version }}
-          INPUT_NEXT_SNAPSHOT_VERSION: ${{ inputs.next_snapshot_version }}
-          INPUT_RELEASE_BRANCH: ${{ inputs.release_branch }}
-          REF_NAME: ${{ github.ref_name }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      - name: Checkout immutable release tag
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ inputs.release_tag }}
+          fetch-depth: 0
+
+      - name: Verify immutable release source
         run: |
           set -euo pipefail
 
-          release_version="${INPUT_RELEASE_VERSION:-${RELEASE_TAG#v}}"
-          if [[ -z "${release_version}" ]]; then
-            echo "release_version is required for manual runs." >&2
-            exit 1
-          fi
-          if [[ "${release_version}" == *-SNAPSHOT ]]; then
-            echo "Release version must not be a SNAPSHOT: ${release_version}" >&2
+          release_tag="${{ inputs.release_tag }}"
+          git check-ref-format "refs/tags/${release_tag}"
+          git show-ref --verify --quiet "refs/tags/${release_tag}"
+          test "$(git cat-file -t "refs/tags/${release_tag}")" = "tag"
+          test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "${release_tag}")"
+          test -z "$(git status --porcelain)"
+
+          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          test "${{ inputs.release_tag }}" = "v${version}"
+          case "${version}" in
+            *-SNAPSHOT)
+              echo "Release tag resolves to a SNAPSHOT version: ${version}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Verify complete CI
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          commit="$(git rev-parse HEAD)"
+          run_id="$(gh run list --repo "${GITHUB_REPOSITORY}" --workflow CI --commit "${commit}" \
+            --limit 100 --json databaseId,status,conclusion,createdAt \
+            --jq '[.[] | select(.status == "completed" and .conclusion == "success")] | sort_by(.createdAt) | last | .databaseId')"
+          if [[ -z "${run_id}" || "${run_id}" == "null" ]]; then
+            echo "No successful CI run exists for release commit ${commit}." >&2
             exit 1
           fi
 
-          next_snapshot="${INPUT_NEXT_SNAPSHOT_VERSION:-}"
-          if [[ -z "${next_snapshot}" && -n "${RELEASE_BODY:-}" ]]; then
-            next_snapshot="$(printf '%s\n' "${RELEASE_BODY}" \
-              | sed -nE 's/^[Nn]ext-[Ss]napshot:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p' \
-              | head -n 1)"
-          fi
-          if [[ -z "${next_snapshot}" ]]; then
-            IFS=. read -r major minor patch extra <<< "${release_version}"
-            if [[ -z "${major:-}" || -z "${minor:-}" || -z "${patch:-}" || -n "${extra:-}" || ! "${patch}" =~ ^[0-9]+$ ]]; then
-              echo "Cannot infer next snapshot from ${release_version}; set next_snapshot_version or add 'Next-Snapshot: x.y.z-SNAPSHOT' to the release notes." >&2
+          required_jobs=(
+            "Documentation checks"
+            "Test (Java 25)"
+            "Package artifacts"
+            "Spring middleware integration"
+            "Quarkus middleware integration"
+            "Helidon middleware integration"
+            "Spring Native Image"
+            "Spring Native Image (MyBatis-Plus)"
+            "Spring Native Image (Redisson)"
+            "Spring Native Image (JobRunr)"
+            "Quarkus Native Image"
+            "Helidon Native Image"
+            "Maven 4 compatibility"
+            "Merge gate"
+          )
+          job_results="$(gh run view "${run_id}" --repo "${GITHUB_REPOSITORY}" --json jobs \
+            --jq '[.jobs[] | {key: .name, value: .conclusion}] | from_entries')"
+          for required_job in "${required_jobs[@]}"; do
+            conclusion="$(jq -r --arg job "${required_job}" '.[$job] // empty' <<< "${job_results}")"
+            if [[ "${conclusion}" != "success" ]]; then
+              echo "CI run ${run_id} lacks successful required job: ${required_job}" >&2
               exit 1
             fi
-            next_snapshot="${major}.${minor}.$((patch + 1))-SNAPSHOT"
-          fi
-          if [[ "${next_snapshot}" != *-SNAPSHOT ]]; then
-            echo "Next development version must be a SNAPSHOT: ${next_snapshot}" >&2
-            exit 1
-          fi
-
-          release_branch="${INPUT_RELEASE_BRANCH:-}"
-          if [[ -z "${release_branch}" ]]; then
-            release_branch="${RELEASE_TARGET:-}"
-          fi
-          if [[ -z "${release_branch}" ]]; then
-            release_branch="${REF_NAME:-}"
-          fi
-          if [[ -z "${release_branch}" ]]; then
-            release_branch="${DEFAULT_BRANCH:-}"
-          fi
-          if [[ -z "${release_branch}" ]]; then
-            echo "Cannot resolve release branch." >&2
-            exit 1
-          fi
-
-          {
-            echo "release_version=${release_version}"
-            echo "next_snapshot=${next_snapshot}"
-            echo "release_branch=${release_branch}"
-          } >> "$GITHUB_OUTPUT"
-
-  publish:
-    name: Publish to Maven Central
-    runs-on: ubuntu-latest
-    needs: resolve-release
-    environment: jfoundry
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+          done
 
       - name: Set up Java and Maven Central credentials
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
           java-version: 25
@@ -119,64 +104,88 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Set release version
-        run: |
-          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set \
-            -DnewVersion="${{ needs.resolve-release.outputs.release_version }}" \
-            -DprocessAllModules=true \
-            -DgenerateBackupPoms=false
+      - name: Verify signed release artifacts
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: ./mvnw -B -Prelease -DskipTests verify -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
-      - name: Publish staged deployment
+      - name: Verify Dependabot security alerts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          alerts="$(gh api --paginate \
+            "repos/${GITHUB_REPOSITORY}/dependabot/alerts?state=open&per_page=100" \
+            --jq '.[] | select(.security_advisory.severity == "high" or .security_advisory.severity == "critical") | .html_url')"
+          if [[ -n "${alerts}" ]]; then
+            echo "Open high or critical Dependabot alerts block release publication:" >&2
+            echo "${alerts}" >&2
+            exit 1
+          fi
+
+      - name: Stage Maven Central deployment
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./mvnw -B -Prelease -DskipTests deploy -Dgpg.passphrase="${GPG_PASSPHRASE}"
+        run: |
+          set -euo pipefail
+          ./mvnw -B -Prelease -DskipTests deploy -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
 
-  bump-release-branch:
-    name: Bump release branch to next SNAPSHOT
-    runs-on: ubuntu-latest
-    needs:
-      - resolve-release
-      - publish
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 25
-          cache: maven
-
-      - name: Bump release branch to next SNAPSHOT
-        env:
-          RELEASE_BRANCH: ${{ needs.resolve-release.outputs.release_branch }}
+      - name: Assemble release evidence
         run: |
           set -euo pipefail
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git fetch origin "${RELEASE_BRANCH}"
-          git worktree add -B "release-bump/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" /tmp/jfoundry-release-branch "origin/${RELEASE_BRANCH}"
-          cd /tmp/jfoundry-release-branch
-
-          ./mvnw -B org.codehaus.mojo:versions-maven-plugin:2.21.0:set \
-            -DnewVersion="${{ needs.resolve-release.outputs.next_snapshot }}" \
-            -DprocessAllModules=true \
-            -DgenerateBackupPoms=false
-
-          if git diff --quiet; then
-            echo "Release branch is already at ${{ needs.resolve-release.outputs.next_snapshot }}."
-            exit 0
+          mkdir -p release-evidence/artifacts release-evidence/poms release-evidence/signatures release-evidence/sboms
+          while IFS= read -r artifact; do
+            module="${artifact#./}"
+            module="${module%/target/*}"
+            target="release-evidence/artifacts/${module//\//_}-$(basename "${artifact}")"
+            cp "${artifact}" "${target}"
+          done < <(find . -path '*/target/*.jar' -type f | sort)
+          while IFS= read -r pom; do
+            module="${pom#./}"
+            module="${module%/pom.xml}"
+            if [[ "${module}" == "${pom#./}" ]]; then
+              module="root"
+            fi
+            cp "${pom}" "release-evidence/poms/${module//\//_}-pom.xml"
+          done < <(find . -name pom.xml -type f | sort)
+          signature_count=0
+          while IFS= read -r signature; do
+            module="${signature#./}"
+            module="${module%/target/*}"
+            target="release-evidence/signatures/${module//\//_}-$(basename "${signature}")"
+            cp "${signature}" "${target}"
+            signature_count=$((signature_count + 1))
+          done < <(find . -path '*/target/*.asc' -type f | sort)
+          if (( signature_count == 0 )); then
+            echo "Release build produced no GPG signature files." >&2
+            exit 1
           fi
+          while IFS= read -r sbom; do
+            module="${sbom#./}"
+            module="${module%/target/*}"
+            cp "${sbom}" "release-evidence/sboms/${module//\//_}-$(basename "${sbom}")"
+          done < <(find . -path '*/target/bom.*' -type f | sort)
+          cp central-deploy.log release-evidence/central-deploy.log
+          {
+            echo "release_tag=${{ inputs.release_tag }}"
+            echo "source_commit=$(git rev-parse HEAD)"
+            echo "workflow_run_id=${GITHUB_RUN_ID}"
+            echo "workflow_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > release-evidence/release-metadata.txt
+          find release-evidence -type f -print0 | sort -z | xargs -0 shasum -a 256 > release-evidence/SHA256SUMS
 
-          git add pom.xml '**/pom.xml'
-          git commit -m "chore(release): start ${{ needs.resolve-release.outputs.next_snapshot }}"
-          git push origin "HEAD:${RELEASE_BRANCH}"
+      - name: Upload release evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ inputs.release_tag }}-release-evidence
+          path: release-evidence
+          if-no-files-found: error
+
+      - name: Attest release artifact provenance
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: release-evidence/**

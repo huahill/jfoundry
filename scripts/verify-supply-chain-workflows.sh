@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+root_dir="${1:-.}"
+
+require_file() {
+    local file="$1"
+    if [[ ! -f "${root_dir}/${file}" ]]; then
+        echo "Supply-chain configuration is missing: ${file}" >&2
+        exit 1
+    fi
+}
+
+require_text() {
+    local file="$1"
+    local text="$2"
+    if ! grep -Fq -- "${text}" "${root_dir}/${file}"; then
+        echo "${file} must contain: ${text}" >&2
+        exit 1
+    fi
+}
+
+require_file ".github/dependabot.yml"
+require_file ".github/workflows/codeql.yml"
+require_file ".github/workflows/release.yml"
+require_file ".github/workflows/ci.yml"
+
+require_text ".github/dependabot.yml" "package-ecosystem: maven"
+require_text ".github/dependabot.yml" "package-ecosystem: github-actions"
+require_text ".github/workflows/codeql.yml" "security-events: write"
+require_text ".github/workflows/codeql.yml" "github/codeql-action/init"
+require_text ".github/workflows/codeql.yml" "github/codeql-action/analyze"
+require_text ".github/workflows/ci.yml" "name: Dependency Review"
+require_text ".github/workflows/ci.yml" "actions/dependency-review-action"
+require_text ".github/workflows/ci.yml" "fail-on-severity: high"
+require_text ".github/workflows/ci.yml" "needs.dependency-review.result"
+require_text ".github/workflows/release.yml" "actions/upload-artifact"
+require_text ".github/workflows/release.yml" "release-evidence"
+
+echo "Supply-chain workflow verification passed: ${root_dir}"
