@@ -111,8 +111,8 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
 业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
 `createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于 Spring Boot 4.0.7、
-MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、Outbox/Inbox 存储、消息代理、Redisson 或
-JobRunr：
+MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。此外，它还会
+通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
 
 ```bash
 ./mvnw -B \

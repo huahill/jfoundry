@@ -164,7 +164,8 @@ Native executable, and verifies an insert, reload, update, and reload of a busin
 `AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
 claim applies to Spring Boot 4.0.7, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
-JPA, Outbox/Inbox stores, brokers, Redisson, or JobRunr:
+JPA, brokers, Redisson, or JobRunr. It also verifies the built-in MyBatis-Plus Outbox and Inbox
+stores through append, paginated claim, idempotent claim, and processed-state operations:
 
 ```bash
 ./mvnw -B \

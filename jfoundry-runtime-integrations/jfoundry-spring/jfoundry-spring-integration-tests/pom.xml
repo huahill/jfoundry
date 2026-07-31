@@ -41,12 +41,10 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-inbox-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -71,7 +69,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -129,12 +126,10 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-inbox-spring-boot-autoconfigure</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -390,6 +385,46 @@
             <dependencies>
                 <dependency>
                     <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-domain</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-transaction-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-domain-event-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-domain-event-externalization-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-messaging-core</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-messaging-jackson</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-domain-event-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-messaging-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-transaction-spring</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
                     <artifactId>jfoundry-persistence-core</artifactId>
                 </dependency>
                 <dependency>
@@ -401,8 +436,20 @@
                     <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-starter</artifactId>
                 </dependency>
                 <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-outbox-mybatis-plus-spring-boot-starter</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.xfoundries</groupId>
+                    <artifactId>jfoundry-inbox-mybatis-plus-spring-boot-starter</artifactId>
+                </dependency>
+                <dependency>
                     <groupId>com.baomidou</groupId>
                     <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.baomidou</groupId>
+                    <artifactId>mybatis-plus-jsqlparser</artifactId>
                 </dependency>
                 <dependency>
                     <groupId>com.baomidou</groupId>
@@ -475,6 +522,14 @@
                                 <goals>
                                     <goal>process-aot</goal>
                                 </goals>
+                                <configuration>
+                                    <arguments>
+                                        <argument>--spring.datasource.url=jdbc:postgresql://localhost:5432/jfoundry</argument>
+                                        <argument>--spring.datasource.username=jfoundry</argument>
+                                        <argument>--spring.datasource.password=jfoundry</argument>
+                                        <argument>--spring.datasource.driver-class-name=org.postgresql.Driver</argument>
+                                    </arguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>

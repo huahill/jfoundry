@@ -29,7 +29,7 @@ class NativeMybatisPlusIT {
 
     @Test
     void nativeImagePersistsAndUpdatesAuditDataAgainstPostgreSql() throws Exception {
-        createTable();
+        createTables();
         assertThat(Files.isExecutable(APPLICATION))
                 .as("MyBatis-Plus Native Image executable")
                 .isTrue();
@@ -53,12 +53,15 @@ class NativeMybatisPlusIT {
                     "\"createdBy\":\"native-test\"",
                     "\"lastModifiedBy\":\"native-test\"",
                     "\"value\":\"updated\"");
+            assertThat(exerciseTechnicalStores(port)).contains(
+                    "\"outboxClaimed\":true",
+                    "\"inboxCompleted\":true");
         } finally {
             stop(application);
         }
     }
 
-    private static void createTable() throws Exception {
+    private static void createTables() throws Exception {
         try (var connection = DriverManager.getConnection(
                 postgresql.getJdbcUrl(), postgresql.getUsername(), postgresql.getPassword());
              var statement = connection.createStatement()) {
@@ -70,6 +73,46 @@ class NativeMybatisPlusIT {
                         created_by varchar(64),
                         last_modified_at timestamp with time zone not null,
                         last_modified_by varchar(64)
+                    )
+                    """);
+            statement.execute("""
+                    create table jfoundry_outbox_event (
+                        event_id varchar(64) primary key,
+                        topic varchar(255) not null,
+                        payload_key varchar(255),
+                        payload_type varchar(500) not null,
+                        payload_json text not null,
+                        traceparent varchar(512),
+                        tracestate varchar(512),
+                        aggregate_type varchar(255),
+                        aggregate_id varchar(255),
+                        aggregate_version bigint,
+                        status varchar(32) not null,
+                        retry_count integer not null,
+                        error_message varchar(2000),
+                        occurred_at timestamp not null,
+                        last_attempt_at timestamp,
+                        next_retry_at timestamp,
+                        created_at timestamp not null,
+                        updated_at timestamp not null,
+                        claimed_at timestamp,
+                        claimed_by varchar(100),
+                        claim_token varchar(36)
+                    )
+                    """);
+            statement.execute("""
+                    create table jfoundry_inbox_message (
+                        id varchar(64) primary key,
+                        message_id varchar(128) not null,
+                        consumer_name varchar(255) not null,
+                        status varchar(32) not null,
+                        processed_at timestamp,
+                        created_at timestamp not null,
+                        updated_at timestamp not null,
+                        claimed_at timestamp,
+                        claim_token varchar(36),
+                        error_message varchar(2000),
+                        unique (consumer_name, message_id)
                     )
                     """);
         }
@@ -109,6 +152,22 @@ class NativeMybatisPlusIT {
         connection.setReadTimeout(5_000);
         if (connection.getResponseCode() != 200) {
             throw new IOException("Native MyBatis-Plus audit operation failed with HTTP " + connection.getResponseCode());
+        }
+        return new String(connection.getInputStream().readAllBytes());
+    }
+
+    private static String exerciseTechnicalStores(int port) throws Exception {
+        var connection = (java.net.HttpURLConnection) new java.net.URI(
+                "http://127.0.0.1:" + port + "/jfoundry/native/mybatis-plus/technical-stores")
+                .toURL()
+                .openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Accept", "application/json");
+        connection.setConnectTimeout(1_000);
+        connection.setReadTimeout(5_000);
+        if (connection.getResponseCode() != 200) {
+            throw new IOException("Native MyBatis-Plus technical store operation failed with HTTP "
+                    + connection.getResponseCode());
         }
         return new String(connection.getInputStream().readAllBytes());
     }
