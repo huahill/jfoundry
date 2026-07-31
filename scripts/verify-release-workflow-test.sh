@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VERIFY_SCRIPT="${ROOT_DIR}/scripts/verify-release-workflow.sh"
+
+assert_accepts() {
+    if ! bash "${VERIFY_SCRIPT}" "$1"; then
+        echo "Expected release workflow verification to succeed for $1." >&2
+        exit 1
+    fi
+}
+
+assert_rejects() {
+    if bash "${VERIFY_SCRIPT}" "$1" >/dev/null 2>&1; then
+        echo "Expected release workflow verification to reject $1." >&2
+        exit 1
+    fi
+}
+
+temp_dir="$(mktemp -d)"
+trap 'rm -rf "${temp_dir}"' EXIT
+
+safe_workflow="${temp_dir}/safe-release.yml"
+cat > "${safe_workflow}" <<'YAML'
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        required: true
+permissions:
+  actions: read
+  contents: read
+  security-events: read
+  attestations: write
+  id-token: write
+jobs:
+  publish:
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_tag }}
+      - name: Verify immutable release source
+        run: |
+          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          test "${{ inputs.release_tag }}" = "v${version}"
+          test -z "$(git status --porcelain)"
+      - name: Verify complete CI
+        run: gh run view 1 --json jobs
+      - run: ./mvnw -B -Prelease -DskipTests verify
+      - run: ./mvnw -B -Prelease -DskipTests deploy
+      - name: Verify Dependabot security alerts
+        run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
+      - uses: actions/attest-build-provenance@v2
+YAML
+
+unsafe_workflow="${temp_dir}/unsafe-release.yml"
+cat > "${unsafe_workflow}" <<'YAML'
+name: Release
+on:
+  release:
+    types: [published]
+jobs:
+  publish:
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./mvnw versions:set -DnewVersion=1.0.0
+      - run: ./mvnw -Prelease deploy
+      - run: git push origin main
+YAML
+
+assert_rejects "${unsafe_workflow}"
+assert_rejects "${safe_workflow}"
+
+complete_workflow="${temp_dir}/complete-release.yml"
+cp "${safe_workflow}" "${complete_workflow}"
+cat >> "${complete_workflow}" <<'YAML'
+      - name: Stage Maven Central deployment
+        run: ./mvnw -B -Prelease -DskipTests deploy | tee central-deploy.log
+      - name: Assemble release evidence
+        run: |
+          mkdir -p release-evidence/artifacts release-evidence/poms release-evidence/signatures release-evidence/sboms
+          find . -path '*/target/*.asc' -type f
+          cp central-deploy.log release-evidence/central-deploy.log
+          printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
+YAML
+assert_accepts "${complete_workflow}"
+
+missing_alert_workflow="${temp_dir}/missing-alert-release.yml"
+grep -v "Verify Dependabot security alerts\|dependabot/alerts" "${safe_workflow}" > "${missing_alert_workflow}"
+assert_rejects "${missing_alert_workflow}"
+
+missing_ci_workflow="${temp_dir}/missing-ci-release.yml"
+grep -v "Verify complete CI\|gh run view" "${safe_workflow}" > "${missing_ci_workflow}"
+assert_rejects "${missing_ci_workflow}"
+
+assert_accepts "${ROOT_DIR}/.github/workflows/release.yml"
+
+echo "Release workflow verification tests passed."

@@ -38,10 +38,10 @@ Example server configuration:
 </servers>
 ```
 
-## GitHub Secrets To Add Later
+## GitHub Release Environment
 
-When the Central Portal namespace is ready, add the credentials below to the repository environment
-named `jfoundry`. SNAPSHOT publishing needs only the Central credentials; releases also need GPG.
+Configure the credentials below in the repository environment named `jfoundry`. SNAPSHOT publishing
+needs only the Central credentials; releases also need GPG.
 
 | Secret | Value |
 |--------|-------|
@@ -51,7 +51,7 @@ named `jfoundry`. SNAPSHOT publishing needs only the Central credentials; releas
 | `GPG_PASSPHRASE` (release only) | Passphrase for `GPG_PRIVATE_KEY` |
 
 GitHub path: repository `Settings` -> `Environments` -> `jfoundry` -> `Environment secrets`.
-Add protection reviewers to the environment if release publication should require manual approval.
+Require maintainer review for this environment before publishing a release.
 
 ## Local Verification
 
@@ -73,13 +73,19 @@ If GPG is not configured locally, the release-profile verification may fail at t
 
 ## Publish
 
-After replacing placeholder metadata, setting release versions, and configuring Central credentials and GPG, deploy locally with the release profile:
+Release publication is performed by the protected GitHub Actions environment, not from an arbitrary
+developer checkout. The release tag must point to a committed non-SNAPSHOT reactor whose POM version
+matches the tag exactly. For example, `v1.0.0-RC1` must point to source whose root and reactor version
+is `1.0.0-RC1`.
 
-```bash
-mvn -Prelease -DskipTests deploy
-```
+The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
+and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, checks for open High or
+Critical Dependabot alerts, and only then stages `deploy`. It never changes POM versions or pushes a
+branch during publication.
 
-The Central publishing plugin is configured with `autoPublish=false`, so the deployment uploads a staged deployment to Central Portal for manual review and publishing.
+The Central publishing plugin uses `autoPublish=false`. Inspect the staged deployment, signatures,
+source and Javadoc artifacts, BOM resolution, CycloneDX SBOM, checksums, and provenance evidence
+before publishing it in Central Portal.
 
 ## Publish SNAPSHOTs
 
@@ -126,24 +132,13 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
 
 ## GitHub Release Publishing
 
-The `Release` workflow publishes automatically when a GitHub Release is published.
+1. Merge the committed release-version change after the complete CI matrix passes.
+2. Create and push an annotated tag such as `v1.0.0-RC1` for that exact commit.
+3. Manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and approve the `jfoundry`
+   environment when its reviewers have inspected the candidate.
+4. Inspect and publish the staged Central deployment.
+5. Create the GitHub Release only after Central publication succeeds.
+6. Merge a separate change that starts the next `-SNAPSHOT` development version.
 
-Use a tag such as `v1.0.0`. The workflow strips the leading `v`, sets all reactor POM versions
-to `1.0.0`, runs `./mvnw -B -Prelease -DskipTests deploy`, then updates the default branch to
-the next development version in a separate job and Git worktree. The release commit itself is not
-pushed back to the default branch; the tag/GitHub Release identifies the immutable release version.
-
-The publish and default-branch bump steps are intentionally separate jobs. If the Central staged
-deployment succeeds but the default-branch push is rejected by branch protection or a non-fast-forward
-race, rerun only the failed bump job; do not rerun the publish job for the same release version.
-
-By default, the next development version is inferred as the next patch version, for example `1.0.0` becomes `1.0.1-SNAPSHOT`. To override it, add a line to the GitHub Release notes:
-
-```text
-Next-Snapshot: 1.1.0-SNAPSHOT
-```
-
-Manual workflow runs require `release_version` and can optionally set `next_snapshot_version`.
-
-The publish job uses the Central publishing plugin with `autoPublish=false`, so a successful
-GitHub Release upload creates a staged Central Portal deployment for manual review and publishing.
+Do not reuse a failed or discarded release version. Correct the source, choose a new version, and
+repeat the immutable-tag process.

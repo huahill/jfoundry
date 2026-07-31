@@ -43,6 +43,11 @@ This assessment supports real project use. It does not claim that either project
 architecture, that jfoundry should be mandatory, or that every supported-looking technology
 combination has been production-validated.
 
+The public versioning promise, release-candidate acceptance criteria, and supported runtime scope
+are defined by the [Support Policy](../../../release/support-policy.md). Supply-chain controls and
+the release evidence retained for an immutable artifact are defined by
+[Supply Chain Security](../../../release/supply-chain-security.md).
+
 ## Value Provided
 
 ### jfoundry

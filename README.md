@@ -132,6 +132,8 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 - [Getting Started](docs/i18n/en/integration/getting-started.md)
 - [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md)
+- [Support Policy](docs/release/support-policy.md)
+- [Supply-Chain Security](docs/release/supply-chain-security.md)
 - [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)
 
 ### Capabilities

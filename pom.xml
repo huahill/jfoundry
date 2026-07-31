@@ -35,7 +35,7 @@
         <connection>${jfoundry.release.scm.connection}</connection>
         <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
         <url>${jfoundry.release.scm.url}</url>
-        <tag>HEAD</tag>
+        <tag>v${project.version}</tag>
     </scm>
 
     <properties>
@@ -60,6 +60,7 @@
         <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
+        <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
         <argLine/>
         <mockito.javaagent.argLine/>
     </properties>
@@ -283,6 +284,33 @@
                         <configuration>
                             <publishingServerId>jfoundry</publishingServerId>
                             <autoPublish>false</autoPublish>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.cyclonedx</groupId>
+                        <artifactId>cyclonedx-maven-plugin</artifactId>
+                        <version>${cyclonedx-maven-plugin.version}</version>
+                        <inherited>false</inherited>
+                        <executions>
+                            <execution>
+                                <id>attach-aggregate-sbom</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>makeAggregateBom</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <projectType>library</projectType>
+                            <schemaVersion>1.6</schemaVersion>
+                            <includeBomSerialNumber>false</includeBomSerialNumber>
+                            <includeCompileScope>true</includeCompileScope>
+                            <includeProvidedScope>true</includeProvidedScope>
+                            <includeRuntimeScope>true</includeRuntimeScope>
+                            <includeSystemScope>true</includeSystemScope>
+                            <includeTestScope>false</includeTestScope>
+                            <outputFormat>all</outputFormat>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
                         </configuration>
                     </plugin>
                 </plugins>

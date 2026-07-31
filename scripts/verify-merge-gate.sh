@@ -3,16 +3,19 @@
 set -euo pipefail
 
 verify_merge_gate() {
-    if [[ "$#" -ne 14 ]]; then
-        echo "Expected run_full plus 13 job results, received $# arguments." >&2
+    if [[ "$#" -ne 16 ]]; then
+        echo "Expected run_full, pull-request flag, plus 14 job results, received $# arguments." >&2
         return 2
     fi
 
     local run_full="$1"
     shift
+    local is_pull_request="$1"
+    shift
 
     local -a job_names=(
         "Documentation checks"
+        "Dependency Review"
         "Test"
         "Package artifacts"
         "Spring middleware integration"
@@ -34,8 +37,18 @@ verify_merge_gate() {
         return 2
     fi
 
+    if [[ "${is_pull_request}" != "true" && "${is_pull_request}" != "false" ]]; then
+        echo "is_pull_request must be true or false, received: ${is_pull_request}" >&2
+        return 2
+    fi
+
     if [[ "${job_results[0]}" != "success" ]]; then
         echo "Documentation checks must succeed, received: ${job_results[0]}" >&2
+        return 1
+    fi
+
+    if [[ "${is_pull_request}" == "true" && "${job_results[1]}" != "success" ]]; then
+        echo "Dependency Review must succeed for pull requests, received: ${job_results[1]}" >&2
         return 1
     fi
 
@@ -44,6 +57,9 @@ verify_merge_gate() {
     fi
 
     for index in "${!job_names[@]}"; do
+        if [[ "${index}" -eq 1 && "${is_pull_request}" == "false" ]]; then
+            continue
+        fi
         if [[ "${job_results[index]}" != "success" ]]; then
             echo "${job_names[index]} must succeed for code changes, received: ${job_results[index]}" >&2
             return 1
