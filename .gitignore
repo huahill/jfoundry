@@ -11,3 +11,4 @@ target/
 .DS_Store
 .codegraph/
 graphify-out/
+docs/superpowers/
