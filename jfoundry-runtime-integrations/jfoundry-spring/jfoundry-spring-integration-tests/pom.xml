@@ -26,7 +26,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-transaction-core</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
