@@ -28,6 +28,8 @@ When framework docs, examples, or test fixtures mention DDD modeling concepts, k
 6. Add or update focused tests next to each affected runtime module. A successful test in one runtime does not validate the other runtime adapters.
 7. Run the narrowest Maven verification first, then broader verification when public APIs, starters, auto-configuration, or cross-module behavior changed.
 8. Call out compatibility impact when changing public APIs, starter dependencies, configuration properties, table schemas, event routing, or state transitions.
+9. For runtime, starter, dependency-scope, Native Image, or infrastructure-adapter changes, select and run the matching local CI stage from `references/testing.md`; `mvn test` alone does not validate AOT or Native Image classpaths.
+10. Submit framework changes through a short-lived branch and pull request. The server-side `Merge gate` is authoritative; integrate only after it succeeds, using `Rebase and merge` to preserve linear history.
 
 ## Cross-Runtime Consistency
 

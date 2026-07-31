@@ -55,3 +55,22 @@ mvn test
 - Mockito's Java agent is opt-in per module. When adding Mockito usage to test sources, or when a test framework loads Mockito during test startup, ensure the module has a test dependency that resolves `mockito-core` and override `mockito.javaagent.argLine` with `-javaagent:${org.mockito:mockito-core:jar}`. Do not enable the Mockito Java agent in modules that do not load Mockito during tests.
 
 When changing public API, starter dependencies, configuration properties, table schemas, or release baselines, include compatibility impact in the final report even if tests pass.
+
+## Merge-Gate Verification
+
+Every repository change is integrated through a pull request. The GitHub `Merge gate` always runs and is the
+required status check for `main`: documentation-only changes require documentation verification; every other
+change requires the complete existing CI matrix to succeed. A skipped, cancelled, or failed runtime task is
+not an acceptable result for a code change.
+
+Before pushing a branch, select the narrowest CI-equivalent stage that covers the changed capability:
+
+| Changed area | Required local preflight |
+| --- | --- |
+| Spring Boot auto-configuration, starter, dependency scope, or AOT hints | `scripts/verify-runtime-ci.sh spring --stage native` |
+| Redisson lock adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-redisson` |
+| MyBatis-Plus persistence, Outbox/Inbox store, or Native hints | `scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus` |
+| JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
+| Shared runtime contract or lifecycle behavior | Matching Spring, Quarkus, and Helidon stages |
+
+Local preflight shortens feedback time; it never replaces the server-side merge gate.

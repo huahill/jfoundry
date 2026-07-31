@@ -85,6 +85,17 @@ store.
 Implementation mechanics and database limitations belong in the [JPA implementation guide](../implementations/jpa.md).
 The capability state model and SQL-template policy belong in [Reliable Messaging](../capabilities/reliable-messaging.md).
 
+## Merge Verification
+
+All changes enter `main` through a pull request and GitHub's `Rebase and merge` strategy; direct pushes are
+not permitted. The always-running `Merge gate` is the required status check. It accepts a documentation-only
+change only when documentation verification succeeds. For any code change, it requires every existing CI job,
+including runtime middleware and Native Image verification, to succeed. A skipped, cancelled, or failed runtime
+job does not satisfy the gate.
+
+Contributors should run the CI-equivalent stage for the capability they change before pushing a branch. Local
+verification reduces feedback time but cannot replace the server-side gate.
+
 ## Acceptance Criteria
 
 - Core modules have no compile/provided dependency on Spring, Spring Boot, Helidon, Quarkus,

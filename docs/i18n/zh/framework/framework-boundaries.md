@@ -53,6 +53,12 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 
 实现机制和数据库限制属于 [JPA 实现指南](../implementations/jpa.md)。能力状态模型和 SQL 模板策略属于[可靠消息](../capabilities/reliable-messaging.md)。
 
+## 合并验证
+
+所有变更必须通过 Pull Request 进入 `main`，并使用 GitHub 的 `Rebase and merge` 策略；不允许直接推送。始终执行的 `Merge gate` 是必需状态检查。仅文档变更只有在文档验证成功时才可通过；任何代码变更都要求现有全部 CI 任务成功，包括运行时中间件和原生镜像验证。运行时任务被跳过、取消或失败都不能满足门禁要求。
+
+贡献者应在推送分支前运行与所改能力对应的本地 CI 对齐阶段。本地验证可以缩短反馈时间，但不能替代服务端门禁。
+
 ## 验收标准
 
 - 核心模块对 Spring、Spring Boot、Helidon、Quarkus、Micronaut、CDI、Jakarta 运行时 API、消息代理客户端和持久化框架细节没有编译期或仅提供依赖。
