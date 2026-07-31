@@ -1,7 +1,7 @@
 package org.jfoundry.infrastructure.outbox.spring.externalization;
 
 import org.jfoundry.application.event.DomainEventBatch;
-import org.jfoundry.application.event.DomainEventDispatcher;
+import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jmolecules.event.types.DomainEvent;
 
@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /// Records domain events into the transactional outbox.
-public class OutboxDomainEventDispatcher implements DomainEventDispatcher {
+public class OutboxDomainEventDispatcher implements BeforeCommitDomainEventDispatcher {
 
     private final Supplier<? extends DomainEventOutboxRecorder> outboxRecorderSupplier;
 

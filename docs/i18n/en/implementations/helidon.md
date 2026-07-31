@@ -50,10 +50,11 @@ The generic runtime does not implicitly add JPA, Outbox, Inbox, a database, or a
 creates. Transaction name and read-only options have no portable Jakarta Transactions equivalent and
 are rejected rather than ignored.
 
-The runtime also adds a CDI interceptor to JFoundry `@ApplicationService` beans. It collects domain
-events registered through `DomainEventContext`, publishes them after the outermost successful
-application-service invocation, and discards them when that invocation fails. The boundary is
-synchronous; it does not support reactive return types.
+The runtime also adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
+registered in an active JTA transaction, it records the Outbox path in `beforeCompletion` and notifies
+ordinary CDI dispatchers only after a successful commit. Outside a transaction, it dispatches after
+the outermost successful application-service invocation and discards events when that invocation
+fails. The boundary is synchronous; it does not support reactive return types.
 
 ## JPA, Outbox, And Inbox
 

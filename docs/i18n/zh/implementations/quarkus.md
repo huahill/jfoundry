@@ -245,9 +245,9 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 `@AggregateRouting`；在未指定路由 key 时，解析出的聚合 id 也会成为默认消息 key。没有 `@Externalized` 的事件不会被记录。
 应用可以声明自己的 CDI Bean 覆盖默认序列化器或记录器。
 
-事务边界必须包住完整的应用服务调用，包括领域事件分发。例如，可在 `@ApplicationService` 方法上使用 Jakarta
-`@Transactional`，或在外层 `TransactionRunner` 回调中调用该方法。仅在应用服务内部将聚合修改包进一个
-`TransactionRunner` 回调是不够的：领域事件边界会在该回调返回后才写入 Outbox。
+当聚合在活跃 JTA 事务中注册时，自动外部化会在该事务的 `beforeCompletion` 阶段记录 Outbox 行。因此，即使
+应用服务在其内部通过 `TransactionRunner` 建立事务边界，聚合变更和 Outbox 行仍保持原子性。本地 CDI 领域事件
+监听器与此路径分离，只会在成功提交后接收事件。
 
 扩展会在增强阶段为 `@Externalized` 事件类型注册 Jackson 反射元数据，因此默认序列化器可以用于
 原生镜像。它不指定消息代理传输方式；需要投递时，请另行选择 `MessageSender` 适配器并启用派发器。

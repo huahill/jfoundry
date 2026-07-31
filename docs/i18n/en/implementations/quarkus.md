@@ -279,11 +279,10 @@ also becomes the default message key when no routing key is specified. Events wi
 `@Externalized` are not recorded. Applications can replace the default serializer or recorder with
 their own CDI bean.
 
-The enclosing transaction must cover the complete application-service invocation, including domain
-event dispatch. For example, apply Jakarta `@Transactional` to the `@ApplicationService` method, or
-invoke that method from an outer `TransactionRunner` callback. Starting and completing a
-`TransactionRunner` callback only around the aggregate mutation inside the application service is
-too narrow: the domain-event boundary records the Outbox entry after that callback has returned.
+When an aggregate is registered while a JTA transaction is active, automatic externalization records
+the Outbox entry in that transaction's `beforeCompletion` phase. The aggregate change and Outbox row
+are therefore atomic even when an application service creates its boundary with `TransactionRunner`.
+Local CDI domain-event observers remain separate and are notified only after a successful commit.
 
 The extension registers `@Externalized` event classes for Jackson reflection during augmentation, so
 the default serializer works in Native Image. It does not prescribe a broker transport; use an

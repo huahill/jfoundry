@@ -1,32 +1,29 @@
-package org.jfoundry.infrastructure.event.helidon;
+package org.jfoundry.infrastructure.event.quarkus;
 
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
 import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.domain.event.EventRecordable;
-import org.jmolecules.ddd.types.Identifier;
 import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HelidonDomainEventScopeTest {
+class QuarkusDomainEventScopeTest {
 
     @Test
     void dispatchesOutboxEventsBeforeCommitAndLocalEventsAfterCommit() throws Exception {
         RecordingTransactionSynchronizationRegistry transactionRegistry =
                 new RecordingTransactionSynchronizationRegistry();
         transactionRegistry.activate();
-        HelidonDomainEventScope scope = new HelidonDomainEventScope(transactionRegistry);
+        QuarkusDomainEventScope scope = new QuarkusDomainEventScope(transactionRegistry);
         RecordingBeforeCommitDispatcher outbox = new RecordingBeforeCommitDispatcher();
         RecordingAfterCommitDispatcher local = new RecordingAfterCommitDispatcher();
 
@@ -43,35 +40,6 @@ class HelidonDomainEventScopeTest {
                     .containsExactly("confirmed");
             return null;
         });
-    }
-
-    @Test
-    void drainsRegisteredAggregateEventsOnlyAtTheOutermostScope() throws Exception {
-        HelidonDomainEventScope scope = new HelidonDomainEventScope(
-                new RecordingTransactionSynchronizationRegistry());
-        TestAggregate aggregate = new TestAggregate();
-        aggregate.record(new TestEvent("confirmed"));
-
-        List<DomainEvent> events = scope.invoke(outermost -> {
-            scope.register(aggregate);
-            return outermost ? scope.drainEvents() : List.of();
-        });
-
-        assertThat(events).extracting(event -> ((TestEvent) event).name()).containsExactly("confirmed");
-    }
-
-    private static final class TestAggregate extends BaseAggregateRoot<TestAggregate, TestAggregateId> {
-
-        private TestAggregate() {
-            super(new TestAggregateId("order-1"));
-        }
-
-        private void record(DomainEvent event) {
-            recordEvent(event);
-        }
-    }
-
-    private record TestAggregateId(String value) implements Identifier {
     }
 
     private record TestEvent(String name) implements DomainEvent {

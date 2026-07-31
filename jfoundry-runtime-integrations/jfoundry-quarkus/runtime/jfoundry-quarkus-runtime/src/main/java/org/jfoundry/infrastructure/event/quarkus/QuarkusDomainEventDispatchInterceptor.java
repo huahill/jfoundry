@@ -33,7 +33,8 @@ public class QuarkusDomainEventDispatchInterceptor {
 
     @AroundInvoke
     Object dispatch(InvocationContext invocation) throws Exception {
-        return scope.invoke(outermost -> {
+        List<DomainEventDispatcher> delegates = dispatchers.stream().toList();
+        return scope.invoke(delegates, outermost -> {
             try {
                 Object result = invocation.proceed();
                 if (isAsynchronousResult(result)) {
@@ -41,7 +42,7 @@ public class QuarkusDomainEventDispatchInterceptor {
                             "Quarkus domain-event dispatch supports synchronous application-service methods only");
                 }
                 if (outermost && !scope.failed()) {
-                    dispatch(scope.drainEvents());
+                    dispatch(scope.drainEvents(), delegates);
                 }
                 return result;
             } catch (Exception exception) {
@@ -51,11 +52,10 @@ public class QuarkusDomainEventDispatchInterceptor {
         });
     }
 
-    private void dispatch(List<DomainEvent> events) {
+    private void dispatch(List<DomainEvent> events, List<DomainEventDispatcher> delegates) {
         if (events.isEmpty()) {
             return;
         }
-        List<DomainEventDispatcher> delegates = dispatchers.stream().toList();
         if (!delegates.isEmpty()) {
             new CompositeDomainEventDispatcher(delegates).dispatch(events);
         }
