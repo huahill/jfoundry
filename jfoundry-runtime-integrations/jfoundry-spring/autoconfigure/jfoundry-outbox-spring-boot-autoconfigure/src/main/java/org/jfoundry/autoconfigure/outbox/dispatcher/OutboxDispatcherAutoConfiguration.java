@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportRuntimeHints;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /// Auto-configuration for the Outbox Dispatcher.
@@ -41,6 +42,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 )
 @ConditionalOnClass({OutboxMessageStore.class, MessageSender.class, ScheduledOutboxDispatcher.class})
 @EnableConfigurationProperties({OutboxDispatcherProperties.class, OutboxRecoveryProperties.class, OutboxCleanupProperties.class})
+@ImportRuntimeHints(ScheduledOutboxNativeRuntimeHints.class)
 public class OutboxDispatcherAutoConfiguration {
 
     @Configuration(proxyBeanMethods = false)

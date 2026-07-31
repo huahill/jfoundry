@@ -95,4 +95,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   `tools.jackson.databind.ObjectMapper`；Outbox 启动器通过消息启动器继承该能力。JFoundry 不支持
   Spring Boot 的 Jackson 2 兼容模块。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
+- 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.mode` 是构建期的结构化配置。必须将
+  选定值传给 `process-aot`；仅在启动原生可执行文件时变更该值，无法恢复被 AOT 裁剪的 Bean。需要不同
+  派发模式的部署应构建独立镜像。
 - `mode=none` 表示不注册派发器、恢复任务或清理任务，即使显式开启恢复或清理也不会注册。

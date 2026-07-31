@@ -101,5 +101,9 @@ bean into the default recorder. Applications normally provide these mappings wit
   `tools.jackson.databind.ObjectMapper`; the Outbox starter inherits this capability through messaging.
   JFoundry does not support Spring Boot's Jackson 2 compatibility module.
 - Distributed lock support is explicit. The default Spring Boot starter does not pull Redisson.
+- For a Spring Boot Native Image, `jfoundry.outbox.dispatcher.mode` is a build-time structural
+  setting. Pass the selected value to `process-aot`; changing it only when starting the native
+  executable cannot restore beans that AOT excluded. Build a distinct image when a deployment needs
+  a different dispatcher mode.
 - `mode=none` means no dispatcher, recovery job, or cleanup job is registered, even when recovery
   or cleanup is explicitly enabled.
