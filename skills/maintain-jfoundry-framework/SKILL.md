@@ -42,6 +42,15 @@ Before changing a framework-neutral contract or a behavior implemented by runtim
 
 Apply runtime-specific APIs only inside their runtime adapters. Put a shared semantic marker or contract in the framework-neutral core only when it expresses behavior needed by more than one runtime. Do not move lifecycle APIs such as Spring transaction synchronization or JTA callbacks into core merely to make the implementations look uniform.
 
+## Java Platform Baseline
+
+Treat the root POM's `maven.compiler.release` as the source of truth for Java language and JDK API choices. Before adding or modifying Java code:
+
+1. Read the configured release and use APIs that are stable in that release; do not introduce preview features into framework code without an explicit project decision.
+2. Prefer a stable, semantically better API available in the target release over a legacy alternative retained only by habit. For example, use `ScopedValue` for dynamically scoped contextual state when lexical binding is the intended model.
+3. Do not mechanically replace every older API. `ThreadLocal` remains appropriate when mutable, thread-owned state is genuinely required; record the reason when retaining it is non-obvious.
+4. Verify the affected module with the configured Java baseline, including a focused regression test when the choice prevents a return to an unsuitable API.
+
 ## Non-Negotiable Boundaries
 
 For every module-placement decision, apply Onion Simple as defined in `references/module-boundaries.md`.
