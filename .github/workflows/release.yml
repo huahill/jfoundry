@@ -110,6 +110,23 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: ./mvnw -B -Prelease -DskipTests verify -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
+      - name: Verify Maven Central Consumer POMs
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+
+          consumer_pom_repository="${RUNNER_TEMP}/jfoundry-consumer-pom-repository"
+          rm -rf "${consumer_pom_repository}"
+          mkdir -p "${consumer_pom_repository}"
+          ./mvnw -B -Prelease -DskipTests -Dmaven.repo.local="${consumer_pom_repository}" \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" install
+
+          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
+            "$(command -v mvn)" "$(pwd)/mvnw"
+          echo "CONSUMER_POM_REPOSITORY=${consumer_pom_repository}" >> "${GITHUB_ENV}"
+
       - name: Verify Dependabot security alerts
         env:
           GH_TOKEN: ${{ github.token }}
@@ -138,7 +155,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          mkdir -p release-evidence/artifacts release-evidence/poms release-evidence/signatures release-evidence/sboms
+          mkdir -p release-evidence/artifacts release-evidence/consumer-poms release-evidence/signatures release-evidence/sboms
           while IFS= read -r artifact; do
             module="${artifact#./}"
             module="${module%/target/*}"
@@ -146,13 +163,11 @@ jobs:
             cp "${artifact}" "${target}"
           done < <(find . -path '*/target/*.jar' -type f | sort)
           while IFS= read -r pom; do
-            module="${pom#./}"
-            module="${module%/pom.xml}"
-            if [[ "${module}" == "${pom#./}" ]]; then
-              module="root"
-            fi
-            cp "${pom}" "release-evidence/poms/${module//\//_}-pom.xml"
-          done < <(find . -name pom.xml -type f | sort)
+            relative_pom="${pom#${CONSUMER_POM_REPOSITORY}/}"
+            target="release-evidence/consumer-poms/${relative_pom}"
+            mkdir -p "$(dirname "${target}")"
+            cp "${pom}" "${target}"
+          done < <(find "${CONSUMER_POM_REPOSITORY}/io/github/xfoundries" -name '*.pom' ! -name '*-build.pom' -type f | sort)
           signature_count=0
           while IFS= read -r signature; do
             module="${signature#./}"

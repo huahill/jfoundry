@@ -10,8 +10,8 @@
 | Spring Framework | 7.0.x |
 | Quarkus | 3.37.3 |
 | Helidon MP | 4.5.1 |
-| Maven release tool | 3.9.x |
-| Maven 4 | Compatibility check only while Maven 4 is preview/RC |
+| Maven release tool | 4.0.0-rc-5 (experimental) |
+| Maven 3.9 | Consumer compatibility check |
 
 ## Dependency Baseline
 
@@ -61,7 +61,7 @@ general JFoundry dependency-management rule.
 
 ## Verification Evidence
 
-Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. The Spring MyBatis-Plus, Redisson, and JobRunr Native Image verification evidence was recorded on 2026-07-30 with the same GraalVM and Maven versions.
+Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. The Spring MyBatis-Plus, Redisson, and JobRunr Native Image verification evidence was recorded on 2026-07-30 with the same GraalVM and Maven versions. Maven 4 RC5 Consumer POM release verification was added on 2026-08-01; the release workflow performs a clean Maven 4 install and verifies the installed POMs with both Maven 3.9 and Maven 4 RC5 before deployment.
 
 | Gate | Command | Result |
 |------|---------|--------|
@@ -75,8 +75,9 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
-| Maven 4 validate | Maven `4.0.0-rc-5`, `mvn -B -DskipTests validate -e` | PASS |
-| Maven 4 package | Maven `4.0.0-rc-5`, `mvn -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
+| Maven 4 validate | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests validate -e` | PASS |
+| Maven 4 package | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
+| Maven Consumer POM contract | Maven `4.0.0-rc-5`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC5 | Required before Central deploy; verifies flattened child POMs and Maven 3.9/Maven 4 consumer resolution |
 | Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
 | Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
 
@@ -99,7 +100,7 @@ support works.
 - `./mvnw -DskipTests package`
 - `./mvnw -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
 - Java 25 release-baseline test in CI
-- Maven 4 compatibility matrix in CI
+- Maven 4 Wrapper package compatibility and Consumer POM contract before Central deployment
 - Spring and Quarkus Native Image smoke tests in CI
 - Spring Native Image MyBatis-Plus persistence integration in CI
 - Spring Native Image Redisson lock and JobRunr Outbox integrations in CI
