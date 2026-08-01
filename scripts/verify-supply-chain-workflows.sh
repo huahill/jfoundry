@@ -36,6 +36,8 @@ require_text ".github/workflows/codeql.yml" "build-mode: manual"
 require_text ".github/workflows/codeql.yml" "language: actions"
 require_text ".github/workflows/codeql.yml" "build-mode: none"
 require_text ".github/workflows/codeql.yml" 'build-mode: ${{ matrix.build-mode }}'
+require_text ".github/workflows/codeql.yml" "actions/setup-java"
+require_text ".github/workflows/codeql.yml" "java-version: 25"
 require_text ".github/workflows/ci.yml" "name: Dependency Review"
 require_text ".github/workflows/ci.yml" "actions/dependency-review-action"
 require_text ".github/workflows/ci.yml" "fail-on-severity: high"
