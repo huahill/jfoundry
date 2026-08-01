@@ -67,7 +67,7 @@
 
     <!-- Runtime utilities -->
     <javassist.version>3.30.2-GA</javassist.version>
-    <opentelemetry.version>1.49.0</opentelemetry.version>
+    <opentelemetry.version>1.62.0</opentelemetry.version>
     <slf4j.version>2.0.18</slf4j.version>
     <snakeyaml.version>2.2</snakeyaml.version>
 
