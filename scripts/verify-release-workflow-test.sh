@@ -34,6 +34,7 @@ permissions:
   actions: read
   contents: read
   security-events: read
+  vulnerability-alerts: read
   attestations: write
   id-token: write
 jobs:
@@ -87,6 +88,10 @@ cat >> "${complete_workflow}" <<'YAML'
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
 YAML
 assert_accepts "${complete_workflow}"
+
+missing_vulnerability_alerts_permission_workflow="${temp_dir}/missing-vulnerability-alerts-permission-release.yml"
+grep -v "vulnerability-alerts: read" "${complete_workflow}" > "${missing_vulnerability_alerts_permission_workflow}"
+assert_rejects "${missing_vulnerability_alerts_permission_workflow}"
 
 missing_alert_workflow="${temp_dir}/missing-alert-release.yml"
 grep -v "Verify Dependabot security alerts\|dependabot/alerts" "${safe_workflow}" > "${missing_alert_workflow}"
