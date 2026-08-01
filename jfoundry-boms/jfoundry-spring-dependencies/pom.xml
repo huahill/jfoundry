@@ -6,7 +6,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-dependencies</artifactId>
-    <version>1.0.0-RC2</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>jfoundry-spring-dependencies</name>
     <description>Spring Boot and Cloud platform dependency management BOM for jfoundry applications.</description>
