@@ -69,6 +69,27 @@ jobs:
     steps:
       - run: echo '${{ needs.dependency-review.result }}'
 YAML
+assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
+permissions:
+  contents: read
+  security-events: write
+jobs:
+  analyze:
+    strategy:
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: actions
+            build-mode: none
+    steps:
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - uses: github/codeql-action/analyze@v4
+YAML
 assert_accepts "${temp_dir}"
 rm "${temp_dir}/.github/dependabot.yml"
 assert_rejects "${temp_dir}"
