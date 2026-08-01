@@ -51,6 +51,8 @@ jobs:
       - name: Verify complete CI
         run: gh run view 1 --json jobs
       - run: ./mvnw -B -Prelease -DskipTests verify
+      - name: Verify Maven Central Consumer POMs
+        run: bash scripts/verify-consumer-pom.sh /tmp/repository 1.0.0 mvn ./mvnw
       - run: ./mvnw -B -Prelease -DskipTests deploy
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
@@ -82,7 +84,7 @@ cat >> "${complete_workflow}" <<'YAML'
         run: ./mvnw -B -Prelease -DskipTests deploy | tee central-deploy.log
       - name: Assemble release evidence
         run: |
-          mkdir -p release-evidence/artifacts release-evidence/poms release-evidence/signatures release-evidence/sboms
+          mkdir -p release-evidence/artifacts release-evidence/consumer-poms release-evidence/signatures release-evidence/sboms
           find . -path '*/target/*.asc' -type f
           cp central-deploy.log release-evidence/central-deploy.log
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
@@ -100,6 +102,10 @@ assert_rejects "${missing_alert_workflow}"
 missing_ci_workflow="${temp_dir}/missing-ci-release.yml"
 grep -v "Verify complete CI\|gh run view" "${safe_workflow}" > "${missing_ci_workflow}"
 assert_rejects "${missing_ci_workflow}"
+
+missing_consumer_pom_verification_workflow="${temp_dir}/missing-consumer-pom-verification-release.yml"
+grep -v "Verify Maven Central Consumer POMs\|verify-consumer-pom.sh" "${complete_workflow}" > "${missing_consumer_pom_verification_workflow}"
+assert_rejects "${missing_consumer_pom_verification_workflow}"
 
 assert_accepts "${ROOT_DIR}/.github/workflows/release.yml"
 

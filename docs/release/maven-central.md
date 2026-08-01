@@ -9,7 +9,8 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 ## Prerequisites
 
 - Java 25.
-- Maven 3.9.0 or newer.
+- The checked-in Maven Wrapper, currently Maven `4.0.0-rc-5` with Consumer POM transformation enabled.
+- Maven 3.9.x for the release consumer-compatibility check.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
 - For local release dry-runs, a Maven server entry named `jfoundry` in `~/.m2/settings.xml`.
@@ -58,13 +59,13 @@ Require maintainer review for this environment before publishing a release.
 Run the regular package build first:
 
 ```bash
-mvn -DskipTests package
+./mvnw -DskipTests package
 ```
 
 Then run the release profile through `verify` so sources, Javadocs, and local signatures are exercised:
 
 ```bash
-mvn -Prelease -DskipTests verify
+./mvnw -Prelease -DskipTests verify
 ```
 
 The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle; that behavior is triggered during `deploy`.
@@ -79,9 +80,16 @@ matches the tag exactly. For example, `v1.0.0-RC1` must point to source whose ro
 is `1.0.0-RC1`.
 
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
-and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, checks for open High or
-Critical Dependabot alerts, and only then stages `deploy`. It never changes POM versions or pushes a
-branch during publication.
+and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
+into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
+resolution, checks for open High or Critical Dependabot alerts, and only then stages `deploy`. It
+never changes POM versions or pushes a branch during publication.
+
+Maven 4 is still an RC release. JFoundry uses its official Consumer POM transformation because Maven
+Central validates the POM that is deployed, rather than the build-time inheritance model. The source
+POMs remain maintainable parent/BOM-based POMs; Maven 4 publishes flattened Consumer POMs for child
+artifacts. The workflow archives those transformed POMs in the release evidence and checks that Maven
+3.9 and Maven 4 can consume them before deployment.
 
 The Central publishing plugin uses `autoPublish=false`. Inspect the staged deployment, signatures,
 source and Javadoc artifacts, BOM resolution, CycloneDX SBOM, checksums, and provenance evidence
@@ -97,7 +105,7 @@ including standalone BOM modules.
 Publish the current development version locally with:
 
 ```bash
-mvn -DskipTests deploy \
+./mvnw -DskipTests deploy \
   -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
 ```
 
