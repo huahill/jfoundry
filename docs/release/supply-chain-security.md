@@ -28,7 +28,7 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 
 Repository administrators must enable all of the following in GitHub repository security settings:
 
-1. Dependabot alerts and Dependabot security updates.
+1. Dependency Graph, Dependabot alerts, and Dependabot security updates.
 2. Secret scanning and push protection.
 3. GitHub Actions full-length SHA pinning after verifying every workflow is pinned.
 4. The `jfoundry` deployment environment with Maven Central and GPG secrets, plus release reviewers
