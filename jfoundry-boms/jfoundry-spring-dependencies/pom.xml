@@ -6,7 +6,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-dependencies</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0-RC1</version>
     <packaging>pom</packaging>
     <name>jfoundry-spring-dependencies</name>
     <description>Spring Boot and Cloud platform dependency management BOM for jfoundry applications.</description>
@@ -20,7 +20,7 @@
         <tag>HEAD</tag>
     </scm>
     <properties>
-        <project.build.outputTimestamp>2026-06-27T00:00:00Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-08-01T01:04:25Z</project.build.outputTimestamp>
         <jfoundry.release.url>https://github.com/xfoundries/jfoundry</jfoundry.release.url>
         <jfoundry.release.scm.connection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.connection>
         <jfoundry.release.scm.developerConnection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.developerConnection>
