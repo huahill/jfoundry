@@ -36,22 +36,29 @@ jobs:
           server-username: CENTRAL_USERNAME
           server-password: CENTRAL_PASSWORD
 
-      - name: Ensure current version is a SNAPSHOT
+      - name: Resolve version
+        id: version
         run: |
           set -euo pipefail
 
-          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
           case "${version}" in
             *-SNAPSHOT)
               echo "Publishing ${version}"
+              echo "is_snapshot=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "Refusing to publish non-SNAPSHOT version: ${version}" >&2
-              exit 1
+              echo "Skipping non-SNAPSHOT version: ${version}"
+              echo "is_snapshot=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Publish SNAPSHOT
+        if: steps.version.outputs.is_snapshot == 'true'
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
