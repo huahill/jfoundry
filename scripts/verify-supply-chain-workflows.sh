@@ -26,6 +26,7 @@ require_file ".github/workflows/codeql.yml"
 require_file ".github/workflows/release.yml"
 require_file ".github/workflows/ci.yml"
 require_file ".github/workflows/snapshot.yml"
+require_file ".github/workflows/auto-merge-dependabot.yml"
 
 require_text ".github/dependabot.yml" "package-ecosystem: maven"
 require_text ".github/dependabot.yml" "package-ecosystem: github-actions"
@@ -49,6 +50,10 @@ require_text ".github/workflows/release.yml" "release-evidence"
 require_text ".github/workflows/snapshot.yml" "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'"
 require_text ".github/workflows/snapshot.yml" "is_snapshot=true"
 require_text ".github/workflows/snapshot.yml" "if: steps.version.outputs.is_snapshot == 'true'"
+require_text ".github/workflows/auto-merge-dependabot.yml" "pull_request_target:"
+require_text ".github/workflows/auto-merge-dependabot.yml" "dependabot[bot]"
+require_text ".github/workflows/auto-merge-dependabot.yml" "pull-requests: write"
+require_text ".github/workflows/auto-merge-dependabot.yml" 'gh pr merge "${PR_NUMBER}" --auto --rebase'
 if grep -Fq -- "-DforceStdout | tail -n 1" "${root_dir}/.github/workflows/snapshot.yml"; then
     echo ".github/workflows/snapshot.yml must not use bare Maven 4 version extraction" >&2
     exit 1
