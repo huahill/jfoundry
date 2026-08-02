@@ -67,7 +67,6 @@ jobs:
               tail -n 1
           )"
           bash scripts/verify-consumer-pom.sh /tmp/repository "${version}" mvn ./mvnw
-      - run: ./mvnw -B -Prelease -DskipTests verify org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
       - uses: actions/attest-build-provenance@v2
@@ -94,10 +93,23 @@ assert_rejects "${safe_workflow}"
 complete_workflow="${temp_dir}/complete-release.yml"
 cp "${safe_workflow}" "${complete_workflow}"
 cat >> "${complete_workflow}" <<'YAML'
+      - name: Install Apache Maven 3 for Central publication
+        id: maven_3
+        env:
+          MAVEN_3_VERSION: 3.9.16
+          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+        run: |
+          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
+          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
       - name: Stage Maven Central deployment
         run: |
-          ./mvnw -B -Prelease -DskipTests verify \
-            org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish \
+          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy \
+            "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment" \
             | tee central-deploy.log
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then
@@ -156,10 +168,10 @@ non_main_workflow_source_workflow="${temp_dir}/non-main-workflow-source-release.
 grep -v 'test "${GITHUB_REF}" = "refs/heads/main"' "${complete_workflow}" > "${non_main_workflow_source_workflow}"
 assert_rejects "${non_main_workflow_source_workflow}"
 
-maven4_unsafe_deploy_workflow="${temp_dir}/maven4-unsafe-deploy-release.yml"
-sed 's#./mvnw -B -Prelease -DskipTests verify \\#./mvnw -B -Prelease -DskipTests deploy#' \
-    "${complete_workflow}" > "${maven4_unsafe_deploy_workflow}"
-assert_rejects "${maven4_unsafe_deploy_workflow}"
+maven4_direct_publish_workflow="${temp_dir}/maven4-direct-publish-release.yml"
+sed 's#"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy#./mvnw -B -Prelease -DskipTests verify org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish#' \
+    "${complete_workflow}" > "${maven4_direct_publish_workflow}"
+assert_rejects "${maven4_direct_publish_workflow}"
 
 missing_project_local_repository_exclusion_workflow="${temp_dir}/missing-project-local-repository-exclusion-release.yml"
 grep -v "project-local-repo" "${complete_workflow}" > "${missing_project_local_repository_exclusion_workflow}"

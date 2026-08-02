@@ -75,7 +75,11 @@ require_text 'GH_TOKEN: ${{ github.token }}'
 require_text "-Prelease -DskipTests verify"
 require_text "Verify Maven Central Consumer POMs"
 require_text "verify-consumer-pom.sh"
-require_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish"
+require_text "Install Apache Maven 3 for Central publication"
+require_text "MAVEN_3_VERSION: 3.9.16"
+require_text "MAVEN_3_SHA512:"
+require_text '"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy'
+require_text '-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment'
 require_text "deployment_id="
 require_text "deploymentId: ([[:alnum:]-]+)"
 require_text 'if [[ -z "${deployment_id}" ]]'
@@ -137,7 +141,8 @@ fi
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
-forbid_text "-Prelease -DskipTests deploy"
+forbid_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish"
+forbid_text "./mvnw -B -Prelease -DskipTests verify \\"
 forbid_text "-DforceStdout | tail -n 1"
 forbid_text "search.maven.org/solrsearch/select"
 
