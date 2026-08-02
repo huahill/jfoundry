@@ -110,6 +110,9 @@ require_text "release-metadata.txt"
 require_text "target/*.asc"
 require_text "! -path '*/target/project-local-repo/*'"
 require_text "central-deployment.txt"
+require_text "Archive release evidence"
+require_text "tar -czf release-evidence.tar.gz release-evidence"
+require_text "subject-path: release-evidence.tar.gz"
 require_text "gh release create"
 require_text "gh release edit"
 require_text "--verify-tag"
@@ -145,5 +148,13 @@ forbid_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish
 forbid_text "./mvnw -B -Prelease -DskipTests verify \\"
 forbid_text "-DforceStdout | tail -n 1"
 forbid_text "search.maven.org/solrsearch/select"
+forbid_text "subject-path: release-evidence/**"
+
+release_evidence_archive_line="$(grep -n -F "Archive release evidence" "${workflow_file}" | head -n 1 | cut -d: -f1)"
+provenance_line="$(grep -n -F "Attest release artifact provenance" "${workflow_file}" | head -n 1 | cut -d: -f1)"
+if [[ -z "${release_evidence_archive_line}" || -z "${provenance_line}" || "${provenance_line}" -le "${release_evidence_archive_line}" ]]; then
+    echo "Release evidence must be archived before provenance attestation." >&2
+    exit 1
+fi
 
 echo "Release workflow verification passed: ${workflow_file}"

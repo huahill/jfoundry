@@ -335,10 +335,13 @@ jobs:
           path: release-evidence
           if-no-files-found: error
 
+      - name: Archive release evidence
+        run: tar -czf release-evidence.tar.gz release-evidence
+
       - name: Attest release artifact provenance
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
-          subject-path: release-evidence/**
+          subject-path: release-evidence.tar.gz
 
       - name: Create GitHub Release
         env:
@@ -353,7 +356,6 @@ jobs:
             *-*) is_prerelease=true ;;
           esac
 
-          tar -czf release-evidence.tar.gz release-evidence
           if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             release_tag="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json tagName --jq '.tagName')"
             test "${release_tag}" = "${RELEASE_TAG}"

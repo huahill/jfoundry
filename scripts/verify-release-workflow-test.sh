@@ -147,6 +147,12 @@ cat >> "${complete_workflow}" <<'YAML'
           find . -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*'
           cp central-deploy.log release-evidence/central-deploy.log
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
+      - name: Archive release evidence
+        run: tar -czf release-evidence.tar.gz release-evidence
+      - name: Attest release artifact provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: release-evidence.tar.gz
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -287,6 +293,11 @@ assert_rejects "${missing_ci_workflow}"
 missing_consumer_pom_verification_workflow="${temp_dir}/missing-consumer-pom-verification-release.yml"
 grep -v "Verify Maven Central Consumer POMs\|verify-consumer-pom.sh" "${complete_workflow}" > "${missing_consumer_pom_verification_workflow}"
 assert_rejects "${missing_consumer_pom_verification_workflow}"
+
+directory_provenance_subject_workflow="${temp_dir}/directory-provenance-subject-release.yml"
+sed 's#subject-path: release-evidence.tar.gz#subject-path: release-evidence/\*\*#' \
+    "${ROOT_DIR}/.github/workflows/release.yml" > "${directory_provenance_subject_workflow}"
+assert_rejects "${directory_provenance_subject_workflow}"
 
 manual_publication_pom="${temp_dir}/manual-publication-pom.xml"
 cat > "${manual_publication_pom}" <<'XML'
