@@ -68,7 +68,7 @@ Then run the release profile through `verify` so sources, Javadocs, and local si
 ./mvnw -Prelease -DskipTests verify
 ```
 
-The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle; that behavior is triggered during `deploy`.
+The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle. With Maven 4, release publication explicitly invokes `org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish` after `verify`; it does not rely on the plugin's dynamic `deploy` lifecycle integration.
 
 If GPG is not configured locally, the release-profile verification may fail at the signing step. Failures before signing, including compilation, source JARs, Javadocs, metadata, placeholder metadata guards, or Central publishing plugin setup, must be fixed before release.
 
@@ -82,8 +82,10 @@ is `1.0.0-RC1`.
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
 and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
 into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
-resolution, checks for open High or Critical Dependabot alerts, and only then runs `deploy`. It
-never changes POM versions or pushes a branch during publication.
+resolution, checks for open High or Critical Dependabot alerts, and only then runs `verify` with
+the explicit Central plugin `publish` goal. The workflow requires the plugin to report a Central
+`deploymentId` before it treats the deployment as successful. It never changes POM versions or
+pushes a branch during publication.
 
 Maven 4 is still an RC release. JFoundry uses its official Consumer POM transformation because Maven
 Central validates the POM that is deployed, rather than the build-time inheritance model. The source
@@ -152,8 +154,10 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
 
 1. Merge the committed release-version change after the complete CI matrix passes.
 2. Create and push an annotated tag such as `v1.0.0-RC1` for that exact commit.
-3. Manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and approve the `jfoundry`
-   environment when its reviewers have inspected the candidate.
+3. From the `main` branch, manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and
+   approve the `jfoundry` environment when its reviewers have inspected the candidate. The workflow
+   rejects runs started from a tag or any other branch so that it always uses the current reviewed
+   release workflow definition while checking out the immutable release tag as its source.
 4. Wait for the workflow to publish Central, verify public availability, upload and attest release
    evidence, and create the GitHub Release.
 5. Merge a separate change that starts the next `-SNAPSHOT` development version.

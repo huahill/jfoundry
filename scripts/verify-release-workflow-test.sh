@@ -43,6 +43,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.release_tag }}
+      - name: Verify release workflow source
+        run: test "${GITHUB_REF}" = "refs/heads/main"
       - name: Verify immutable release source
         run: |
           version="$(
@@ -65,7 +67,7 @@ jobs:
               tail -n 1
           )"
           bash scripts/verify-consumer-pom.sh /tmp/repository "${version}" mvn ./mvnw
-      - run: ./mvnw -B -Prelease -DskipTests deploy
+      - run: ./mvnw -B -Prelease -DskipTests verify org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
       - uses: actions/attest-build-provenance@v2
@@ -93,7 +95,15 @@ complete_workflow="${temp_dir}/complete-release.yml"
 cp "${safe_workflow}" "${complete_workflow}"
 cat >> "${complete_workflow}" <<'YAML'
       - name: Stage Maven Central deployment
-        run: ./mvnw -B -Prelease -DskipTests deploy | tee central-deploy.log
+        run: |
+          ./mvnw -B -Prelease -DskipTests verify \
+            org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish \
+            | tee central-deploy.log
+          deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
+          if [[ -z "${deployment_id}" ]]; then
+            echo "Central Publishing did not report a deploymentId." >&2
+            exit 1
+          fi
       - name: Check Maven Central publication
         run: |
           central_status="$(
@@ -141,6 +151,15 @@ cat >> "${complete_workflow}" <<'YAML'
           gh release edit "${{ inputs.release_tag }}" --draft=false --prerelease="${is_prerelease}"
 YAML
 assert_accepts "${complete_workflow}"
+
+non_main_workflow_source_workflow="${temp_dir}/non-main-workflow-source-release.yml"
+grep -v 'test "${GITHUB_REF}" = "refs/heads/main"' "${complete_workflow}" > "${non_main_workflow_source_workflow}"
+assert_rejects "${non_main_workflow_source_workflow}"
+
+maven4_unsafe_deploy_workflow="${temp_dir}/maven4-unsafe-deploy-release.yml"
+sed 's#./mvnw -B -Prelease -DskipTests verify \\#./mvnw -B -Prelease -DskipTests deploy#' \
+    "${complete_workflow}" > "${maven4_unsafe_deploy_workflow}"
+assert_rejects "${maven4_unsafe_deploy_workflow}"
 
 missing_project_local_repository_exclusion_workflow="${temp_dir}/missing-project-local-repository-exclusion-release.yml"
 grep -v "project-local-repo" "${complete_workflow}" > "${missing_project_local_repository_exclusion_workflow}"
