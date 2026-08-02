@@ -17,6 +17,18 @@ require_text() {
     fi
 }
 
+require_count() {
+    local text="$1"
+    local expected_count="$2"
+    local actual_count
+
+    actual_count="$(grep -Fc -- "${text}" "${workflow_file}" || true)"
+    if [[ "${actual_count}" != "${expected_count}" ]]; then
+        echo "Release workflow must contain ${expected_count} occurrence(s) of: ${text}" >&2
+        exit 1
+    fi
+}
+
 forbid_text() {
     local text="$1"
     if grep -Fq -- "${text}" "${workflow_file}"; then
@@ -32,6 +44,7 @@ require_text "Verify immutable release source"
 require_text "Verify complete CI"
 require_text 'test "${{ inputs.release_tag }}" = "v${version}"'
 require_text 'test -z "$(git status --porcelain)"'
+require_count "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'" 2
 require_text "gh run view"
 require_text "actions: read"
 require_text "-Prelease -DskipTests verify"
@@ -54,5 +67,6 @@ require_text "target/*.asc"
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
+forbid_text "-DforceStdout | tail -n 1"
 
 echo "Release workflow verification passed: ${workflow_file}"
