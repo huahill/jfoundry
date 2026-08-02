@@ -43,7 +43,11 @@ jobs:
           test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "${release_tag}")"
           test -z "$(git status --porcelain)"
 
-          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
           test "${{ inputs.release_tag }}" = "v${version}"
           case "${version}" in
             *-SNAPSHOT)
@@ -122,7 +126,11 @@ jobs:
           ./mvnw -B -Prelease -DskipTests -Dmaven.repo.local="${consumer_pom_repository}" \
             -Dgpg.passphrase="${GPG_PASSPHRASE}" install
 
-          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
             "$(command -v mvn)" "$(pwd)/mvnw"
           echo "CONSUMER_POM_REPOSITORY=${consumer_pom_repository}" >> "${GITHUB_ENV}"
@@ -161,7 +169,7 @@ jobs:
             module="${module%/target/*}"
             target="release-evidence/artifacts/${module//\//_}-$(basename "${artifact}")"
             cp "${artifact}" "${target}"
-          done < <(find . -path '*/target/*.jar' -type f | sort)
+          done < <(find . -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*' | sort)
           while IFS= read -r pom; do
             relative_pom="${pom#${CONSUMER_POM_REPOSITORY}/}"
             target="release-evidence/consumer-poms/${relative_pom}"
@@ -175,7 +183,7 @@ jobs:
             target="release-evidence/signatures/${module//\//_}-$(basename "${signature}")"
             cp "${signature}" "${target}"
             signature_count=$((signature_count + 1))
-          done < <(find . -path '*/target/*.asc' -type f | sort)
+          done < <(find . -path '*/target/*.asc' -type f ! -path '*/target/project-local-repo/*' | sort)
           if (( signature_count == 0 )); then
             echo "Release build produced no GPG signature files." >&2
             exit 1
@@ -184,7 +192,7 @@ jobs:
             module="${sbom#./}"
             module="${module%/target/*}"
             cp "${sbom}" "release-evidence/sboms/${module//\//_}-$(basename "${sbom}")"
-          done < <(find . -path '*/target/bom.*' -type f | sort)
+          done < <(find . -path '*/target/bom.*' -type f ! -path '*/target/project-local-repo/*' | sort)
           cp central-deploy.log release-evidence/central-deploy.log
           {
             echo "release_tag=${{ inputs.release_tag }}"
