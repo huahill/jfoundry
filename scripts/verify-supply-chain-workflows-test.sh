@@ -107,6 +107,20 @@ jobs:
         if: steps.version.outputs.is_snapshot == 'true'
         run: ./mvnw deploy
 YAML
+assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  enable-auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - run: gh pr merge "${PR_NUMBER}" --auto --rebase
+YAML
 cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
 permissions:
   contents: read
