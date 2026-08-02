@@ -63,6 +63,7 @@ require_text "release-evidence/consumer-poms"
 require_text "release-evidence/signatures"
 require_text "release-metadata.txt"
 require_text "target/*.asc"
+require_text "! -path '*/target/project-local-repo/*'"
 
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"

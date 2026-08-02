@@ -96,10 +96,15 @@ cat >> "${complete_workflow}" <<'YAML'
         run: |
           mkdir -p release-evidence/artifacts release-evidence/consumer-poms release-evidence/signatures release-evidence/sboms
           find . -path '*/target/*.asc' -type f
+          find . -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*'
           cp central-deploy.log release-evidence/central-deploy.log
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
 YAML
 assert_accepts "${complete_workflow}"
+
+missing_project_local_repository_exclusion_workflow="${temp_dir}/missing-project-local-repository-exclusion-release.yml"
+grep -v "project-local-repo" "${complete_workflow}" > "${missing_project_local_repository_exclusion_workflow}"
+assert_rejects "${missing_project_local_repository_exclusion_workflow}"
 
 legacy_version_extraction_workflow="${temp_dir}/legacy-version-extraction-release.yml"
 awk '
