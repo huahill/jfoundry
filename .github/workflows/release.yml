@@ -14,7 +14,7 @@ concurrency:
 
 permissions:
   actions: read
-  contents: read
+  contents: write
   security-events: read
   vulnerability-alerts: read
   attestations: write
@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   publish:
-    name: Verify and stage Maven Central release
+    name: Verify and publish Maven Central release
     runs-on: ubuntu-latest
     environment: jfoundry
     steps:
@@ -33,6 +33,7 @@ jobs:
           fetch-depth: 0
 
       - name: Verify immutable release source
+        id: release_source
         run: |
           set -euo pipefail
 
@@ -42,6 +43,8 @@ jobs:
           test "$(git cat-file -t "refs/tags/${release_tag}")" = "tag"
           test "$(git rev-parse HEAD)" = "$(git rev-list -n 1 "${release_tag}")"
           test -z "$(git status --porcelain)"
+          git fetch origin +refs/heads/main:refs/remotes/origin/main --no-tags
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
 
           version="$(
             ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
@@ -55,6 +58,7 @@ jobs:
               exit 1
               ;;
           esac
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
       - name: Verify complete CI
         env:
@@ -150,7 +154,29 @@ jobs:
             exit 1
           fi
 
-      - name: Stage Maven Central deployment
+      - name: Check Maven Central publication
+        id: central_publication
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          central_pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
+          central_status="$(
+            curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head "${central_pom_url}"
+          )"
+          case "${central_status}" in
+            200) echo "already_published=true" >> "${GITHUB_OUTPUT}" ;;
+            404) echo "already_published=false" >> "${GITHUB_OUTPUT}" ;;
+            *)
+              echo "Central publication lookup returned unexpected HTTP status: ${central_status}" >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Publish Maven Central deployment
+        id: publish_central
+        if: steps.central_publication.outputs.already_published != 'true'
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -158,6 +184,65 @@ jobs:
         run: |
           set -euo pipefail
           ./mvnw -B -Prelease -DskipTests deploy -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
+
+      - name: Record existing Maven Central publication
+        id: record_existing_publication
+        if: steps.central_publication.outputs.already_published == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+          printf 'Maven Central already contains io.github.xfoundries:jfoundry-parent:%s. Deployment was not retried.\n' \
+            "${RELEASE_VERSION}" > central-deploy.log
+
+      - name: Verify Maven Central publication
+        id: central_publication_complete
+        env:
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          for attempt in $(seq 1 60); do
+            central_pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
+            if curl --fail --retry 5 --retry-all-errors --silent --show-error --head "${central_pom_url}"; then
+              echo "published=true" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            sleep 10
+          done
+
+          echo "Maven Central did not expose io.github.xfoundries:jfoundry-parent:${RELEASE_VERSION} within 10 minutes." >&2
+          exit 1
+
+      - name: Capture Maven Central deployment details
+        id: central_deployment_evidence
+        if: ${{ always() && (steps.publish_central.conclusion != 'skipped' || steps.record_existing_publication.conclusion != 'skipped') }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p release-evidence
+          {
+            echo "release_version=${{ steps.release_source.outputs.version }}"
+            echo "central_repository_group=io.github.xfoundries"
+            echo "central_repository_artifact=jfoundry-parent"
+            echo "central_repository_published=${{ steps.central_publication_complete.outputs.published }}"
+            echo
+            if [[ -f central-deploy.log ]]; then
+              grep -Ei 'deployment|publish|status' central-deploy.log || true
+            else
+              echo "central-deploy.log was not created before the release workflow stopped."
+            fi
+          } > release-evidence/central-deployment.txt
+
+      - name: Upload Maven Central deployment details
+        if: ${{ always() && steps.central_deployment_evidence.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ${{ inputs.release_tag }}-central-deployment
+          path: |
+            release-evidence/central-deployment.txt
+            central-deploy.log
+          if-no-files-found: error
 
       - name: Assemble release evidence
         run: |
@@ -213,3 +298,35 @@ jobs:
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
           subject-path: release-evidence/**
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
+        run: |
+          set -euo pipefail
+
+          is_prerelease=false
+          case "${RELEASE_VERSION}" in
+            *-*) is_prerelease=true ;;
+          esac
+
+          tar -czf release-evidence.tar.gz release-evidence
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            release_tag="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json tagName --jq '.tagName')"
+            test "${release_tag}" = "${RELEASE_TAG}"
+            gh release upload "${RELEASE_TAG}" release-evidence.tar.gz --clobber --repo "${GITHUB_REPOSITORY}"
+            gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" \
+              --draft=false --prerelease="${is_prerelease}"
+            exit 0
+          fi
+
+          release_flags=(--verify-tag)
+          if [[ "${is_prerelease}" == "true" ]]; then
+            release_flags+=(--prerelease --latest=false)
+          fi
+          gh release create "${RELEASE_TAG}" release-evidence.tar.gz "${release_flags[@]}" \
+            --repo "${GITHUB_REPOSITORY}" \
+            --title "JFoundry ${RELEASE_TAG}" \
+            --generate-notes

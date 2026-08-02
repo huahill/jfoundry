@@ -283,7 +283,8 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>jfoundry</publishingServerId>
-                            <autoPublish>false</autoPublish>
+                            <autoPublish>true</autoPublish>
+                            <waitUntil>PUBLISHED</waitUntil>
                         </configuration>
                     </plugin>
                     <plugin>
