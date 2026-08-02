@@ -506,7 +506,7 @@
       <build><plugins>
         <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-enforcer-plugin</artifactId><version>${maven-enforcer-plugin.version}</version><executions><execution><id>require-release-version</id><goals><goal>enforce</goal></goals><configuration><rules><requireReleaseVersion/></rules></configuration></execution></executions></plugin>
         <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-gpg-plugin</artifactId><version>${maven-gpg-plugin.version}</version><executions><execution><id>sign-artifacts</id><phase>verify</phase><goals><goal>sign</goal></goals></execution></executions></plugin>
-        <plugin><groupId>org.sonatype.central</groupId><artifactId>central-publishing-maven-plugin</artifactId><version>${central-publishing-maven-plugin.version}</version><extensions>true</extensions><configuration><publishingServerId>jfoundry</publishingServerId><autoPublish>false</autoPublish></configuration></plugin>
+        <plugin><groupId>org.sonatype.central</groupId><artifactId>central-publishing-maven-plugin</artifactId><version>${central-publishing-maven-plugin.version}</version><extensions>true</extensions><configuration><publishingServerId>jfoundry</publishingServerId><autoPublish>true</autoPublish><waitUntil>PUBLISHED</waitUntil></configuration></plugin>
       </plugins></build>
     </profile>
   </profiles>
