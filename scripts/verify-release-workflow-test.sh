@@ -45,14 +45,24 @@ jobs:
           ref: ${{ inputs.release_tag }}
       - name: Verify immutable release source
         run: |
-          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
           test "${{ inputs.release_tag }}" = "v${version}"
           test -z "$(git status --porcelain)"
       - name: Verify complete CI
         run: gh run view 1 --json jobs
       - run: ./mvnw -B -Prelease -DskipTests verify
       - name: Verify Maven Central Consumer POMs
-        run: bash scripts/verify-consumer-pom.sh /tmp/repository 1.0.0 mvn ./mvnw
+        run: |
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
+          bash scripts/verify-consumer-pom.sh /tmp/repository "${version}" mvn ./mvnw
       - run: ./mvnw -B -Prelease -DskipTests deploy
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
@@ -90,6 +100,56 @@ cat >> "${complete_workflow}" <<'YAML'
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
 YAML
 assert_accepts "${complete_workflow}"
+
+legacy_version_extraction_workflow="${temp_dir}/legacy-version-extraction-release.yml"
+awk '
+    /          version="\$\(/ {
+        print "          version=\"\$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)\""
+        skipping = 1
+        next
+    }
+    skipping && /          \)/ {
+        skipping = 0
+        next
+    }
+    !skipping { print }
+' "${complete_workflow}" > "${legacy_version_extraction_workflow}"
+assert_rejects "${legacy_version_extraction_workflow}"
+
+partially_legacy_version_extraction_workflow="${temp_dir}/partially-legacy-version-extraction-release.yml"
+awk '
+    /          version="\$\(/ {
+        version_extraction_count++
+        if (version_extraction_count == 2) {
+            print "          version=\"\$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)\""
+            skipping = 1
+            next
+        }
+    }
+    skipping && /          \)/ {
+        skipping = 0
+        next
+    }
+    !skipping { print }
+' "${complete_workflow}" > "${partially_legacy_version_extraction_workflow}"
+assert_rejects "${partially_legacy_version_extraction_workflow}"
+
+missing_consumer_pom_version_extraction_workflow="${temp_dir}/missing-consumer-pom-version-extraction-release.yml"
+awk '
+    /          version="\$\(/ {
+        version_extraction_count++
+        if (version_extraction_count == 2) {
+            skipping = 1
+            next
+        }
+    }
+    skipping && /          \)/ {
+        skipping = 0
+        next
+    }
+    !skipping { print }
+' "${complete_workflow}" > "${missing_consumer_pom_version_extraction_workflow}"
+assert_rejects "${missing_consumer_pom_version_extraction_workflow}"
 
 missing_vulnerability_alerts_permission_workflow="${temp_dir}/missing-vulnerability-alerts-permission-release.yml"
 grep -v "vulnerability-alerts: read" "${complete_workflow}" > "${missing_vulnerability_alerts_permission_workflow}"
