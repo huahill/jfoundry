@@ -70,6 +70,43 @@ jobs:
       - run: echo '${{ needs.dependency-review.result }}'
 YAML
 assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
+on:
+  push:
+    branches: [main]
+jobs:
+  publish-snapshot:
+    steps:
+      - run: |
+          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          test "${version}" = "1.0.0-SNAPSHOT"
+YAML
+assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
+on:
+  push:
+    branches: [main]
+jobs:
+  publish-snapshot:
+    steps:
+      - run: |
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
+          case "${version}" in
+            *-SNAPSHOT)
+              echo "is_snapshot=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_snapshot=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+      - name: Publish SNAPSHOT
+        if: steps.version.outputs.is_snapshot == 'true'
+        run: ./mvnw deploy
+YAML
 cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
 permissions:
   contents: read
@@ -144,6 +181,21 @@ jobs:
       - uses: github/codeql-action/analyze@v4
 YAML
 assert_accepts "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
+on:
+  push:
+    branches: [main]
+jobs:
+  publish-snapshot:
+    steps:
+      - run: |
+          version="$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -n 1)"
+          case "${version}" in
+            *-SNAPSHOT) ;;
+            *) exit 0 ;;
+          esac
+YAML
+assert_rejects "${temp_dir}"
 rm "${temp_dir}/.github/dependabot.yml"
 assert_rejects "${temp_dir}"
 assert_accepts "${ROOT_DIR}"
