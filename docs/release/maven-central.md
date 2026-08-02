@@ -10,7 +10,7 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 
 - Java 25.
 - The checked-in Maven Wrapper, currently Maven `4.0.0-rc-5` with Consumer POM transformation enabled.
-- Maven 3.9.x for the release consumer-compatibility check.
+- Maven `3.9.16` for Maven Central publication and the release consumer-compatibility check.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
 - For local release dry-runs, a Maven server entry named `jfoundry` in `~/.m2/settings.xml`.
@@ -89,9 +89,16 @@ pushes a branch during publication.
 
 Maven 4 is still an RC release. JFoundry uses its official Consumer POM transformation because Maven
 Central validates the POM that is deployed, rather than the build-time inheritance model. The source
-POMs remain maintainable parent/BOM-based POMs; Maven 4 publishes flattened Consumer POMs for child
-artifacts. The workflow archives those transformed POMs in the release evidence and checks that Maven
-3.9 and Maven 4 can consume them before deployment.
+POMs remain maintainable parent/BOM-based POMs; Maven 4 produces flattened Consumer POMs for child
+artifacts. The workflow archives those transformed POMs and checks that Maven 3.9 and Maven 4 can
+consume them before publication.
+
+Maven Central publication itself currently runs with Apache Maven `3.9.16`. Maven 4 RC5 does not
+reliably apply the Central plugin lifecycle extension, and an explicit plugin goal packages Maven 4
+Consumer POM attachments as nonstandard `*-consumer.pom` files that Central cannot associate with
+artifact coordinates. The workflow downloads Maven 3.9.16 from Apache's repository, verifies its
+SHA-512 checksum, and executes a serial `deploy` lifecycle. Maven 4 remains the normal build runtime
+and the authority for Consumer POM verification.
 
 Every JFoundry publication POM, including the independent BOM POMs, configures the Central publishing
 plugin with `autoPublish=true` and `waitUntil=PUBLISHED`. The workflow then verifies that Maven
