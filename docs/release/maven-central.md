@@ -82,7 +82,7 @@ is `1.0.0-RC1`.
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
 and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
 into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
-resolution, checks for open High or Critical Dependabot alerts, and only then stages `deploy`. It
+resolution, checks for open High or Critical Dependabot alerts, and only then runs `deploy`. It
 never changes POM versions or pushes a branch during publication.
 
 Maven 4 is still an RC release. JFoundry uses its official Consumer POM transformation because Maven
@@ -91,9 +91,19 @@ POMs remain maintainable parent/BOM-based POMs; Maven 4 publishes flattened Cons
 artifacts. The workflow archives those transformed POMs in the release evidence and checks that Maven
 3.9 and Maven 4 can consume them before deployment.
 
-The Central publishing plugin uses `autoPublish=false`. Inspect the staged deployment, signatures,
-source and Javadoc artifacts, BOM resolution, CycloneDX SBOM, checksums, and provenance evidence
-before publishing it in Central Portal.
+Every JFoundry publication POM, including the independent BOM POMs, configures the Central publishing
+plugin with `autoPublish=true` and `waitUntil=PUBLISHED`. The workflow then verifies that Maven
+Central's content repository resolves the exact `io.github.xfoundries:jfoundry-parent` POM for the
+release version. It never creates the GitHub Release before that consumer-visible availability check
+passes.
+
+If Maven Central already exposes that exact coordinate, the workflow does not redeploy the version.
+It records the existing publication, regenerates the evidence, and can complete a previously
+interrupted GitHub Release publication. Maven Central release versions remain immutable.
+
+Maven versions with a prerelease qualifier, such as `1.0.0-RC1`, produce a GitHub prerelease and
+are explicitly excluded from GitHub's Latest release selection. A release without such a qualifier
+is published as the normal stable GitHub Release.
 
 ## Publish SNAPSHOTs
 
@@ -144,9 +154,9 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
 2. Create and push an annotated tag such as `v1.0.0-RC1` for that exact commit.
 3. Manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and approve the `jfoundry`
    environment when its reviewers have inspected the candidate.
-4. Inspect and publish the staged Central deployment.
-5. Create the GitHub Release only after Central publication succeeds.
-6. Merge a separate change that starts the next `-SNAPSHOT` development version.
+4. Wait for the workflow to publish Central, verify public availability, upload and attest release
+   evidence, and create the GitHub Release.
+5. Merge a separate change that starts the next `-SNAPSHOT` development version.
 
-Do not reuse a failed or discarded release version. Correct the source, choose a new version, and
-repeat the immutable-tag process.
+Retry an interrupted workflow only when its immutable source remains correct. If the release source
+must change, choose a new version and repeat the immutable-tag process; never move an existing tag.
