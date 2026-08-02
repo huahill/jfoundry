@@ -16,8 +16,9 @@ operations.
   dependencies, excluding test dependencies.
 - A release is refused when GitHub reports an open High or Critical Dependabot alert. The release
   workflow archives JARs, SBOMs, SHA-256 checksums, and GitHub build provenance.
-- Maven Central artifacts are signed with the release GPG key. Central publication remains manually
-  approved after staging.
+- Maven Central artifacts are signed with the release GPG key. The protected release workflow waits
+  for Central publication and independently verifies public Maven Central artifact resolution before
+  creating the corresponding GitHub Release.
 
 Dependency Review evaluates dependency changes in a pull request. Dependabot and the release check
 cover vulnerabilities that become known after the dependency was introduced. A false-positive or
@@ -43,10 +44,12 @@ The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GP
 ## Release Evidence
 
 For every stable release and release candidate, retain the immutable Git tag, successful CI run,
-Central staging record, SBOM, checksums, GPG signatures, source POMs, and provenance attestation.
-The release-evidence archive contains the Maven Central deployment log, which records the deployment
-identifier when Central supplies one, together with the source commit and GitHub workflow URL. The tag
-must identify the exact non-SNAPSHOT source that generated the published POMs and artifacts.
+Central publication record, SBOM, checksums, GPG signatures, source POMs, and provenance attestation.
+The workflow uploads Central deployment details before collecting the remaining release evidence, so
+the deployment status remains available if later evidence collection fails. The final release-evidence
+archive contains the deployment log, source commit, GitHub workflow URL, and a checksum manifest; it
+is attached to the GitHub Release after Maven Central availability is verified. The tag must identify
+the exact non-SNAPSHOT source that generated the published POMs and artifacts.
 
 ## License Decisions
 
