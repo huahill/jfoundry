@@ -62,6 +62,7 @@ forbid_text() {
 require_text "workflow_dispatch:"
 require_text "release_tag:"
 require_text 'ref: ${{ inputs.release_tag }}'
+require_text 'test "${GITHUB_REF}" = "refs/heads/main"'
 require_text "Verify immutable release source"
 require_text "Verify complete CI"
 require_text 'test "${{ inputs.release_tag }}" = "v${version}"'
@@ -74,7 +75,10 @@ require_text 'GH_TOKEN: ${{ github.token }}'
 require_text "-Prelease -DskipTests verify"
 require_text "Verify Maven Central Consumer POMs"
 require_text "verify-consumer-pom.sh"
-require_text "-Prelease -DskipTests deploy"
+require_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish"
+require_text "deployment_id="
+require_text "deploymentId: ([[:alnum:]-]+)"
+require_text 'if [[ -z "${deployment_id}" ]]'
 require_text "Check Maven Central publication"
 require_text "Verify Maven Central publication"
 require_text "repo.maven.apache.org/maven2"
@@ -95,6 +99,7 @@ require_text "attestations: write"
 require_text "id-token: write"
 require_text "actions/attest-build-provenance"
 require_text "central-deploy.log"
+require_text "Central Publishing did not report a deploymentId."
 require_text "release-evidence/consumer-poms"
 require_text "release-evidence/signatures"
 require_text "release-metadata.txt"
@@ -132,6 +137,7 @@ fi
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
+forbid_text "-Prelease -DskipTests deploy"
 forbid_text "-DforceStdout | tail -n 1"
 forbid_text "search.maven.org/solrsearch/select"
 
