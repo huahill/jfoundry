@@ -35,8 +35,6 @@ permissions:
   contents: write
   security-events: read
   vulnerability-alerts: read
-  attestations: write
-  id-token: write
 jobs:
   publish:
     steps:
@@ -69,7 +67,6 @@ jobs:
           bash scripts/verify-consumer-pom.sh /tmp/repository "${version}" mvn ./mvnw
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
-      - uses: actions/attest-build-provenance@v2
 YAML
 
 unsafe_workflow="${temp_dir}/unsafe-release.yml"
@@ -132,27 +129,6 @@ cat >> "${complete_workflow}" <<'YAML'
           esac
       - name: Verify Maven Central publication
         run: test "${PUBLICATION_VISIBLE}" = "true"
-      - name: Capture Maven Central deployment details
-        if: ${{ always() }}
-        run: |
-          mkdir -p release-evidence
-          printf 'deployment_id=%s\n' "${DEPLOYMENT_ID}" > release-evidence/central-deployment.txt
-      - name: Upload Maven Central deployment details
-        if: ${{ always() }}
-        run: echo release-evidence/central-deployment.txt
-      - name: Assemble release evidence
-        run: |
-          mkdir -p release-evidence/artifacts release-evidence/consumer-poms release-evidence/signatures release-evidence/sboms
-          find . -path '*/target/*.asc' -type f
-          find . -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*'
-          cp central-deploy.log release-evidence/central-deploy.log
-          printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
-      - name: Archive release evidence
-        run: tar -czf release-evidence.tar.gz release-evidence
-      - name: Attest release artifact provenance
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-path: release-evidence.tar.gz
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -178,10 +154,6 @@ maven4_direct_publish_workflow="${temp_dir}/maven4-direct-publish-release.yml"
 sed 's#"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy#./mvnw -B -Prelease -DskipTests verify org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish#' \
     "${complete_workflow}" > "${maven4_direct_publish_workflow}"
 assert_rejects "${maven4_direct_publish_workflow}"
-
-missing_project_local_repository_exclusion_workflow="${temp_dir}/missing-project-local-repository-exclusion-release.yml"
-grep -v "project-local-repo" "${complete_workflow}" > "${missing_project_local_repository_exclusion_workflow}"
-assert_rejects "${missing_project_local_repository_exclusion_workflow}"
 
 legacy_version_extraction_workflow="${temp_dir}/legacy-version-extraction-release.yml"
 awk '
@@ -266,10 +238,6 @@ sed -e '/is_prerelease=false/d' \
     "${complete_workflow}" > "${missing_prerelease_classification_workflow}"
 assert_rejects "${missing_prerelease_classification_workflow}"
 
-missing_failure_evidence_workflow="${temp_dir}/missing-failure-evidence-release.yml"
-grep -v "always()" "${complete_workflow}" > "${missing_failure_evidence_workflow}"
-assert_rejects "${missing_failure_evidence_workflow}"
-
 missing_main_ancestry_workflow="${temp_dir}/missing-main-ancestry-release.yml"
 grep -v "git merge-base --is-ancestor\|origin/main" "${complete_workflow}" > "${missing_main_ancestry_workflow}"
 assert_rejects "${missing_main_ancestry_workflow}"
@@ -294,10 +262,15 @@ missing_consumer_pom_verification_workflow="${temp_dir}/missing-consumer-pom-ver
 grep -v "Verify Maven Central Consumer POMs\|verify-consumer-pom.sh" "${complete_workflow}" > "${missing_consumer_pom_verification_workflow}"
 assert_rejects "${missing_consumer_pom_verification_workflow}"
 
-directory_provenance_subject_workflow="${temp_dir}/directory-provenance-subject-release.yml"
-sed 's#subject-path: release-evidence.tar.gz#subject-path: release-evidence/\*\*#' \
-    "${ROOT_DIR}/.github/workflows/release.yml" > "${directory_provenance_subject_workflow}"
-assert_rejects "${directory_provenance_subject_workflow}"
+release_evidence_workflow="${temp_dir}/release-evidence-release.yml"
+awk '
+    /name: Create GitHub Release/ {
+        print "      - name: Archive release evidence"
+        print "        run: tar -czf release-evidence.tar.gz release-evidence"
+    }
+    { print }
+' "${ROOT_DIR}/.github/workflows/release.yml" > "${release_evidence_workflow}"
+assert_rejects "${release_evidence_workflow}"
 
 manual_publication_pom="${temp_dir}/manual-publication-pom.xml"
 cat > "${manual_publication_pom}" <<'XML'

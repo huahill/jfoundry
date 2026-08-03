@@ -165,8 +165,8 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
    approve the `jfoundry` environment when its reviewers have inspected the candidate. The workflow
    rejects runs started from a tag or any other branch so that it always uses the current reviewed
    release workflow definition while checking out the immutable release tag as its source.
-4. Wait for the workflow to publish Central, verify public availability, upload and attest release
-   evidence, and create the GitHub Release.
+4. Wait for the workflow to publish Central, verify public availability, and create the GitHub
+   Release.
 5. Merge a separate change that starts the next `-SNAPSHOT` development version.
 
 Retry an interrupted workflow only when its immutable source remains correct. If the release source

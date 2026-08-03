@@ -45,8 +45,8 @@ production release. Promotion to a stable release requires all of the following:
    that commit.
 2. The release profile produces signed JARs, source JARs, Javadoc JARs, and an aggregate CycloneDX
    SBOM; Central accepts a staged deployment.
-3. Maintainers inspect the staged POM metadata, signatures, BOM import, checksums, SBOM, and GitHub
-   provenance evidence.
+3. Maintainers inspect the staged POM metadata, signatures, BOM import, checksums, SBOM, and the
+   successful release workflow.
 4. Each maintained expense-approval demo branch consumes the candidate as an external dependency and
    completes its own documented acceptance path.
 5. No unapproved High or Critical dependency alert remains open, and release notes list supported

@@ -15,7 +15,7 @@ operations.
 - The release build generates an aggregate CycloneDX SBOM for compile, runtime, provided, and system
   dependencies, excluding test dependencies.
 - A release is refused when GitHub reports an open High or Critical Dependabot alert. The release
-  workflow archives JARs, SBOMs, SHA-256 checksums, and GitHub build provenance.
+  workflow records its immutable source tag and successful CI verification.
 - Maven Central artifacts are signed with the release GPG key. The protected release workflow waits
   for Central publication and independently verifies public Maven Central artifact resolution before
   creating the corresponding GitHub Release.
@@ -43,13 +43,11 @@ The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GP
 
 ## Release Evidence
 
-For every stable release and release candidate, retain the immutable Git tag, successful CI run,
-Central publication record, SBOM, checksums, GPG signatures, source POMs, and provenance attestation.
-The workflow uploads Central deployment details before collecting the remaining release evidence, so
-the deployment status remains available if later evidence collection fails. The final release-evidence
-archive contains the deployment log, source commit, GitHub workflow URL, and a checksum manifest; it
-is attached to the GitHub Release after Maven Central availability is verified. The tag must identify
-the exact non-SNAPSHOT source that generated the published POMs and artifacts.
+For every stable release and release candidate, retain the immutable Git tag, successful CI run, and
+Central publication record. Maven Central is the distribution record for the signed JARs, source
+POMs, and checksums; the build produces the aggregate SBOM. The workflow does not attach a duplicate
+artifact archive to GitHub Releases. The tag must identify the exact non-SNAPSHOT source that
+generated the published POMs and artifacts.
 
 ## License Decisions
 
