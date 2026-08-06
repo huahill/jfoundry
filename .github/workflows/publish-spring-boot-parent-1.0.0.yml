@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write
   attestations: write
   id-token: write
 
@@ -176,6 +176,22 @@ jobs:
           } > remediation-evidence/release-metadata.txt
           find remediation-evidence -type f -print0 | sort -z | xargs -0 shasum -a 256 > remediation-evidence/SHA256SUMS
           tar -czf remediation-evidence.tar.gz remediation-evidence
+
+      - name: Rewrite v1.0.0 GitHub tag and Release
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${GITHUB_SHA}"
+          git push origin "refs/tags/v${PARENT_VERSION}" --force
+          if gh release view "v${PARENT_VERSION}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release delete "v${PARENT_VERSION}" --yes --repo "${GITHUB_REPOSITORY}"
+          fi
+          gh release create "v${PARENT_VERSION}" --verify-tag --repo "${GITHUB_REPOSITORY}" \
+            --title "JFoundry v${PARENT_VERSION}" --generate-notes
 
       - name: Upload remediation evidence
         if: always()
