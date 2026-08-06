@@ -68,19 +68,19 @@
     <modules>
         <module>jfoundry-boms/jfoundry-modules-dependencies</module>
         <module>jfoundry-boms/jfoundry-foundation-dependencies</module>
-        <module>jfoundry-boms/jfoundry-spring-boot-parent</module>
         <module>jfoundry-boms/jfoundry-spring-dependencies</module>
         <module>jfoundry-boms/jfoundry-quarkus-dependencies</module>
         <module>jfoundry-boms/jfoundry-helidon-dependencies</module>
         <module>jfoundry-boms/jfoundry-dependencies</module>
+        <module>jfoundry-boms/jfoundry-spring-boot-parent</module>
         <module>jfoundry-core/jfoundry-architecture</module>
         <module>jfoundry-core/jfoundry-domain</module>
         <module>jfoundry-core/jfoundry-application</module>
         <module>jfoundry-core/jfoundry-infrastructure</module>
         <module>jfoundry-core/jfoundry-starters</module>
-        <module>jfoundry-runtime-integrations/jfoundry-spring</module>
-        <module>jfoundry-runtime-integrations/jfoundry-quarkus</module>
-        <module>jfoundry-runtime-integrations/jfoundry-helidon</module>
+        <module>jfoundry-runtime/jfoundry-spring</module>
+        <module>jfoundry-runtime/jfoundry-quarkus</module>
+        <module>jfoundry-runtime/jfoundry-helidon</module>
     </modules>
 
     <dependencyManagement>

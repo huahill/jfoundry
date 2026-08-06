@@ -39,7 +39,7 @@ class OutboxJpaStarterDependencyTest {
         Path projectRoot = repositoryRoot();
         Process process = new ProcessBuilder(
                 projectRoot.resolve("mvnw").toString(),
-                "-pl", "jfoundry-runtime-integrations/jfoundry-spring/starters/jfoundry-persistence-jpa-spring-boot-starter",
+                "-pl", "jfoundry-runtime/jfoundry-spring/starters/jfoundry-persistence-jpa-spring-boot-starter",
                 "-am",
                 "dependency:tree",
                 "-Dscope=runtime",

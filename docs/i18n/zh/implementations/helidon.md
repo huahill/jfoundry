@@ -96,7 +96,7 @@ JSON 标量、数组和对象类型。
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+  -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pjvm-integration verify
 ```
 
@@ -108,7 +108,7 @@ Helidon 使用方已用 GraalVM 原生镜像构建，并验证 CDI 发现、应�
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

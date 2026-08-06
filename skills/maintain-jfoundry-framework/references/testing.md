@@ -33,14 +33,14 @@ mvn test
 | Inbox core | `mvn -pl jfoundry-core/jfoundry-application/jfoundry-inbox-core test` |
 | MyBatis-Plus adapter | `mvn -pl jfoundry-core/jfoundry-infrastructure/<module> -am test` |
 | Broker sender runtime adapter | `mvn -pl <runtime messaging module> -am test` |
-| Spring runtime adapter | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/runtime/<module> -am test` |
-| Boot auto-configuration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/<capability-module> -am test` |
-| Spring middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
-| Spring Native Image consumer | `mvn -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then probe `/jfoundry/native/ready` |
-| Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |
-| Quarkus Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
-| Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
-| Helidon Native Image integration | `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
+| Spring runtime adapter | `mvn -pl jfoundry-runtime/jfoundry-spring/runtime/<module> -am test` |
+| Boot auto-configuration | `mvn -pl jfoundry-runtime/jfoundry-spring/autoconfigure/<capability-module> -am test` |
+| Spring middleware integration | `mvn -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
+| Spring Native Image consumer | `mvn -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then probe `/jfoundry/native/ready` |
+| Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |
+| Quarkus Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
+| Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
+| Helidon Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
 | Starter POM | `mvn -pl <starter-module> -am test` or `mvn validate` for dependency shape |
 
 ## Test Expectations

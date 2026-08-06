@@ -67,19 +67,19 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 |------|---------|--------|
 | Unit tests | `./mvnw -B clean test` | PASS on Java 25 |
 | Package artifacts | `./mvnw -B -DskipTests package` | PASS on Java 25 |
-| Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
-| Spring Native Image base Starter/Web MVC consumer smoke test | GraalVM 25 with Spring Boot 4.0.7 AOT, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
-| Spring Native Image MyBatis-Plus persistence integration | GraalVM 25 with Spring Boot 4.0.7, MyBatis-Plus 3.5.17 and its `mybatis-plus-spring-boot-native-image` module, PostgreSQL, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-mybatis-plus verify` | PASS on GraalVM Community 25.0.2; verifies a business-defined `AuditStampHolder` mapping and built-in Outbox/Inbox store append, paginated claim, idempotent claim, and processed-state operations |
-| Spring Native Image Redisson lock integration | GraalVM 25 with Spring Boot 4.0.7, Redisson 4.6.1, and Redis, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-redisson verify` | PASS on GraalVM Community 25.0.2; verifies `LockExecutor` acquires and releases a lock |
-| Spring Native Image JobRunr Outbox integration | GraalVM 25 with Spring Boot 4.0.7, JobRunr 8.7.1, and PostgreSQL, `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-jobrunr clean verify` | PASS on GraalVM Community 25.0.2; verifies a scheduled Outbox message is published |
-| Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
-| Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Spring Native Image base Starter/Web MVC consumer smoke test | GraalVM 25 with Spring Boot 4.0.7 AOT, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
+| Spring Native Image MyBatis-Plus persistence integration | GraalVM 25 with Spring Boot 4.0.7, MyBatis-Plus 3.5.17 and its `mybatis-plus-spring-boot-native-image` module, PostgreSQL, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-mybatis-plus verify` | PASS on GraalVM Community 25.0.2; verifies a business-defined `AuditStampHolder` mapping and built-in Outbox/Inbox store append, paginated claim, idempotent claim, and processed-state operations |
+| Spring Native Image Redisson lock integration | GraalVM 25 with Spring Boot 4.0.7, Redisson 4.6.1, and Redis, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-redisson verify` | PASS on GraalVM Community 25.0.2; verifies `LockExecutor` acquires and releases a lock |
+| Spring Native Image JobRunr Outbox integration | GraalVM 25 with Spring Boot 4.0.7, JobRunr 8.7.1, and PostgreSQL, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-jobrunr clean verify` | PASS on GraalVM Community 25.0.2; verifies a scheduled Outbox message is published |
+| Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
+| Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
 | Maven 4 validate | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests validate -e` | PASS |
 | Maven 4 package | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
 | Maven Consumer POM contract | Maven `4.0.0-rc-5`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC5 | Required before Central deploy; verifies flattened child POMs and Maven 3.9/Maven 4 consumer resolution |
-| Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
-| Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
+| Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
+| Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
 
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
@@ -98,7 +98,7 @@ support works.
 
 - `./mvnw test`
 - `./mvnw -DskipTests package`
-- `./mvnw -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
+- `./mvnw -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
 - Java 25 release-baseline test in CI
 - Maven 4 Wrapper package compatibility and Consumer POM contract before Central deployment
 - Spring and Quarkus Native Image smoke tests in CI

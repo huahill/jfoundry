@@ -105,7 +105,7 @@ is opt-in so ordinary module tests do not require Docker:
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+  -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pjvm-integration verify
 ```
 
@@ -118,7 +118,7 @@ Native Image profile:
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests \
+mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

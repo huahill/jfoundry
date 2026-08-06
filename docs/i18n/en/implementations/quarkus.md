@@ -349,7 +349,7 @@ regular module test does not require Docker:
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
+  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
   -am -Pjvm-integration verify
 ```
 
