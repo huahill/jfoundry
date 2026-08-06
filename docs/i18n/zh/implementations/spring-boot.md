@@ -14,7 +14,7 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 </parent>
 
 <dependencies>
