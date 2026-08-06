@@ -10,7 +10,7 @@ Spring Boot 应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 </parent>
 ```
 
@@ -33,14 +33,14 @@ Spring Boot、Spring Cloud 和 Spring Cloud Alibaba 版本线。这样应用可�
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

@@ -22,7 +22,7 @@ and that management alone does not create a JFoundry adapter for each Cloud capa
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 </parent>
 
 <dependencies>

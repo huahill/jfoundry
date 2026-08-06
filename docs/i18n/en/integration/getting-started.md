@@ -13,7 +13,7 @@ For a Spring Boot application, use `jfoundry-spring-boot-parent` as the only Mav
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
 </parent>
 ```
 
@@ -45,14 +45,14 @@ runtime BOM:
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-spring-dependencies</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

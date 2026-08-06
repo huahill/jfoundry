@@ -170,7 +170,7 @@ The following areas are not established by the current evidence:
   long-running production operations.
 - Compatibility across a real downstream upgrade from one stable jfoundry release to another.
 
-At the assessment date, the reactor development version is `1.0.1-SNAPSHOT`; stable version `1.0.0`
+At the assessment date, the `1.0.1` release candidate is prepared; stable version `1.0.0`
 is published, and the repository has release automation and a documented
 [compatibility matrix](../../../release/compatibility.md). A production application should not depend
 on a moving SNAPSHOT; it should consume a released version or an immutable, internally governed build.
