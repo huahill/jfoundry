@@ -4,31 +4,18 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 ## 装配模型
 
-在运行时装配模块导入用于 JFoundry 模块版本的 `jfoundry-dependencies`，以及用于 Spring
-平台的 `jfoundry-spring-dependencies`，再添加 `jfoundry-spring-boot-starter`。基础启动器
-保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
+将 `jfoundry-spring-boot-parent` 作为应用的唯一 Maven Parent，再在运行时装配模块添加
+`jfoundry-spring-boot-starter`。该 Parent 继承 `spring-boot-starter-parent:4.0.7`，设置 Java 25，
+并导入 `jfoundry-dependencies` 与 `jfoundry-spring-dependencies`。基础启动器保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
 
 Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cloud Alibaba BOM。它只管理版本：应用仍需显式声明所选 Cloud 启动器；仅管理版本不表示 JFoundry 已为每项 Cloud 能力提供适配器。
 
 ```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
+<parent>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-spring-boot-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</parent>
 
 <dependencies>
     <dependency>
@@ -37,6 +24,8 @@ Spring 运行时 BOM 管理已对齐的 Spring Boot、Spring Cloud 和 Spring Cl
     </dependency>
 </dependencies>
 ```
+
+必须保留不同 Parent 的应用，可按[接入指南](../integration/getting-started.md)直接导入两份 JFoundry BOM；此时应用自行管理 Java 与 Spring Boot Parent 配置。
 
 其它能力都需要显式选择，从而使应用的数据源、投递、调度和分布式锁决策保持清晰。
 
@@ -92,7 +81,7 @@ Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pit verify
 ```
 
@@ -103,7 +92,7 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative package
 ```
 
@@ -116,7 +105,7 @@ MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、消息代理、Redisson 或
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative-mybatis-plus verify
 ```
 

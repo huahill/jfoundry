@@ -38,7 +38,8 @@ before child properties are available. The version must be updated with the Spri
 
 The new POM is consumer-facing rather than an internal build parent. It declares JFoundry project
 metadata and release publication configuration required to publish the POM independently. It does
-not add any runtime dependency, starter, plugin execution, or Java source.
+not add any runtime dependency or starter. Non-inherited test-only plugin executions compile and
+run its POM-contract tests without changing consumer builds.
 
 ## Consumer Contract
 

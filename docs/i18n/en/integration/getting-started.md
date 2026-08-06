@@ -5,10 +5,25 @@ useful when a system needs explicit aggregates, invariants, domain events, archi
 or reliable external integration. A short CRUD prototype without those needs may be simpler with a
 plain runtime framework and ORM.
 
-## Choose A BOM And Module Boundary
+## Choose A Parent, BOM, And Module Boundary
 
-Every application imports `jfoundry-dependencies` for JFoundry module versions. An application that
-uses a supported runtime additionally imports exactly one matching runtime BOM:
+For a Spring Boot application, use `jfoundry-spring-boot-parent` as the only Maven parent:
+
+```xml
+<parent>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-spring-boot-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</parent>
+```
+
+It inherits `spring-boot-starter-parent:4.0.7`, sets the Java 25 baseline, and imports both
+JFoundry BOMs required for Spring Boot. Declare Spring Boot and JFoundry dependencies without a
+version, but continue to select each JFoundry capability starter explicitly.
+
+An application that must keep a different Maven parent imports `jfoundry-dependencies` for JFoundry
+module versions. An application that uses a supported runtime additionally imports exactly one
+matching runtime BOM:
 `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, or
 `jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
 replace the core JFoundry BOM. Select versions from the intended release line; this project currently
@@ -20,8 +35,9 @@ Spring Cloud Alibaba version lines. This lets an application add a selected Clou
 version; it does not add any Cloud starter automatically or imply that JFoundry provides an adapter
 for that starter.
 
-The following XML uses Spring Boot as the runtime example. For Quarkus or Helidon, retain the core
-BOM and replace the second import with the matching runtime BOM:
+The following XML is the alternative for a Spring Boot application that cannot use the JFoundry
+parent. For Quarkus or Helidon, retain the core BOM and replace the second import with the matching
+runtime BOM:
 
 ```xml
 <dependencyManagement>

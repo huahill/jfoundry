@@ -7,35 +7,23 @@ capability is enabled by the base starter.
 
 ## Assembly Model
 
-Import `jfoundry-dependencies` for JFoundry module versions and
-`jfoundry-spring-dependencies` for the Spring platform, then add
-`jfoundry-spring-boot-starter` in the runtime assembly module. The base starter intentionally
-remains small: it provides general Boot wiring and a Spring-backed `TransactionRunner`, but no
-persistence provider, broker, Outbox, Inbox, JobRunr, or Redisson client.
+Use `jfoundry-spring-boot-parent` as the application's only Maven parent, then add
+`jfoundry-spring-boot-starter` in the runtime assembly module. The parent inherits
+`spring-boot-starter-parent:4.0.7`, sets Java 25, and imports `jfoundry-dependencies` plus
+`jfoundry-spring-dependencies`. The base starter intentionally remains small: it provides general
+Boot wiring and a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox,
+Inbox, JobRunr, or Redisson client.
 
 The Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and Spring Cloud Alibaba BOMs.
 It manages their versions only: applications still declare the selected Cloud starters explicitly,
 and that management alone does not create a JFoundry adapter for each Cloud capability.
 
 ```xml
-<dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-    </dependencies>
-</dependencyManagement>
+<parent>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-spring-boot-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</parent>
 
 <dependencies>
     <dependency>
@@ -44,6 +32,10 @@ and that management alone does not create a JFoundry adapter for each Cloud capa
     </dependency>
 </dependencies>
 ```
+
+An application that must retain a different parent can import the two JFoundry BOMs directly as
+shown in [Getting Started](../integration/getting-started.md). It must then manage its Java and
+Spring Boot parent configuration itself.
 
 Add every other capability explicitly. This keeps a Spring Boot application honest about its
 database, delivery, scheduling, and distributed-lock choices.
@@ -142,7 +134,7 @@ Kafka, and RabbitMQ:
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pit verify
 ```
 
@@ -154,7 +146,7 @@ capability needs its own Native Image integration verification before it can be 
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative package
 ```
 
@@ -169,7 +161,7 @@ stores through append, paginated claim, idempotent claim, and processed-state op
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests \
+  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
   -am -Pnative-mybatis-plus verify
 ```
 

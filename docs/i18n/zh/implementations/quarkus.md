@@ -305,7 +305,7 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 
 ```bash
 ./mvnw -B \
-  -pl jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
+  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
   -am -Pjvm-integration verify
 ```
 

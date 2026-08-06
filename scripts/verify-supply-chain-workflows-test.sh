@@ -191,7 +191,7 @@ jobs:
           build-mode: ${{ matrix.build-mode }}
       - name: Build Java sources
         if: matrix.language == 'java-kotlin'
-        run: ./mvnw -B -DskipTests -pl '!jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests' package
+        run: ./mvnw -B -DskipTests -pl '!jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests' package
       - uses: github/codeql-action/analyze@v4
 YAML
 assert_accepts "${temp_dir}"

@@ -8,6 +8,10 @@ create a published parent or inheritance boundary.
 - `jfoundry-parent` is the repository's internal build parent. It imports the core
   `jfoundry-dependencies` BOM for internal modules and must not be used as a consumer-facing BOM
   parent.
+- `jfoundry-spring-boot-parent` is the consumer-facing Spring Boot parent. It directly inherits the
+  supported `spring-boot-starter-parent`, imports `jfoundry-dependencies` and
+  `jfoundry-spring-dependencies`, and is the sole Maven parent for a Spring Boot application that
+  adopts it.
 - `jfoundry-foundation-dependencies` manages low-level common dependency versions.
 - `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
@@ -22,9 +26,10 @@ SCM), reproducible-build properties, and release profile. Keep the root POM's co
 and release profile for its own publication lifecycle; Maven does not propagate them to independent
 BOMs.
 
-An external application always imports `jfoundry-dependencies`. An application using Spring Boot,
-Quarkus, or Helidon additionally imports exactly the matching runtime BOM. Do not make a runtime BOM
-implicitly carry JFoundry module versions, and do not use `jfoundry-parent` outside this repository.
+An external application using `jfoundry-spring-boot-parent` does not import JFoundry BOMs directly.
+An application using another parent imports `jfoundry-dependencies` and exactly one matching runtime
+BOM. Do not make a runtime BOM implicitly carry JFoundry module versions, and do not use
+`jfoundry-parent` outside this repository.
 
 Runtime BOM overrides must be exceptional, platform-local, and documented with the upstream reason and
 validation scope. The Helidon `groovy-all` compatibility override is an example: it exists solely for

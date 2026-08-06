@@ -6,9 +6,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 MVNW="${REPO_ROOT}/mvnw"
 
-SPRING_INTEGRATION_MODULE="jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests"
-QUARKUS_INTEGRATION_MODULE="jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests"
-HELIDON_INTEGRATION_MODULE="jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests"
+SPRING_INTEGRATION_MODULE="jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests"
+QUARKUS_INTEGRATION_MODULE="jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests"
+HELIDON_INTEGRATION_MODULE="jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests"
 
 JAVA_25_HOME="${JAVA_25_HOME:-}"
 GRAALVM_HOME="${GRAALVM_HOME:-}"

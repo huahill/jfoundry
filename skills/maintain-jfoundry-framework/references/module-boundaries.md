@@ -21,15 +21,15 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 
 ### Runtime Integration
 
-- `jfoundry-runtime-integrations/jfoundry-spring/runtime`: Spring Framework adapters such as local event publishing, transaction runner, messaging sender wrappers, outbox transaction/scheduling integration, and Web MVC ProblemDetail support.
-- `jfoundry-runtime-integrations/jfoundry-spring/autoconfigure/*`: capability-specific Spring Boot auto-configuration, conditions, properties, and runtime wiring.
-- `jfoundry-runtime-integrations/jfoundry-spring/starters`: dependency entry points only.
-- `jfoundry-runtime-integrations/jfoundry-spring/jfoundry-spring-integration-tests`: Spring middleware, Testcontainers, and runtime integration verification.
-- `jfoundry-runtime-integrations/jfoundry-quarkus/runtime`: Quarkus runtime extension artifacts and CDI behavior.
-- `jfoundry-runtime-integrations/jfoundry-quarkus/deployment`: Quarkus build-time processors and Native Image registration.
-- `jfoundry-runtime-integrations/jfoundry-quarkus/jfoundry-quarkus-integration-tests`: Quarkus consumer and Native Image integration verification.
-- `jfoundry-runtime-integrations/jfoundry-helidon/runtime`: Helidon MP CDI, JTA, JAX-RS, scheduling, and JPA runtime behavior.
-- `jfoundry-runtime-integrations/jfoundry-helidon/jfoundry-helidon-integration-tests`: Helidon MP consumer and Native Image integration verification.
+- `jfoundry-runtime/jfoundry-spring/runtime`: Spring Framework adapters such as local event publishing, transaction runner, messaging sender wrappers, outbox transaction/scheduling integration, and Web MVC ProblemDetail support.
+- `jfoundry-runtime/jfoundry-spring/autoconfigure/*`: capability-specific Spring Boot auto-configuration, conditions, properties, and runtime wiring.
+- `jfoundry-runtime/jfoundry-spring/starters`: dependency entry points only.
+- `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`: Spring middleware, Testcontainers, and runtime integration verification.
+- `jfoundry-runtime/jfoundry-quarkus/runtime`: Quarkus runtime extension artifacts and CDI behavior.
+- `jfoundry-runtime/jfoundry-quarkus/deployment`: Quarkus build-time processors and Native Image registration.
+- `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`: Quarkus consumer and Native Image integration verification.
+- `jfoundry-runtime/jfoundry-helidon/runtime`: Helidon MP CDI, JTA, JAX-RS, scheduling, and JPA runtime behavior.
+- `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`: Helidon MP consumer and Native Image integration verification.
 
 Runtime-specific middleware, Testcontainers, database/broker compatibility, and profile-driven checks belong
 in the affected runtime's direct `jfoundry-<runtime>-integration-tests` module. Framework-neutral tests belong

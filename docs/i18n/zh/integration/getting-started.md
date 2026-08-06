@@ -2,16 +2,29 @@
 
 从满足当前业务用例的最小架构开始。jfoundry 最适合需要明确聚合、不变量、领域事件、架构边界或可靠外部集成的系统。短期 CRUD 原型如果没有这些需求，直接使用运行时框架和 ORM 可能更简单。
 
-## 选择 BOM 与模块边界
+## 选择 Parent、BOM 与模块边界
 
-所有应用都导入用于 JFoundry 模块版本的 `jfoundry-dependencies`。使用受支持运行时的应用还要额外且仅导入一个
+Spring Boot 应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent：
+
+```xml
+<parent>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-spring-boot-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+</parent>
+```
+
+它继承 `spring-boot-starter-parent:4.0.7`，设置 Java 25 基线，并导入 Spring Boot 所需的两份
+JFoundry BOM。Spring Boot 与 JFoundry 依赖无需声明版本，但每个 JFoundry 能力启动器仍须显式选择。
+
+必须保留不同 Maven Parent 的应用，应导入用于 JFoundry 模块版本的 `jfoundry-dependencies`。使用受支持运行时的应用还要额外且仅导入一个
 对应的运行时 BOM：`jfoundry-spring-dependencies`、`jfoundry-quarkus-dependencies` 或
 `jfoundry-helidon-dependencies`。运行时 BOM 只管理各自的平台生态版本，不能替代核心 JFoundry BOM。请选择目标发布线的版本；本项目当前使用下面的开发版本。
 
 运行时 BOM 还可以管理与其平台基线兼容的官方 Cloud 或集成 BOM。例如，Spring 运行时 BOM 管理已对齐的
 Spring Boot、Spring Cloud 和 Spring Cloud Alibaba 版本线。这样应用可以不写版本地添加所选 Cloud 启动器；它不会自动引入任何 Cloud 启动器，也不表示 JFoundry 已为该启动器提供适配器。
 
-下面 XML 以 Spring Boot 为运行时示例。使用 Quarkus 或 Helidon 时，保留核心 BOM，并将第二个 import
+下面 XML 是无法使用 JFoundry Parent 的 Spring Boot 应用的替代方式。使用 Quarkus 或 Helidon 时，保留核心 BOM，并将第二个 import
 替换为对应的运行时 BOM：
 
 ```xml
