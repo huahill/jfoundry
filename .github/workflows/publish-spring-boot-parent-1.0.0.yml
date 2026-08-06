@@ -1,0 +1,192 @@
+name: Publish Spring Boot Parent 1.0.0 Remediation
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type PUBLISH_JFOUNDRY_SPRING_BOOT_PARENT_1_0_0 to publish the missing parent POM.
+        required: true
+        type: string
+
+concurrency:
+  group: spring-boot-parent-1.0.0-remediation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  attestations: write
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish only jfoundry-spring-boot-parent 1.0.0
+    runs-on: ubuntu-latest
+    environment: jfoundry
+    env:
+      PARENT_VERSION: 1.0.0
+      PARENT_POM_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
+      CONFIRMATION: ${{ inputs.confirmation }}
+    steps:
+      - name: Verify remediation publication request
+        run: |
+          set -euo pipefail
+
+          test "${GITHUB_REF}" = "refs/heads/main"
+          test "${CONFIRMATION}" = "PUBLISH_JFOUNDRY_SPRING_BOOT_PARENT_1_0_0"
+
+      - name: Checkout main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Verify remediation source
+        run: |
+          set -euo pipefail
+
+          test -z "$(git status --porcelain)"
+          test -f "${PARENT_POM_PATH}"
+          grep -Fq "<artifactId>jfoundry-spring-boot-parent</artifactId>" "${PARENT_POM_PATH}"
+          grep -Fq "<version>${PARENT_VERSION}</version>" "${PARENT_POM_PATH}"
+
+      - name: Verify Maven Central preconditions
+        run: |
+          set -euo pipefail
+
+          require_central_status() {
+            local artifact="$1"
+            local expected_status="$2"
+            local pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/${artifact}/${PARENT_VERSION}/${artifact}-${PARENT_VERSION}.pom"
+            local actual_status
+
+            actual_status="$(
+              curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head "${pom_url}"
+            )"
+            if [[ "${actual_status}" != "${expected_status}" ]]; then
+              echo "Expected Maven Central status ${expected_status} for ${pom_url}, got ${actual_status}." >&2
+              exit 1
+            fi
+          }
+
+          require_central_status "jfoundry-spring-boot-parent" "404"
+          require_central_status "jfoundry-dependencies" "200"
+          require_central_status "jfoundry-spring-dependencies" "200"
+
+      - name: Set up Java and Maven Central credentials
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+          server-id: jfoundry
+          server-username: CENTRAL_USERNAME
+          server-password: CENTRAL_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: GPG_PASSPHRASE
+
+      - name: Verify signed Parent POM
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+
+          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml -Prelease -DskipTests verify \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}"
+
+      - name: Install Apache Maven 3 for Central publication
+        id: maven_3
+        env:
+          MAVEN_3_VERSION: 3.9.16
+          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+        run: |
+          set -euo pipefail
+
+          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+
+          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
+          "${executable}" --version
+          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
+
+      - name: Publish only the missing Parent POM
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+
+          "${{ steps.maven_3.outputs.executable }}" -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
+            -Prelease -DskipTests deploy \
+            "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-parent-remediation-deployment" \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
+          deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
+          if [[ -z "${deployment_id}" ]]; then
+            echo "Central Publishing did not report a deploymentId." >&2
+            exit 1
+          fi
+          echo "Central deployment created: ${deployment_id}"
+
+      - name: Verify Maven Central publication
+        run: |
+          set -euo pipefail
+
+          pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/jfoundry-spring-boot-parent/${PARENT_VERSION}/jfoundry-spring-boot-parent-${PARENT_VERSION}.pom"
+          for attempt in $(seq 1 40); do
+            central_status="$(
+              curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head \
+                --connect-timeout 5 --max-time 5 "${pom_url}"
+            )"
+            case "${central_status}" in
+              200) exit 0 ;;
+              404) ;;
+              *)
+                echo "Maven Central lookup returned unexpected HTTP status ${central_status}: ${pom_url}" >&2
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+
+          echo "Maven Central did not expose jfoundry-spring-boot-parent:${PARENT_VERSION} within 10 minutes." >&2
+          exit 1
+
+      - name: Assemble remediation evidence
+        if: always()
+        run: |
+          set -euo pipefail
+
+          mkdir -p remediation-evidence/artifacts remediation-evidence/signatures
+          if [[ -d jfoundry-boms/jfoundry-spring-boot-parent/target ]]; then
+            find jfoundry-boms/jfoundry-spring-boot-parent/target -maxdepth 1 -name '*.pom' -type f \
+              -exec cp {} remediation-evidence/artifacts/ \;
+            find jfoundry-boms/jfoundry-spring-boot-parent/target -maxdepth 1 -name '*.asc' -type f \
+              -exec cp {} remediation-evidence/signatures/ \;
+          fi
+          if [[ -f central-deploy.log ]]; then
+            cp central-deploy.log remediation-evidence/
+          fi
+          {
+            echo "coordinate=io.github.xfoundries:jfoundry-spring-boot-parent:${PARENT_VERSION}"
+            echo "source_commit=$(git rev-parse HEAD)"
+            echo "workflow_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > remediation-evidence/release-metadata.txt
+          find remediation-evidence -type f -print0 | sort -z | xargs -0 shasum -a 256 > remediation-evidence/SHA256SUMS
+          tar -czf remediation-evidence.tar.gz remediation-evidence
+
+      - name: Upload remediation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: spring-boot-parent-1.0.0-remediation-${{ github.run_id }}
+          path: remediation-evidence.tar.gz
+          if-no-files-found: error
+
+      - name: Attest remediation evidence
+        if: always()
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
+        with:
+          subject-path: remediation-evidence.tar.gz
