@@ -23,8 +23,8 @@
     <jfoundry.release.scm.connection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.connection>
     <jfoundry.release.scm.developerConnection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.developerConnection>
     <jfoundry.release.scm.url>https://github.com/xfoundries/jfoundry</jfoundry.release.scm.url>
-    <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
-    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
   </properties>
   <dependencyManagement>

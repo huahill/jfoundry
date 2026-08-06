@@ -290,12 +290,12 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>4.0.7</version>
+                <version>4.1.0</version>
             </plugin>
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>1.1.6</version>
+                <version>1.1.7</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.shared</groupId>
@@ -464,7 +464,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <version>3.6.1</version>
                         <executions>
                             <execution>
                                 <id>add-native-mybatis-plus-source</id>
@@ -570,7 +570,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <version>3.6.1</version>
                         <executions>
                             <execution>
                                 <id>add-native-redisson-source</id>
@@ -708,7 +708,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <version>3.6.1</version>
                         <executions>
                             <execution>
                                 <id>add-native-jobrunr-source</id>
