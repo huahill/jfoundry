@@ -170,10 +170,10 @@ The following areas are not established by the current evidence:
   long-running production operations.
 - Compatibility across a real downstream upgrade from one stable jfoundry release to another.
 
-At the assessment date, the reactor version is `1.0.0-SNAPSHOT` and the repository has release
-automation and a documented [compatibility matrix](../../../release/compatibility.md), but no stable
-release tag. A production application should not depend on a moving SNAPSHOT; it should consume a
-released version or an immutable, internally governed build.
+At the assessment date, the reactor development version is `1.0.1-SNAPSHOT`; stable version `1.0.0`
+is published, and the repository has release automation and a documented
+[compatibility matrix](../../../release/compatibility.md). A production application should not depend
+on a moving SNAPSHOT; it should consume a released version or an immutable, internally governed build.
 
 The domain architecture plugin has structured workflows, references, templates, and format
 validation, but it does not yet have an automated scenario evaluation suite covering good and bad

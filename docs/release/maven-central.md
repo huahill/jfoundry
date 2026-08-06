@@ -82,7 +82,8 @@ is `1.0.0-RC1`.
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
 and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
 into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
-resolution, checks for open High or Critical Dependabot alerts, and only then runs `verify` with
+resolution for direct BOM imports and a business project that inherits `jfoundry-spring-boot-parent`,
+checks for open High or Critical Dependabot alerts, and only then runs `verify` with
 the explicit Central plugin `publish` goal. The workflow requires the plugin to report a Central
 `deploymentId` before it treats the deployment as successful. It never changes POM versions or
 pushes a branch during publication.

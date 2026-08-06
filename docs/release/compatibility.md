@@ -77,7 +77,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
 | Maven 4 validate | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests validate -e` | PASS |
 | Maven 4 package | Maven `4.0.0-rc-5`, `./mvnw -B -DskipTests package` | PASS on 2026-07-24; Maven 4 reports imported-BOM model warnings |
-| Maven Consumer POM contract | Maven `4.0.0-rc-5`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC5 | Required before Central deploy; verifies flattened child POMs and Maven 3.9/Maven 4 consumer resolution |
+| Maven Consumer POM contract | Maven `4.0.0-rc-5`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC5 | Required before Central deploy; verifies flattened child POMs plus direct-BOM and Spring Boot Parent consumer resolution with Maven 3.9 and Maven 4 |
 | Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
 | Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
 

@@ -21,9 +21,11 @@ class SpringBootParentPomTest {
 
         assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.0.7"));
+        assertThat(childText(child(document.getDocumentElement(), "properties"), "jfoundry.version"))
+                .isEqualTo("1.0.1-SNAPSHOT");
         assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
-                new Coordinate("io.github.xfoundries", "jfoundry-spring-dependencies", "${project.version}"));
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"),
+                new Coordinate("io.github.xfoundries", "jfoundry-spring-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(document.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
     }
 

@@ -7,11 +7,12 @@
     <parent>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-spring-boot-parent</artifactId>
-        <version>1.0.0</version>
+        <version>1.0.1-SNAPSHOT</version>
         <relativePath>../../../pom.xml</relativePath>
     </parent>
 
     <artifactId>single-parent-consumer</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
