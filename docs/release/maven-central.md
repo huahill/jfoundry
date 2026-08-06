@@ -114,6 +114,22 @@ Maven versions with a prerelease qualifier, such as `1.0.0-RC1`, produce a GitHu
 are explicitly excluded from GitHub's Latest release selection. A release without such a qualifier
 is published as the normal stable GitHub Release.
 
+## One-Time Spring Boot Parent 1.0.0 Remediation
+
+`.github/workflows/publish-spring-boot-parent-1.0.0.yml` is a temporary, manual-only remediation
+for the previously absent `io.github.xfoundries:jfoundry-spring-boot-parent:1.0.0` POM. It may run
+only from `main`, requires the exact `PUBLISH_JFOUNDRY_SPRING_BOOT_PARENT_1_0_0` confirmation value,
+and uses the protected `jfoundry` environment. The workflow requires that the Parent POM returns
+`404` from Maven Central while the already published `jfoundry-dependencies:1.0.0` and
+`jfoundry-spring-dependencies:1.0.0` POMs both return `200`.
+
+It signs and deploys only `jfoundry-boms/jfoundry-spring-boot-parent/pom.xml`, waits for the new POM
+to become visible, and uploads an attested evidence archive. It does not create a Git tag or GitHub
+Release, and it must never redeploy an existing `1.0.0` coordinate. After Central publication is
+confirmed and the workflow evidence is retained, remove this workflow and
+`scripts/verify-spring-boot-parent-remediation-workflow.sh` in a follow-up change. Future framework
+changes must use a new version line.
+
 ## Publish SNAPSHOTs
 
 Central Portal supports publishing `*-SNAPSHOT` versions when SNAPSHOT publishing is enabled for
