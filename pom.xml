@@ -68,6 +68,7 @@
     <modules>
         <module>jfoundry-boms/jfoundry-modules-dependencies</module>
         <module>jfoundry-boms/jfoundry-foundation-dependencies</module>
+        <module>jfoundry-boms/jfoundry-spring-boot-parent</module>
         <module>jfoundry-boms/jfoundry-spring-dependencies</module>
         <module>jfoundry-boms/jfoundry-quarkus-dependencies</module>
         <module>jfoundry-boms/jfoundry-helidon-dependencies</module>
