@@ -35,4 +35,96 @@ if bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}" >/dev/null 2>&
     exit 1
 fi
 
+cat > "${fixture_pom_dir}/jfoundry-domain-${fixture_version}.pom" <<'XML'
+<project>
+  <artifactId>jfoundry-domain</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+</project>
+XML
+
+starter_dir="${fixture_repo}/io/github/xfoundries/jfoundry-webmvc-spring-boot-starter/${fixture_version}"
+mkdir -p "${starter_dir}"
+cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom" <<'XML'
+<project>
+  <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+</project>
+XML
+
+for artifact in jfoundry-dependencies jfoundry-spring-dependencies; do
+    artifact_dir="${fixture_repo}/io/github/xfoundries/${artifact}/${fixture_version}"
+    mkdir -p "${artifact_dir}"
+    cat > "${artifact_dir}/${artifact}-${fixture_version}.pom" <<XML
+<project>
+  <artifactId>${artifact}</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <dependencyManagement></dependencyManagement>
+</project>
+XML
+done
+
+parent_dir="${fixture_repo}/io/github/xfoundries/jfoundry-spring-boot-parent/${fixture_version}"
+mkdir -p "${parent_dir}"
+cat > "${parent_dir}/jfoundry-spring-boot-parent-${fixture_version}.pom" <<'XML'
+<project>
+  <artifactId>jfoundry-spring-boot-parent</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-dependencies</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
+XML
+
+if bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}" >/dev/null 2>&1; then
+    echo "Expected Consumer POM verification to reject a Spring Boot Parent that imports JFoundry BOMs with project.version." >&2
+    exit 1
+fi
+
+cat > "${parent_dir}/jfoundry-spring-boot-parent-${fixture_version}.pom" <<XML
+<project>
+  <artifactId>jfoundry-spring-boot-parent</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <properties>
+    <jfoundry.version>${fixture_version}</jfoundry.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-dependencies</artifactId>
+        <version>\${jfoundry.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-spring-dependencies</artifactId>
+        <version>\${jfoundry.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
+XML
+
+bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}"
+
 echo "Consumer POM verification regression test passed."

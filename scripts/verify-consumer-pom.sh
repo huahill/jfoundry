@@ -71,10 +71,26 @@ verify_independent_bom() {
     require_text "${pom}" "<dependencyManagement>"
 }
 
+verify_spring_boot_parent() {
+    local pom
+    pom="$(pom_path "jfoundry-spring-boot-parent")"
+    if [[ ! -f "${pom}" ]]; then
+        echo "Spring Boot Parent POM does not exist: ${pom}" >&2
+        exit 1
+    fi
+    verify_metadata "${pom}"
+    require_text "${pom}" "<jfoundry.version>${version}</jfoundry.version>"
+    require_text "${pom}" "<artifactId>jfoundry-dependencies</artifactId>"
+    require_text "${pom}" "<artifactId>jfoundry-spring-dependencies</artifactId>"
+    require_text "${pom}" '<version>${jfoundry.version}</version>'
+    forbid_text "${pom}" '${project.version}'
+}
+
 verify_flattened_module "jfoundry-domain"
 verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
 verify_independent_bom "jfoundry-spring-dependencies"
+verify_spring_boot_parent
 
 if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
     if [[ -z "${maven3_bin}" || -z "${maven4_bin}" ]]; then
@@ -126,8 +142,32 @@ if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
 </project>
 XML
 
+    spring_boot_parent_consumer_pom="${temp_dir}/spring-boot-parent-consumer-pom.xml"
+    cat > "${spring_boot_parent_consumer_pom}" <<XML
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-spring-boot-parent</artifactId>
+        <version>${version}</version>
+        <relativePath/>
+    </parent>
+    <artifactId>spring-boot-parent-consumer-smoke</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+</project>
+XML
+
     for maven_bin in "${maven3_bin}" "${maven4_bin}"; do
         "${maven_bin}" -B -f "${consumer_pom}" -Dmaven.repo.local="${repository}" compile
+        "${maven_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
     done
 fi
 
