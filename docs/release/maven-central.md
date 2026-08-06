@@ -124,9 +124,10 @@ and uses the protected `jfoundry` environment. The workflow requires that the Pa
 `jfoundry-spring-dependencies:1.0.0` POMs both return `200`.
 
 It signs and deploys only `jfoundry-boms/jfoundry-spring-boot-parent/pom.xml`, waits for the new POM
-to become visible, and uploads an attested evidence archive. It does not create a Git tag or GitHub
-Release, and it must never redeploy an existing `1.0.0` coordinate. After Central publication is
-confirmed and the workflow evidence is retained, remove this workflow and
+to become visible, and uploads an attested evidence archive. After publication succeeds, it force
+updates `v1.0.0` to the reviewed `main` commit, deletes the existing `v1.0.0` GitHub Release, and
+creates a new release for that tag. It must never redeploy an existing `1.0.0` coordinate. After
+Central publication is confirmed and the workflow evidence is retained, remove this workflow and
 `scripts/verify-spring-boot-parent-remediation-workflow.sh` in a follow-up change. Future framework
 changes must use a new version line.
 

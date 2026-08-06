@@ -41,7 +41,7 @@
         <connection>${jfoundry.release.scm.connection}</connection>
         <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
         <url>${jfoundry.release.scm.url}</url>
-        <tag>HEAD</tag>
+        <tag>v1.0.0</tag>
     </scm>
 
     <properties>
