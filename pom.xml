@@ -118,6 +118,7 @@
                     <configuration>
                         <release>${maven.compiler.release}</release>
                         <parameters>true</parameters>
+                        <proc>full</proc>
                     </configuration>
                 </plugin>
                 <plugin>

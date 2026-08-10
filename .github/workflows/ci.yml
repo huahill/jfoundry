@@ -144,6 +144,9 @@ jobs:
       - name: Package without tests
         run: ./mvnw -B -DskipTests package
 
+      - name: Verify compiler processor artifacts
+        run: scripts/verify-maven-compiler-processor-artifacts.sh
+
   spring-integration:
     name: Spring middleware integration
     runs-on: ubuntu-latest
