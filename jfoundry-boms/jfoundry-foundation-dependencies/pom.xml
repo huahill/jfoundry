@@ -23,60 +23,60 @@
     <jfoundry.release.scm.connection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.connection>
     <jfoundry.release.scm.developerConnection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.developerConnection>
     <jfoundry.release.scm.url>https://github.com/xfoundries/jfoundry</jfoundry.release.scm.url>
-    <maven-enforcer-plugin.version>3.6.1</maven-enforcer-plugin.version>
-    <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+    <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     <!-- Imported BOMs -->
     <jmolecules.version>2025.0.2</jmolecules.version>
-    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <junit-jupiter.version>6.1.2</junit-jupiter.version>
 
     <!-- Domain modeling and architecture -->
     <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
-    <archunit.version>1.4.2</archunit.version>
+    <archunit.version>1.5.0</archunit.version>
 
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.2.19.Final</hibernate.version>
-    <mysql-connector-j.version>9.7.0</mysql-connector-j.version>
+    <hibernate.version>7.4.5.Final</hibernate.version>
+    <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
 
     <!-- Serialization and data binding -->
-    <jackson3.version>3.1.5</jackson3.version>
+    <jackson3.version>3.2.1</jackson3.version>
 
     <!-- Mapping and code generation -->
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Apache Commons -->
-    <commons-codec.version>1.22.0</commons-codec.version>
+    <commons-codec.version>1.22.1</commons-codec.version>
     <commons-collections4.version>4.5.0</commons-collections4.version>
     <commons-io.version>2.22.0</commons-io.version>
     <commons-lang3.version>3.20.0</commons-lang3.version>
     <commons-text.version>1.15.0</commons-text.version>
 
     <!-- Caching -->
-    <caffeine.version>3.1.8</caffeine.version>
+    <caffeine.version>3.2.4</caffeine.version>
 
     <!-- Messaging and background jobs -->
-    <jobrunr.version>8.7.1</jobrunr.version>
-    <kafka-clients.version>4.1.2</kafka-clients.version>
+    <jobrunr.version>8.8.0</jobrunr.version>
+    <kafka-clients.version>4.3.1</kafka-clients.version>
     <mqttv3.version>1.2.5</mqttv3.version>
-    <rabbitmq-amqp-client.version>5.25.0</rabbitmq-amqp-client.version>
-    <redisson.version>4.6.1</redisson.version>
+    <rabbitmq-amqp-client.version>5.34.0</rabbitmq-amqp-client.version>
+    <redisson.version>4.7.0</redisson.version>
     <rocketmq-client.version>5.5.0</rocketmq-client.version>
 
     <!-- Runtime utilities -->
-    <javassist.version>3.30.2-GA</javassist.version>
-    <opentelemetry.version>1.62.0</opentelemetry.version>
+    <javassist.version>3.32.0-GA</javassist.version>
+    <opentelemetry.version>1.64.0</opentelemetry.version>
     <slf4j.version>2.0.18</slf4j.version>
-    <snakeyaml.version>2.2</snakeyaml.version>
+    <snakeyaml.version>2.6</snakeyaml.version>
 
     <!-- Testing -->
-    <awaitility.version>4.2.1</awaitility.version>
+    <awaitility.version>4.3.0</awaitility.version>
     <assertj.version>3.27.7</assertj.version>
-    <byte-buddy.version>1.17.8</byte-buddy.version>
-    <mockito.version>5.17.0</mockito.version>
-    <junit-platform.version>6.0.3</junit-platform.version>
+    <byte-buddy.version>1.18.11</byte-buddy.version>
+    <mockito.version>5.23.0</mockito.version>
+    <junit-platform.version>6.1.2</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
   <dependencyManagement>
