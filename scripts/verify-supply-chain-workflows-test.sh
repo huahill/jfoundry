@@ -45,9 +45,13 @@ updates:
     schedule:
       interval: weekly
     groups:
-      jfoundry-maven-patches:
+      jfoundry-maven-libraries:
         patterns: ["*"]
-        update-types: [patch]
+        exclude-patterns:
+          - org.apache.maven.plugins:maven-compiler-plugin
+          - org.apache.maven.plugins:maven-source-plugin
+          - org.graalvm.buildtools:native-maven-plugin
+        update-types: [patch, minor, major]
     ignore:
       - dependency-name: org.springframework.boot:spring-boot-dependencies
       - dependency-name: org.springframework.boot:spring-boot-starter-parent
