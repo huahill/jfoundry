@@ -74,7 +74,7 @@
     <!-- Testing -->
     <awaitility.version>4.2.1</awaitility.version>
     <assertj.version>3.27.7</assertj.version>
-    <byte-buddy.version>1.17.8</byte-buddy.version>
+    <byte-buddy.version>1.18.11</byte-buddy.version>
     <mockito.version>5.17.0</mockito.version>
     <junit-platform.version>6.0.3</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
