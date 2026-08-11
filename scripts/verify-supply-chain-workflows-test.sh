@@ -19,6 +19,19 @@ assert_rejects() {
     fi
 }
 
+assert_rejects_with_message() {
+    local output
+    if output="$(bash "${VERIFY_SCRIPT}" "$1" 2>&1)"; then
+        echo "Expected supply-chain workflow verification to reject $1." >&2
+        exit 1
+    fi
+    if ! grep -Fqx -- "$2" <<< "${output}"; then
+        echo "Expected supply-chain workflow verification to reject $1 with: $2" >&2
+        echo "Actual output: ${output}" >&2
+        exit 1
+    fi
+}
+
 temp_dir="$(mktemp -d)"
 trap 'rm -rf "${temp_dir}"' EXIT
 mkdir -p "${temp_dir}/.github/workflows"
@@ -586,6 +599,93 @@ updates:
       interval: weekly
 YAML
 assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+      jfoundry-maven-minors:
+        patterns: ["*"]
+        update-types: [minor]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: io.quarkus.platform:quarkus-bom
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+  - package-ecosystem: github-actions
+    malformed: [
+YAML
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: could not safely parse YAML"
+
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+# package-ecosystem: maven
+# package-ecosystem: github-actions
+updates: !ruby/object:Policy
+  name: dependabot
+YAML
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: could not safely parse YAML"
+
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+# package-ecosystem: maven
+# package-ecosystem: github-actions
+updates:
+  - malformed-update-entry
+YAML
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: each updates entry must be a mapping"
 
 write_compliant_dependabot
 write_compliant_auto_merge_workflow
