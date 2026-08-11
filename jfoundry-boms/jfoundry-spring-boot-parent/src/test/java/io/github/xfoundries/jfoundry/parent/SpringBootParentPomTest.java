@@ -22,11 +22,30 @@ class SpringBootParentPomTest {
         assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.0.7"));
         assertThat(childText(child(document.getDocumentElement(), "properties"), "jfoundry.version"))
-                .isEqualTo("1.0.2-SNAPSHOT");
+                .isEqualTo("1.0.2");
         assertThat(importedBoms(document)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(document.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+    }
+
+    @Test
+    void standalonePublishedPomsUseTheReleaseTag() throws Exception {
+        List<Path> pomPaths = List.of(
+                Path.of("pom.xml"),
+                Path.of("..", "jfoundry-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-spring-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+
+        for (Path pomPath : pomPaths) {
+            Document document = document(pomPath);
+            assertThat(childText(child(document.getDocumentElement(), "scm"), "tag"))
+                    .as("SCM tag for %s", pomPath)
+                    .isEqualTo("v1.0.2");
+        }
     }
 
     private Document document(Path path) throws Exception {
