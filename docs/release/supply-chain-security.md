@@ -27,9 +27,10 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 
 ## Dependabot Update Governance
 
-- Dependabot groups non-Spring Maven patch updates. Non-Spring Maven minor and major updates remain
-  individual pull requests and may be queued for rebase auto-merge only after Dependency Review and
-  the `Merge gate` succeed.
+- Dependabot groups non-Spring Maven library updates across patch, minor, and major versions. Maven
+  Compiler, Source, and GraalVM Native Image plugins remain individual pull requests because they can
+  alter build or Native Image behavior. Maven updates may be queued for rebase auto-merge only after
+  Dependency Review and the `Merge gate` succeed.
 - Dependabot ignores Spring Boot, Spring Cloud, and Spring Cloud Alibaba dependency-management
   updates. Maintainers upgrade those platforms through a manual compatibility pull request because
   the change must be evaluated across the supported runtime matrix.
