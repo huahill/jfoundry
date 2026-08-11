@@ -73,7 +73,7 @@ on:
     types: [opened, reopened, synchronize]
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
 
 jobs:
@@ -83,19 +83,12 @@ jobs:
       github.event.pull_request.base.ref == 'main'
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch Dependabot metadata
-        id: dependabot-metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-
       - name: Verify Maven-only update
         id: scope
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
         run: |
           set -euo pipefail
 
@@ -106,38 +99,49 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        if: steps.scope.outputs.is_maven_update == 'true'
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+
+      - name: Check automatic merge eligibility
+        id: eligibility
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
           DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
         run: |
           set -euo pipefail
-
           case ",${DEPENDENCY_NAMES}," in
             *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              echo "is_eligible=false" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_eligible=true" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.eligibility.outputs.is_eligible == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
         run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
 YAML
+}
+
+replace_in_auto_merge_workflow() {
+    local expected="$1"
+    local replacement="$2"
+
+    ruby - "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" "${expected}" "${replacement}" <<'RUBY'
+path, expected, replacement = ARGV
+content = File.read(path)
+abort "Expected workflow text was not found: #{expected}" unless content.sub!(expected, replacement)
+File.write(path, content)
+RUBY
 }
 
 write_compliant_dependabot
@@ -1193,6 +1197,31 @@ jobs:
         # gh pr merge "${PR_NUMBER}" --auto --rebase
         run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
 YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "contents: write" "contents: read"
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "github.event.pull_request.base.ref == 'main'" "github.event.pull_request.base.ref == 'develop'"
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow $'id: dependabot-metadata\n        if: steps.scope.outputs.is_maven_update == \'true\'' $'id: dependabot-metadata\n        if: always()'
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow $'steps:\n' $'steps:\n      - run: gh pr checkout "${PR_NUMBER}"\n'
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow $'GH_TOKEN: ${{ github.token }}' $'GH_TOKEN: ${{ secrets[\'GITHUB_TOKEN\'] }}'
 assert_rejects "${temp_dir}"
 
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
