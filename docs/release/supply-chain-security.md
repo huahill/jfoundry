@@ -25,6 +25,20 @@ cover vulnerabilities that become known after the dependency was introduced. A f
 exception requires a documented maintainer decision linked from the affected pull request or release
 notes; it must state the advisory, affected artifact, reason, compensating control, and expiry date.
 
+## Dependabot Update Governance
+
+- Dependabot groups non-Spring Maven patch updates. Non-Spring Maven minor and major updates remain
+  individual pull requests and may be queued for rebase auto-merge only after Dependency Review and
+  the `Merge gate` succeed.
+- Dependabot ignores Spring Boot, Spring Cloud, and Spring Cloud Alibaba dependency-management
+  updates. Maintainers upgrade those platforms through a manual compatibility pull request because
+  the change must be evaluated across the supported runtime matrix.
+- Ignoring a Spring platform dependency also suppresses Dependabot security pull requests for it.
+  Maintainers must create a compatibility pull request for an applicable alert; open High or Critical
+  alerts still block release publication.
+- CodeQL `init` and `analyze` updates are atomic: they are upgraded together in the same pull request.
+  GitHub Actions updates, including CodeQL updates, are never eligible for Maven auto-merge.
+
 ## Required Repository Settings
 
 Repository administrators must enable all of the following in GitHub repository security settings:
