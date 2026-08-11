@@ -35,7 +35,7 @@
         <mybatis-plus-spring-boot4.version>3.5.17</mybatis-plus-spring-boot4.version>
         <jobrunr.version>8.7.1</jobrunr.version>
         <mybatis-spring.version>4.0.0</mybatis-spring.version>
-        <redisson.version>4.6.1</redisson.version>
+        <redisson.version>4.7.0</redisson.version>
     </properties>
     <dependencyManagement>
         <dependencies>
