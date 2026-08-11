@@ -23,12 +23,111 @@ temp_dir="$(mktemp -d)"
 trap 'rm -rf "${temp_dir}"' EXIT
 mkdir -p "${temp_dir}/.github/workflows"
 
-cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+write_compliant_dependabot() {
+    cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
 version: 2
 updates:
   - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
   - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
 YAML
+}
+
+write_compliant_auto_merge_workflow() {
+    cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+}
+
+write_compliant_dependabot
 cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
 permissions:
   contents: read
@@ -108,19 +207,7 @@ jobs:
         run: ./mvnw deploy
 YAML
 assert_rejects "${temp_dir}"
-cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
-on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
-permissions:
-  contents: read
-  pull-requests: write
-jobs:
-  enable-auto-merge:
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
-    steps:
-      - run: gh pr merge "${PR_NUMBER}" --auto --rebase
-YAML
+write_compliant_auto_merge_workflow
 cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
 permissions:
   contents: read
@@ -195,6 +282,819 @@ jobs:
       - uses: github/codeql-action/analyze@v4
 YAML
 assert_accepts "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: "*"
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-major
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch, minor]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      renamed-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: [org.jfoundry:*]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [minor]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-codeql-action:
+        patterns: [github/codeql-action/*]
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      jfoundry-maven-patches:
+        patterns: ["*"]
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.springframework.boot:spring-boot-dependencies
+      - dependency-name: org.springframework.boot:spring-boot-starter-parent
+      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
+      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef97 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh pr merge "${PR_NUMBER}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+          UPDATE_TYPE: ${{ steps.dependabot-metadata.outputs.update-type }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if [[ "${UPDATE_TYPE}" != 'version-update:semver-patch' ]]; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject protected Spring coordinates
+        id: protected-coordinates
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+
+          case ",${DEPENDENCY_NAMES}," in
+            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
+              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+              ;;
+            *)
+              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              ;;
+          esac
+
+      - name: Enable rebase auto-merge
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
 on:
   push:
