@@ -4,7 +4,7 @@
 
   <groupId>io.github.xfoundries</groupId>
   <artifactId>jfoundry-dependencies</artifactId>
-  <version>1.0.2-SNAPSHOT</version>
+  <version>1.0.2</version>
   <packaging>pom</packaging>
   <name>jfoundry-dependencies</name>
   <description>Framework-neutral dependency management BOM for jfoundry.</description>
@@ -28,7 +28,7 @@
     <connection>${jfoundry.release.scm.connection}</connection>
     <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
     <url>${jfoundry.release.scm.url}</url>
-    <tag>HEAD</tag>
+    <tag>v1.0.2</tag>
   </scm>
   <properties>
     <project.build.outputTimestamp>2026-08-06T12:24:23Z</project.build.outputTimestamp>
