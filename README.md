@@ -43,6 +43,13 @@ mandatory combined architecture.
 See [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md) for
 the evidence and boundaries of using the plugin together with JFoundry.
 
+### See It in Practice
+
+Explore the [jfoundry expense approval demo](https://github.com/xfoundries/jfoundry-expense-approval-demo),
+an end-to-end reference project that validates the workflow with a deliberately small business
+domain, complete architecture and integration paths, and maintained Hexagonal and Onion Simple
+variants.
+
 ```text
 requirements -> domain modeling -> architecture decision -> optional jfoundry landing -> implementation handoff
 ```

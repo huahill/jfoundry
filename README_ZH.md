@@ -39,6 +39,12 @@ JFoundry 在设计期的配套插件。它帮助 AI 编程代理从需求出发�
 
 与 JFoundry 配合使用的验证证据和边界见[采用就绪度与已验证范围](docs/i18n/zh/integration/adoption-readiness.md)。
 
+### 查看端到端示例
+
+可直接查看 [jfoundry 费用报销审批 Demo](https://github.com/xfoundries/jfoundry-expense-approval-demo)。
+这是一个端到端参考项目：它以刻意简化的业务领域验证完整的架构和集成链路，并持续维护 Hexagonal
+与 Onion Simple 两个变体。
+
 ```text
 需求 -> 领域建模 -> 架构决策 -> 可选的 jfoundry 落地 -> 实施交接
 ```
