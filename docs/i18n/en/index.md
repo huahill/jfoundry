@@ -14,7 +14,7 @@ linked from its owning runtime guide rather than presented as a technology-selec
 
 - [Capability Catalog](capabilities/index.md)
 - [Aggregate Persistence](capabilities/aggregate-persistence.md)
-- [REST Problem Details](capabilities/problem-details.md)
+- [Web](capabilities/web.md)
 - [Message Delivery](capabilities/message-delivery.md)
 - [Reliable Messaging: Outbox And Inbox](capabilities/reliable-messaging.md)
 - [Application Transactions](capabilities/application-transactions.md)

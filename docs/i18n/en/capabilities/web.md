@@ -1,10 +1,28 @@
-# REST Problem Details
+# Web
+
+`jfoundry-web` is JFoundry's runtime-neutral Web capability foundation. It owns shared HTTP problem
+semantics, while runtime adapters render those semantics through their respective HTTP stacks. The
+currently published Web capabilities are RFC 9457 Problem Details for HTTP APIs and opt-in outbound
+HTTP client support for Spring applications.
+
+## Select A Web Capability
+
+| Need | Spring Boot | Quarkus | Helidon MP |
+|---|---|---|---|
+| RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
+| Outbound HTTP client support | `jfoundry-web-spring` | Not provided | Not provided |
+
+`jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
+normally receives it from its selected Spring Boot Web starter. `Not provided` means that JFoundry
+does not currently publish an adapter for that runtime; it is not an implicit support claim.
+
+## Problem Details (RFC 9457)
 
 Use this capability when an HTTP API needs stable RFC 9457 `application/problem+json` responses
 for JFoundry business failures. It translates a supported application or domain exception into an
 HTTP response at the runtime boundary; domain and application code do not select HTTP status codes.
 
-## Add The Runtime Entry Point
+### Add The Runtime Entry Point
 
 | Runtime | Consumer dependency | HTTP integration |
 |---|---|---|
@@ -16,7 +34,7 @@ The entry points include the runtime-neutral `jfoundry-web` module. Applications
 normally add only the entry point shown above. Import the core and matching runtime BOMs first as
 described in [Getting Started](../integration/getting-started.md).
 
-## Shared Contract
+### Shared Contract
 
 Supported responses contain RFC 9457 `type`, `title`, `status`, and `detail` members, plus the
 stable JFoundry `code` extension. Custom extensions preserve JSON scalar, array, and object types.
@@ -31,7 +49,7 @@ Applications can provide a `ProblemMapper` to map an owned exception to a `Probl
 Use this for stable, application-specific errors, rather than leaking implementation exceptions or
 forcing an HTTP concern into the domain model.
 
-## Deliberate Boundaries
+### Deliberate Boundaries
 
 - Unknown exceptions and HTTP failures outside the supported status set retain the runtime's normal
   handling. This capability is not an application's universal exception policy.
@@ -40,10 +58,23 @@ forcing an HTTP concern into the domain model.
 - The published adapters currently cover Spring MVC, Quarkus REST, and Helidon MP JAX-RS. They do
   not claim support for other HTTP stacks.
 
-## Runtime Reference
+### Runtime Reference
 
 - [Spring Boot Runtime Assembly](../implementations/spring-boot.md) covers auto-configuration and
   Spring MVC replacement rules.
 - [Quarkus Runtime Integration](../implementations/quarkus.md) covers extension composition and
   Quarkus REST behavior.
 - [Helidon MP Runtime Integration](../implementations/helidon.md) covers CDI and JAX-RS behavior.
+
+## Outbound HTTP Client Integration
+
+`jfoundry-web-spring` is an opt-in Spring Web integration for selected outbound `RestClient` calls.
+Configure only the builder owned by the integration with `RestClientSupport.configure(builder)`, then
+execute that call through `RestClientSupport.execute(...)`. A non-success response becomes an
+`HttpResponseException` containing only its status code. Transport and response-decoding failures
+become an `HttpRequestException` with a safe failure kind.
+
+The integration does not read, copy, or retain a downstream response body. An application adapter
+that owns a documented downstream protocol must perform any body parsing itself. The
+[Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents the Spring-specific
+composition and boundary in more detail.
