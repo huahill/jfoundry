@@ -1,5 +1,6 @@
 package org.jfoundry.webmvc.spring;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.application.exception.ExternalAccessException;
 import org.jfoundry.application.exception.InvalidArgumentException;
@@ -17,20 +18,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ProblemDetailsExceptionHandlerTest {
 
@@ -116,25 +125,25 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     @Test
-    void mapsUnhandledExceptionsWithAnApplicationProblemMapper() {
-        ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
-                java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
-                "The application cannot complete the request.", Map.of("code", "APPLICATION_FAILURE")));
-        ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
+    void leavesAccessDeniedExceptionsForOuterSecurityFilters() throws Exception {
+        AtomicReference<Exception> propagated = new AtomicReference<>();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new FailingController())
+                .setControllerAdvice(handler)
+                .addFilters((request, response, chain) -> {
+                    try {
+                        chain.doFilter(request, response);
+                    } catch (Exception exception) {
+                        propagated.set(exception);
+                        ((HttpServletResponse) response).setStatus(HttpStatus.FORBIDDEN.value());
+                    }
+                })
+                .build();
 
-        ResponseEntity<ProblemDetail> response = applicationHandler.handleUnhandled(new IllegalStateException("internal"));
+        mockMvc.perform(get("/failing"))
+                .andExpect(status().isForbidden());
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_FAILURE", "Application failure",
-                "https://example.test/problems/application");
-    }
-
-    @Test
-    void mapsUnhandledExceptionsToASafeInternalServerErrorByDefault() {
-        ResponseEntity<ProblemDetail> response = handler.handleUnhandled(new IllegalStateException("internal"));
-
-        assertProblem(response, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal server error",
-                "urn:jfoundry:problem:internal-error");
-        assertThat(response.getBody().getDetail()).isEqualTo("The server failed to process the request.");
+        assertThat(propagated).hasValueSatisfying(exception ->
+                assertThat(exception).hasCauseInstanceOf(AccessDeniedException.class));
     }
 
     @ParameterizedTest
@@ -174,6 +183,15 @@ class ProblemDetailsExceptionHandlerTest {
 
     private static WebRequest webRequest() {
         return new ServletWebRequest(new MockHttpServletRequest());
+    }
+
+    @RestController
+    private static final class FailingController {
+
+        @GetMapping("/failing")
+        void fail() {
+            throw new AccessDeniedException("forbidden");
+        }
     }
 
     private static void assertProblem(ResponseEntity<ProblemDetail> response,
