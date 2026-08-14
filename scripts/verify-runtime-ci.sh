@@ -68,6 +68,15 @@ run_maven() {
     )
 }
 
+run_maven_serially() {
+    local java_home="$1"
+    shift
+    (
+        cd "${REPO_ROOT}"
+        JAVA_HOME="${java_home}" PATH="${java_home}/bin:${PATH}" "${MVNW}" -B -T 1 "$@"
+    )
+}
+
 spring_native_smoke_test() {
     local application="${REPO_ROOT}/${SPRING_INTEGRATION_MODULE}/target/jfoundry-spring-integration-tests"
     local log_file="/tmp/jfoundry-spring-native.log"
@@ -159,7 +168,7 @@ verify_quarkus() {
 
     require_java_25
     require_docker
-    run_maven "${JAVA_25_HOME}" -DskipTests install
+    run_maven_serially "${JAVA_25_HOME}" -DskipTests install
 
     if [[ "${stage}" == "middleware" || "${stage}" == "all" ]]; then
         run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -am -Pjvm-integration verify
