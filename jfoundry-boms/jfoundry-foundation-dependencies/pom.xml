@@ -32,7 +32,7 @@
 
     <!-- Domain modeling and architecture -->
     <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
-    <archunit.version>1.4.2</archunit.version>
+    <archunit.version>1.5.0</archunit.version>
 
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
