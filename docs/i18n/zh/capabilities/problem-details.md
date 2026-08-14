@@ -10,7 +10,7 @@
 | Quarkus | `jfoundry-web-quarkus-runtime` | 带 Jackson 的 Quarkus REST |
 | Helidon MP | `jfoundry-web-helidon-runtime` | JAX-RS |
 
-这些入口都会引入运行时无关的 `jfoundry-web-problem-details` 模块。应用通常只添加上表所列的入口。先按[接入指南](../integration/getting-started.md)导入核心 BOM 与对应运行时 BOM。
+这些入口都会引入运行时无关的 `jfoundry-web` 模块。应用通常只添加上表所列的入口。先按[接入指南](../integration/getting-started.md)导入核心 BOM 与对应运行时 BOM。
 
 ## 共享契约
 

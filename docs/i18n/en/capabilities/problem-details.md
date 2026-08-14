@@ -12,7 +12,7 @@ HTTP response at the runtime boundary; domain and application code do not select
 | Quarkus | `jfoundry-web-quarkus-runtime` | Quarkus REST with Jackson |
 | Helidon MP | `jfoundry-web-helidon-runtime` | JAX-RS |
 
-The entry points include the runtime-neutral `jfoundry-web-problem-details` module. Applications
+The entry points include the runtime-neutral `jfoundry-web` module. Applications
 normally add only the entry point shown above. Import the core and matching runtime BOMs first as
 described in [Getting Started](../integration/getting-started.md).
 
