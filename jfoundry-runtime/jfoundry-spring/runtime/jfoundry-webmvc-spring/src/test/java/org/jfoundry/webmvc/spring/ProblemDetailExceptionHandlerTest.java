@@ -20,6 +20,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
@@ -113,6 +114,28 @@ class ProblemDetailExceptionHandlerTest {
         assertThat(response.getBody().getProperties()).containsEntry("field", "name");
     }
 
+    @Test
+    void mapsUnhandledExceptionsWithAnApplicationProblemMapper() {
+        ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
+                java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
+                "The application cannot complete the request.", Map.of("code", "APPLICATION_FAILURE")));
+        ProblemDetailExceptionHandler applicationHandler = new ProblemDetailExceptionHandler(applicationMapper);
+
+        ResponseEntity<ProblemDetail> response = applicationHandler.handleUnhandled(new IllegalStateException("internal"));
+
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_FAILURE", "Application failure",
+                "https://example.test/problems/application");
+    }
+
+    @Test
+    void mapsUnhandledExceptionsToASafeInternalServerErrorByDefault() {
+        ResponseEntity<ProblemDetail> response = handler.handleUnhandled(new IllegalStateException("internal"));
+
+        assertProblem(response, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal server error",
+                "urn:jfoundry:problem:internal-error");
+        assertThat(response.getBody().getDetail()).isEqualTo("The server failed to process the request.");
+    }
+
     @ParameterizedTest
     @MethodSource("httpExceptionCases")
     void mapsSpringMvcExceptionsToHttpProblemCodes(Exception exception, int status, String code) throws Exception {
@@ -120,6 +143,21 @@ class ProblemDetailExceptionHandlerTest {
 
         assertThat(response).isNotNull();
         assertProblem(response, status, code);
+    }
+
+    @Test
+    void preservesUnsupportedSpringMvcProblemDetails() throws Exception {
+        ResponseStatusException exception = new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                "Too many requests");
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS);
+        assertThat(response.getBody()).isInstanceOf(ProblemDetail.class);
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getStatus()).isEqualTo(HttpStatus.TOO_MANY_REQUESTS.value());
+        assertThat(problem.getDetail()).isEqualTo("Too many requests");
+        assertThat(problem.getProperties()).isNull();
     }
 
     private static Stream<Arguments> httpExceptionCases() {

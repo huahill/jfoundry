@@ -68,7 +68,7 @@ Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢�
 
 ## Web、锁与替换
 
-Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常输出共享 RFC 9457 契约，并与 Spring MVC 自身的 HTTP 错误处理协作；领域和应用代码不应直接选择 HTTP 状态码。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。
+Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。
 
 Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约束、幂等或本地同步不足以满足该需求时使用。
 

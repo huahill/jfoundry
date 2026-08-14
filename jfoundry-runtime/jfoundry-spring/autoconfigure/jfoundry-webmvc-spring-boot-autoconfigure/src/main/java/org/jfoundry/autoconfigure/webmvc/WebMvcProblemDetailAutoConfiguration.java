@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 /**
  * Auto-configuration for jfoundry Spring MVC ProblemDetail exception responses.
  */
-@AutoConfiguration
+@AutoConfiguration(beforeName = "org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(name = {
         "org.springframework.web.servlet.DispatcherServlet",

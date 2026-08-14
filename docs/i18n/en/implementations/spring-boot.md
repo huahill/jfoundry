@@ -113,9 +113,12 @@ and Inbox semantics.
 
 ## Web, Locks, And Replacement
 
-The Web MVC starter is an inbound adapter. It renders the shared RFC 9457 contract for supported
-jfoundry exceptions and cooperates with Spring MVC's own HTTP error handling; domain and application
-code must not select HTTP statuses directly. It intentionally does not configure authentication or
+The Web MVC starter is an inbound adapter. It owns the shared RFC 9457 contract for supported
+jfoundry exceptions, application `ProblemMapper` mappings, and `ProblemCatalog`-supported Spring MVC HTTP
+failures; domain and application code must not select HTTP statuses directly. Other Spring MVC
+failures retain Spring's original status and problem response. The auto-configuration runs before
+Spring Boot's Web MVC problem-details configuration, so enabling `spring.mvc.problemdetails.enabled`
+does not introduce a competing handler. It intentionally does not configure authentication or
 authorization. A security adapter that owns those semantics can render its own `401` or `403`
 descriptor with `ProblemDetailRenderer.render(...)`.
 
