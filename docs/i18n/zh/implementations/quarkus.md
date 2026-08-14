@@ -59,7 +59,7 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 ## 已支持范围
 
 Quarkus 不是 Spring starter 的翻译层。当前显式依赖组合覆盖 CDI/JTA 事务、本地 CDI 领域事件投递、JPA
-聚合持久化、JPA Outbox 和 Inbox 存储、Outbox 派发与维护、Kafka 和 RabbitMQ 投递，以及 REST Problem Details。
+聚合持久化、JPA Outbox 和 Inbox 存储、Outbox 派发与维护、Kafka 和 RabbitMQ 投递，以及 RFC 9457 Problem Details。
 通用的 `jfoundry-web-quarkus-runtime` 扩展当前提供 Problem Details 适配器，并作为后续 Quarkus Web
 入站集成的归属；它不会将 Web 语义移入核心。
 
@@ -272,10 +272,10 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 应用仍负责把 Inbox SQL 模板复制到自己的迁移流程中，并维护 `jfoundry_inbox_message` 表。该能力只装配持久化，
 不提供派发器、调度器、序列化器、自动事件外部化或启动器。
 
-## REST Problem Details
+## Problem Details（RFC 9457）
 
 Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-quarkus-runtime`。该扩展以更宽泛的
-Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行时无关的契约和所有受支持运行时的依赖选择见[REST Problem Details](../capabilities/problem-details.md)：
+Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)：
 
 ```xml
 <dependency>
@@ -331,6 +331,6 @@ bash scripts/verify-runtime-ci.sh quarkus
 
 ## 当前范围
 
-当前 Quarkus 集成覆盖 CDI 发现、应用事务、REST Problem Details、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
+当前 Quarkus 集成覆盖 CDI 发现、应用事务、RFC 9457 Problem Details、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
 Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。它尚未提供
 MyBatis-Plus、RocketMQ 或启动器的 Quarkus 装配；这些能力仍是后续的显式工作项。

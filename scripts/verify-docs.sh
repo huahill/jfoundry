@@ -6,9 +6,9 @@ readonly EN_DOCS_DIR="docs/i18n/en"
 readonly ZH_DOCS_DIR="docs/i18n/zh"
 readonly -a CAPABILITY_CATALOG_DOCUMENTS=(
     "${EN_DOCS_DIR}/capabilities/index.md"
-    "${EN_DOCS_DIR}/capabilities/problem-details.md"
+    "${EN_DOCS_DIR}/capabilities/web.md"
     "${ZH_DOCS_DIR}/capabilities/index.md"
-    "${ZH_DOCS_DIR}/capabilities/problem-details.md"
+    "${ZH_DOCS_DIR}/capabilities/web.md"
 )
 
 if [[ ! -d "$EN_DOCS_DIR" || ! -d "$ZH_DOCS_DIR" ]]; then

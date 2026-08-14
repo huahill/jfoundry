@@ -62,7 +62,7 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 | Architecture | Hexagonal and Onion semantics with ArchUnit rules |
 | Application | Application services, transaction boundaries, CQRS, and domain-event orchestration |
 | Persistence | Aggregate persistence contracts with JPA and MyBatis-Plus implementations |
-| REST APIs | RFC 9457 Problem Details responses for Spring MVC, Quarkus REST, and Helidon MP JAX-RS |
+| Web | RFC 9457 Problem Details for Spring MVC, Quarkus REST, and Helidon MP JAX-RS, plus opt-in Spring `RestClient` integration |
 | Message delivery | Runtime-neutral outbound transport contracts with explicit Kafka, RabbitMQ, and RocketMQ adapters |
 | Reliable messaging | Transactional Outbox, Inbox idempotency, messaging, and serialization SPI |
 | Runtime integration | Spring Framework and Spring Boot assembly; Quarkus and Helidon CDI/Jakarta Transactions, JPA, and Outbox/Inbox assembly |
@@ -72,12 +72,12 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 - **Choose a capability**: start with the [Capability Catalog](docs/i18n/en/capabilities/index.md) to map a business need to its supported runtime dependency.
 - **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/repository-vs-read-contracts.md).
 - **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
-- **REST error responses**: read [REST Problem Details](docs/i18n/en/capabilities/problem-details.md), then add the Spring MVC, Quarkus REST, or Helidon MP entry point for the selected runtime.
+- **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details for an HTTP API or the opt-in Spring `RestClient` integration for an outbound client.
 - **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
 - **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md) guide.
 - **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
-- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, REST Problem Details, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
-- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, and REST Problem Details composition. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
+- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, Web support currently covering RFC 9457 Problem Details, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
+- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, and Web support currently covering RFC 9457 Problem Details. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
 
 ## Minimal Setup
 
@@ -150,7 +150,7 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 - [Capability Catalog](docs/i18n/en/capabilities/index.md)
 - [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md)
-- [REST Problem Details](docs/i18n/en/capabilities/problem-details.md)
+- [Web](docs/i18n/en/capabilities/web.md)
 - [Message Delivery](docs/i18n/en/capabilities/message-delivery.md)
 - [Reliable Messaging: Outbox And Inbox](docs/i18n/en/capabilities/reliable-messaging.md)
 - [Application Transactions](docs/i18n/en/capabilities/application-transactions.md)

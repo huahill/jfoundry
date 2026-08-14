@@ -63,7 +63,7 @@ artifact automatically.
 
 Quarkus is not a Spring starter translation layer. Its explicit composition currently covers CDI/JTA
 transactions, local CDI domain-event delivery, JPA aggregate persistence, JPA Outbox and Inbox
-stores, Outbox dispatch and maintenance, Kafka and RabbitMQ delivery, and REST problem responses.
+stores, Outbox dispatch and maintenance, Kafka and RabbitMQ delivery, and RFC 9457 Problem Details.
 The generic `jfoundry-web-quarkus-runtime` extension currently provides the Problem Details adapter
 and is the home for future Quarkus Web inbound integration; it does not move web semantics into the
 core.
@@ -312,12 +312,12 @@ The application remains responsible for copying the Inbox SQL template into its 
 and maintaining the `jfoundry_inbox_message` table. This capability assembles persistence only. It
 does not provide a dispatcher, scheduler, serializer, automatic event externalization, or a starter.
 
-## REST Problem Details
+## Problem Details (RFC 9457)
 
 Add `jfoundry-web-quarkus-runtime` when a Quarkus REST application needs the shared RFC 9457 error
 contract. The extension is named for the broader Quarkus Web boundary; Problem Details is its
 currently implemented capability. The runtime-neutral contract and the dependency choices for all
-supported runtimes are in [REST Problem Details](../capabilities/problem-details.md):
+supported runtimes are in [Web](../capabilities/web.md):
 
 ```xml
 <dependency>
@@ -379,7 +379,7 @@ use `bash scripts/verify-runtime-ci.sh all` with both environment variables set.
 
 ## Current Scope
 
-This Quarkus integration covers CDI discovery, application transactions, REST Problem Details,
+This Quarkus integration covers CDI discovery, application transactions, RFC 9457 Problem Details,
 application-service domain-event dispatch, JPA aggregate persistence context assembly, optional JPA Outbox and
 Inbox storage, automatic externalization for explicitly marked events, Kafka and RabbitMQ message delivery, and
 optional Outbox dispatch, recovery, and cleanup. It does not yet provide Quarkus assembly for MyBatis-Plus,

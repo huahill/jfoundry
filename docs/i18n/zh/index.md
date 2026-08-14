@@ -12,7 +12,7 @@
 
 - [能力目录](capabilities/index.md)
 - [聚合持久化](capabilities/aggregate-persistence.md)
-- [REST Problem Details](capabilities/problem-details.md)
+- [Web](capabilities/web.md)
 - [消息传输](capabilities/message-delivery.md)
 - [可靠消息：Outbox 与 Inbox](capabilities/reliable-messaging.md)
 - [应用事务](capabilities/application-transactions.md)
