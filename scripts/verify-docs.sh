@@ -4,6 +4,12 @@ set -euo pipefail
 
 readonly EN_DOCS_DIR="docs/i18n/en"
 readonly ZH_DOCS_DIR="docs/i18n/zh"
+readonly -a CAPABILITY_CATALOG_DOCUMENTS=(
+    "${EN_DOCS_DIR}/capabilities/index.md"
+    "${EN_DOCS_DIR}/capabilities/problem-details.md"
+    "${ZH_DOCS_DIR}/capabilities/index.md"
+    "${ZH_DOCS_DIR}/capabilities/problem-details.md"
+)
 
 if [[ ! -d "$EN_DOCS_DIR" || ! -d "$ZH_DOCS_DIR" ]]; then
     echo "Expected both $EN_DOCS_DIR and $ZH_DOCS_DIR to exist." >&2
@@ -36,5 +42,15 @@ while IFS= read -r document; do
         fi
     done < <(perl -ne 'while (/\]\(([^ )]+)(?:\s+"[^"]*")?\)/g) { print "$1\n" }' "$document")
 done < <(find docs -type f -name '*.md' -print; find . -maxdepth 1 -type f -name 'README*.md' -print)
+
+while IFS= read -r artifact; do
+    if ! rg -Fq --glob 'pom.xml' "<artifactId>${artifact}</artifactId>" .; then
+        echo "Documented JFoundry artifact does not exist in a reactor POM: ${artifact}" >&2
+        failures=1
+    fi
+done < <(
+    perl -ne 'while (/`(jfoundry-[a-z0-9-]+)`/g) { print "$1\n" }' \
+        "${CAPABILITY_CATALOG_DOCUMENTS[@]}" | sort -u
+)
 
 exit "$failures"

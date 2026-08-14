@@ -316,7 +316,8 @@ does not provide a dispatcher, scheduler, serializer, automatic event externaliz
 
 Add `jfoundry-web-quarkus-runtime` when a Quarkus REST application needs the shared RFC 9457 error
 contract. The extension is named for the broader Quarkus Web boundary; Problem Details is its
-currently implemented capability:
+currently implemented capability. The runtime-neutral contract and the dependency choices for all
+supported runtimes are in [REST Problem Details](../capabilities/problem-details.md):
 
 ```xml
 <dependency>

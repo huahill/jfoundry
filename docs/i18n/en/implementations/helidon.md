@@ -89,7 +89,8 @@ alternative.
 `jfoundry-web-helidon-runtime` maps JFoundry application and domain exceptions to RFC 9457
 `application/problem+json` JAX-RS responses. It keeps Helidon's ordinary handling for unknown
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
-general JAX-RS error policy.
+general JAX-RS error policy. The runtime-neutral contract and the dependency choices for all
+supported runtimes are in [REST Problem Details](../capabilities/problem-details.md).
 
 It does not configure security. A Helidon security adapter that owns authentication and authorization
 can render its own `401` or `403` descriptor with `ProblemDetailsRenderer.render(...)`. Extension

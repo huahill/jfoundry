@@ -103,6 +103,8 @@ boundaries.
 
 ## Add Capabilities Only When Needed
 
+- Start with the [Capability Catalog](../capabilities/index.md). It maps a business need to the
+  supported runtime entry point and links to the contract and composition guidance.
 - Add [Application Transactions](../capabilities/application-transactions.md) or
   [Distributed Locks](../capabilities/distributed-locks.md) when the use case needs them.
 - Add [Message Delivery](../capabilities/message-delivery.md) when the application needs a direct
@@ -110,8 +112,8 @@ boundaries.
   only when it also needs durable publication or consumer idempotency. Add Web MVC and scheduling
   starters only for their corresponding capability.
 
-The [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md) is
-the canonical catalog for individual starters, properties, and registration conditions.
+The [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md)
+details individual Spring starters, properties, and registration conditions.
 
 For runtime-specific dependency setup, composition, and verification, see
 [Spring Boot Runtime Assembly](../implementations/spring-boot.md),

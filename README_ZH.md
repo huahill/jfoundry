@@ -57,14 +57,17 @@ JFoundry 在设计期的配套插件。它帮助 AI 编程代理从需求出发�
 | 架构 | Hexagonal 和 Onion 语义，以及 ArchUnit 规则 |
 | 应用层 | 应用服务、事务边界、CQRS 和领域事件编排 |
 | 持久化 | 聚合持久化契约，以及 MyBatis-Plus 和 JPA 实现 |
+| REST API | 面向 Spring MVC、Quarkus REST 和 Helidon MP JAX-RS 的 RFC 9457 Problem Details 响应 |
 | 消息传输 | 运行时无关的出站传输契约，以及显式选择的 Kafka、RabbitMQ、RocketMQ 适配器 |
 | 可靠消息 | Transactional Outbox、Inbox 幂等、消息和序列化 SPI |
-| 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA、Outbox/Inbox 与 REST Problem Details 装配 |
+| 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA 与 Outbox/Inbox 装配 |
 
 ## 选择路径
 
+- **选择能力**：先从[能力目录](docs/i18n/zh/capabilities/index.md)开始，将业务需求映射到受支持运行时的依赖入口。
 - **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md)。
+- **REST 错误响应**：先阅读[REST Problem Details](docs/i18n/zh/capabilities/problem-details.md)，再为所选运行时添加 Spring MVC、Quarkus REST 或 Helidon MP 入口。
 - **消息传输**：通过[消息传输](docs/i18n/zh/capabilities/message-delivery.md)选择直接使用的 Kafka、RabbitMQ、RocketMQ 或应用自有传输适配器。
 - **Spring Boot + MyBatis-Plus（常用组合）**：先完成 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md)，再接入 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 聚合持久化；这是一条常见接入路径，不改变 JPA 的同等支持地位。
 - **可靠消息**：先阅读[可靠消息](docs/i18n/zh/capabilities/reliable-messaging.md)，再从对应的 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md) 指南中选择其存储实现。
@@ -141,7 +144,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### 能力
 
+- [能力目录](docs/i18n/zh/capabilities/index.md)
 - [聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)
+- [REST Problem Details](docs/i18n/zh/capabilities/problem-details.md)
 - [消息传输](docs/i18n/zh/capabilities/message-delivery.md)
 - [可靠消息：Outbox 与 Inbox](docs/i18n/zh/capabilities/reliable-messaging.md)
 - [应用事务](docs/i18n/zh/capabilities/application-transactions.md)

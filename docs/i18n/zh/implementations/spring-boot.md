@@ -68,7 +68,7 @@ Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢�
 
 ## Web、锁与替换
 
-Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。
+Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[REST Problem Details](../capabilities/problem-details.md)。
 
 `jfoundry-web-spring` 为出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对拥有该集成的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。该集成不会读取、复制或保留下游响应体；拥有已明确约定下游协议的应用适配器应自行解析响应体。
 

@@ -275,7 +275,7 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 ## REST Problem Details
 
 Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-quarkus-runtime`。该扩展以更宽泛的
-Quarkus Web 边界命名，Problem Details 是当前已实现的能力：
+Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行时无关的契约和所有受支持运行时的依赖选择见[REST Problem Details](../capabilities/problem-details.md)：
 
 ```xml
 <dependency>

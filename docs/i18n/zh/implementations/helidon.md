@@ -81,7 +81,7 @@ jfoundry.outbox.dispatcher.enabled=true
 
 `jfoundry-web-helidon-runtime` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
-适配器不替代应用通用的 JAX-RS 错误策略。
+适配器不替代应用通用的 JAX-RS 错误策略。运行时无关的契约和所有受支持运行时的依赖选择见[REST Problem Details](../capabilities/problem-details.md)。
 
 它不配置安全能力。拥有认证和授权语义的 Helidon 安全适配器可使用
 `ProblemDetailsRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。扩展字段在各运行时适配器中会保留
