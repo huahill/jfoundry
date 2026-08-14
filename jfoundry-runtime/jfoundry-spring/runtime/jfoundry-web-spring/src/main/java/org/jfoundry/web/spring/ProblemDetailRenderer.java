@@ -1,4 +1,4 @@
-package org.jfoundry.webmvc.spring;
+package org.jfoundry.web.spring;
 
 import org.jfoundry.problem.ProblemDescriptor;
 import org.springframework.http.HttpStatusCode;
@@ -6,7 +6,7 @@ import org.springframework.http.ProblemDetail;
 
 import java.util.Objects;
 
-/// Renders runtime-neutral problem descriptors as Spring MVC problem details.
+/// Renders runtime-neutral problem descriptors as Spring Problem Details.
 public final class ProblemDetailRenderer {
 
     private ProblemDetailRenderer() {

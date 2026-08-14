@@ -28,6 +28,15 @@ class ProblemCatalogTest {
     }
 
     @Test
+    void resolvesServiceUnavailableToTheServiceUnavailableProblem() {
+        ProblemDescriptor problem = ProblemCatalog.forHttpStatus(503);
+
+        assertThat(problem.code()).isEqualTo("HTTP_SERVICE_UNAVAILABLE");
+        assertThat(problem.type()).hasToString("urn:jfoundry:problem:http-service-unavailable");
+        assertThat(problem.detail()).isEqualTo("The service is temporarily unavailable.");
+    }
+
+    @Test
     void identifiesTheHttpStatusesWithSharedProblemSemantics() {
         assertThat(ProblemCatalog.supportsHttpStatus(400)).isTrue();
         assertThat(ProblemCatalog.supportsHttpStatus(404)).isTrue();

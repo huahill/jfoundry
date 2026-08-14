@@ -53,8 +53,8 @@ public final class ProblemCatalog {
                     "The request payload is too large.");
             case 415 -> problem(415, "HTTP_UNSUPPORTED_MEDIA_TYPE", "Unsupported media type", "http-unsupported-media-type",
                     "The request media type is not supported.");
-            case 503 -> problem(503, "HTTP_REQUEST_TIMEOUT", "Request timeout", "http-request-timeout",
-                    "The request timed out.");
+            case 503 -> problem(503, "HTTP_SERVICE_UNAVAILABLE", "Service unavailable", "http-service-unavailable",
+                    "The service is temporarily unavailable.");
             default -> problem(500, "HTTP_INTERNAL_ERROR", "Internal server error", "http-internal-error",
                     "The server failed to process the request.");
         };

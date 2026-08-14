@@ -7,9 +7,9 @@
         <version>1.0.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>jfoundry-web-problem-details</artifactId>
-    <name>jfoundry-web-problem-details</name>
-    <description>Runtime-neutral RFC 9457 problem semantics for jfoundry errors.</description>
+    <artifactId>jfoundry-web</artifactId>
+    <name>jfoundry-web</name>
+    <description>Runtime-neutral Web and RFC 9457 problem semantics for jfoundry errors.</description>
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

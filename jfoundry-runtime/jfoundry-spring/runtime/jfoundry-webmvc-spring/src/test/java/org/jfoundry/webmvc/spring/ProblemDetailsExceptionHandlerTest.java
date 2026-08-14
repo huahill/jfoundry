@@ -8,6 +8,7 @@ import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
+import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,9 +32,9 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProblemDetailExceptionHandlerTest {
+class ProblemDetailsExceptionHandlerTest {
 
-    private final ProblemDetailExceptionHandler handler = new ProblemDetailExceptionHandler();
+    private final ProblemDetailsExceptionHandler handler = new ProblemDetailsExceptionHandler();
 
     @Test
     void mapsInvalidArgumentToBadRequestProblemDetail() {
@@ -104,7 +105,7 @@ class ProblemDetailExceptionHandlerTest {
         ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/validation"), "Validation failed", 422,
                 "The request violates an application rule.", Map.of("code", "APPLICATION_VALIDATION", "field", "name")));
-        ProblemDetailExceptionHandler applicationHandler = new ProblemDetailExceptionHandler(applicationMapper);
+        ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
 
         ResponseEntity<ProblemDetail> response = applicationHandler.handleInvalidArgument(
                 new InvalidArgumentException("internal detail"));
@@ -119,7 +120,7 @@ class ProblemDetailExceptionHandlerTest {
         ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
                 "The application cannot complete the request.", Map.of("code", "APPLICATION_FAILURE")));
-        ProblemDetailExceptionHandler applicationHandler = new ProblemDetailExceptionHandler(applicationMapper);
+        ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
 
         ResponseEntity<ProblemDetail> response = applicationHandler.handleUnhandled(new IllegalStateException("internal"));
 
