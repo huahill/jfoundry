@@ -26,6 +26,12 @@ run_maven() {
     CALLS+=("maven:${java_home}:$*")
 }
 
+run_maven_serially() {
+    local java_home="$1"
+    shift
+    CALLS+=("maven-serial:${java_home}:$*")
+}
+
 spring_native_smoke_test() {
     CALLS+=("spring-native-smoke")
 }
@@ -75,7 +81,7 @@ assert_before() {
 
 CALLS=()
 main quarkus --stage middleware
-assert_contains "maven::-DskipTests install"
+assert_contains "maven-serial::-DskipTests install"
 assert_contains "-Pjvm-integration verify"
 assert_not_contains "-Pnative"
 

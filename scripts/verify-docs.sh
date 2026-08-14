@@ -21,6 +21,7 @@ trap 'rm -rf "$temp_dir"' EXIT
 
 find "$EN_DOCS_DIR" -type f -name '*.md' | sed "s#^$EN_DOCS_DIR/##" | sort > "$temp_dir/en-docs"
 find "$ZH_DOCS_DIR" -type f -name '*.md' | sed "s#^$ZH_DOCS_DIR/##" | sort > "$temp_dir/zh-docs"
+find . -type f -name pom.xml -print > "$temp_dir/reactor-poms"
 
 if ! diff -u "$temp_dir/en-docs" "$temp_dir/zh-docs"; then
     echo "English and Chinese documentation paths must stay aligned." >&2
@@ -44,7 +45,15 @@ while IFS= read -r document; do
 done < <(find docs -type f -name '*.md' -print; find . -maxdepth 1 -type f -name 'README*.md' -print)
 
 while IFS= read -r artifact; do
-    if ! rg -Fq --glob 'pom.xml' "<artifactId>${artifact}</artifactId>" .; then
+    artifact_found=false
+    while IFS= read -r pom; do
+        if grep -Fq "<artifactId>${artifact}</artifactId>" "${pom}"; then
+            artifact_found=true
+            break
+        fi
+    done < "$temp_dir/reactor-poms"
+
+    if [[ "${artifact_found}" != true ]]; then
         echo "Documented JFoundry artifact does not exist in a reactor POM: ${artifact}" >&2
         failures=1
     fi
