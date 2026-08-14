@@ -48,14 +48,9 @@ maven_updates = updates.select { |update| update["package-ecosystem"] == "maven"
 fail_policy("must contain exactly one Maven updates entry") unless maven_updates.size == 1
 
 expected_maven_groups = {
-    "jfoundry-maven-libraries" => {
+    "jfoundry-maven-patches" => {
         "patterns" => ["*"],
-        "exclude-patterns" => [
-            "org.apache.maven.plugins:maven-compiler-plugin",
-            "org.apache.maven.plugins:maven-source-plugin",
-            "org.graalvm.buildtools:native-maven-plugin"
-        ],
-        "update-types" => ["patch", "minor", "major"]
+        "update-types" => ["patch"]
     }
 }
 maven_update = maven_updates.first
