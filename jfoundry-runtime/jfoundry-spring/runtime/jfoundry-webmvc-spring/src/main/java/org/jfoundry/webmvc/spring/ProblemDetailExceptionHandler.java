@@ -66,6 +66,12 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
         return problem(problemMapper.map(exception).orElseThrow());
     }
 
+    /// Maps exceptions without a more specific handler through the configured problem mapper.
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> handleUnhandled(Exception exception) {
+        return problem(problemMapper.map(exception).orElseThrow());
+    }
+
     private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
         return ResponseEntity.status(HttpStatusCode.valueOf(descriptor.status()))
                 .body(ProblemDetailRenderer.render(descriptor));
@@ -77,6 +83,9 @@ public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandle
                                                              HttpHeaders headers,
                                                              HttpStatusCode statusCode,
                                                              WebRequest request) {
+        if (!org.jfoundry.problem.ProblemCatalog.supportsHttpStatus(statusCode.value())) {
+            return super.handleExceptionInternal(exception, body, headers, statusCode, request);
+        }
         ProblemDescriptor descriptor = org.jfoundry.problem.ProblemCatalog.forHttpStatus(statusCode.value());
         if (statusCode.isSameCodeAs(HttpStatus.INTERNAL_SERVER_ERROR) && request instanceof ServletWebRequest) {
             request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, exception, WebRequest.SCOPE_REQUEST);
