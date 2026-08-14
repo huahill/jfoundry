@@ -6,7 +6,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-quarkus-dependencies</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>pom</packaging>
 
     <name>jfoundry-quarkus-dependencies</name>
@@ -18,7 +18,7 @@
         <connection>${jfoundry.release.scm.connection}</connection>
         <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
         <url>${jfoundry.release.scm.url}</url>
-        <tag>v1.0.2</tag>
+        <tag>v1.0.3</tag>
     </scm>
 
     <properties>
