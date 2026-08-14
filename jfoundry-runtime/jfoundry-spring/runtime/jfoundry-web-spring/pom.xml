@@ -8,32 +8,22 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-webmvc-spring</artifactId>
-    <name>jfoundry-webmvc-spring</name>
-    <description>Spring MVC runtime adapter for jfoundry ProblemDetail exception responses.</description>
+    <artifactId>jfoundry-web-spring</artifactId>
+    <name>jfoundry-web-spring</name>
+    <description>Spring Web integration for JFoundry Web semantics.</description>
 
     <dependencies>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-application-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-web-spring</artifactId>
+            <artifactId>jfoundry-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
+            <artifactId>spring-web</artifactId>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

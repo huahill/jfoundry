@@ -2,27 +2,26 @@ package org.jfoundry.autoconfigure.webmvc;
 
 import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemMapper;
-import org.jfoundry.webmvc.spring.ProblemDetailExceptionHandler;
+import org.jfoundry.webmvc.spring.ProblemDetailsExceptionHandler;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.Bean;
 
-/**
- * Auto-configuration for jfoundry Spring MVC ProblemDetail exception responses.
- */
+/// Auto-configuration for JFoundry Spring MVC Problem Details exception responses.
 @AutoConfiguration(beforeName = "org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @ConditionalOnClass(name = {
         "org.springframework.web.servlet.DispatcherServlet",
-        "org.jfoundry.webmvc.spring.ProblemDetailExceptionHandler"
+        "org.jfoundry.webmvc.spring.ProblemDetailsExceptionHandler"
 })
 public class WebMvcProblemDetailAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(ProblemDetailExceptionHandler.class)
-    public ProblemDetailExceptionHandler problemDetailExceptionHandler(java.util.List<ProblemMapper> problemMappers) {
-        return new ProblemDetailExceptionHandler(new CompositeProblemMapper(problemMappers));
+    @ConditionalOnMissingBean(ProblemDetailsExceptionHandler.class)
+    public ProblemDetailsExceptionHandler jfoundryProblemDetailsExceptionHandler(
+            java.util.List<ProblemMapper> problemMappers) {
+        return new ProblemDetailsExceptionHandler(new CompositeProblemMapper(problemMappers));
     }
 }

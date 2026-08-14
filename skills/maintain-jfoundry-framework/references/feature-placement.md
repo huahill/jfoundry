@@ -17,7 +17,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Message sending or payload serialization SPI | `jfoundry-core/jfoundry-application/jfoundry-messaging-core` |
 | Outbox state, store contract, dispatcher service, retry/backoff core | `jfoundry-core/jfoundry-application/jfoundry-outbox-core` |
 | Inbox state, store contract, `InboxTemplate` | `jfoundry-core/jfoundry-application/jfoundry-inbox-core` |
-| Runtime-neutral HTTP problem semantics and exception-to-response policy | `jfoundry-core/jfoundry-infrastructure/jfoundry-web-problem-details` |
+| Runtime-neutral HTTP problem semantics and exception-to-response policy | `jfoundry-core/jfoundry-infrastructure/jfoundry-web` |
 | MyBatis-Plus business persistence adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-persistence-mybatis-plus` |
 | Jakarta Persistence business persistence adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-persistence-jpa` |
 | MyBatis-Plus Outbox/Inbox store adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-mybatis-plus` or `jfoundry-core/jfoundry-infrastructure/jfoundry-inbox-mybatis-plus` |

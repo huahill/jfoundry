@@ -9,6 +9,7 @@ import org.jfoundry.domain.exception.DomainStateException;
 import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
+import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,17 +23,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import org.springframework.web.util.WebUtils;
 
-/// Maps JFoundry core exceptions to Spring MVC RFC 9457 ProblemDetail responses.
+/// Maps JFoundry core exceptions to Spring MVC RFC 9457 Problem Details responses.
 @RestControllerAdvice
-public class ProblemDetailExceptionHandler extends ResponseEntityExceptionHandler {
+public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final ProblemMapper problemMapper;
 
-    public ProblemDetailExceptionHandler() {
+    public ProblemDetailsExceptionHandler() {
         this(new CompositeProblemMapper(java.util.List.of()));
     }
 
-    public ProblemDetailExceptionHandler(ProblemMapper problemMapper) {
+    public ProblemDetailsExceptionHandler(ProblemMapper problemMapper) {
         this.problemMapper = java.util.Objects.requireNonNull(problemMapper, "problemMapper must not be null");
     }
 

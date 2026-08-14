@@ -3,7 +3,7 @@ package org.jfoundry.autoconfigure.webmvc;
 import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
-import org.jfoundry.webmvc.spring.ProblemDetailExceptionHandler;
+import org.jfoundry.webmvc.spring.ProblemDetailsExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
@@ -18,18 +18,18 @@ class WebMvcProblemDetailAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(WebMvcProblemDetailAutoConfiguration.class));
 
     @Test
-    void createsProblemDetailExceptionHandler() {
-        runner.run(context -> assertThat(context).hasSingleBean(ProblemDetailExceptionHandler.class));
+    void createsProblemDetailsExceptionHandler() {
+        runner.run(context -> assertThat(context).hasSingleBean(ProblemDetailsExceptionHandler.class));
     }
 
     @Test
     void backsOffWhenUserProvidesExceptionHandler() {
-        ProblemDetailExceptionHandler userHandler = new ProblemDetailExceptionHandler();
+        ProblemDetailsExceptionHandler userHandler = new ProblemDetailsExceptionHandler();
 
-        runner.withBean(ProblemDetailExceptionHandler.class, () -> userHandler)
+        runner.withBean(ProblemDetailsExceptionHandler.class, () -> userHandler)
                 .run(context -> {
-                    assertThat(context).hasSingleBean(ProblemDetailExceptionHandler.class);
-                    assertThat(context.getBean(ProblemDetailExceptionHandler.class)).isSameAs(userHandler);
+                    assertThat(context).hasSingleBean(ProblemDetailsExceptionHandler.class);
+                    assertThat(context.getBean(ProblemDetailsExceptionHandler.class)).isSameAs(userHandler);
                 });
     }
 
@@ -40,7 +40,7 @@ class WebMvcProblemDetailAutoConfigurationTest {
                 "Application detail", java.util.Map.of("code", "APPLICATION_FAILURE")));
 
         runner.withBean(ProblemMapper.class, () -> mapper)
-                .run(context -> assertThat(context.getBean(ProblemDetailExceptionHandler.class)
+                .run(context -> assertThat(context.getBean(ProblemDetailsExceptionHandler.class)
                         .handleInvalidArgument(new InvalidArgumentException("internal"))
                         .getBody().getProperties()).containsEntry("code", "APPLICATION_FAILURE"));
     }
@@ -52,7 +52,7 @@ class WebMvcProblemDetailAutoConfigurationTest {
                 .withPropertyValues("spring.mvc.problemdetails.enabled=true")
                 .run(context -> {
                     assertThat(context).hasSingleBean(ResponseEntityExceptionHandler.class);
-                    assertThat(context).hasSingleBean(ProblemDetailExceptionHandler.class);
+                    assertThat(context).hasSingleBean(ProblemDetailsExceptionHandler.class);
                     assertThat(context).doesNotHaveBean("problemDetailsExceptionHandler");
                 });
     }

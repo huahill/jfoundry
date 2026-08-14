@@ -122,6 +122,14 @@ does not introduce a competing handler. It intentionally does not configure auth
 authorization. A security adapter that owns those semantics can render its own `401` or `403`
 descriptor with `ProblemDetailRenderer.render(...)`.
 
+`jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
+only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
+the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
+`HttpResponseException` containing only its status code. Transport and response-decoding failures
+become an `HttpRequestException` with a safe failure kind. The integration does not read, copy, or
+retain a downstream response body; an application adapter that owns a documented downstream protocol
+must perform any body parsing itself.
+
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that
 cannot be met by database constraints, idempotency, or local synchronization.
 

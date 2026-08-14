@@ -37,6 +37,7 @@
         <module>runtime/jfoundry-transaction-spring</module>
         <module>runtime/jfoundry-lock-spring</module>
         <module>runtime/jfoundry-observability-spring</module>
+        <module>runtime/jfoundry-web-spring</module>
         <module>runtime/jfoundry-webmvc-spring</module>
         <module>autoconfigure/jfoundry-jpa-spring-boot-support</module>
         <module>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</module>
