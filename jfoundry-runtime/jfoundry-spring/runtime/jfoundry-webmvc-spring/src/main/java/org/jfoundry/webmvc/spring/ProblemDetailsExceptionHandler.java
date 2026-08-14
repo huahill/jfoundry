@@ -67,12 +67,6 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         return problem(problemMapper.map(exception).orElseThrow());
     }
 
-    /// Maps exceptions without a more specific handler through the configured problem mapper.
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ProblemDetail> handleUnhandled(Exception exception) {
-        return problem(problemMapper.map(exception).orElseThrow());
-    }
-
     private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
         return ResponseEntity.status(HttpStatusCode.valueOf(descriptor.status()))
                 .body(ProblemDetailRenderer.render(descriptor));
