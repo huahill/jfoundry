@@ -120,7 +120,8 @@ failures retain Spring's original status and problem response. The auto-configur
 Spring Boot's Web MVC problem-details configuration, so enabling `spring.mvc.problemdetails.enabled`
 does not introduce a competing handler. It intentionally does not configure authentication or
 authorization. A security adapter that owns those semantics can render its own `401` or `403`
-descriptor with `ProblemDetailRenderer.render(...)`.
+descriptor with `ProblemDetailRenderer.render(...)`. The shared contract and capability-selection
+entry point are documented in [REST Problem Details](../capabilities/problem-details.md).
 
 `jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute

@@ -82,10 +82,11 @@ Hexagonal 或 Onion 应依据领域和项目约束选择；jfoundry 不会为业
 
 ## 仅在需要时追加能力
 
+- 先从[能力目录](../capabilities/index.md)开始。它将业务需求映射到受支持的运行时入口，并链接到契约和组合说明。
 - 用例需要时加入[应用事务](../capabilities/application-transactions.md)或[分布式锁](../capabilities/distributed-locks.md)。
 - 应用需要直接消息代理生产者时加入[消息传输](../capabilities/message-delivery.md)；只有还需要持久化发布或消费端幂等时，才加入[可靠消息：Outbox 与 Inbox](../capabilities/reliable-messaging.md)。Web MVC 和调度启动器只为对应能力添加。
 
-[Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)是单个启动器、配置项和注册条件的唯一目录。
+[Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)详细说明单个 Spring 启动器、配置项和注册条件。
 
 各运行时的依赖配置、能力组合与验证见 [Spring Boot 运行时装配](../implementations/spring-boot.md)、
 [Quarkus 运行时集成](../implementations/quarkus.md) 和
