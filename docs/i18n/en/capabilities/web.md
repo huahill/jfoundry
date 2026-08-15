@@ -72,9 +72,15 @@ forcing an HTTP concern into the domain model.
 Configure only the builder owned by the integration with `RestClientSupport.configure(builder)`, then
 execute that call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind.
+become an `HttpRequestException` with a safe failure kind. The default `BASIC` HTTP logging records
+query-free request metadata and response statuses only when its logger is enabled at `DEBUG`; it does
+not access either body.
 
-The integration does not read, copy, or retain a downstream response body. An application adapter
-that owns a documented downstream protocol must perform any body parsing itself. The
+Applications can select `NONE`, `HEADERS`, or `FULL` through
+`RestClientSupport.configure(builder, HttpLoggingLevel)`. `HEADERS` redacts sensitive headers. `FULL`
+also redacts and limits JSON body logs to 8 KiB, and can read an unconsumed error response body for
+that diagnostic purpose. The response error handler itself does not read, copy, or retain a downstream
+response body. An application adapter that owns a documented downstream protocol must perform any body
+parsing itself. The
 [Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents the Spring-specific
 composition and boundary in more detail.

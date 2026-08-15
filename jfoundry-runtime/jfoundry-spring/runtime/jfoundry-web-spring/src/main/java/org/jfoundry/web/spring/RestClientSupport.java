@@ -13,15 +13,26 @@ import java.net.http.HttpTimeoutException;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/// Installs safe response handling and translates RestClient transport failures.
+/// Installs safe response handling, `BASIC` HTTP logging, and translates RestClient transport failures.
 public final class RestClientSupport {
 
     private RestClientSupport() {
     }
 
+    /// Configures a `RestClient` builder with safe response handling and `BASIC` HTTP logging.
     public static RestClient.Builder configure(RestClient.Builder builder) {
-        return Objects.requireNonNull(builder, "builder must not be null")
+        return configure(builder, HttpLoggingLevel.BASIC);
+    }
+
+    /// Configures a `RestClient` builder with safe response handling and the selected HTTP logging detail.
+    public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel) {
+        var configuredBuilder = Objects.requireNonNull(builder, "builder must not be null")
                 .defaultStatusHandler(new HttpResponseErrorHandler());
+        var level = Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
+        if (level != HttpLoggingLevel.NONE) {
+            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level));
+        }
+        return configuredBuilder;
     }
 
     public static <T> T execute(Supplier<T> operation) {
