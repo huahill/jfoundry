@@ -58,7 +58,7 @@
     <caffeine.version>3.1.8</caffeine.version>
 
     <!-- Messaging and background jobs -->
-    <jobrunr.version>8.7.1</jobrunr.version>
+    <jobrunr.version>8.8.1</jobrunr.version>
     <kafka-clients.version>4.3.1</kafka-clients.version>
     <mqttv3.version>1.2.5</mqttv3.version>
     <rabbitmq-amqp-client.version>5.34.0</rabbitmq-amqp-client.version>
@@ -109,6 +109,11 @@
         <version>${jmolecules-integrations.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.jmolecules.integrations</groupId>
+        <artifactId>jmolecules-spring</artifactId>
+        <version>${jmolecules-integrations.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit-junit5</artifactId>
         <version>${archunit.version}</version>
@@ -138,6 +143,16 @@
       <dependency>
         <groupId>com.baomidou</groupId>
         <artifactId>mybatis-plus-jsqlparser</artifactId>
+        <version>${mybatis-plus.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
+        <version>${mybatis-plus.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-spring-boot-native-image</artifactId>
         <version>${mybatis-plus.version}</version>
       </dependency>
       <dependency>
@@ -226,6 +241,11 @@
         <version>${jobrunr.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.jobrunr</groupId>
+        <artifactId>jobrunr-spring-boot-4-starter</artifactId>
+        <version>${jobrunr.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.apache.kafka</groupId>
         <artifactId>kafka-clients</artifactId>
         <version>${kafka-clients.version}</version>
@@ -243,6 +263,11 @@
       <dependency>
         <groupId>org.redisson</groupId>
         <artifactId>redisson</artifactId>
+        <version>${redisson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.redisson</groupId>
+        <artifactId>redisson-spring-boot-starter</artifactId>
         <version>${redisson.version}</version>
       </dependency>
 
