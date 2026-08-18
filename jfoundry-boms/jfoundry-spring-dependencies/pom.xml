@@ -31,11 +31,7 @@
         <spring-boot.version>4.0.7</spring-boot.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
         <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
-        <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
-        <mybatis-plus-spring-boot4.version>3.5.17</mybatis-plus-spring-boot4.version>
-        <jobrunr.version>8.7.1</jobrunr.version>
         <mybatis-spring.version>4.1.0</mybatis-spring.version>
-        <redisson.version>4.6.1</redisson.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -61,35 +57,18 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Shared component families are versioned by the foundation BOM. -->
             <dependency>
-                <groupId>org.jmolecules.integrations</groupId>
-                <artifactId>jmolecules-spring</artifactId>
-                <version>${jmolecules-integrations.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
-                <version>${mybatis-plus-spring-boot4.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.baomidou</groupId>
-                <artifactId>mybatis-plus-spring-boot-native-image</artifactId>
-                <version>${mybatis-plus-spring-boot4.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jobrunr</groupId>
-                <artifactId>jobrunr-spring-boot-4-starter</artifactId>
-                <version>${jobrunr.version}</version>
+                <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-foundation-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mybatis</groupId>
                 <artifactId>mybatis-spring</artifactId>
                 <version>${mybatis-spring.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.redisson</groupId>
-                <artifactId>redisson-spring-boot-starter</artifactId>
-                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

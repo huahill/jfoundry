@@ -12,13 +12,16 @@ create a published parent or inheritance boundary.
   supported `spring-boot-starter-parent`, imports `jfoundry-dependencies` and
   `jfoundry-spring-dependencies`, and is the sole Maven parent for a Spring Boot application that
   adopts it.
-- `jfoundry-foundation-dependencies` manages low-level common dependency versions.
+- `jfoundry-foundation-dependencies` manages low-level common dependency versions and all supported
+  coordinates of third-party component families shared with a runtime BOM.
 - `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
   foundation and module BOMs and is the required JFoundry BOM for every external application.
 - `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, and
   `jfoundry-helidon-dependencies` are standalone runtime BOMs. They do not import
-  `jfoundry-dependencies` and manage only their own runtime platform ecosystems.
+  `jfoundry-dependencies`. A runtime BOM imports `jfoundry-foundation-dependencies` when it exposes
+  a runtime variant of a shared third-party component family; otherwise it manages only its runtime
+  platform ecosystem.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and
@@ -61,6 +64,11 @@ Managing an ecosystem BOM does not mean JFoundry provides an adapter for every l
 ecosystem. A JFoundry adapter remains a separate module, API, and runtime-verification decision.
 
 When adding a module or third-party dependency, update the narrowest relevant BOM and any aggregate BOM that imports it.
+
+For a third-party component family used by both Foundation and a runtime BOM, Foundation is the sole
+version owner. It manages every supported coordinate in that family, including runtime-specific starter
+or Native Image artifacts. The runtime BOM imports Foundation and must not redeclare the family version
+or any of those coordinates. JobRunr, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
 
 ## Starter Rules
 
