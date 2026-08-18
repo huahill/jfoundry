@@ -30,8 +30,8 @@
 | Hibernate ORM | 7.2.19.Final |
 | Spring Kafka | 4.0.6 |
 | Spring AMQP | 4.0.4 |
-| JobRunr | 8.7.1 |
-| Redisson | 4.6.1 |
+| JobRunr | 8.8.1 |
+| Redisson | 4.7.0 |
 | RocketMQ client | 5.5.0 |
 | Javassist override | 3.30.2-GA |
 | Helidon `groovy-all` compatibility override | 2.4.14 |
@@ -70,8 +70,8 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Spring middleware integration tests | `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Spring Native Image base Starter/Web MVC consumer smoke test | GraalVM 25 with Spring Boot 4.0.7 AOT, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then `GET /jfoundry/native/ready` | PASS on GraalVM Community 25.0.2 |
 | Spring Native Image MyBatis-Plus persistence integration | GraalVM 25 with Spring Boot 4.0.7, MyBatis-Plus 3.5.17 and its `mybatis-plus-spring-boot-native-image` module, PostgreSQL, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-mybatis-plus verify` | PASS on GraalVM Community 25.0.2; verifies a business-defined `AuditStampHolder` mapping and built-in Outbox/Inbox store append, paginated claim, idempotent claim, and processed-state operations |
-| Spring Native Image Redisson lock integration | GraalVM 25 with Spring Boot 4.0.7, Redisson 4.6.1, and Redis, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-redisson verify` | PASS on GraalVM Community 25.0.2; verifies `LockExecutor` acquires and releases a lock |
-| Spring Native Image JobRunr Outbox integration | GraalVM 25 with Spring Boot 4.0.7, JobRunr 8.7.1, and PostgreSQL, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-jobrunr clean verify` | PASS on GraalVM Community 25.0.2; verifies a scheduled Outbox message is published |
+| Spring Native Image Redisson lock integration | GraalVM 25 with Spring Boot 4.0.7, Redisson 4.7.0, and Redis, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-redisson verify` | Pending Docker-backed verification; the Spring starter now uses the Foundation BOM's 4.7.0 constraint |
+| Spring Native Image JobRunr Outbox integration | GraalVM 25 with Spring Boot 4.0.7, JobRunr 8.8.1, and PostgreSQL, `./mvnw -B -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative-jobrunr clean verify` | Pending Docker-backed verification; dependency resolution aligns the starter and core library at 8.8.1 |
 | Quarkus PostgreSQL middleware integration | `./mvnw -B -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Helidon PostgreSQL/JTA middleware integration | `./mvnw -B -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` | PASS on Java 25 with Docker 29.6.2/Testcontainers |
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |

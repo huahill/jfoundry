@@ -48,6 +48,26 @@ class SpringBootParentPomTest {
         }
     }
 
+    @Test
+    void foundationBomOwnsSharedComponentFamiliesUsedBySpring() throws Exception {
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+        Document spring = document(Path.of("..", "jfoundry-spring-dependencies", "pom.xml"));
+
+        assertThat(childText(child(foundation.getDocumentElement(), "properties"), "jobrunr.version"))
+                .isEqualTo("8.8.1");
+        assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
+        assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isTrue();
+        assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
+
+        assertThat(importedBoms(spring)).contains(
+                new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
+        assertThat(managesDependency(spring, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
+        assertThat(managesDependency(spring, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
+        assertThat(managesDependency(spring, "org.redisson", "redisson-spring-boot-starter")).isFalse();
+        assertThat(managesDependency(spring, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+    }
+
     private Document document(Path path) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -63,7 +83,8 @@ class SpringBootParentPomTest {
         Element dependencies = child(management, "dependencies");
         List<Coordinate> imports = new ArrayList<>();
         for (Element dependency : children(dependencies, "dependency")) {
-            if ("import".equals(childText(dependency, "scope"))) {
+            Element scope = child(dependency, "scope");
+            if (scope != null && "import".equals(scope.getTextContent())) {
                 imports.add(coordinate(dependency));
             }
         }
@@ -75,6 +96,14 @@ class SpringBootParentPomTest {
                 childText(element, "groupId"),
                 childText(element, "artifactId"),
                 childText(element, "version"));
+    }
+
+    private boolean managesDependency(Document document, String groupId, String artifactId) {
+        Element management = child(document.getDocumentElement(), "dependencyManagement");
+        Element dependencies = child(management, "dependencies");
+        return children(dependencies, "dependency").stream()
+                .anyMatch(dependency -> groupId.equals(childText(dependency, "groupId"))
+                        && artifactId.equals(childText(dependency, "artifactId")));
     }
 
     private Element child(Element parent, String name) {
