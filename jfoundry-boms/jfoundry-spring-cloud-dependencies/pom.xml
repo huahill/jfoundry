@@ -6,7 +6,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-    <version>1.0.3</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
     <name>jfoundry-spring-cloud-dependencies</name>
     <description>Spring Cloud platform dependency management BOM for jfoundry applications.</description>
@@ -17,7 +17,7 @@
         <connection>${jfoundry.release.scm.connection}</connection>
         <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
         <url>${jfoundry.release.scm.url}</url>
-        <tag>v1.0.3</tag>
+        <tag>v1.1.0</tag>
     </scm>
     <properties>
         <project.build.outputTimestamp>2026-08-06T12:24:23Z</project.build.outputTimestamp>
