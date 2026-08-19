@@ -37,7 +37,7 @@
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.2.19.Final</hibernate.version>
+    <hibernate.version>7.4.5.Final</hibernate.version>
     <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
 
