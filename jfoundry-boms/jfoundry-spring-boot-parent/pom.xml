@@ -61,14 +61,14 @@
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-dependencies</artifactId>
+                <artifactId>jfoundry-spring-dependencies</artifactId>
                 <version>${jfoundry.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-spring-dependencies</artifactId>
+                <artifactId>jfoundry-dependencies</artifactId>
                 <version>${jfoundry.version}</version>
                 <type>pom</type>
                 <scope>import</scope>

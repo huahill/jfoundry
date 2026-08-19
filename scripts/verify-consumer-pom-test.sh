@@ -114,11 +114,51 @@ cat > "${parent_dir}/jfoundry-spring-boot-parent-${fixture_version}.pom" <<XML
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-dependencies</artifactId>
         <version>\${jfoundry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-spring-dependencies</artifactId>
         <version>\${jfoundry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
+XML
+
+if bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}" >/dev/null 2>&1; then
+    echo "Expected Consumer POM verification to reject a Spring Boot Parent that imports the core BOM before the runtime BOM." >&2
+    exit 1
+fi
+
+cat > "${parent_dir}/jfoundry-spring-boot-parent-${fixture_version}.pom" <<XML
+<project>
+  <artifactId>jfoundry-spring-boot-parent</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <properties>
+    <jfoundry.version>${fixture_version}</jfoundry.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-spring-dependencies</artifactId>
+        <version>\${jfoundry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-dependencies</artifactId>
+        <version>\${jfoundry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
