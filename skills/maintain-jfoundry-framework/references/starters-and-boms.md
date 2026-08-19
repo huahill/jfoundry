@@ -68,7 +68,11 @@ When adding a module or third-party dependency, update the narrowest relevant BO
 For a third-party component family used by both Foundation and a runtime BOM, Foundation is the sole
 version owner. It manages every supported coordinate in that family, including runtime-specific starter
 or Native Image artifacts. The runtime BOM imports Foundation and must not redeclare the family version
-or any of those coordinates. JobRunr, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
+or any of those coordinates. JobRunr, Jackson, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
+
+When an upstream component family publishes a BOM, import that BOM from Foundation rather than managing
+individual artifacts from the family. Jackson is managed through `tools.jackson:jackson-bom`, which keeps
+Jackson 3 `databind` and `core` aligned with the corresponding Jackson 2 annotations release.
 
 ## Starter Rules
 

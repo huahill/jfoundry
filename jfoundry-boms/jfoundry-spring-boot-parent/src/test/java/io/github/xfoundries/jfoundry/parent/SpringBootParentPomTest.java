@@ -55,6 +55,11 @@ class SpringBootParentPomTest {
 
         assertThat(childText(child(foundation.getDocumentElement(), "properties"), "jobrunr.version"))
                 .isEqualTo("8.8.1");
+        assertThat(childText(child(foundation.getDocumentElement(), "properties"), "jackson.version"))
+                .isEqualTo("3.2.1");
+        assertThat(importedBoms(foundation)).contains(
+                new Coordinate("tools.jackson", "jackson-bom", "${jackson.version}"));
+        assertThat(managesDependency(foundation, "tools.jackson.core", "jackson-databind")).isFalse();
         assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isTrue();

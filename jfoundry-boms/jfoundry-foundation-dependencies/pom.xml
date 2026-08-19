@@ -42,7 +42,7 @@
     <postgresql.version>42.7.13</postgresql.version>
 
     <!-- Serialization and data binding -->
-    <jackson3.version>3.1.5</jackson3.version>
+    <jackson.version>3.2.1</jackson.version>
 
     <!-- Mapping and code generation -->
     <mapstruct.version>1.5.5.Final</mapstruct.version>
@@ -93,6 +93,13 @@
         <groupId>org.junit</groupId>
         <artifactId>junit-bom</artifactId>
         <version>${junit-jupiter.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -174,13 +181,6 @@
         <groupId>org.postgresql</groupId>
         <artifactId>postgresql</artifactId>
         <version>${postgresql.version}</version>
-      </dependency>
-
-      <!-- Serialization and data binding -->
-      <dependency>
-        <groupId>tools.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson3.version}</version>
       </dependency>
 
       <!-- Mapping and code generation -->

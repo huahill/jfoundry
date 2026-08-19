@@ -25,7 +25,7 @@
 | Helidon MP | 4.5.1 |
 | MyBatis-Plus | 3.5.17 |
 | MyBatis-Plus Spring Boot 4 starter | 3.5.17 |
-| Jackson 3 | 3.1.4 |
+| Jackson 3 | 3.2.1 (`jackson-annotations` 2.22) |
 | Jakarta Persistence | 3.2.0 |
 | Hibernate ORM | 7.2.19.Final |
 | Spring Kafka | 4.0.6 |
