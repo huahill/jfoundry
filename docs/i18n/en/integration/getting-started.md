@@ -7,53 +7,61 @@ plain runtime framework and ORM.
 
 ## Choose A Parent, BOM, And Module Boundary
 
-For a Spring Boot application, use `jfoundry-spring-boot-parent` as the only Maven parent:
+Choose one Spring platform line. The lines are intentionally incompatible and an application must not
+import both runtime BOMs.
+
+| Line | Parent | Runtime BOM | Platform baseline |
+|------|--------|-------------|-------------------|
+| Boot-only | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | Spring Boot 4.1.0 |
+| Cloud | `jfoundry-spring-cloud-parent` | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
+
+For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven parent:
 
 ```xml
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.3</version>
 </parent>
 ```
 
-It inherits `spring-boot-starter-parent:4.0.7`, sets the Java 25 baseline, and imports both
-JFoundry BOMs required for Spring Boot. Declare Spring Boot and JFoundry dependencies without a
-version, but continue to select each JFoundry capability starter explicitly.
+It inherits `spring-boot-starter-parent:4.1.0`, sets the Java 25 baseline, and imports the Boot-only
+runtime BOM before `jfoundry-dependencies`. Declare Spring Boot and JFoundry dependencies without a
+version, but continue to select each JFoundry capability starter explicitly. A Cloud application uses
+`jfoundry-spring-cloud-parent`, which inherits Spring Boot 4.0.7 and imports the Cloud runtime BOM.
 
 An application that must keep a different Maven parent imports `jfoundry-dependencies` for JFoundry
 module versions. An application that uses a supported runtime additionally imports exactly one
-matching runtime BOM:
-`jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, or
+matching runtime BOM: `jfoundry-spring-boot-dependencies`,
+`jfoundry-spring-cloud-dependencies`, `jfoundry-quarkus-dependencies`, or
 `jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
 replace the core JFoundry BOM. Import the runtime BOM before `jfoundry-dependencies` so the runtime
 platform's managed constraints take precedence. Select versions from the intended release line; this
 project currently uses the following development version.
 
-Runtime BOMs may also manage official Cloud or integration BOMs compatible with their platform
-baseline. For example, the Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and
-Spring Cloud Alibaba version lines. This lets an application add a selected Cloud starter without a
-version; it does not add any Cloud starter automatically or imply that JFoundry provides an adapter
-for that starter.
+The Boot-only BOM manages only Spring Boot. The Cloud BOM manages Spring Boot, Spring Cloud, and
+Spring Cloud Alibaba as one tested platform line. This lets a Cloud application add a selected Cloud
+starter without a version; it does not add any Cloud starter automatically or imply that JFoundry
+provides an adapter for that starter.
 
-The following XML is the alternative for a Spring Boot application that cannot use the JFoundry
-parent. For Quarkus or Helidon, replace the first import with the matching runtime BOM and retain the
-second core BOM:
+The following XML is the alternative for a Boot-only application that cannot use the JFoundry parent.
+For the Cloud line, replace the first import with `jfoundry-spring-cloud-dependencies`. For Quarkus
+or Helidon, use the matching runtime BOM and retain the second core BOM:
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-dependencies</artifactId>
-            <version>1.0.1</version>
+            <artifactId>jfoundry-spring-boot-dependencies</artifactId>
+            <version>1.0.3</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.3</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>

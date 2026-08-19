@@ -7,22 +7,23 @@ capability is enabled by the base starter.
 
 ## Assembly Model
 
-Use `jfoundry-spring-boot-parent` as the application's only Maven parent, then add
+Use `jfoundry-spring-boot-parent` as the Boot-only application's only Maven parent, then add
 `jfoundry-spring-boot-starter` in the runtime assembly module. The parent inherits
-`spring-boot-starter-parent:4.0.7`, sets Java 25, and imports `jfoundry-dependencies` plus
-`jfoundry-spring-dependencies`. The base starter intentionally remains small: it provides general
+`spring-boot-starter-parent:4.1.0`, sets Java 25, and imports `jfoundry-spring-boot-dependencies`
+before `jfoundry-dependencies`. The base starter intentionally remains small: it provides general
 Boot wiring and a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox,
 Inbox, JobRunr, or Redisson client.
 
-The Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and Spring Cloud Alibaba BOMs.
-It manages their versions only: applications still declare the selected Cloud starters explicitly,
-and that management alone does not create a JFoundry adapter for each Cloud capability.
+An application that needs Spring Cloud or Spring Cloud Alibaba uses `jfoundry-spring-cloud-parent`.
+That independent line inherits Spring Boot 4.0.7 and imports `jfoundry-spring-cloud-dependencies`
+before `jfoundry-dependencies`; it manages Spring Cloud 2025.1.2 and Spring Cloud Alibaba
+2025.1.0.0. Do not combine the two Spring runtime BOMs. Cloud Alibaba belongs only to the Cloud line.
 
 ```xml
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.3</version>
 </parent>
 
 <dependencies>
@@ -153,7 +154,7 @@ Kafka, and RabbitMQ:
   -am -Pit verify
 ```
 
-The same module also contains a minimal Spring Boot 4.0.7 AOT consumer. On GraalVM Native Image, the
+The same module also contains a minimal Spring Boot 4.1.0 AOT consumer. On GraalVM Native Image, the
 `native` profile builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready`
 returns `ready`. This is the Native Image support claim for the base Spring Boot starter and Web MVC
 assembly. It does not certify optional persistence, broker, lock, or scheduler adapters; each such
@@ -170,7 +171,7 @@ starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, l
 Native executable, and verifies an insert, reload, update, and reload of a business-defined
 `AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
-claim applies to Spring Boot 4.0.7, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
+claim applies to Spring Boot 4.1.0, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
 JPA, brokers, Redisson, or JobRunr. It also verifies the built-in MyBatis-Plus Outbox and Inbox
 stores through append, paginated claim, idempotent claim, and processed-state operations:
 
