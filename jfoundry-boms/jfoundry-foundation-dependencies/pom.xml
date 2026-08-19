@@ -28,7 +28,7 @@
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     <!-- Imported BOMs -->
     <jmolecules.version>2025.0.2</jmolecules.version>
-    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <junit-jupiter.version>6.1.3</junit-jupiter.version>
 
     <!-- Domain modeling and architecture -->
     <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
