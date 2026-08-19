@@ -95,27 +95,64 @@ require_imported_bom_before() {
     fi
 }
 
-verify_spring_boot_parent() {
+require_exact_imported_boms() {
+    local pom="$1"
+    local first_artifact="$2"
+    local second_artifact="$3"
+    local actual
+    local expected
+
+    actual="$(xmllint --xpath '//*[local-name()="dependencyManagement"]/*[local-name()="dependencies"]/*[local-name()="dependency"][*[local-name()="type" and text()="pom"] and *[local-name()="scope" and text()="import"]]/*[local-name()="artifactId"]/text()' "${pom}")"
+    expected="$(printf '%s\n%s' "${first_artifact}" "${second_artifact}")"
+    if [[ "${actual}" != "${expected}" ]]; then
+        echo "Consumer POM must import exactly ${first_artifact} then ${second_artifact}: ${pom}" >&2
+        exit 1
+    fi
+}
+
+require_parent_coordinate() {
+    local pom="$1"
+    local group_id="$2"
+    local artifact_id="$3"
+    local version="$4"
+    local actual
+
+    actual="$(xmllint --xpath 'concat(//*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="groupId"]/text(), ":", //*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="artifactId"]/text(), ":", //*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="version"]/text())' "${pom}")"
+    if [[ "${actual}" != "${group_id}:${artifact_id}:${version}" ]]; then
+        echo "Consumer POM must inherit ${group_id}:${artifact_id}:${version}: ${pom}" >&2
+        exit 1
+    fi
+}
+
+verify_spring_parent() {
+    local artifact="$1"
+    local boot_version="$2"
+    local runtime_bom="$3"
     local pom
-    pom="$(pom_path "jfoundry-spring-boot-parent")"
+    pom="$(pom_path "${artifact}")"
     if [[ ! -f "${pom}" ]]; then
-        echo "Spring Boot Parent POM does not exist: ${pom}" >&2
+        echo "Spring parent POM does not exist: ${pom}" >&2
         exit 1
     fi
     verify_metadata "${pom}"
     require_text "${pom}" "<jfoundry.version>${version}</jfoundry.version>"
     require_text "${pom}" "<artifactId>jfoundry-dependencies</artifactId>"
-    require_text "${pom}" "<artifactId>jfoundry-spring-dependencies</artifactId>"
+    require_text "${pom}" "<artifactId>${runtime_bom}</artifactId>"
     require_text "${pom}" '<version>${jfoundry.version}</version>'
     forbid_text "${pom}" '${project.version}'
-    require_imported_bom_before "${pom}" "jfoundry-spring-dependencies" "jfoundry-dependencies"
+    forbid_text "${pom}" "jfoundry-spring-dependencies"
+    require_parent_coordinate "${pom}" "org.springframework.boot" "spring-boot-starter-parent" "${boot_version}"
+    require_imported_bom_before "${pom}" "${runtime_bom}" "jfoundry-dependencies"
+    require_exact_imported_boms "${pom}" "${runtime_bom}" "jfoundry-dependencies"
 }
 
 verify_flattened_module "jfoundry-domain"
 verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
-verify_independent_bom "jfoundry-spring-dependencies"
-verify_spring_boot_parent
+verify_independent_bom "jfoundry-spring-boot-dependencies"
+verify_independent_bom "jfoundry-spring-cloud-dependencies"
+verify_spring_parent "jfoundry-spring-boot-parent" "4.1.0" "jfoundry-spring-boot-dependencies"
+verify_spring_parent "jfoundry-spring-cloud-parent" "4.0.7" "jfoundry-spring-cloud-dependencies"
 
 if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
     if [[ -z "${maven3_bin}" || -z "${maven4_bin}" ]]; then
@@ -131,20 +168,20 @@ if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
 
     temp_dir="$(mktemp -d)"
     trap 'rm -rf "${temp_dir}"' EXIT
-    consumer_pom="${temp_dir}/pom.xml"
-    cat > "${consumer_pom}" <<XML
+    boot_consumer_pom="${temp_dir}/boot-consumer-pom.xml"
+    cat > "${boot_consumer_pom}" <<XML
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.xfoundries.verification</groupId>
-    <artifactId>consumer-pom-smoke</artifactId>
+    <artifactId>boot-consumer-pom-smoke</artifactId>
     <version>1.0.0</version>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-spring-dependencies</artifactId>
+                <artifactId>jfoundry-spring-boot-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -162,6 +199,54 @@ if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+</project>
+XML
+
+    cloud_consumer_pom="${temp_dir}/cloud-consumer-pom.xml"
+    cat > "${cloud_consumer_pom}" <<XML
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>io.github.xfoundries.verification</groupId>
+    <artifactId>cloud-consumer-pom-smoke</artifactId>
+    <version>1.0.0</version>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+                <version>${version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-dependencies</artifactId>
+                <version>${version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
     </dependencies>
 </project>
@@ -190,9 +275,38 @@ XML
 </project>
 XML
 
+    spring_cloud_parent_consumer_pom="${temp_dir}/spring-cloud-parent-consumer-pom.xml"
+    cat > "${spring_cloud_parent_consumer_pom}" <<XML
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-spring-cloud-parent</artifactId>
+        <version>${version}</version>
+        <relativePath/>
+    </parent>
+    <artifactId>spring-cloud-parent-consumer-smoke</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+        </dependency>
+    </dependencies>
+</project>
+XML
+
     for maven_bin in "${maven3_bin}" "${maven4_bin}"; do
-        "${maven_bin}" -B -f "${consumer_pom}" -Dmaven.repo.local="${repository}" compile
+        "${maven_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+        "${maven_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
         "${maven_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+        "${maven_bin}" -B -f "${spring_cloud_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
     done
 fi
 
