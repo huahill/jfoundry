@@ -87,6 +87,22 @@ assert_rejects() {
     fi
 }
 
+assert_accepts_without_xmllint() {
+    local fake_bin="${temp_dir}/without-xmllint"
+
+    mkdir -p "${fake_bin}"
+    cat > "${fake_bin}/xmllint" <<'SH'
+#!/usr/bin/env bash
+exit 127
+SH
+    chmod +x "${fake_bin}/xmllint"
+
+    if ! PATH="${fake_bin}:${PATH}" bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}"; then
+        echo "Expected Consumer POM verification to work without xmllint." >&2
+        exit 1
+    fi
+}
+
 write_parent() {
     local parent_artifact="$1"
     local boot_version="$2"
@@ -153,5 +169,6 @@ write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-cloud-dependenci
 assert_rejects "a Spring Cloud parent that imports the core BOM before the runtime BOM"
 write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
 assert_accepts
+assert_accepts_without_xmllint
 
 echo "Consumer POM verification regression test passed."

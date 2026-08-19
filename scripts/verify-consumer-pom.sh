@@ -12,6 +12,11 @@ version="$2"
 maven3_bin="${3:-}"
 maven4_bin="${4:-}"
 group_path="io/github/xfoundries"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+xml_query() {
+    java "${script_dir}/VerifyConsumerPomXml.java" "$@"
+}
 
 require_text() {
     local pom="$1"
@@ -87,7 +92,7 @@ require_imported_bom_before() {
         elif [[ "${artifact}" == "${second_artifact}" ]]; then
             second_index="${index}"
         fi
-    done < <(xmllint --xpath '//*[local-name()="dependencyManagement"]/*[local-name()="dependencies"]/*[local-name()="dependency"][*[local-name()="type" and text()="pom"] and *[local-name()="scope" and text()="import"]]/*[local-name()="artifactId"]/text()' "${pom}")
+    done < <(xml_query imported-artifact-ids "${pom}")
 
     if (( first_index == 0 || second_index == 0 || first_index >= second_index )); then
         echo "Consumer POM must import ${first_artifact} before ${second_artifact}: ${pom}" >&2
@@ -102,7 +107,7 @@ require_exact_imported_boms() {
     local actual
     local expected
 
-    actual="$(xmllint --xpath '//*[local-name()="dependencyManagement"]/*[local-name()="dependencies"]/*[local-name()="dependency"][*[local-name()="type" and text()="pom"] and *[local-name()="scope" and text()="import"]]/*[local-name()="artifactId"]/text()' "${pom}")"
+    actual="$(xml_query imported-artifact-ids "${pom}")"
     expected="$(printf '%s\n%s' "${first_artifact}" "${second_artifact}")"
     if [[ "${actual}" != "${expected}" ]]; then
         echo "Consumer POM must import exactly ${first_artifact} then ${second_artifact}: ${pom}" >&2
@@ -117,7 +122,7 @@ require_parent_coordinate() {
     local version="$4"
     local actual
 
-    actual="$(xmllint --xpath 'concat(//*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="groupId"]/text(), ":", //*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="artifactId"]/text(), ":", //*[local-name()="project"]/*[local-name()="parent"]/*[local-name()="version"]/text())' "${pom}")"
+    actual="$(xml_query parent-coordinate "${pom}")"
     if [[ "${actual}" != "${group_id}:${artifact_id}:${version}" ]]; then
         echo "Consumer POM must inherit ${group_id}:${artifact_id}:${version}: ${pom}" >&2
         exit 1
