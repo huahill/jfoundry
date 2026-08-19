@@ -26,8 +26,9 @@ module versions. An application that uses a supported runtime additionally impor
 matching runtime BOM:
 `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, or
 `jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
-replace the core JFoundry BOM. Select versions from the intended release line; this project currently
-uses the following development version.
+replace the core JFoundry BOM. Import the runtime BOM before `jfoundry-dependencies` so the runtime
+platform's managed constraints take precedence. Select versions from the intended release line; this
+project currently uses the following development version.
 
 Runtime BOMs may also manage official Cloud or integration BOMs compatible with their platform
 baseline. For example, the Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and
@@ -36,22 +37,22 @@ version; it does not add any Cloud starter automatically or imply that JFoundry 
 for that starter.
 
 The following XML is the alternative for a Spring Boot application that cannot use the JFoundry
-parent. For Quarkus or Helidon, retain the core BOM and replace the second import with the matching
-runtime BOM:
+parent. For Quarkus or Helidon, replace the first import with the matching runtime BOM and retain the
+second core BOM:
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
+            <artifactId>jfoundry-spring-dependencies</artifactId>
             <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-dependencies</artifactId>
+            <artifactId>jfoundry-dependencies</artifactId>
             <version>1.0.1</version>
             <type>pom</type>
             <scope>import</scope>

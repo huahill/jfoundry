@@ -15,14 +15,14 @@ infrastructure 模块之外。
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
+            <artifactId>jfoundry-quarkus-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-dependencies</artifactId>
+            <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>

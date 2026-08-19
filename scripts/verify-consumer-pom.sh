@@ -71,6 +71,30 @@ verify_independent_bom() {
     require_text "${pom}" "<dependencyManagement>"
 }
 
+require_imported_bom_before() {
+    local pom="$1"
+    local first_artifact="$2"
+    local second_artifact="$3"
+    local first_index=0
+    local second_index=0
+    local index=0
+    local artifact
+
+    while IFS= read -r artifact; do
+        ((index += 1))
+        if [[ "${artifact}" == "${first_artifact}" ]]; then
+            first_index="${index}"
+        elif [[ "${artifact}" == "${second_artifact}" ]]; then
+            second_index="${index}"
+        fi
+    done < <(xmllint --xpath '//*[local-name()="dependencyManagement"]/*[local-name()="dependencies"]/*[local-name()="dependency"][*[local-name()="type" and text()="pom"] and *[local-name()="scope" and text()="import"]]/*[local-name()="artifactId"]/text()' "${pom}")
+
+    if (( first_index == 0 || second_index == 0 || first_index >= second_index )); then
+        echo "Consumer POM must import ${first_artifact} before ${second_artifact}: ${pom}" >&2
+        exit 1
+    fi
+}
+
 verify_spring_boot_parent() {
     local pom
     pom="$(pom_path "jfoundry-spring-boot-parent")"
@@ -84,6 +108,7 @@ verify_spring_boot_parent() {
     require_text "${pom}" "<artifactId>jfoundry-spring-dependencies</artifactId>"
     require_text "${pom}" '<version>${jfoundry.version}</version>'
     forbid_text "${pom}" '${project.version}'
+    require_imported_bom_before "${pom}" "jfoundry-spring-dependencies" "jfoundry-dependencies"
 }
 
 verify_flattened_module "jfoundry-domain"
@@ -119,14 +144,14 @@ if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-dependencies</artifactId>
+                <artifactId>jfoundry-spring-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-spring-dependencies</artifactId>
+                <artifactId>jfoundry-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
