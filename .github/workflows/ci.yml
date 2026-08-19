@@ -82,6 +82,9 @@ jobs:
       - name: Verify supply-chain workflows
         run: bash scripts/verify-supply-chain-workflows.sh
 
+      - name: Test Consumer POM verification
+        run: bash scripts/verify-consumer-pom-test.sh
+
       - name: Test release governance verifiers
         run: |
           bash scripts/verify-release-workflow-test.sh

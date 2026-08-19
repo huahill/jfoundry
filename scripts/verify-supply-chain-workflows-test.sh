@@ -184,6 +184,10 @@ jobs:
       - dependency-review
     steps:
       - run: echo '${{ needs.dependency-review.result }}'
+  consumer-pom-verification:
+    steps:
+      - name: Test Consumer POM verification
+        run: bash scripts/verify-consumer-pom-test.sh
 YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
