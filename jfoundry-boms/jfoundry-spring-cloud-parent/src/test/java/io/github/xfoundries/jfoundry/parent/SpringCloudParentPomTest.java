@@ -22,7 +22,7 @@ class SpringCloudParentPomTest {
         assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.0.7"));
         assertThat(childText(child(document.getDocumentElement(), "properties"), "jfoundry.version"))
-                .isEqualTo("1.0.3");
+                .isEqualTo("1.1.0");
         assertThat(importedBoms(document)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-cloud-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
@@ -33,7 +33,7 @@ class SpringCloudParentPomTest {
     void isAStandalonePublishedPom() throws Exception {
         Document document = document(Path.of("pom.xml"));
 
-        assertThat(childText(child(document.getDocumentElement(), "scm"), "tag")).isEqualTo("v1.0.3");
+        assertThat(childText(child(document.getDocumentElement(), "scm"), "tag")).isEqualTo("v1.1.0");
         assertThat(child(document.getDocumentElement(), "licenses")).isNotNull();
         assertThat(child(document.getDocumentElement(), "developers")).isNotNull();
     }
