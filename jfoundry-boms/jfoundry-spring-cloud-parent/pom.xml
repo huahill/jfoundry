@@ -8,16 +8,16 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.0</version>
+        <version>4.0.7</version>
         <relativePath/>
     </parent>
 
     <groupId>io.github.xfoundries</groupId>
-    <artifactId>jfoundry-spring-boot-parent</artifactId>
+    <artifactId>jfoundry-spring-cloud-parent</artifactId>
     <version>1.0.3</version>
     <packaging>pom</packaging>
-    <name>jfoundry-spring-boot-parent</name>
-    <description>Spring Boot parent POM for jfoundry applications.</description>
+    <name>jfoundry-spring-cloud-parent</name>
+    <description>Spring Cloud parent POM for jfoundry applications.</description>
     <url>${jfoundry.release.url}</url>
 
     <licenses>
@@ -61,7 +61,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-spring-boot-dependencies</artifactId>
+                <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
                 <version>${jfoundry.version}</version>
                 <type>pom</type>
                 <scope>import</scope>

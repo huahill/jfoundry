@@ -68,11 +68,13 @@
     <modules>
         <module>jfoundry-boms/jfoundry-modules-dependencies</module>
         <module>jfoundry-boms/jfoundry-foundation-dependencies</module>
-        <module>jfoundry-boms/jfoundry-spring-dependencies</module>
+        <module>jfoundry-boms/jfoundry-spring-boot-dependencies</module>
+        <module>jfoundry-boms/jfoundry-spring-cloud-dependencies</module>
         <module>jfoundry-boms/jfoundry-quarkus-dependencies</module>
         <module>jfoundry-boms/jfoundry-helidon-dependencies</module>
         <module>jfoundry-boms/jfoundry-dependencies</module>
         <module>jfoundry-boms/jfoundry-spring-boot-parent</module>
+        <module>jfoundry-boms/jfoundry-spring-cloud-parent</module>
         <module>jfoundry-core/jfoundry-architecture</module>
         <module>jfoundry-core/jfoundry-domain</module>
         <module>jfoundry-core/jfoundry-application</module>
@@ -87,14 +89,14 @@
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-dependencies</artifactId>
+                <artifactId>jfoundry-spring-boot-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-spring-dependencies</artifactId>
+                <artifactId>jfoundry-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>
                 <scope>import</scope>

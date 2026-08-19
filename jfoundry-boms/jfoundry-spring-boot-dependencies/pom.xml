@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.xfoundries</groupId>
-    <artifactId>jfoundry-spring-dependencies</artifactId>
+    <artifactId>jfoundry-spring-boot-dependencies</artifactId>
     <version>1.0.3</version>
     <packaging>pom</packaging>
-    <name>jfoundry-spring-dependencies</name>
-    <description>Spring Boot and Cloud platform dependency management BOM for jfoundry applications.</description>
+    <name>jfoundry-spring-boot-dependencies</name>
+    <description>Spring Boot platform dependency management BOM for jfoundry applications.</description>
     <url>${jfoundry.release.url}</url>
     <licenses><license><name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0.txt</url><distribution>repo</distribution></license></licenses>
     <developers><developer><id>youngledo</id><name>youngledo</name></developer></developers>
@@ -28,32 +28,16 @@
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
-        <spring-boot.version>4.0.7</spring-boot.version>
-        <spring-cloud.version>2025.1.2</spring-cloud.version>
-        <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <mybatis-spring.version>4.1.0</mybatis-spring.version>
     </properties>
     <dependencyManagement>
         <dependencies>
-            <!-- Spring platform BOMs. They manage versions only; applications select starters explicitly. -->
+            <!-- Spring Boot manages versions only; applications select starters explicitly. -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
