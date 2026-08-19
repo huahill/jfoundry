@@ -19,7 +19,7 @@ JFoundry BOM。Spring Boot 与 JFoundry 依赖无需声明版本，但每个 JFo
 
 必须保留不同 Maven Parent 的应用，应导入用于 JFoundry 模块版本的 `jfoundry-dependencies`。使用受支持运行时的应用还要额外且仅导入一个
 对应的运行时 BOM：`jfoundry-spring-dependencies`、`jfoundry-quarkus-dependencies` 或
-`jfoundry-helidon-dependencies`。运行时 BOM 只管理各自的平台生态版本，不能替代核心 JFoundry BOM。请选择目标发布线的版本；本项目当前使用下面的开发版本。
+`jfoundry-helidon-dependencies`。运行时 BOM 只管理各自的平台生态版本，不能替代核心 JFoundry BOM。请先导入核心 BOM，再导入运行时 BOM，使 Foundation 管理的共享组件族约束优先。请选择目标发布线的版本；本项目当前使用下面的开发版本。
 
 运行时 BOM 还可以管理与其平台基线兼容的官方 Cloud 或集成 BOM。例如，Spring 运行时 BOM 管理已对齐的
 Spring Boot、Spring Cloud 和 Spring Cloud Alibaba 版本线。这样应用可以不写版本地添加所选 Cloud 启动器；它不会自动引入任何 Cloud 启动器，也不表示 JFoundry 已为该启动器提供适配器。

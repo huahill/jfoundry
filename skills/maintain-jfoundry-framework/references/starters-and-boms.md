@@ -19,9 +19,9 @@ create a published parent or inheritance boundary.
   foundation and module BOMs and is the required JFoundry BOM for every external application.
 - `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, and
   `jfoundry-helidon-dependencies` are standalone runtime BOMs. They do not import
-  `jfoundry-dependencies`. A runtime BOM imports `jfoundry-foundation-dependencies` when it exposes
-  a runtime variant of a shared third-party component family; otherwise it manages only its runtime
-  platform ecosystem.
+  `jfoundry-dependencies` and manage only their runtime platform ecosystems. A consumer imports
+  `jfoundry-dependencies` before its matching runtime BOM so Foundation's shared component-family
+  constraints take precedence without redefining the platform contract.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and
@@ -67,8 +67,8 @@ When adding a module or third-party dependency, update the narrowest relevant BO
 
 For a third-party component family used by both Foundation and a runtime BOM, Foundation is the sole
 version owner. It manages every supported coordinate in that family, including runtime-specific starter
-or Native Image artifacts. The runtime BOM imports Foundation and must not redeclare the family version
-or any of those coordinates. JobRunr, Jackson, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
+or Native Image artifacts. The runtime BOM must not redeclare the family version or any of those
+coordinates. JobRunr, Jackson, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
 
 When an upstream component family publishes a BOM, import that BOM from Foundation rather than managing
 individual artifacts from the family. Jackson is managed through `tools.jackson:jackson-bom`, which keeps

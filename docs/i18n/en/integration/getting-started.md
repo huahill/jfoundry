@@ -26,8 +26,9 @@ module versions. An application that uses a supported runtime additionally impor
 matching runtime BOM:
 `jfoundry-spring-dependencies`, `jfoundry-quarkus-dependencies`, or
 `jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
-replace the core JFoundry BOM. Select versions from the intended release line; this project currently
-uses the following development version.
+replace the core JFoundry BOM. Import the core BOM before the runtime BOM so Foundation's shared
+component-family constraints take precedence. Select versions from the intended release line; this
+project currently uses the following development version.
 
 Runtime BOMs may also manage official Cloud or integration BOMs compatible with their platform
 baseline. For example, the Spring runtime BOM manages the aligned Spring Boot, Spring Cloud, and

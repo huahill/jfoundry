@@ -7,7 +7,8 @@ Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and applicatio
 ## Dependency Composition
 
 Import the core JFoundry BOM, then the Helidon BOM for the same release line. The Helidon BOM manages
-the selected Helidon platform ecosystem only; it does not manage JFoundry module versions:
+the selected Helidon platform ecosystem only; it does not manage JFoundry module versions. Importing
+the core BOM first gives Foundation's shared component-family constraints precedence:
 
 ```xml
 <dependencyManagement>

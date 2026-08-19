@@ -7,8 +7,9 @@ outside the domain, application, and infrastructure modules.
 ## Dependency Setup
 
 Import the core JFoundry BOM, then the Quarkus BOM for the same release line, and finally add the
-runtime extension. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
-it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
+runtime extension. `jfoundry-quarkus-dependencies` manages the Quarkus platform ecosystem only; it
+does not manage JFoundry module versions. Import `jfoundry-dependencies` first so Foundation's shared
+component-family constraints take precedence. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
 
 ```xml

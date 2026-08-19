@@ -25,6 +25,13 @@
         <dependencies>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.github.xfoundries</groupId>
                 <artifactId>jfoundry-quarkus-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>

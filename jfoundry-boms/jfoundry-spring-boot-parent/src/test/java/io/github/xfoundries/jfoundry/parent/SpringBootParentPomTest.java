@@ -73,6 +73,25 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(spring, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
     }
 
+    @Test
+    void runtimeParentsImportTheCoreBomBeforeTheirRuntimeBom() throws Exception {
+        assertRuntimeParentImports(
+                Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "pom.xml"),
+                "jfoundry-spring-dependencies");
+        assertRuntimeParentImports(
+                Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus", "pom.xml"),
+                "jfoundry-quarkus-dependencies");
+        assertRuntimeParentImports(
+                Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon", "pom.xml"),
+                "jfoundry-helidon-dependencies");
+    }
+
+    private void assertRuntimeParentImports(Path pomPath, String runtimeBomArtifactId) throws Exception {
+        assertThat(importedBoms(document(pomPath))).containsExactly(
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
+                new Coordinate("io.github.xfoundries", runtimeBomArtifactId, "${project.version}"));
+    }
+
     private Document document(Path path) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);

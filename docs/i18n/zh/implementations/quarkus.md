@@ -7,7 +7,7 @@ infrastructure 模块之外。
 ## 依赖配置
 
 先导入核心 JFoundry BOM，再导入同一发布线的 Quarkus BOM，最后添加运行时扩展。
-`jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
+`jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。请先导入 `jfoundry-dependencies`，使 Foundation 管理的共享组件族约束优先。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
 ```xml
