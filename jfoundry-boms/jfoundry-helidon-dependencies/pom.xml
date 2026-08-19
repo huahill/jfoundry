@@ -31,7 +31,7 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
         <helidon.version>4.5.2</helidon.version>
-        <helidon.groovy-all.version>2.4.21</helidon.groovy-all.version>
+        <helidon.groovy-all.version>3.0.25</helidon.groovy-all.version>
     </properties>
 
     <dependencyManagement>
