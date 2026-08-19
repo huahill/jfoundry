@@ -72,7 +72,7 @@
     <snakeyaml.version>2.6</snakeyaml.version>
 
     <!-- Testing -->
-    <awaitility.version>4.2.1</awaitility.version>
+    <awaitility.version>4.3.0</awaitility.version>
     <assertj.version>3.27.7</assertj.version>
     <byte-buddy.version>1.17.8</byte-buddy.version>
     <mockito.version>5.23.0</mockito.version>
