@@ -320,6 +320,7 @@ permissions:
 jobs:
   prepare:
     steps:
+      - run: git tag --points-at sha
       - run: ./mvnw versions:set
       - run: git push --set-upstream origin branch
       - run: gh pr create
