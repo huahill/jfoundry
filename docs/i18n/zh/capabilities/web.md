@@ -33,6 +33,30 @@
 
 内置目录映射以下 JFoundry 异常：`InvalidArgumentException`、`NotFoundException`、`ConflictException`、`ExternalAccessException`、`DomainRuleViolationException` 和 `DomainStateException`。运行时报告 `400`、`404`、`405`、`406`、`413`、`415` 或 `503` 时，也会使用共享契约。
 
+`InvalidArgumentException`、`NotFoundException`、`ConflictException`、`DomainRuleViolationException`
+和 `DomainStateException` 的消息会成为面向调用方的 `detail`。这些消息应使用业务语言，不得包含凭证、
+内部地址、SQL 或其它诊断数据。
+
+`ExternalAccessException` 的语义不同：其诊断消息默认会被隐藏。具体的转换后异常在拥有稳定、可操作且
+经过审查的提示时，可以通过受保护的构造方法显式提供公开详情：
+
+```java
+final class MksAuthenticationException extends ExternalAccessException {
+
+    MksAuthenticationException(Throwable cause) {
+        super(
+                "MKS deployment JWT signing failed",
+                cause,
+                "Deployment authorization is temporarily unavailable."
+        );
+    }
+}
+```
+
+内置目录会把该显式详情用于 `EXTERNAL_ACCESS` 响应，但绝不会从诊断消息、cause 或
+`cause.getMessage()` 推导公开详情。现有构造方法仍保持默认脱敏，并继续返回
+`The requested operation is temporarily unavailable.`。
+
 应用可以提供 `ProblemMapper`，将自己拥有的异常映射为 `ProblemDescriptor`。这用于稳定的应用专属错误，避免泄露实现异常，也不应把 HTTP 关注点放入领域模型。
 
 ### 明确边界

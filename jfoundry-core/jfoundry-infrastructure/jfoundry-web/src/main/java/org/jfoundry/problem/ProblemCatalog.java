@@ -27,9 +27,10 @@ public final class ProblemCatalog {
         if (exception instanceof ConflictException) {
             return problem(409, "CONFLICT", "Conflict", "conflict", exception.getMessage());
         }
-        if (exception instanceof ExternalAccessException) {
+        if (exception instanceof ExternalAccessException externalAccessException) {
             return problem(503, "EXTERNAL_ACCESS", "Service temporarily unavailable", "external-access",
-                    "The requested operation is temporarily unavailable.");
+                    externalAccessException.publicDetail()
+                            .orElse("The requested operation is temporarily unavailable."));
         }
         if (exception instanceof DomainRuleViolationException) {
             return problem(422, "DOMAIN_RULE_VIOLATION", "Domain rule violation", "domain-rule-violation",
