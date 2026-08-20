@@ -49,7 +49,7 @@
 
 ## 出站 HTTP 客户端集成
 
-`jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对由该集成拥有的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行该调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。默认的 `BASIC` HTTP 日志只会在对应 logger 开启 `DEBUG` 时记录移除 query 后的请求元数据和响应状态，不会访问任一 body。
+`jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对由该集成拥有的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行该调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。Spring MVC 适配器会以 `ERROR` 级别记录外部访问异常和其他未处理异常的堆栈；Problem Details 响应不会包含 cause 或堆栈。默认的 `BASIC` HTTP 日志只会在对应 logger 开启 `DEBUG` 时记录移除 query 后的请求元数据和响应状态，不会访问任一 body。
 
 应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`。`HEADERS` 会脱敏敏感 header；`FULL` 还会脱敏 JSON body、限制日志内容为 8 KiB，并可能为了诊断未消费的错误响应而读取其 body。响应错误处理器本身不会读取、复制或保留下游响应 body；拥有已明确约定下游协议的应用适配器仍应自行完成响应 body 解析。
 

@@ -42,7 +42,7 @@ public final class RestClientSupport {
         } catch (HttpResponseException exception) {
             throw exception;
         } catch (RestClientException exception) {
-            throw new HttpRequestException(classify(exception));
+            throw new HttpRequestException(classify(exception), exception);
         }
     }
 

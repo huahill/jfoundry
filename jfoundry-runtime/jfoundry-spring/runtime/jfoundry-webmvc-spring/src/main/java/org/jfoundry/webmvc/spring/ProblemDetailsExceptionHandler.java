@@ -10,6 +10,8 @@ import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -27,6 +29,8 @@ import org.springframework.web.util.WebUtils;
 @RestControllerAdvice
 public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(ProblemDetailsExceptionHandler.class);
+    private static final String SPRING_SECURITY_PACKAGE = "org.springframework.security.";
     private final ProblemMapper problemMapper;
 
     public ProblemDetailsExceptionHandler() {
@@ -54,6 +58,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
 
     @ExceptionHandler(ExternalAccessException.class)
     public ResponseEntity<ProblemDetail> handleExternalAccess(ExternalAccessException exception) {
+        LOG.error("External access failed while processing an HTTP request", exception);
         return problem(problemMapper.map(exception).orElseThrow());
     }
 
@@ -65,6 +70,30 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
     @ExceptionHandler(DomainStateException.class)
     public ResponseEntity<ProblemDetail> handleDomainState(DomainStateException exception) {
         return problem(problemMapper.map(exception).orElseThrow());
+    }
+
+    /// Maps exceptions without a more specific handler through the configured problem mapper.
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ProblemDetail> handleUnhandled(Exception exception) {
+        if (isSecurityException(exception)) {
+            if (exception instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new RuntimeException(exception);
+        }
+        LOG.error("Unhandled exception while processing an HTTP request", exception);
+        return problem(problemMapper.map(exception).orElseThrow());
+    }
+
+    private static boolean isSecurityException(Throwable exception) {
+        for (Throwable current = exception; current != null; current = current.getCause()) {
+            for (Class<?> type = current.getClass(); type != null; type = type.getSuperclass()) {
+                if (type.getName().startsWith(SPRING_SECURITY_PACKAGE)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {

@@ -73,9 +73,11 @@ forcing an HTTP concern into the domain model.
 Configure only the builder owned by the integration with `RestClientSupport.configure(builder)`, then
 execute that call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. The default `BASIC` HTTP logging records
-query-free request metadata and response statuses only when its logger is enabled at `DEBUG`; it does
-not access either body.
+become an `HttpRequestException` with a safe failure kind while retaining the original exception as
+its cause for server-side diagnostics. The Spring MVC adapter logs external-access and otherwise
+unhandled exceptions with their stack traces at `ERROR`; Problem Details responses never include a
+cause or stack trace. The default `BASIC` HTTP logging records query-free request metadata and response
+statuses only when its logger is enabled at `DEBUG`; it does not access either body.
 
 Applications can select `NONE`, `HEADERS`, or `FULL` through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. `HEADERS` redacts sensitive headers. `FULL`
