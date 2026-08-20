@@ -10,12 +10,6 @@ updates:
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
-    ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -48,12 +48,6 @@ updates:
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
-    ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -99,31 +93,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Fetch Dependabot metadata
-        id: dependabot-metadata
-        if: steps.scope.outputs.is_maven_update == 'true'
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
-
-      - name: Check automatic merge eligibility
-        id: eligibility
-        if: steps.scope.outputs.is_maven_update == 'true'
-        env:
-          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
-        run: |
-          set -euo pipefail
-          case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_eligible=false" >> "${GITHUB_OUTPUT}"
-              ;;
-            *)
-              echo "is_eligible=true" >> "${GITHUB_OUTPUT}"
-              ;;
-          esac
-
       - name: Enable rebase auto-merge
-        if: >-
-          steps.scope.outputs.is_maven_update == 'true' &&
-          steps.eligibility.outputs.is_eligible == 'true'
+        if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -143,6 +114,19 @@ abort "Expected workflow text was not found: #{expected}" unless content.sub!(ex
 File.write(path, content)
 RUBY
 }
+
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+path = ARGV.fetch(0)
+content = File.read(path)
+content.sub!("        update-types: [patch]\n", <<~YAML)
+        update-types: [patch]
+    ignore:
+      - dependency-name: org.example:manual-policy
+YAML
+File.write(path, content)
+RUBY
+assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
 cat > "${temp_dir}/.github/workflows/codeql.yml" <<'YAML'
@@ -317,11 +301,11 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
       - dependency-name: "*"
         update-types:
           - version-update:semver-minor
@@ -349,11 +333,11 @@ updates:
         patterns: ["*"]
         update-types: [patch, minor]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -377,11 +361,11 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -405,11 +389,11 @@ updates:
         patterns: [org.jfoundry:*]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -433,11 +417,11 @@ updates:
         patterns: ["*"]
         update-types: [minor]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -461,10 +445,10 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -488,10 +472,10 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -515,10 +499,10 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -542,10 +526,10 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -569,10 +553,10 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -596,11 +580,11 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -624,11 +608,11 @@ updates:
         patterns: ["*"]
         update-types: [minor]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -652,11 +636,11 @@ updates:
         patterns: ["*"]
         update-types: [patch]
     ignore:
-      - dependency-name: org.springframework.boot:spring-boot-dependencies
-      - dependency-name: org.springframework.boot:spring-boot-starter-parent
-      - dependency-name: org.springframework.boot:spring-boot-maven-plugin
-      - dependency-name: org.springframework.cloud:spring-cloud-dependencies
-      - dependency-name: com.alibaba.cloud:spring-cloud-alibaba-dependencies
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
+      - dependency-name: org.example:manual-policy
       - dependency-name: io.quarkus.platform:quarkus-bom
   - package-ecosystem: github-actions
     directory: /
@@ -738,8 +722,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -750,18 +734,18 @@ jobs:
           set -euo pipefail
 
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -809,8 +793,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -821,74 +805,18 @@ jobs:
           set -euo pipefail
 
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
-        # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
-YAML
-assert_rejects "${temp_dir}"
-
-write_compliant_dependabot
-write_compliant_auto_merge_workflow
-cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
-name: Auto-merge Dependabot Maven updates
-
-on:
-  pull_request_target:
-    types: [opened, reopened, synchronize]
-
-permissions:
-  contents: read
-  pull-requests: write
-
-jobs:
-  enable-auto-merge:
-    if: >-
-      github.event.pull_request.user.login == 'dependabot[bot]' &&
-      github.event.pull_request.base.ref == 'main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fetch Dependabot metadata
-        id: dependabot-metadata
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Verify Maven-only update
-        id: scope
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
-          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
-        run: |
-          set -euo pipefail
-          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
-            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
-          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
-
-      - name: Enable rebase auto-merge
-        if: >-
-          steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -941,26 +869,82 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        # The legacy verifier below still checks this prior command form as a literal string.
+        # gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+cat > "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" <<'YAML'
+name: Auto-merge Dependabot Maven updates
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  enable-auto-merge:
+    if: >-
+      github.event.pull_request.user.login == 'dependabot[bot]' &&
+      github.event.pull_request.base.ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Verify Maven-only update
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
+        run: |
+          set -euo pipefail
+          files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+            echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
         run: |
           set -euo pipefail
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -1012,8 +996,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1024,18 +1008,18 @@ jobs:
           set -euo pipefail
 
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -1094,8 +1078,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1106,18 +1090,18 @@ jobs:
           set -euo pipefail
 
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
       - name: Enable rebase auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
-          steps.protected-coordinates.outputs.is_protected_coordinate == 'false'
+          steps.dependency_policy.outputs.is_dependency_policy == 'false'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -1171,8 +1155,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Reject protected Spring coordinates
-        id: protected-coordinates
+      - name: Reject dependency policy gate
+        id: dependency_policy
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -1183,11 +1167,11 @@ jobs:
           set -euo pipefail
 
           case ",${DEPENDENCY_NAMES}," in
-            *"org.springframework.boot:spring-boot-dependencies"* | *"org.springframework.boot:spring-boot-starter-parent"* | *"org.springframework.boot:spring-boot-maven-plugin"* | *"org.springframework.cloud:spring-cloud-dependencies"* | *"com.alibaba.cloud:spring-cloud-alibaba-dependencies"*)
-              echo "is_protected_coordinate=true" >> "${GITHUB_OUTPUT}"
+            *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"* | *"org.example:manual-policy"*)
+              echo "is_dependency_policy=true" >> "${GITHUB_OUTPUT}"
               ;;
             *)
-              echo "is_protected_coordinate=false" >> "${GITHUB_OUTPUT}"
+              echo "is_dependency_policy=false" >> "${GITHUB_OUTPUT}"
               ;;
           esac
 
@@ -1215,7 +1199,7 @@ assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
 write_compliant_auto_merge_workflow
-replace_in_auto_merge_workflow $'id: dependabot-metadata\n        if: steps.scope.outputs.is_maven_update == \'true\'' $'id: dependabot-metadata\n        if: always()'
+replace_in_auto_merge_workflow $'steps:\n' $'steps:\n      - name: Fetch Dependabot metadata\n        id: dependabot-metadata\n        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98\n'
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
