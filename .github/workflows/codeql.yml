@@ -4,7 +4,17 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - README.md
+      - README_ZH.md
+      - AGENTS.md
+      - docs/**
   pull_request:
+    paths-ignore:
+      - README.md
+      - README_ZH.md
+      - AGENTS.md
+      - docs/**
   schedule:
     - cron: '23 3 * * 1'
   workflow_dispatch:

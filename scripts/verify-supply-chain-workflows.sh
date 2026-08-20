@@ -188,6 +188,7 @@ require_file ".github/workflows/codeql.yml"
 require_file ".github/workflows/release.yml"
 require_file ".github/workflows/ci.yml"
 require_file ".github/workflows/snapshot.yml"
+require_file ".github/workflows/prepare-snapshot.yml"
 require_file ".github/workflows/auto-merge-dependabot.yml"
 
 require_text ".github/dependabot.yml" "package-ecosystem: maven"
@@ -215,6 +216,15 @@ require_text ".github/workflows/release.yml" "release-evidence"
 require_text ".github/workflows/snapshot.yml" "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'"
 require_text ".github/workflows/snapshot.yml" "is_snapshot=true"
 require_text ".github/workflows/snapshot.yml" "if: steps.version.outputs.is_snapshot == 'true'"
+require_text ".github/workflows/prepare-snapshot.yml" "workflow_run:"
+require_text ".github/workflows/prepare-snapshot.yml" "workflows:"
+require_text ".github/workflows/prepare-snapshot.yml" "- Release"
+require_text ".github/workflows/prepare-snapshot.yml" "git tag --points-at"
+require_text ".github/workflows/prepare-snapshot.yml" "contents: write"
+require_text ".github/workflows/prepare-snapshot.yml" "pull-requests: write"
+require_text ".github/workflows/prepare-snapshot.yml" "versions:set"
+require_text ".github/workflows/prepare-snapshot.yml" "git push --set-upstream origin"
+require_text ".github/workflows/prepare-snapshot.yml" "gh pr create"
 verify_dependabot_auto_merge_workflow
 if grep -Fq -- "-DforceStdout | tail -n 1" "${root_dir}/.github/workflows/snapshot.yml"; then
     echo ".github/workflows/snapshot.yml must not use bare Maven 4 version extraction" >&2

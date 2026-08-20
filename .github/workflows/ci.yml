@@ -52,7 +52,7 @@ jobs:
           run_full=false
           while IFS= read -r changed_path; do
             case "$changed_path" in
-              README.md|README_ZH.md|docs/*)
+              README.md|README_ZH.md|AGENTS.md|docs/*)
                 ;;
               *)
                 run_full=true
@@ -82,6 +82,9 @@ jobs:
       - name: Verify supply-chain workflows
         run: bash scripts/verify-supply-chain-workflows.sh
 
+      - name: Verify workflow path policy
+        run: bash scripts/verify-workflow-paths.sh
+
       - name: Test Consumer POM verification
         run: bash scripts/verify-consumer-pom-test.sh
 
@@ -90,6 +93,7 @@ jobs:
           bash scripts/verify-release-workflow-test.sh
           bash scripts/verify-release-sbom-test.sh
           bash scripts/verify-supply-chain-workflows-test.sh
+          bash scripts/verify-workflow-paths-test.sh
 
   dependency-review:
     name: Dependency Review

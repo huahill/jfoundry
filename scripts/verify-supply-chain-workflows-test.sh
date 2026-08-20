@@ -308,6 +308,22 @@ jobs:
         run: ./mvnw -B -DskipTests -pl '!jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests' package
       - uses: github/codeql-action/analyze@v4
 YAML
+cat > "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'YAML'
+on:
+  workflow_run:
+    workflows:
+      - Release
+    types: [completed]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  prepare:
+    steps:
+      - run: ./mvnw versions:set
+      - run: git push --set-upstream origin branch
+      - run: gh pr create
+YAML
 assert_accepts "${temp_dir}"
 
 write_compliant_dependabot

@@ -52,5 +52,6 @@ production release. Promotion to a stable release requires all of the following:
 5. No unapproved High or Critical dependency alert remains open, and release notes list supported
    scope, known limitations, and upgrade impact.
 
-The stable GitHub Release is created only after Central publication succeeds. The next development
-version is committed separately as a `-SNAPSHOT` change after publication.
+The stable GitHub Release is created only after Central publication succeeds. The
+`Prepare next SNAPSHOT` workflow then opens a separate pull request for the next development
+`-SNAPSHOT` version; it never changes `main` directly.

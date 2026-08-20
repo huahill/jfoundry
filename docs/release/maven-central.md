@@ -185,7 +185,9 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
    release workflow definition while checking out the immutable release tag as its source.
 4. Wait for the workflow to publish Central, verify public availability, upload and attest release
    evidence, and create the GitHub Release.
-5. Merge a separate change that starts the next `-SNAPSHOT` development version.
+5. After a successful stable release, `Prepare next SNAPSHOT` creates a short-lived branch and pull
+   request for the next minor `-SNAPSHOT` development version. Review and merge that PR before the
+   next development changes. The workflow skips prerelease tags and does not write directly to `main`.
 
 Retry an interrupted workflow only when its immutable source remains correct. If the release source
 must change, choose a new version and repeat the immutable-tag process; never move an existing tag.

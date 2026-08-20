@@ -89,6 +89,11 @@ The GitHub `Merge gate` status check must pass before integration. Use GitHub's 
 to preserve the linear `main` history. Local verification accelerates feedback but does not replace the
 server-side merge gate.
 
+Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`, and
+`docs/**`. These paths still run documentation and dependency checks, but skip the full Java, runtime,
+Native Image, Maven compatibility, and CodeQL matrix. Changes to workflows, scripts, POMs, source code,
+or maintenance skills remain full-validation changes.
+
 ## Documentation Comments
 
 Javadocs and documentation comments in source code must follow the Language Policy. There is no Javadoc i18n mechanism for comment bodies; generated documentation uses the text from source comments. Keep comments concise and focused on API intent; avoid restating obvious implementation details.
