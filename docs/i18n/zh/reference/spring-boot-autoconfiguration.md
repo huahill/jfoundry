@@ -11,6 +11,7 @@
 | `jfoundry-observability-spring-boot-starter` | 对符合条件的 Outbox、Inbox 和锁操作进行 Micrometer Observation | 遥测 exporter、collector 或直接 OpenTelemetry 装饰器 |
 | `jfoundry-lock-redisson-spring-boot-starter` | 分布式锁核心、Spring `@DistributedLock` 拦截、Redisson 适配器、Redisson Spring Boot 启动器 | Outbox、Inbox、消息代理投递 |
 | `jfoundry-domain-event-spring-boot-starter` | 领域事件派发、Spring 应用事件发布 | Outbox 持久化或消息代理投递 |
+| `jfoundry-web-spring-boot-starter` | 出站 Spring `RestClient` 支持与可配置 HTTP 日志 | 入站 Web MVC ProblemDetail 处理 |
 | `jfoundry-messaging-spring-boot-starter` | 消息 SPI、Jackson 消息载荷序列化器和 Spring 消息运行时 | 任意 `MessageSender` 或消息代理客户端 |
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` 适配器，在 Boot 创建 `KafkaOperations` 后选择 | Outbox 存储 |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` 适配器 | Outbox 存储 |
@@ -35,6 +36,7 @@
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | 当 Spring 事件适配器存在时，开启 Spring `ApplicationEventPublisher` 派发。 |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | 当存在 `DomainEventOutboxRecorder` Bean 时，开启 Outbox 领域事件派发。 |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
+| `jfoundry.web.rest-client.logging-level` | `BASIC` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
@@ -79,6 +81,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`、JPA `InboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Inbox 适配器。用户提供的 `InboxMessageStore` 或 `JpaInboxClaimStrategy` 优先；内置领取策略仅支持 PostgreSQL 和 MySQL，未知数据库产品在应用未提供策略时会快速失败。 |
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC 应用且处理器类存在；没有已有 JFoundry 处理器。它先于 Spring Boot Web MVC 自动配置运行，使 Boot 的通用问题详情处理器回退。 |
+| `WebRestClientAutoConfiguration` | `RestClientCustomizer`、`JfoundryWebProperties` | Spring Boot `RestClient` 类和 `jfoundry-web-spring` 存在；customizer 将配置的日志级别应用到 Boot 管理的 builder。 |
 
 ## 说明
 

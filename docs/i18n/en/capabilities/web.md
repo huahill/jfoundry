@@ -10,11 +10,12 @@ HTTP client support for Spring applications.
 | Need | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
 | RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Outbound HTTP client support | `jfoundry-web-spring` | Not provided | Not provided |
+| Outbound HTTP client support | `jfoundry-web-spring-boot-starter` or `jfoundry-web-spring` | Not provided | Not provided |
 
 `jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
-normally receives it from its selected Spring Boot Web starter. `Not provided` means that JFoundry
-does not currently publish an adapter for that runtime; it is not an implicit support claim.
+can add `jfoundry-web-spring-boot-starter`, which supplies the Spring Boot RestClient integration and
+the `jfoundry.web.rest-client.logging-level` property. `Not provided` means that JFoundry does not currently
+publish an adapter for that runtime; it is not an implicit support claim.
 
 ## Problem Details (RFC 9457)
 
@@ -72,9 +73,11 @@ forcing an HTTP concern into the domain model.
 Configure only the builder owned by the integration with `RestClientSupport.configure(builder)`, then
 execute that call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. The default `BASIC` HTTP logging records
-query-free request metadata and response statuses only when its logger is enabled at `DEBUG`; it does
-not access either body.
+become an `HttpRequestException` with a safe failure kind while retaining the original exception as
+its cause for server-side diagnostics. The Spring MVC adapter logs external-access and otherwise
+unhandled exceptions with their stack traces at `ERROR`; Problem Details responses never include a
+cause or stack trace. The default `BASIC` HTTP logging records query-free request metadata and response
+statuses only when its logger is enabled at `DEBUG`; it does not access either body.
 
 Applications can select `NONE`, `HEADERS`, or `FULL` through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. `HEADERS` redacts sensitive headers. `FULL`
@@ -84,3 +87,8 @@ response body. An application adapter that owns a documented downstream protocol
 parsing itself. The
 [Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents the Spring-specific
 composition and boundary in more detail.
+
+Spring Boot applications can add `jfoundry-web-spring-boot-starter` and set
+`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`. The property is applied to
+Spring Boot-managed `RestClient.Builder` instances; manually created builders still use the explicit
+`RestClientSupport.configure(builder, HttpLoggingLevel)` API.

@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "jfoundry.web.rest-client",
+      "type": "org.jfoundry.autoconfigure.web.JfoundryWebProperties$RestClient",
+      "sourceType": "org.jfoundry.autoconfigure.web.JfoundryWebProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jfoundry.web.rest-client.logging-level",
+      "type": "org.jfoundry.web.spring.HttpLoggingLevel",
+      "defaultValue": "BASIC",
+      "description": "Outbound RestClient logging detail: NONE, BASIC, HEADERS, or FULL."
+    }
+  ]
+}

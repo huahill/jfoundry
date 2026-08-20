@@ -50,6 +50,7 @@ database, delivery, scheduling, and distributed-lock choices.
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
+| Outbound `RestClient` support and configurable HTTP logging | `jfoundry-web-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
 | JSON serialization contract | `jfoundry-messaging-spring-boot-starter` | Adds Spring messaging integration and the default Jackson `PayloadSerializer`, but no real sender. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |
 | Outbox runtime | `jfoundry-outbox-spring-boot-starter` | Adds externalization and Spring scheduling integration; select a store and sender separately. |
@@ -134,6 +135,12 @@ access request or response bodies. Applications can select `NONE`, `HEADERS`, or
 bodies and can read an unconsumed error response body for diagnostics. The response error handler
 itself does not read, copy, or retain a downstream response body; an application adapter that owns a
 documented downstream protocol must perform any body parsing itself.
+
+Spring Boot applications can use `jfoundry-web-spring-boot-starter` and set
+`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`. The setting is applied to
+Spring Boot-managed `RestClient.Builder` instances. Applications that create a builder directly with
+`RestClient.builder()` must continue to select the level with
+`RestClientSupport.configure(builder, HttpLoggingLevel)`.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that
 cannot be met by database constraints, idempotency, or local synchronization.
