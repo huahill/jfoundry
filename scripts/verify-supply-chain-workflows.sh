@@ -56,22 +56,7 @@ expected_maven_groups = {
 maven_update = maven_updates.first
 fail_policy("Maven groups must be #{expected_maven_groups.inspect}") unless maven_update["groups"] == expected_maven_groups
 
-expected_ignore_names = [
-    "org.springframework.boot:spring-boot-dependencies",
-    "org.springframework.boot:spring-boot-starter-parent",
-    "org.springframework.boot:spring-boot-maven-plugin",
-    "org.springframework.cloud:spring-cloud-dependencies",
-    "com.alibaba.cloud:spring-cloud-alibaba-dependencies"
-]
-ignores = maven_update["ignore"]
-fail_policy("Maven ignores must be an array") unless ignores.is_a?(Array)
-ignore_names = ignores.map do |ignore|
-    fail_policy("each Maven ignore must contain only dependency-name") unless ignore.is_a?(Hash) && ignore.keys == ["dependency-name"]
-    ignore["dependency-name"]
-end
-unless ignore_names.size == expected_ignore_names.size && ignore_names.sort == expected_ignore_names.sort
-    fail_policy("Maven ignore dependency names must be exactly #{expected_ignore_names.inspect}")
-end
+fail_policy("Maven updates must not define ignore rules") if maven_update.key?("ignore")
 
 github_actions_updates = updates.select { |update| update["package-ecosystem"] == "github-actions" }
 fail_policy("must contain exactly one GitHub Actions updates entry") unless github_actions_updates.size == 1
@@ -148,49 +133,25 @@ step_indexes = lambda { |id| steps.each_index.select { |index| steps[index]["id"
 scope_indexes = step_indexes.call("scope")
 metadata_indexes = step_indexes.call("dependabot-metadata")
 eligibility_indexes = step_indexes.call("eligibility")
+dependency_policy_indexes = step_indexes.call("dependency_policy")
 fail_workflow("must contain exactly one scope step") unless scope_indexes.size == 1
-fail_workflow("must contain exactly one metadata step") unless metadata_indexes.size == 1
-fail_workflow("must contain exactly one eligibility step") unless eligibility_indexes.size == 1
+fail_workflow("must not contain a metadata step") unless metadata_indexes.empty?
+fail_workflow("must not contain an eligibility step") unless eligibility_indexes.empty?
+fail_workflow("must not contain a dependency_policy step") unless dependency_policy_indexes.empty?
 
 scope_index = scope_indexes.first
-metadata_index = metadata_indexes.first
-eligibility_index = eligibility_indexes.first
 scope = steps[scope_index]
-metadata = steps[metadata_index]
-eligibility = steps[eligibility_index]
-scope_condition = "steps.scope.outputs.is_maven_update == 'true'"
 scope_run = scope["run"].to_s
 fail_workflow("scope must list pull request files through the GitHub API") unless scope_run.include?('gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files"')
 fail_workflow("scope must reject non-pom.xml files") unless scope_run.include?("grep -Evq '(^|/)pom\\.xml$'")
-fail_workflow("metadata must run after scope") unless metadata_index > scope_index
-fail_workflow("metadata action must use the pinned v3 SHA") unless metadata["uses"] == "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98"
-fail_workflow("metadata must require Maven-only scope") unless metadata["if"] == scope_condition
-fail_workflow("eligibility must run after metadata") unless eligibility_index > metadata_index
-fail_workflow("eligibility must require Maven-only scope") unless eligibility["if"] == scope_condition
-fail_workflow("eligibility must read dependency names") unless eligibility.dig("env", "DEPENDENCY_NAMES") == "${{ steps.dependabot-metadata.outputs.dependency-names }}"
-
-protected_coordinates = [
-    "org.springframework.boot:spring-boot-dependencies",
-    "org.springframework.boot:spring-boot-starter-parent",
-    "org.springframework.boot:spring-boot-maven-plugin",
-    "org.springframework.cloud:spring-cloud-dependencies",
-    "com.alibaba.cloud:spring-cloud-alibaba-dependencies"
-]
-eligibility_run = eligibility["run"].to_s
-protected_coordinates.each do |coordinate|
-    fail_workflow("eligibility must protect #{coordinate}") unless eligibility_run.include?(coordinate)
-end
-fail_workflow("eligibility must reject protected coordinates") unless eligibility_run.include?("is_eligible=false")
-fail_workflow("eligibility must allow other coordinates") unless eligibility_run.include?("is_eligible=true")
 
 merge_indexes = steps.each_index.select { |index| steps[index]["run"].to_s.match?(/\bgh\s+pr\s+merge\b/) }
 fail_workflow("must contain exactly one gh pr merge step") unless merge_indexes.size == 1
 merge_index = merge_indexes.first
 merge = steps[merge_index]
-expected_merge_condition = "steps.scope.outputs.is_maven_update == 'true' && steps.eligibility.outputs.is_eligible == 'true'"
+expected_merge_condition = "steps.scope.outputs.is_maven_update == 'true'"
 actual_merge_condition = merge["if"].to_s.gsub(/\s+/, " ").strip
-fail_workflow("merge must require Maven-only scope and eligibility") unless actual_merge_condition == expected_merge_condition
-fail_workflow("merge must run after eligibility") unless merge_index > eligibility_index
+fail_workflow("merge must require Maven-only scope") unless actual_merge_condition == expected_merge_condition
 merge_run = merge["run"].to_s
 fail_workflow("merge must specify the repository") unless merge_run.match?(/--repo\s+"?\$\{REPOSITORY\}"?/)
 fail_workflow("merge must queue auto-merge") unless merge_run.match?(/(?:^|\s)--auto(?:\s|$)/)
@@ -232,7 +193,6 @@ require_text ".github/workflows/release.yml" "release-evidence"
 require_text ".github/workflows/snapshot.yml" "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'"
 require_text ".github/workflows/snapshot.yml" "is_snapshot=true"
 require_text ".github/workflows/snapshot.yml" "if: steps.version.outputs.is_snapshot == 'true'"
-require_text ".github/workflows/auto-merge-dependabot.yml" "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3"
 verify_dependabot_auto_merge_workflow
 if grep -Fq -- "-DforceStdout | tail -n 1" "${root_dir}/.github/workflows/snapshot.yml"; then
     echo ".github/workflows/snapshot.yml must not use bare Maven 4 version extraction" >&2

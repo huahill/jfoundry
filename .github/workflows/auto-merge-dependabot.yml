@@ -31,31 +31,8 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Fetch Dependabot metadata
-        id: dependabot-metadata
-        if: steps.scope.outputs.is_maven_update == 'true'
-        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
-
-      - name: Check automatic merge eligibility
-        id: eligibility
-        if: steps.scope.outputs.is_maven_update == 'true'
-        env:
-          DEPENDENCY_NAMES: ${{ steps.dependabot-metadata.outputs.dependency-names }}
-        run: |
-          set -euo pipefail
-          case ",${DEPENDENCY_NAMES}," in
-            *,org.springframework.boot:spring-boot-dependencies,*|*,org.springframework.boot:spring-boot-starter-parent,*|*,org.springframework.boot:spring-boot-maven-plugin,*|*,org.springframework.cloud:spring-cloud-dependencies,*|*,com.alibaba.cloud:spring-cloud-alibaba-dependencies,*)
-              echo "is_eligible=false" >> "${GITHUB_OUTPUT}"
-              ;;
-            *)
-              echo "is_eligible=true" >> "${GITHUB_OUTPUT}"
-              ;;
-          esac
-
       - name: Enable rebase auto-merge
-        if: >-
-          steps.scope.outputs.is_maven_update == 'true' &&
-          steps.eligibility.outputs.is_eligible == 'true'
+        if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
