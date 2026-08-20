@@ -135,29 +135,51 @@ metadata_indexes = step_indexes.call("dependabot-metadata")
 eligibility_indexes = step_indexes.call("eligibility")
 dependency_policy_indexes = step_indexes.call("dependency_policy")
 fail_workflow("must contain exactly one scope step") unless scope_indexes.size == 1
-fail_workflow("must not contain a metadata step") unless metadata_indexes.empty?
-fail_workflow("must not contain an eligibility step") unless eligibility_indexes.empty?
+fail_workflow("must contain exactly one metadata step") unless metadata_indexes.size == 1
+fail_workflow("must contain exactly one eligibility step") unless eligibility_indexes.size == 1
 fail_workflow("must not contain a dependency_policy step") unless dependency_policy_indexes.empty?
 
 scope_index = scope_indexes.first
+metadata_index = metadata_indexes.first
+eligibility_index = eligibility_indexes.first
 scope = steps[scope_index]
+metadata = steps[metadata_index]
+eligibility = steps[eligibility_index]
+scope_condition = "steps.scope.outputs.is_maven_update == 'true'"
 scope_run = scope["run"].to_s
 fail_workflow("scope must list pull request files through the GitHub API") unless scope_run.include?('gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files"')
 fail_workflow("scope must reject non-pom.xml files") unless scope_run.include?("grep -Evq '(^|/)pom\\.xml$'")
+fail_workflow("metadata must run after scope") unless metadata_index > scope_index
+fail_workflow("metadata action must use the pinned v3 SHA") unless metadata["uses"] == "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98"
+fail_workflow("metadata must require Maven-only scope") unless metadata["if"] == scope_condition
+unless metadata.dig("with", "github-token") == "${{ github.token }}"
+    fail_workflow("metadata must use github.token")
+end
+fail_workflow("eligibility must run after metadata") unless eligibility_index > metadata_index
+fail_workflow("eligibility must require Maven-only scope") unless eligibility["if"] == scope_condition
+unless eligibility.dig("env", "UPDATE_TYPE") == "${{ steps.dependabot-metadata.outputs.update-type }}"
+    fail_workflow("eligibility must read the Dependabot update type")
+end
+eligibility_run = eligibility["run"].to_s
+unless eligibility_run.include?("version-update:semver-patch")
+    fail_workflow("eligibility must allow only semantic patch updates")
+end
+fail_workflow("eligibility must emit a true patch result") unless eligibility_run.include?("is_patch_update=true")
+fail_workflow("eligibility must emit a false patch result") unless eligibility_run.include?("is_patch_update=false")
 
 merge_indexes = steps.each_index.select { |index| steps[index]["run"].to_s.match?(/\bgh\s+pr\s+merge\b/) }
 fail_workflow("must contain exactly one gh pr merge step") unless merge_indexes.size == 1
 merge_index = merge_indexes.first
 merge = steps[merge_index]
-expected_merge_condition = "steps.scope.outputs.is_maven_update == 'true'"
+expected_merge_condition = "steps.scope.outputs.is_maven_update == 'true' && steps.eligibility.outputs.is_patch_update == 'true'"
 actual_merge_condition = merge["if"].to_s.gsub(/\s+/, " ").strip
-fail_workflow("merge must require Maven-only scope") unless actual_merge_condition == expected_merge_condition
+fail_workflow("merge must require Maven-only scope and patch eligibility") unless actual_merge_condition == expected_merge_condition
+fail_workflow("merge must run after eligibility") unless merge_index > eligibility_index
 merge_run = merge["run"].to_s
 fail_workflow("merge must specify the repository") unless merge_run.match?(/--repo\s+"?\$\{REPOSITORY\}"?/)
 fail_workflow("merge must queue auto-merge") unless merge_run.match?(/(?:^|\s)--auto(?:\s|$)/)
 fail_workflow("merge must use rebase") unless merge_run.match?(/(?:^|\s)--rebase(?:\s|$)/)
 fail_workflow("merge must define REPOSITORY") unless merge.dig("env", "REPOSITORY") == "${{ github.repository }}"
-fail_workflow("must not gate by update type") if source.include?("UPDATE_TYPE") || source.include?("version-update:semver-patch")
 RUBY
 }
 

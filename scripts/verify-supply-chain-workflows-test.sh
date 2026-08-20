@@ -93,8 +93,30 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Enable rebase auto-merge
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
         if: steps.scope.outputs.is_maven_update == 'true'
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3
+        with:
+          github-token: ${{ github.token }}
+
+      - name: Check automatic merge eligibility
+        id: eligibility
+        if: steps.scope.outputs.is_maven_update == 'true'
+        env:
+          UPDATE_TYPE: ${{ steps.dependabot-metadata.outputs.update-type }}
+        run: |
+          set -euo pipefail
+          if [[ "${UPDATE_TYPE}" == 'version-update:semver-patch' ]]; then
+            echo "is_patch_update=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "is_patch_update=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Enable rebase auto-merge
+        if: >-
+          steps.scope.outputs.is_maven_update == 'true' &&
+          steps.eligibility.outputs.is_patch_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -1195,6 +1217,21 @@ assert_rejects "${temp_dir}"
 write_compliant_dependabot
 write_compliant_auto_merge_workflow
 replace_in_auto_merge_workflow "github.event.pull_request.base.ref == 'main'" "github.event.pull_request.base.ref == 'develop'"
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98" "dependabot/fetch-metadata@v3"
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "version-update:semver-patch" "version-update:semver-minor"
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow $'steps.scope.outputs.is_maven_update == \'true\' &&\n          steps.eligibility.outputs.is_patch_update == \'true\'' "steps.scope.outputs.is_maven_update == 'true'"
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot

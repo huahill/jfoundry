@@ -60,6 +60,7 @@ class SpringBootParentPomTest {
                 .isEqualTo("8.8.1");
         assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
 
@@ -70,8 +71,31 @@ class SpringBootParentPomTest {
         for (Document springLine : List.of(boot, cloud)) {
             assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
             assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
+            assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
             assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter")).isFalse();
             assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+        }
+    }
+
+    @Test
+    void springAutoconfigurationUsesTheMybatisPlusStarterInsteadOfManagingMybatisSpring() throws Exception {
+        Path autoconfigure = Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "autoconfigure");
+        Document persistence = document(autoconfigure.resolve(
+                "jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure/pom.xml"));
+        Document inbox = document(autoconfigure.resolve("jfoundry-inbox-spring-boot-autoconfigure/pom.xml"));
+        Document outbox = document(autoconfigure.resolve("jfoundry-outbox-spring-boot-autoconfigure/pom.xml"));
+
+        assertThat(dependency(persistence, "org.mybatis", "mybatis-spring")).isNull();
+        assertThat(dependency(persistence, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
+                .satisfies(it -> assertThat(childText(it, "scope")).isEqualTo("test"));
+
+        for (Document document : List.of(inbox, outbox)) {
+            assertThat(dependency(document, "org.mybatis", "mybatis-spring")).isNull();
+            assertThat(dependency(document, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
+                    .satisfies(it -> {
+                        assertThat(childText(it, "scope")).isEqualTo("provided");
+                        assertThat(childText(it, "optional")).isEqualTo("true");
+                    });
         }
     }
 
@@ -123,6 +147,15 @@ class SpringBootParentPomTest {
         return children(dependencies, "dependency").stream()
                 .anyMatch(dependency -> groupId.equals(childText(dependency, "groupId"))
                         && artifactId.equals(childText(dependency, "artifactId")));
+    }
+
+    private Element dependency(Document document, String groupId, String artifactId) {
+        Element dependencies = child(document.getDocumentElement(), "dependencies");
+        return children(dependencies, "dependency").stream()
+                .filter(candidate -> groupId.equals(childText(candidate, "groupId")))
+                .filter(candidate -> artifactId.equals(childText(candidate, "artifactId")))
+                .findFirst()
+                .orElse(null);
     }
 
     private Element child(Element parent, String name) {
