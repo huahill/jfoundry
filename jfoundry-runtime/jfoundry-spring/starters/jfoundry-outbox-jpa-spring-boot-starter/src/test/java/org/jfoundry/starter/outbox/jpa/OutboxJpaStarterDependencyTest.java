@@ -11,8 +11,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OutboxJpaStarterDependencyTest {
 
@@ -54,6 +57,25 @@ class OutboxJpaStarterDependencyTest {
 
         assertThat(jpaStarterTree).contains("jfoundry-persistence-jpa-spring-boot-starter");
         assertThat(jpaStarterTree).doesNotContain("jfoundry-outbox-jpa", "jfoundry-inbox-jpa");
+    }
+
+    @Test
+    void extractsDependencyTreeWithoutDependingOnPluginVersion() {
+        String output = """
+                [INFO] --- dependency:3.11.0:tree (default-cli) @ jfoundry-persistence-jpa-spring-boot-starter ---
+                [INFO] io.github.xfoundries:jfoundry-persistence-jpa-spring-boot-starter:jar:1.1.0
+                [INFO] ------------------------------------------------------------------------
+                """;
+
+        assertThat(dependencyTreeFor(output, "jfoundry-persistence-jpa-spring-boot-starter"))
+                .contains("jfoundry-persistence-jpa-spring-boot-starter:jar:1.1.0");
+    }
+
+    @Test
+    void reportsMissingDependencyTreeSection() {
+        assertThatThrownBy(() -> dependencyTreeFor("[INFO] no matching section", "missing-artifact"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("missing-artifact");
     }
 
     private Path repositoryRoot() {
@@ -101,8 +123,16 @@ class OutboxJpaStarterDependencyTest {
     }
 
     private String dependencyTreeFor(String output, String artifactId) {
-        String section = "--- dependency:3.7.0:tree (default-cli) @ " + artifactId + " ---";
-        int start = output.indexOf(section);
+        Pattern sectionPattern = Pattern.compile(
+                "(?m)^\\[INFO\\] --- dependency:[^\\r\\n]*:tree \\(default-cli\\) @ "
+                        + Pattern.quote(artifactId) + " ---\\r?$"
+        );
+        Matcher matcher = sectionPattern.matcher(output);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Dependency tree section not found for " + artifactId);
+        }
+
+        int start = matcher.start();
         int end = output.indexOf("[INFO] ------------------------------------------------------------------------", start);
         return output.substring(start, end < 0 ? output.length() : end);
     }
