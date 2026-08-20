@@ -75,6 +75,10 @@ For a third-party component family used by both Foundation and a runtime BOM, Fo
 version owner. It manages every supported coordinate in that family, including runtime-specific starter
 or Native Image artifacts. The runtime BOM imports Foundation and must not redeclare the family version
 or any of those coordinates. JobRunr, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
+Do not separately override a starter's transitive dependencies unless JFoundry has an explicit,
+documented compatibility reason and verifies the replacement combination. In particular,
+`org.mybatis:mybatis-spring` follows `mybatis-plus-spring-boot4-starter` and is not managed by a
+JFoundry BOM.
 
 ## Starter Rules
 

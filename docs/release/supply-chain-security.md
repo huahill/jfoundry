@@ -27,13 +27,14 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 
 ## Dependabot Update Governance
 
-- Dependabot groups Maven patch updates. Minor and major Maven library updates remain individual pull
-  requests for focused review and compatibility verification. Maven updates may be queued for rebase
-  auto-merge only after Dependency Review and the `Merge gate` succeed.
+- Dependabot groups Maven patch updates. Only Maven-only patch pull requests may be queued for rebase
+  auto-merge, and they merge only after Dependency Review and the `Merge gate` succeed. Minor and
+  major Maven updates remain individual pull requests and require manual review.
 - Dependabot does not ignore runtime platform dependency-management updates. Spring Boot, Spring
   Cloud, Spring Cloud Alibaba, Quarkus, and Helidon updates follow the same Maven policy as other
-  dependencies, with the complete supported runtime matrix and `Merge gate` providing the
-  compatibility boundary.
+  dependencies. Patch updates use the normal automatic path; minor and major runtime-platform updates
+  require manual review. The complete supported runtime matrix and `Merge gate` provide the
+  compatibility boundary in both cases.
 - CodeQL `init` and `analyze` updates are atomic: they are upgraded together in the same pull request.
   GitHub Actions updates, including CodeQL updates, are never eligible for Maven auto-merge.
 

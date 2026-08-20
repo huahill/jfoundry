@@ -45,6 +45,10 @@ Runtime BOMs manage platform ecosystem versions only; they do not manage JFoundr
 Applications still select each starter or client explicitly. Do not import every starter or runtime
 capability into a business application by default.
 
+JFoundry manages the MyBatis-Plus Boot 4 starter as part of the MyBatis-Plus component family. It does
+not independently manage the starter's `org.mybatis:mybatis-spring` transitive dependency; that bridge
+version follows the tested MyBatis-Plus starter dependency graph.
+
 JFoundry's Spring messaging starter uses Spring Boot's `spring-boot-starter-json`, which provides
 Jackson 3 as Spring Boot 4's default JSON mapper. The shipped JFoundry serializer and jMolecules
 integration use `tools.jackson.databind.ObjectMapper`; Outbox inherits this capability through the

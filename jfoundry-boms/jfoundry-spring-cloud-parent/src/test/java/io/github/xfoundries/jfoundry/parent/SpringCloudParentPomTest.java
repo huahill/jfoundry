@@ -38,6 +38,17 @@ class SpringCloudParentPomTest {
         assertThat(child(document.getDocumentElement(), "developers")).isNotNull();
     }
 
+    @Test
+    void cloudBomUsesTheSameSpringBootVersionAsTheParent() throws Exception {
+        Document parent = document(Path.of("pom.xml"));
+        Document cloudBom = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
+
+        String parentVersion = childText(child(parent.getDocumentElement(), "parent"), "version");
+        String bomVersion = childText(child(cloudBom.getDocumentElement(), "properties"), "spring-boot.version");
+
+        assertThat(bomVersion).isEqualTo(parentVersion);
+    }
+
     private Document document(Path path) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
