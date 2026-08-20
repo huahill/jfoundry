@@ -38,6 +38,7 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 | MyBatis-Plus 聚合持久化 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 仅业务聚合持久化，不含 Outbox/Inbox 存储。 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
 | RFC 9457 Web MVC 错误响应 | `jfoundry-webmvc-spring-boot-starter` | 仅 HTTP 入站适配。 |
+| 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-web-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
 | JSON 序列化契约 | `jfoundry-messaging-spring-boot-starter` | 提供 Spring 消息集成和默认 Jackson `PayloadSerializer`，不提供真实发送器。 |
 | Kafka、RabbitMQ 或 RocketMQ 投递 | 对应 `jfoundry-messaging-*-spring-boot-starter` | 显式选择具体消息代理传输方式。 |
 | Outbox 运行时 | `jfoundry-outbox-spring-boot-starter` | 提供外部化和 Spring 调度集成；存储与发送器需另选。 |
@@ -71,6 +72,11 @@ Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢�
 Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
 
 `jfoundry-web-spring` 为出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对拥有该集成的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。默认的 `BASIC` HTTP 日志不会访问请求或响应 body。应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`；`FULL` 会记录经脱敏、限长的 JSON body，并可能为诊断读取未消费的错误响应 body。响应错误处理器本身不会读取、复制或保留下游响应体；拥有已明确约定下游协议的应用适配器仍应自行解析响应体。
+
+Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并将
+`jfoundry.web.rest-client.logging-level` 设置为 `NONE`、`BASIC`、`HEADERS` 或 `FULL`。该配置会应用于
+Spring Boot 管理的 `RestClient.Builder`。应用通过 `RestClient.builder()` 直接创建 builder 时，
+仍需使用 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择级别。
 
 Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约束、幂等或本地同步不足以满足该需求时使用。
 

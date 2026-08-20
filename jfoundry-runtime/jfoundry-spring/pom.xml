@@ -50,6 +50,7 @@
         <module>autoconfigure/jfoundry-persistence-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-web-spring-boot-autoconfigure</module>
         <module>jfoundry-spring-integration-tests</module>
         <module>starters/jfoundry-spring-boot-starter</module>
         <module>starters/jfoundry-transaction-spring-boot-starter</module>
@@ -70,5 +71,6 @@
         <module>starters/jfoundry-inbox-jpa-spring-boot-starter</module>
         <module>starters/jfoundry-persistence-mybatis-plus-spring-boot-starter</module>
         <module>starters/jfoundry-persistence-jpa-spring-boot-starter</module>
+        <module>starters/jfoundry-web-spring-boot-starter</module>
     </modules>
 </project>

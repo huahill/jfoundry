@@ -10,11 +10,12 @@ HTTP client support for Spring applications.
 | Need | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
 | RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Outbound HTTP client support | `jfoundry-web-spring` | Not provided | Not provided |
+| Outbound HTTP client support | `jfoundry-web-spring-boot-starter` or `jfoundry-web-spring` | Not provided | Not provided |
 
 `jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
-normally receives it from its selected Spring Boot Web starter. `Not provided` means that JFoundry
-does not currently publish an adapter for that runtime; it is not an implicit support claim.
+can add `jfoundry-web-spring-boot-starter`, which supplies the Spring Boot RestClient integration and
+the `jfoundry.web.rest-client.logging-level` property. `Not provided` means that JFoundry does not currently
+publish an adapter for that runtime; it is not an implicit support claim.
 
 ## Problem Details (RFC 9457)
 
@@ -84,3 +85,8 @@ response body. An application adapter that owns a documented downstream protocol
 parsing itself. The
 [Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents the Spring-specific
 composition and boundary in more detail.
+
+Spring Boot applications can add `jfoundry-web-spring-boot-starter` and set
+`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`. The property is applied to
+Spring Boot-managed `RestClient.Builder` instances; manually created builders still use the explicit
+`RestClientSupport.configure(builder, HttpLoggingLevel)` API.

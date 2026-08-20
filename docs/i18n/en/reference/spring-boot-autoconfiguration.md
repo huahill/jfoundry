@@ -13,6 +13,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
 | `jfoundry-domain-event-spring-boot-starter` | Domain event dispatch and Spring application event publishing | Outbox persistence or broker delivery |
+| `jfoundry-web-spring-boot-starter` | Outbound Spring `RestClient` support and configurable HTTP logging | Inbound Web MVC ProblemDetail handling |
 | `jfoundry-messaging-spring-boot-starter` | Messaging SPI, Jackson payload serializer, and Spring messaging runtime | Any `MessageSender` or broker client |
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` adapter, selected after Boot creates `KafkaOperations` | Outbox store |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` adapter | Outbox store |
@@ -37,6 +38,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | Enables Spring `ApplicationEventPublisher` dispatch when the Spring event adapter is present. |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | Enables Outbox-backed domain event dispatch when a `DomainEventOutboxRecorder` bean exists. |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
+| `jfoundry.web.rest-client.logging-level` | `BASIC` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |
@@ -82,6 +84,7 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`, JPA `InboxMessageStore` | `EntityManagerFactory` and the JPA Inbox adapter are present. A user `InboxMessageStore` or `JpaInboxClaimStrategy` takes precedence; built-in claim strategies support only PostgreSQL and MySQL, and an unknown database product fails fast unless the application supplies a strategy. |
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC application and handler class are present; no existing JFoundry handler. It runs before Spring Boot Web MVC auto-configuration, causing Boot's generic problem-details handler to back off. |
+| `WebRestClientAutoConfiguration` | `RestClientCustomizer`, `JfoundryWebProperties` | Spring Boot RestClient classes and `jfoundry-web-spring` are present; the customizer applies the configured logging level to Boot-managed builders. |
 
 ## Notes
 
