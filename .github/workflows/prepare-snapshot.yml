@@ -1,0 +1,111 @@
+name: Prepare next SNAPSHOT
+
+on:
+  workflow_run:
+    workflows:
+      - Release
+    types:
+      - completed
+  workflow_dispatch:
+
+concurrency:
+  group: prepare-snapshot
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    name: Open next SNAPSHOT PR
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: 25
+          cache: maven
+
+      - name: Resolve next development version
+        id: version
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            release_tag="$(git tag --points-at "${{ github.event.workflow_run.head_sha }}" | head -n 1)"
+            if [[ -z "${release_tag}" || "${release_tag}" == *-* ]]; then
+              echo "Skipping prerelease or untagged Release run: ${release_tag:-none}"
+              echo "should_prepare=false" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+          fi
+
+          current_version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
+          if [[ "${current_version}" == *-SNAPSHOT || "${current_version}" == *-* ]]; then
+            echo "Skipping non-stable development source: ${current_version}"
+            echo "should_prepare=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+          if [[ ! "${current_version}" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
+            echo "Unsupported release version: ${current_version}" >&2
+            exit 1
+          fi
+
+          next_version="${BASH_REMATCH[1]}.$((BASH_REMATCH[2] + 1)).0-SNAPSHOT"
+          branch="codex/prepare-${next_version//./-}"
+          echo "next_version=${next_version}" >> "${GITHUB_OUTPUT}"
+          echo "branch=${branch}" >> "${GITHUB_OUTPUT}"
+          echo "should_prepare=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Create SNAPSHOT branch and pull request
+        if: steps.version.outputs.should_prepare == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEXT_VERSION: ${{ steps.version.outputs.next_version }}
+          BRANCH: ${{ steps.version.outputs.branch }}
+        run: |
+          set -euo pipefail
+
+          if gh pr list --repo "${GITHUB_REPOSITORY}" --head "${BRANCH}" --state open --json number --jq 'length' | grep -q '^1$'; then
+            echo "An open SNAPSHOT PR already exists for ${NEXT_VERSION}."
+            exit 0
+          fi
+          if git ls-remote --exit-code --heads origin "${BRANCH}" >/dev/null 2>&1; then
+            echo "A SNAPSHOT branch already exists for ${NEXT_VERSION}; refusing to overwrite it."
+            exit 0
+          fi
+
+          git switch --create "${BRANCH}"
+          ./mvnw -B versions:set -DnewVersion="${NEXT_VERSION}" \
+            -DgenerateBackupPoms=false -DprocessAllModules
+          for pom_file in $(git diff --name-only -- '*.xml'); do
+            baseline_timestamp="$(git show "HEAD:${pom_file}" 2>/dev/null | sed -n 's:.*<project.build.outputTimestamp>\([^<]*\)</project.build.outputTimestamp>.*:\1:p' | head -n 1)"
+            if [[ -n "${baseline_timestamp}" ]]; then
+              ruby -e 'path, timestamp = ARGV; content = File.read(path); content.gsub!(/(<project\.build\.outputTimestamp>)[^<]+(<\/project\.build\.outputTimestamp>)/, "\\1#{timestamp}\\2"); File.write(path, content)' -- "${pom_file}" "${baseline_timestamp}"
+            fi
+          done
+          sed -i 's/<jfoundry.version>[^<]*<\//<jfoundry.version>'"${NEXT_VERSION}"'<\//g' \
+            jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
+            jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml
+
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add pom.xml jfoundry-boms jfoundry-core jfoundry-runtime
+          git commit -m "build: prepare ${NEXT_VERSION} development version"
+          git push --set-upstream origin "${BRANCH}"
+          gh pr create --repo "${GITHUB_REPOSITORY}" --base main --head "${BRANCH}" \
+            --title "build: prepare ${NEXT_VERSION} development version" \
+            --body "Prepare the next development line after the stable release.\n\nThis PR was opened by the post-release version workflow."
