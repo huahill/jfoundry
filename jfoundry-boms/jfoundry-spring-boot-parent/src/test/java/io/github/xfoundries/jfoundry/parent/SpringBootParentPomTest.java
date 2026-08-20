@@ -30,6 +30,21 @@ class SpringBootParentPomTest {
     }
 
     @Test
+    void frameworkBuildParentDoesNotImportARuntimeBom() throws Exception {
+        Document document = document(Path.of("..", "..", "pom.xml"));
+
+        assertThat(importedBoms(document)).containsExactly(
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"));
+    }
+
+    @Test
+    void frameworkNeutralInfrastructureParentDoesNotImportSpringBootBom() throws Exception {
+        Document document = document(Path.of("..", "..", "jfoundry-core", "jfoundry-infrastructure", "pom.xml"));
+
+        assertThat(importedBoms(document)).isEmpty();
+    }
+
+    @Test
     void standalonePublishedPomsUseTheReleaseTag() throws Exception {
         List<Path> pomPaths = List.of(
                 Path.of("pom.xml"),
@@ -38,7 +53,6 @@ class SpringBootParentPomTest {
                 Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-spring-cloud-parent", "pom.xml"),
                 Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
 
@@ -51,7 +65,7 @@ class SpringBootParentPomTest {
     }
 
     @Test
-    void foundationBomOwnsSharedComponentFamiliesUsedByBothSpringLines() throws Exception {
+    void runtimeBomsDelegateSharedComponentFamiliesToTheCoreBom() throws Exception {
         Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
         Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
         Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
@@ -64,9 +78,9 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
 
-        assertThat(importedBoms(boot)).contains(
+        assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
-        assertThat(importedBoms(cloud)).contains(
+        assertThat(importedBoms(cloud)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         for (Document springLine : List.of(boot, cloud)) {
             assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
@@ -75,6 +89,17 @@ class SpringBootParentPomTest {
             assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter")).isFalse();
             assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
         }
+    }
+
+    @Test
+    void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
+        Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
+
+        assertThat(child(child(document.getDocumentElement(), "properties"), "spring-boot.version"))
+                .isNull();
+        assertThat(importedBoms(document)).containsExactly(
+                new Coordinate("org.springframework.cloud", "spring-cloud-dependencies", "${spring-cloud.version}"),
+                new Coordinate("com.alibaba.cloud", "spring-cloud-alibaba-dependencies", "${spring-cloud-alibaba.version}"));
     }
 
     @Test
@@ -97,18 +122,6 @@ class SpringBootParentPomTest {
                         assertThat(childText(it, "optional")).isEqualTo("true");
                     });
         }
-    }
-
-    @Test
-    void cloudParentUsesTheCloudRuntimeLine() throws Exception {
-        Document document = document(Path.of("..", "jfoundry-spring-cloud-parent", "pom.xml"));
-
-        assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
-                new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.0.7"));
-        assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("io.github.xfoundries", "jfoundry-spring-cloud-dependencies", "${jfoundry.version}"),
-                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
-        assertThat(childText(child(document.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
     }
 
     private Document document(Path path) throws Exception {

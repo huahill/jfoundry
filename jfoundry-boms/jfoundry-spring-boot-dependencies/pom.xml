@@ -40,14 +40,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- Shared component families are versioned by the foundation BOM. -->
-            <dependency>
-                <groupId>io.github.xfoundries</groupId>
-                <artifactId>jfoundry-foundation-dependencies</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
     <profiles>

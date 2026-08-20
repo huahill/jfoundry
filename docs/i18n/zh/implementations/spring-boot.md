@@ -8,7 +8,7 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 `jfoundry-spring-boot-starter`。该 Parent 继承 `spring-boot-starter-parent:4.1.0`，设置 Java 25，
 并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-boot-dependencies`。基础启动器保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
 
-需要 Spring Cloud 或 Spring Cloud Alibaba 的应用使用 `jfoundry-spring-cloud-parent`。该独立平台线继承 Spring Boot 4.0.7，并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-cloud-dependencies`；它管理 Spring Cloud 2025.1.2 和 Spring Cloud Alibaba 2025.1.0.0。不得组合两个 Spring 运行时 BOM。Cloud Alibaba 只属于 Cloud 平台线。
+需要 Spring Cloud 或 Spring Cloud Alibaba 的应用使用自有或标准 Maven Parent（例如 `spring-boot-starter-parent:4.0.7`），并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-cloud-dependencies`；Cloud BOM 管理 Spring Cloud 2025.1.2 和 Spring Cloud Alibaba 2025.1.0.0，Spring Boot 由 Parent 管理。不得组合两个 Spring 运行时 BOM。Cloud Alibaba 只属于 Cloud 平台线。
 
 ```xml
 <parent>

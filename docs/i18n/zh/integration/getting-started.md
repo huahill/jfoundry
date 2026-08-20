@@ -9,7 +9,7 @@
 | 平台线 | Parent | 运行时 BOM | 平台基线 |
 |------|--------|-------------|----------|
 | 仅 Boot | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | Spring Boot 4.1.0 |
-| Cloud | `jfoundry-spring-cloud-parent` | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7、Spring Cloud 2025.1.2、Spring Cloud Alibaba 2025.1.0.0 |
+| Cloud | 自有或标准 Maven Parent（例如 `spring-boot-starter-parent:4.0.7`） | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7、Spring Cloud 2025.1.2、Spring Cloud Alibaba 2025.1.0.0 |
 
 仅 Boot 的应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent：
 
@@ -23,14 +23,13 @@
 
 它继承 `spring-boot-starter-parent:4.1.0`，设置 Java 25 基线，并在 `jfoundry-dependencies` 前导入
 仅 Boot 的运行时 BOM。Spring Boot 与 JFoundry 依赖无需声明版本，但每个 JFoundry 能力启动器仍须显式选择。
-Cloud 应用使用 `jfoundry-spring-cloud-parent`；它继承 Spring Boot 4.0.7，并导入 Cloud 运行时 BOM。
+Cloud 应用使用自有或标准 Maven Parent（例如 `spring-boot-starter-parent:4.0.7`），并显式导入 Cloud BOM 与 `jfoundry-dependencies`。
 
 必须保留不同 Maven Parent 的应用，应导入用于 JFoundry 模块版本的 `jfoundry-dependencies`。使用受支持运行时的应用还要额外且仅导入一个
 对应的运行时 BOM：`jfoundry-spring-boot-dependencies`、`jfoundry-spring-cloud-dependencies`、`jfoundry-quarkus-dependencies` 或
 `jfoundry-helidon-dependencies`。运行时 BOM 只管理各自的平台生态版本，不能替代核心 JFoundry BOM。必须先导入运行时 BOM，再导入 `jfoundry-dependencies`，以便优先采用运行时平台管理的约束。请选择目标发布线的版本；本项目当前使用下面的开发版本。
 
-仅 Boot BOM 只管理 Spring Boot。Cloud BOM 将 Spring Boot、Spring Cloud 和 Spring Cloud Alibaba
-作为一个经过验证的平台线管理。这样 Cloud 应用可以不写版本地添加所选 Cloud 启动器；它不会自动引入任何 Cloud 启动器，也不表示 JFoundry 已为该启动器提供适配器。
+仅 Boot BOM 只管理 Spring Boot。Cloud BOM 将 Spring Cloud 和 Spring Cloud Alibaba 作为一个经过验证的平台线管理；Spring Boot 由应用的 Parent 或另一个显式 Boot BOM 管理。这样 Cloud 应用可以不写版本地添加所选 Cloud 启动器；它不会自动引入任何 Cloud 启动器，也不表示 JFoundry 已为该启动器提供适配器。
 
 下面 XML 是无法使用 JFoundry Parent 的仅 Boot 应用的替代方式。使用 Cloud 平台线时，将第一个 import
 替换为 `jfoundry-spring-cloud-dependencies`；使用 Quarkus 或 Helidon 时，替换为对应的运行时 BOM，并保留第二个核心 BOM：

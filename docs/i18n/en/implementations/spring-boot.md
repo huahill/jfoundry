@@ -14,10 +14,11 @@ before `jfoundry-dependencies`. The base starter intentionally remains small: it
 Boot wiring and a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox,
 Inbox, JobRunr, or Redisson client.
 
-An application that needs Spring Cloud or Spring Cloud Alibaba uses `jfoundry-spring-cloud-parent`.
-That independent line inherits Spring Boot 4.0.7 and imports `jfoundry-spring-cloud-dependencies`
-before `jfoundry-dependencies`; it manages Spring Cloud 2025.1.2 and Spring Cloud Alibaba
-2025.1.0.0. Do not combine the two Spring runtime BOMs. Cloud Alibaba belongs only to the Cloud line.
+An application that needs Spring Cloud or Spring Cloud Alibaba keeps its own or a standard Maven
+parent (for example `spring-boot-starter-parent:4.0.7`) and imports
+`jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`; the Cloud BOM manages Spring
+Cloud 2025.1.2 and Spring Cloud Alibaba 2025.1.0.0, while the parent manages Spring Boot. Do not
+combine the two Spring runtime BOMs. Cloud Alibaba belongs only to the Cloud line.
 
 ```xml
 <parent>

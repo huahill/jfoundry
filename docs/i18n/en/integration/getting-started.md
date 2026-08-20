@@ -13,7 +13,7 @@ import both runtime BOMs.
 | Line | Parent | Runtime BOM | Platform baseline |
 |------|--------|-------------|-------------------|
 | Boot-only | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | Spring Boot 4.1.0 |
-| Cloud | `jfoundry-spring-cloud-parent` | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
+| Cloud | Your standard/application parent (for example `spring-boot-starter-parent:4.0.7`) | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
 
 For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven parent:
 
@@ -27,8 +27,9 @@ For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven
 
 It inherits `spring-boot-starter-parent:4.1.0`, sets the Java 25 baseline, and imports the Boot-only
 runtime BOM before `jfoundry-dependencies`. Declare Spring Boot and JFoundry dependencies without a
-version, but continue to select each JFoundry capability starter explicitly. A Cloud application uses
-`jfoundry-spring-cloud-parent`, which inherits Spring Boot 4.0.7 and imports the Cloud runtime BOM.
+version, but continue to select each JFoundry capability starter explicitly. A Cloud application keeps
+its own or a standard Maven parent (for example `spring-boot-starter-parent:4.0.7`) and explicitly
+imports the Cloud BOM and `jfoundry-dependencies`.
 
 An application that must keep a different Maven parent imports `jfoundry-dependencies` for JFoundry
 module versions. An application that uses a supported runtime additionally imports exactly one
@@ -39,10 +40,10 @@ replace the core JFoundry BOM. Import the runtime BOM before `jfoundry-dependenc
 platform's managed constraints take precedence. Select versions from the intended release line; this
 project currently uses the following development version.
 
-The Boot-only BOM manages only Spring Boot. The Cloud BOM manages Spring Boot, Spring Cloud, and
-Spring Cloud Alibaba as one tested platform line. This lets a Cloud application add a selected Cloud
-starter without a version; it does not add any Cloud starter automatically or imply that JFoundry
-provides an adapter for that starter.
+The Boot-only BOM manages only Spring Boot. The Cloud BOM manages Spring Cloud and Spring Cloud
+Alibaba as one tested platform line; the application's parent or another explicit Boot BOM manages
+Spring Boot. This lets a Cloud application add a selected Cloud starter without a version; it does
+not add any Cloud starter automatically or imply that JFoundry provides an adapter for that starter.
 
 The following XML is the alternative for a Boot-only application that cannot use the JFoundry parent.
 For the Cloud line, replace the first import with `jfoundry-spring-cloud-dependencies`. For Quarkus
