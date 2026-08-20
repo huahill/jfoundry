@@ -11,9 +11,9 @@ create a published parent or inheritance boundary.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
   `spring-boot-starter-parent:4.1.0` and imports `jfoundry-spring-boot-dependencies` before
   `jfoundry-dependencies`.
-- `jfoundry-spring-cloud-parent` is the consumer-facing Cloud parent. It directly inherits
-  `spring-boot-starter-parent:4.0.7` and imports `jfoundry-spring-cloud-dependencies` before
-  `jfoundry-dependencies`.
+- Cloud applications use their own or a standard Maven parent (for example
+  `spring-boot-starter-parent:4.0.7`) and explicitly import `jfoundry-spring-cloud-dependencies`
+  before `jfoundry-dependencies`.
 - `jfoundry-foundation-dependencies` manages low-level common dependency versions and all supported
   coordinates of third-party component families shared with a runtime BOM.
 - `jfoundry-modules-dependencies` manages JFoundry module versions.
@@ -21,9 +21,9 @@ create a published parent or inheritance boundary.
   foundation and module BOMs and is the required JFoundry BOM for every external application.
 - `jfoundry-spring-boot-dependencies`, `jfoundry-spring-cloud-dependencies`,
   `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` are standalone runtime BOMs.
-  They do not import `jfoundry-dependencies`. A runtime BOM imports
-  `jfoundry-foundation-dependencies` when it exposes a runtime variant of a shared third-party
-  component family; otherwise it manages only its runtime platform ecosystem.
+  They do not import `jfoundry-dependencies` or `jfoundry-foundation-dependencies`; they manage only
+  their runtime platform ecosystem. The aggregate `jfoundry-dependencies` BOM is the single public
+  entry point for Foundation-managed component families.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and
@@ -52,10 +52,11 @@ that runtime. It never adds those libraries to an application's runtime classpat
 application still declares each selected starter or client explicitly.
 
 `jfoundry-spring-boot-dependencies` manages only Spring Boot 4.1.0. The separate
-`jfoundry-spring-cloud-dependencies` line manages Spring Boot 4.0.7, Spring Cloud 2025.1.2, and
-Spring Cloud Alibaba 2025.1.0.0. This allows a Cloud application to add an appropriate Cloud starter
-without a version while keeping the choice of configuration server, service discovery, traffic
-management, or other platform capability explicit in the application.
+`jfoundry-spring-cloud-dependencies` line manages Spring Cloud 2025.1.2 and Spring Cloud Alibaba
+2025.1.0.0; the Cloud application's parent or another explicit BOM manages Spring Boot 4.0.7. This
+allows a Cloud application to add an appropriate Cloud starter without a version while keeping the
+choice of configuration server, service discovery, traffic management, or other platform capability
+explicit in the application.
 
 Do not add every available ecosystem BOM to a runtime BOM. Add one only when all of the following hold:
 
@@ -71,10 +72,11 @@ ecosystem. A JFoundry adapter remains a separate module, API, and runtime-verifi
 
 When adding a module or third-party dependency, update the narrowest relevant BOM and any aggregate BOM that imports it.
 
-For a third-party component family used by both Foundation and a runtime BOM, Foundation is the sole
-version owner. It manages every supported coordinate in that family, including runtime-specific starter
-or Native Image artifacts. The runtime BOM imports Foundation and must not redeclare the family version
-or any of those coordinates. JobRunr, MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule.
+For a third-party component family used by runtime adapters, Foundation is the sole version owner. It
+manages every supported coordinate in that family, including runtime-specific starter or Native Image
+artifacts. Runtime BOMs must not redeclare the family version or any of those coordinates; applications
+obtain these constraints through the aggregate `jfoundry-dependencies` BOM. JobRunr, MyBatis-Plus,
+Redisson, and jMolecules Integrations follow this rule.
 Do not separately override a starter's transitive dependencies unless JFoundry has an explicit,
 documented compatibility reason and verifies the replacement combination. In particular,
 `org.mybatis:mybatis-spring` follows `mybatis-plus-spring-boot4-starter` and is not managed by a

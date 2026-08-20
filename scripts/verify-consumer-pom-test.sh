@@ -72,6 +72,23 @@ for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry
 XML
 done
 
+cloud_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
+cat > "${cloud_bom_fixture}" <<'XML'
+<project>
+  <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+  <url>https://github.com/xfoundries/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <dependencyManagement>
+    <dependencies>
+      <dependency><artifactId>spring-cloud-dependencies</artifactId></dependency>
+      <dependency><artifactId>spring-cloud-alibaba-dependencies</artifactId></dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>
+XML
+
 assert_accepts() {
     if ! bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}"; then
         echo "Expected Consumer POM verification to accept matching Spring platform lines." >&2
@@ -150,7 +167,6 @@ XML
 }
 
 write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
-write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
 assert_accepts
 
 write_parent jfoundry-spring-boot-parent 4.0.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
@@ -161,14 +177,6 @@ write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies
 assert_rejects "a Spring Boot parent that imports the core BOM before the runtime BOM"
 write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 
-write_parent jfoundry-spring-cloud-parent 4.1.0 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
-assert_rejects "a Spring Cloud parent with the Boot-only version"
-write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
-assert_rejects "a Spring Cloud parent that imports the Boot-only runtime BOM"
-write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-cloud-dependencies jfoundry-dependencies jfoundry-spring-cloud-dependencies
-assert_rejects "a Spring Cloud parent that imports the core BOM before the runtime BOM"
-write_parent jfoundry-spring-cloud-parent 4.0.7 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
-assert_accepts
 assert_accepts_without_xmllint
 
 echo "Consumer POM verification regression test passed."

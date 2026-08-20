@@ -76,6 +76,16 @@ verify_independent_bom() {
     require_text "${pom}" "<dependencyManagement>"
 }
 
+verify_spring_cloud_bom() {
+    local pom
+    pom="$(pom_path "jfoundry-spring-cloud-dependencies")"
+    verify_independent_bom "jfoundry-spring-cloud-dependencies"
+    require_text "${pom}" "<artifactId>spring-cloud-dependencies</artifactId>"
+    require_text "${pom}" "<artifactId>spring-cloud-alibaba-dependencies</artifactId>"
+    forbid_text "${pom}" "<artifactId>spring-boot-dependencies</artifactId>"
+    forbid_text "${pom}" "<artifactId>jfoundry-foundation-dependencies</artifactId>"
+}
+
 require_imported_bom_before() {
     local pom="$1"
     local first_artifact="$2"
@@ -155,9 +165,8 @@ verify_flattened_module "jfoundry-domain"
 verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
 verify_independent_bom "jfoundry-spring-boot-dependencies"
-verify_independent_bom "jfoundry-spring-cloud-dependencies"
+verify_spring_cloud_bom
 verify_spring_parent "jfoundry-spring-boot-parent" "4.1.0" "jfoundry-spring-boot-dependencies"
-verify_spring_parent "jfoundry-spring-cloud-parent" "4.0.7" "jfoundry-spring-cloud-dependencies"
 
 if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
     if [[ -z "${maven3_bin}" || -z "${maven4_bin}" ]]; then
@@ -219,6 +228,12 @@ XML
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>4.0.7</version>
+        <relativePath/>
+    </parent>
     <groupId>io.github.xfoundries.verification</groupId>
     <artifactId>cloud-consumer-pom-smoke</artifactId>
     <version>1.0.0</version>
@@ -280,38 +295,10 @@ XML
 </project>
 XML
 
-    spring_cloud_parent_consumer_pom="${temp_dir}/spring-cloud-parent-consumer-pom.xml"
-    cat > "${spring_cloud_parent_consumer_pom}" <<XML
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring-cloud-parent</artifactId>
-        <version>${version}</version>
-        <relativePath/>
-    </parent>
-    <artifactId>spring-cloud-parent-consumer-smoke</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-    </dependencies>
-</project>
-XML
-
     for maven_bin in "${maven3_bin}" "${maven4_bin}"; do
         "${maven_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
         "${maven_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
         "${maven_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-        "${maven_bin}" -B -f "${spring_cloud_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
     done
 fi
 
