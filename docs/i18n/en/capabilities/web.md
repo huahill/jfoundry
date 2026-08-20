@@ -46,6 +46,32 @@ The built-in catalog maps these JFoundry exceptions: `InvalidArgumentException`,
 `DomainRuleViolationException`, and `DomainStateException`. It also owns the shared HTTP statuses
 `400`, `404`, `405`, `406`, `413`, `415`, and `503` when the runtime reports them.
 
+The messages of `InvalidArgumentException`, `NotFoundException`, `ConflictException`,
+`DomainRuleViolationException`, and `DomainStateException` become caller-facing `detail` values. Keep
+those messages in business language and do not include credentials, internal endpoints, SQL, or other
+diagnostic data.
+
+`ExternalAccessException` is different: its diagnostic message is masked by default. A concrete
+translated exception may use the protected constructor with a reviewed public detail when it owns a
+stable, actionable explanation:
+
+```java
+final class MksAuthenticationException extends ExternalAccessException {
+
+    MksAuthenticationException(Throwable cause) {
+        super(
+                "MKS deployment JWT signing failed",
+                cause,
+                "Deployment authorization is temporarily unavailable."
+        );
+    }
+}
+```
+
+The catalog uses that explicit detail for the `EXTERNAL_ACCESS` response. It never derives a public
+detail from the diagnostic message, the cause, or `cause.getMessage()`. Existing constructors remain
+masked and continue to produce `The requested operation is temporarily unavailable.`
+
 Applications can provide a `ProblemMapper` to map an owned exception to a `ProblemDescriptor`.
 Use this for stable, application-specific errors, rather than leaking implementation exceptions or
 forcing an HTTP concern into the domain model.

@@ -81,6 +81,19 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     @Test
+    void rendersAReviewedExternalAccessPublicDetail() {
+        ResponseEntity<ProblemDetail> response = handler.handleExternalAccess(
+                new ReviewedExternalAccessException("MKS deployment JWT signing failed",
+                        new IllegalStateException("private key is invalid"),
+                        "Deployment authorization is temporarily unavailable."));
+
+        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_ACCESS", "Service temporarily unavailable",
+                "urn:jfoundry:problem:external-access");
+        assertThat(response.getBody().getDetail())
+                .isEqualTo("Deployment authorization is temporarily unavailable.");
+    }
+
+    @Test
     void mapsDomainRuleViolationToUnprocessableContentProblemDetail() {
         ResponseEntity<ProblemDetail> response = handler.handleDomainRuleViolation(
                 new DomainRuleViolationException("Quota exceeded"));
@@ -206,6 +219,13 @@ class ProblemDetailsExceptionHandlerTest {
 
     private static WebRequest webRequest() {
         return new ServletWebRequest(new MockHttpServletRequest());
+    }
+
+    private static final class ReviewedExternalAccessException extends ExternalAccessException {
+
+        private ReviewedExternalAccessException(String message, Throwable cause, String publicDetail) {
+            super(message, cause, publicDetail);
+        }
     }
 
     @RestController

@@ -6,6 +6,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import org.jfoundry.application.exception.ExternalAccessException;
 import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,23 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(problem.getInt("status")).isEqualTo(400);
         assertThat(problem.getString("detail")).isEqualTo("order id is required");
         assertThat(problem.getString("code")).isEqualTo("INVALID_ARGUMENT");
+    }
+
+    @Test
+    void rendersAReviewedExternalAccessPublicDetail() {
+        Response response = new ProblemDetailsExceptionMappers.ExternalAccessMapper().toResponse(
+                new ReviewedExternalAccessException("MKS deployment JWT signing failed",
+                        new IllegalStateException("private key is invalid"),
+                        "Deployment authorization is temporarily unavailable."));
+
+        assertThat(response.getStatus()).isEqualTo(503);
+        JsonObject problem = (JsonObject) response.getEntity();
+        assertThat(problem.getString("type")).isEqualTo("urn:jfoundry:problem:external-access");
+        assertThat(problem.getString("title")).isEqualTo("Service temporarily unavailable");
+        assertThat(problem.getInt("status")).isEqualTo(503);
+        assertThat(problem.getString("detail"))
+                .isEqualTo("Deployment authorization is temporarily unavailable.");
+        assertThat(problem.getString("code")).isEqualTo("EXTERNAL_ACCESS");
     }
 
     @Test
@@ -79,5 +97,12 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(ProblemDetailsExceptionMappers.DomainRuleViolationMapper.class.isAnnotationPresent(Provider.class)).isTrue();
         assertThat(ProblemDetailsExceptionMappers.DomainStateMapper.class.isAnnotationPresent(Provider.class)).isTrue();
         assertThat(ProblemDetailsExceptionMappers.WebApplicationMapper.class.isAnnotationPresent(Provider.class)).isTrue();
+    }
+
+    private static final class ReviewedExternalAccessException extends ExternalAccessException {
+
+        private ReviewedExternalAccessException(String message, Throwable cause, String publicDetail) {
+            super(message, cause, publicDetail);
+        }
     }
 }

@@ -3,6 +3,7 @@ package org.jfoundry.web.quarkus;
 import jakarta.ws.rs.NotAllowedException;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
+import org.jfoundry.application.exception.ExternalAccessException;
 import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,22 @@ class ProblemDetailsExceptionMapperTest {
     }
 
     @Test
+    void rendersAReviewedExternalAccessPublicDetail() {
+        Response response = new ProblemDetailsExceptionMappers.ExternalAccessMapper().toResponse(
+                new ReviewedExternalAccessException("MKS deployment JWT signing failed",
+                        new IllegalStateException("private key is invalid"),
+                        "Deployment authorization is temporarily unavailable."));
+
+        assertThat(response.getStatus()).isEqualTo(503);
+        assertThat(response.getEntity()).isEqualTo(Map.of(
+                "type", "urn:jfoundry:problem:external-access",
+                "title", "Service temporarily unavailable",
+                "status", 503,
+                "detail", "Deployment authorization is temporarily unavailable.",
+                "code", "EXTERNAL_ACCESS"));
+    }
+
+    @Test
     void retainsAllowHeaderForMethodNotAllowedResponses() {
         Response source = Response.status(405).header(HttpHeaders.ALLOW, "GET, HEAD").build();
         Response response = webApplicationMapper.toResponse(new NotAllowedException(source));
@@ -53,5 +70,12 @@ class ProblemDetailsExceptionMapperTest {
                 "status", 403,
                 "detail", "Access is denied.",
                 "code", "FORBIDDEN"));
+    }
+
+    private static final class ReviewedExternalAccessException extends ExternalAccessException {
+
+        private ReviewedExternalAccessException(String message, Throwable cause, String publicDetail) {
+            super(message, cause, publicDetail);
+        }
     }
 }

@@ -1,5 +1,6 @@
 package org.jfoundry.problem;
 
+import org.jfoundry.application.exception.ExternalAccessException;
 import org.jfoundry.application.exception.InvalidArgumentException;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +17,25 @@ class ProblemCatalogTest {
         assertThat(problem.title()).isEqualTo("Invalid argument");
         assertThat(problem.type()).hasToString("urn:jfoundry:problem:invalid-argument");
         assertThat(problem.detail()).isEqualTo("pageSize is invalid");
+    }
+
+    @Test
+    void masksExternalAccessDiagnosticsByDefault() {
+        ProblemDescriptor problem = ProblemCatalog.forException(
+                new ExternalAccessException("k8s api https://cluster.internal timed out"));
+
+        assertThat(problem.detail()).isEqualTo("The requested operation is temporarily unavailable.");
+    }
+
+    @Test
+    void usesAReviewedExternalAccessPublicDetail() {
+        ExternalAccessException exception = new ReviewedExternalAccessException(
+                "MKS deployment JWT signing failed", new IllegalStateException("private key is invalid"),
+                "Deployment authorization is temporarily unavailable.");
+
+        ProblemDescriptor problem = ProblemCatalog.forException(exception);
+
+        assertThat(problem.detail()).isEqualTo("Deployment authorization is temporarily unavailable.");
     }
 
     @Test
@@ -46,5 +66,12 @@ class ProblemCatalogTest {
         assertThat(ProblemCatalog.supportsHttpStatus(415)).isTrue();
         assertThat(ProblemCatalog.supportsHttpStatus(503)).isTrue();
         assertThat(ProblemCatalog.supportsHttpStatus(403)).isFalse();
+    }
+
+    private static final class ReviewedExternalAccessException extends ExternalAccessException {
+
+        private ReviewedExternalAccessException(String message, Throwable cause, String publicDetail) {
+            super(message, cause, publicDetail);
+        }
     }
 }
