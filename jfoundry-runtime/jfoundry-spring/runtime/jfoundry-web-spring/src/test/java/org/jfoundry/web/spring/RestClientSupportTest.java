@@ -45,7 +45,7 @@ class RestClientSupportTest {
     }
 
     @Test
-    void translatesTransportFailuresWithoutRetainingTheOriginalException() {
+    void translatesTransportFailuresWhileRetainingTheOriginalCauseForServerLogging() {
         assertFailureKind(new ResourceAccessException("connect", new ConnectException("private endpoint")),
                 HttpRequestFailureKind.CONNECTION);
         assertFailureKind(new ResourceAccessException("timeout", new SocketTimeoutException("request timeout")),
@@ -55,7 +55,7 @@ class RestClientSupportTest {
     }
 
     @Test
-    void translatesResponseDecodingFailuresWithoutRetainingTheOriginalException() {
+    void translatesResponseDecodingFailuresWhileRetainingTheOriginalCauseForServerLogging() {
         HttpInputMessage inputMessage = new HttpInputMessage() {
             @Override
             public HttpHeaders getHeaders() {
@@ -83,7 +83,7 @@ class RestClientSupportTest {
             throw source;
         })).isInstanceOfSatisfying(HttpRequestException.class, exception -> {
             assertThat(exception.failureKind()).isEqualTo(expectedKind);
-            assertThat(exception).hasNoCause();
+            assertThat(exception).hasCause(source);
         });
     }
 }

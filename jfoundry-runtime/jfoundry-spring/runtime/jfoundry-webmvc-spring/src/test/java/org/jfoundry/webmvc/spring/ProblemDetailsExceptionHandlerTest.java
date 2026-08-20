@@ -125,6 +125,29 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     @Test
+    void mapsUnhandledExceptionsWithAnApplicationProblemMapper() {
+        ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
+                java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
+                "The application cannot complete the request.", Map.of("code", "APPLICATION_FAILURE")));
+        ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
+
+        ResponseEntity<ProblemDetail> response = applicationHandler.handleUnhandled(
+                new IllegalStateException("internal"));
+
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_FAILURE", "Application failure",
+                "https://example.test/problems/application");
+    }
+
+    @Test
+    void mapsUnhandledExceptionsToASafeInternalServerErrorByDefault() {
+        ResponseEntity<ProblemDetail> response = handler.handleUnhandled(new IllegalStateException("internal"));
+
+        assertProblem(response, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal server error",
+                "urn:jfoundry:problem:internal-error");
+        assertThat(response.getBody().getDetail()).isEqualTo("The server failed to process the request.");
+    }
+
+    @Test
     void leavesAccessDeniedExceptionsForOuterSecurityFilters() throws Exception {
         AtomicReference<Exception> propagated = new AtomicReference<>();
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new FailingController())
