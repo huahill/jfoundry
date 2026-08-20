@@ -78,6 +78,10 @@ Recent history follows Conventional Commits, for example `fix(outbox): ...`, `te
 
 Keep `main` history linear. Do not use `git merge` to integrate completed work into `main`; rebase a feature branch onto the current `main` or cherry-pick its ordered commits instead. Do not rewrite already-pushed history unless the user explicitly authorizes it; when authorized, use `git push --force-with-lease`, not `--force`.
 
+### Branch Workflow
+
+Before editing or committing, confirm that the checkout is not `main`. Fetch the current remote refs and create a short-lived branch from `origin/main`, using the `codex/<scope>` naming convention unless a different branch name is explicitly requested. Keep all repository changes on that branch; never commit directly on `main`. On the first push, set the upstream explicitly with `git push -u origin <branch>` so later pushes target the feature branch.
+
 ## Merge Gate
 
 Do not push directly to `main`. Create a short-lived branch and pull request for every repository change.
