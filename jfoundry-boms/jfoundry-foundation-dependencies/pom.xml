@@ -38,6 +38,7 @@
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
     <hibernate.version>7.4.5.Final</hibernate.version>
+    <h2.version>2.4.240</h2.version>
     <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
 
@@ -149,6 +150,11 @@
         <groupId>org.hibernate.orm</groupId>
         <artifactId>hibernate-core</artifactId>
         <version>${hibernate.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>${h2.version}</version>
       </dependency>
       <dependency>
         <groupId>com.mysql</groupId>
