@@ -104,6 +104,62 @@ write_pom "jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus" '
 expect_rejected "invalid-quarkus"
 
 rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus"
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-bom-quarkus" '
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>'
+expect_rejected "invalid-bom-quarkus"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-bom-quarkus"
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-foundation-import" '
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-foundation-dependencies</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>'
+expect_rejected "invalid-foundation-import"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-foundation-import"
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-aggregate-import" '
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.xfoundries</groupId>
+                <artifactId>jfoundry-dependencies</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>'
+expect_rejected "invalid-aggregate-import"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-aggregate-import"
+write_pom "jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/invalid-helidon-test" '
+    <dependencies>
+        <dependency>
+            <groupId>io.helidon.microprofile.bundles</groupId>
+            <artifactId>helidon-microprofile</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>'
+expect_rejected "invalid-helidon-test"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/invalid-helidon-test"
 write_pom "jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/allowed-spring-test" '
     <dependencies>
         <dependency>

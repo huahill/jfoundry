@@ -74,14 +74,17 @@ public final class VerifyDependencyBoundaries {
         if (module == ModuleKind.FOUNDATION_BOM && (spring || quarkus || helidon || isRuntimeMarker(coordinate))) {
             violations.add(format(pom, coordinate, context, "foundation-runtime-coordinate"));
         }
-        if (module == ModuleKind.SPRING && (quarkus || helidon)) {
+        if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOM) && (quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "spring-cross-runtime-dependency"));
         }
-        if (module == ModuleKind.QUARKUS && (spring || helidon)) {
+        if ((module == ModuleKind.QUARKUS || module == ModuleKind.QUARKUS_BOM) && (spring || helidon)) {
             violations.add(format(pom, coordinate, context, "quarkus-cross-runtime-dependency"));
         }
-        if (module == ModuleKind.HELIDON && (spring || quarkus)) {
+        if ((module == ModuleKind.HELIDON || module == ModuleKind.HELIDON_BOM) && (spring || quarkus)) {
             violations.add(format(pom, coordinate, context, "helidon-cross-runtime-dependency"));
+        }
+        if (isRuntimeBom(module) && isDisallowedRuntimeBomImport(coordinate)) {
+            violations.add(format(pom, coordinate, context, "runtime-bom-import"));
         }
     }
 
@@ -118,34 +121,46 @@ public final class VerifyDependencyBoundaries {
         return coordinate.contains("-deployment") || coordinate.contains("-starter");
     }
 
+    private static boolean isRuntimeBom(ModuleKind module) {
+        return module == ModuleKind.SPRING_BOM
+                || module == ModuleKind.QUARKUS_BOM
+                || module == ModuleKind.HELIDON_BOM;
+    }
+
+    private static boolean isDisallowedRuntimeBomImport(String coordinate) {
+        return coordinate.equals("io.github.xfoundries:jfoundry-dependencies")
+                || coordinate.equals("io.github.xfoundries:jfoundry-foundation-dependencies")
+                || coordinate.equals("io.github.xfoundries:jfoundry-spring-boot-dependencies")
+                || coordinate.equals("io.github.xfoundries:jfoundry-spring-cloud-dependencies")
+                || coordinate.equals("io.github.xfoundries:jfoundry-quarkus-dependencies")
+                || coordinate.equals("io.github.xfoundries:jfoundry-helidon-dependencies");
+    }
+
     private static ModuleKind classify(Path relativePath) {
         String path = relativePath.toString().replace('\\', '/');
         if (path.startsWith("jfoundry-core/")) {
             return ModuleKind.CORE;
         }
-        if (path.contains("jfoundry-spring-integration-tests")) {
-            return ModuleKind.RUNTIME_INTEGRATION_TESTS;
+        if (path.startsWith("jfoundry-boms/jfoundry-spring-") && path.endsWith("-dependencies")) {
+            return ModuleKind.SPRING_BOM;
+        }
+        if (path.startsWith("jfoundry-boms/jfoundry-quarkus-dependencies")) {
+            return ModuleKind.QUARKUS_BOM;
+        }
+        if (path.startsWith("jfoundry-boms/jfoundry-helidon-dependencies")) {
+            return ModuleKind.HELIDON_BOM;
         }
         if (path.startsWith("jfoundry-runtime/jfoundry-spring/")) {
             return ModuleKind.SPRING;
         }
-        if (path.contains("jfoundry-quarkus-integration-tests")) {
-            return ModuleKind.RUNTIME_INTEGRATION_TESTS;
-        }
         if (path.startsWith("jfoundry-runtime/jfoundry-quarkus/")) {
             return ModuleKind.QUARKUS;
-        }
-        if (path.contains("jfoundry-helidon-integration-tests")) {
-            return ModuleKind.RUNTIME_INTEGRATION_TESTS;
         }
         if (path.startsWith("jfoundry-runtime/jfoundry-helidon/")) {
             return ModuleKind.HELIDON;
         }
         if (path.startsWith("jfoundry-boms/jfoundry-foundation-dependencies")) {
             return ModuleKind.FOUNDATION_BOM;
-        }
-        if (path.startsWith("jfoundry-boms/jfoundry-") && path.endsWith("-dependencies")) {
-            return ModuleKind.RUNTIME_BOM;
         }
         return ModuleKind.OTHER;
     }
@@ -223,6 +238,6 @@ public final class VerifyDependencyBoundaries {
     }
 
     private enum ModuleKind {
-        CORE, FOUNDATION_BOM, SPRING, QUARKUS, HELIDON, RUNTIME_BOM, RUNTIME_INTEGRATION_TESTS, OTHER
+        CORE, FOUNDATION_BOM, SPRING, QUARKUS, HELIDON, SPRING_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
     }
 }

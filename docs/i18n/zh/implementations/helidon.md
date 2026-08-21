@@ -112,7 +112,7 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
-Helidon MP 4.5.1 将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 上使用 GraalVM Community
+Helidon MP 4.5.2 将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 上使用 GraalVM Community
 25.0.2 时，启用 JPA 的使用方会在镜像生成阶段失败：
 `JpaExtension.processPersistenceXmls` 会使 `org.xml.sax.helpers.LocatorImpl` 进入 image heap。
 仅包含原生 CDI/Web 的使用方可以启动并提供 Problem Details，但执行 `TransactionRunner` 时仍会因

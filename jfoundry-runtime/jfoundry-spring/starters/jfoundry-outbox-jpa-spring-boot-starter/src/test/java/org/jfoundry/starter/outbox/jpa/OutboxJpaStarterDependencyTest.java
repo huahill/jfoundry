@@ -40,8 +40,11 @@ class OutboxJpaStarterDependencyTest {
     @Test
     void businessJpaStarterRuntimeDependencyTreeDoesNotContainReliableMessagingStores() throws Exception {
         Path projectRoot = repositoryRoot();
+        String wrapperName = System.getProperty("os.name").toLowerCase().contains("win")
+                ? "mvnw.cmd"
+                : "mvnw";
         Process process = new ProcessBuilder(
-                projectRoot.resolve("mvnw").toString(),
+                projectRoot.resolve(wrapperName).toString(),
                 "-pl", "jfoundry-runtime/jfoundry-spring/starters/jfoundry-persistence-jpa-spring-boot-starter",
                 "-am",
                 "dependency:tree",

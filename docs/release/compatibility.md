@@ -94,7 +94,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
 
-Helidon MP 4.5.1 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
+Helidon MP 4.5.2 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
 macOS ARM64, adding Helidon's JPA integration also fails image generation through
 `JpaExtension.processPersistenceXmls`, with `org.xml.sax.helpers.LocatorImpl` retained in the image
 heap. The Native CDI/Web consumer starts and serves the JFoundry Problem Details response, but
