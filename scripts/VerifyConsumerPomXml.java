@@ -31,11 +31,11 @@ public class VerifyConsumerPomXml {
         }
 
         for (Node node = dependencies.getFirstChild(); node != null; node = node.getNextSibling()) {
-            if (!(node instanceof Element dependency) || !"dependency".equals(dependency.getLocalName())) {
+            if (!(node instanceof Element dependency) || !hasName(dependency, "dependency")) {
                 continue;
             }
             if ("pom".equals(text(dependency, "type")) && "import".equals(text(dependency, "scope"))) {
-                System.out.println(text(dependency, "artifactId"));
+                System.out.print(text(dependency, "artifactId") + '\n');
             }
         }
     }
@@ -45,16 +45,20 @@ public class VerifyConsumerPomXml {
         if (parent == null) {
             return;
         }
-        System.out.println(text(parent, "groupId") + ':' + text(parent, "artifactId") + ':' + text(parent, "version"));
+        System.out.print(text(parent, "groupId") + ':' + text(parent, "artifactId") + ':' + text(parent, "version") + '\n');
     }
 
     private static Element child(Element parent, String name) {
         for (Node node = parent.getFirstChild(); node != null; node = node.getNextSibling()) {
-            if (node instanceof Element element && name.equals(element.getLocalName())) {
+            if (node instanceof Element element && hasName(element, name)) {
                 return element;
             }
         }
         return null;
+    }
+
+    private static boolean hasName(Element element, String name) {
+        return name.equals(element.getLocalName()) || name.equals(element.getNodeName());
     }
 
     private static String text(Element parent, String name) {
