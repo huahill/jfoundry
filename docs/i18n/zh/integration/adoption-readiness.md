@@ -110,9 +110,9 @@ Hexagonal Port/Adapter 约定分离。
 - Spring Boot 4.0.x 和 Spring Framework 7.0.x，包括 JVM 中间件集成，以及基础运行时、
   MyBatis-Plus 持久化、Redisson 锁和 JobRunr Outbox 派发的 GraalVM 原生镜像验证。费用报销审批
   Demo 还使用两个原生可执行文件验证 Kafka、Outbox、Inbox、PostgreSQL 和支付投影链路。
-- Quarkus 3.37.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 运行时集成验证
+- Quarkus 3.38.3 的 CDI 发现与 Jakarta Transactions `TransactionRunner` 集成，已具备 JVM 运行时集成验证
   和原生镜像 CI 验证任务。
-- Helidon MP 4.5.2 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
+- Helidon MP 4.5.3 的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
   其 GraalVM 25 使用方已验证 CDI/Web 启动和 Problem Details 响应；原生 JTA 与 JPA 仍受上游实验性
   限制，可复现的失败记录见 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
 - MyBatis-Plus 业务持久化与 PostgreSQL。

@@ -1,6 +1,6 @@
 # Helidon MP Runtime Integration
 
-`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with Helidon MP 4.5.2. It is a
+`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with Helidon MP 4.5.3. It is a
 portable CDI/Jakarta runtime integration, not a Spring Boot starter and not a Quarkus extension.
 Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and application code.
 
@@ -124,7 +124,7 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
-Helidon MP 4.5.2 documents Narayana JTA Native Image support as experimental. With GraalVM Community
+Helidon MP 4.5.3 documents Narayana JTA Native Image support as experimental. With GraalVM Community
 25.0.2 on macOS ARM64, the JPA-enabled consumer fails during image generation because
 `org.xml.sax.helpers.LocatorImpl` reaches the image heap through
 `JpaExtension.processPersistenceXmls`. The Native CDI/Web-only consumer starts and serves Problem
