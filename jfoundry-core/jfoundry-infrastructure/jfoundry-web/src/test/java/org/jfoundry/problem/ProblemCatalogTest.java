@@ -13,10 +13,10 @@ class ProblemCatalogTest {
         ProblemDescriptor problem = ProblemCatalog.forException(new InvalidArgumentException("pageSize is invalid"));
 
         assertThat(problem.status()).isEqualTo(400);
-        assertThat(problem.code()).isEqualTo("INVALID_ARGUMENT");
         assertThat(problem.title()).isEqualTo("Invalid argument");
         assertThat(problem.type()).hasToString("urn:jfoundry:problem:invalid-argument");
         assertThat(problem.detail()).isEqualTo("pageSize is invalid");
+        assertThat(problem.extensions()).isEmpty();
     }
 
     @Test
@@ -43,17 +43,18 @@ class ProblemCatalogTest {
         ProblemDescriptor problem = ProblemCatalog.forHttpStatus(405);
 
         assertThat(problem.status()).isEqualTo(405);
-        assertThat(problem.code()).isEqualTo("HTTP_METHOD_NOT_ALLOWED");
+        assertThat(problem.type()).hasToString("urn:jfoundry:problem:http-method-not-allowed");
         assertThat(problem.detail()).isEqualTo("The HTTP method is not allowed for this resource.");
+        assertThat(problem.extensions()).isEmpty();
     }
 
     @Test
     void resolvesServiceUnavailableToTheServiceUnavailableProblem() {
         ProblemDescriptor problem = ProblemCatalog.forHttpStatus(503);
 
-        assertThat(problem.code()).isEqualTo("HTTP_SERVICE_UNAVAILABLE");
         assertThat(problem.type()).hasToString("urn:jfoundry:problem:http-service-unavailable");
         assertThat(problem.detail()).isEqualTo("The service is temporarily unavailable.");
+        assertThat(problem.extensions()).isEmpty();
     }
 
     @Test

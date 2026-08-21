@@ -23,13 +23,4 @@ public record ProblemDescriptor(URI type, String title, int status, String detai
         }
     }
 
-    /// Transitional constructor for existing runtime adapters.
-    public ProblemDescriptor(int status, String code, String title, URI type, String detail) {
-        this(type, title, status, detail, Map.of("code", code));
-    }
-
-    /// Returns the stable problem code extension.
-    public String code() {
-        return (String) extensions.get("code");
-    }
 }

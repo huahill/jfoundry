@@ -290,7 +290,7 @@ Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行�
 `DomainStateException`。它还会为状态码为 `400`、`404`、`405`、`406`、`413`、`415` 和 `503`
 的标准 Jakarta REST 失败渲染共享契约。
 
-响应包含共享的 `type`、`title`、`status`、`detail` 以及 JFoundry `code` 字段。适配器会保留源
+响应包含共享的 `type`、`title`、`status` 和 `detail` 字段；`type` 是稳定的机器可读问题标识。适配器会保留源
 Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它不会推断 Quarkus 未提供的响应头。未知异常
 和其他 HTTP 状态会继续使用正常的 Quarkus 行为，而不会被转换成 JFoundry 错误。
 

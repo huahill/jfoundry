@@ -37,12 +37,12 @@ class WebMvcProblemDetailAutoConfigurationTest {
     void composesApplicationProblemMappersIntoTheHandler() {
         ProblemMapper mapper = exception -> java.util.Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
-                "Application detail", java.util.Map.of("code", "APPLICATION_FAILURE")));
+                "Application detail", java.util.Map.of("retryable", false)));
 
         runner.withBean(ProblemMapper.class, () -> mapper)
                 .run(context -> assertThat(context.getBean(ProblemDetailsExceptionHandler.class)
                         .handleInvalidArgument(new InvalidArgumentException("internal"))
-                        .getBody().getProperties()).containsEntry("code", "APPLICATION_FAILURE"));
+                        .getBody().getProperties()).containsEntry("retryable", false));
     }
 
     @Test

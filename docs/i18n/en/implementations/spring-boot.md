@@ -126,6 +126,40 @@ authorization. A security adapter that owns those semantics can render its own `
 descriptor with `ProblemDetailRenderer.render(...)`. The shared contract and capability-selection
 entry point are documented in [Web](../capabilities/web.md).
 
+For a catalog-supported Spring MVC client error, JFoundry keeps the catalog's stable `type` and
+`status` while using the exception-specific `title` and `detail` produced by Spring Framework,
+including `MessageSource` localization. For example, a missing request parameter identifies that
+parameter, an unsupported method identifies the method, and an unreadable request body reports that
+the request could not be read. Catalog text remains the fallback when Spring provides no specific
+problem body. Server-side failures continue to use reviewed catalog text rather than exception
+messages, causes, or other diagnostic details. Type-conversion failures identify the affected
+request property when available but do not echo its rejected value.
+
+Spring MVC request-body validation failures use the dedicated
+`urn:jfoundry:problem:request-validation` type. Its `errors` extension follows the RFC 9457
+validation-error example: each entry has a human-readable `detail` and, when the error belongs to a
+field, a `pointer` expressed as a JSON Pointer URI fragment. Object-level constraints contain only
+`detail` because they have no reliable JSON location:
+
+```json
+{
+  "type": "urn:jfoundry:problem:request-validation",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "The request failed validation. See 'errors' for details.",
+  "errors": [
+    {
+      "detail": "must not be empty",
+      "pointer": "#/services"
+    }
+  ]
+}
+```
+
+Rejected values are never included because request fields may contain credentials, tokens, or large
+payloads. This mapping is specific to Spring MVC's `MethodArgumentNotValidException`; it does not
+claim equivalent validation handling for Quarkus or Helidon.
+
 `jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an

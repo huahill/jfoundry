@@ -13,7 +13,7 @@ class ProblemDetailRendererTest {
     @Test
     void rendersRuntimeNeutralProblemDescriptor() {
         ProblemDescriptor descriptor = new ProblemDescriptor(URI.create("urn:test:problem"), "Test problem", 422,
-                "A test problem occurred.", Map.of("code", "TEST_PROBLEM"));
+                "A test problem occurred.", Map.of("retryable", false));
 
         var problemDetail = ProblemDetailRenderer.render(descriptor);
 
@@ -21,6 +21,6 @@ class ProblemDetailRendererTest {
         assertThat(problemDetail.getType()).isEqualTo(descriptor.type());
         assertThat(problemDetail.getTitle()).isEqualTo(descriptor.title());
         assertThat(problemDetail.getDetail()).isEqualTo(descriptor.detail());
-        assertThat(problemDetail.getProperties()).containsEntry("code", "TEST_PROBLEM");
+        assertThat(problemDetail.getProperties()).containsEntry("retryable", false);
     }
 }

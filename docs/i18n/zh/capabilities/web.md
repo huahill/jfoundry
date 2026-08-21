@@ -29,7 +29,7 @@
 
 ### 共享契约
 
-受支持的响应包含 RFC 9457 的 `type`、`title`、`status` 和 `detail` 成员，以及稳定的 JFoundry `code` 扩展字段。自定义扩展会保留 JSON 标量、数组和对象类型，且不能覆盖 RFC 9457 保留成员。
+受支持的响应包含 RFC 9457 的 `type`、`title`、`status` 和 `detail` 成员。`type` URI 是稳定的机器可读问题标识。自定义扩展会保留 JSON 标量、数组和对象类型，且不能覆盖 RFC 9457 保留成员；只有当扩展字段能为特定 problem type 提供额外语义时才应定义它。
 
 内置目录映射以下 JFoundry 异常：`InvalidArgumentException`、`NotFoundException`、`ConflictException`、`ExternalAccessException`、`DomainRuleViolationException` 和 `DomainStateException`。运行时报告 `400`、`404`、`405`、`406`、`413`、`415` 或 `503` 时，也会使用共享契约。
 
@@ -53,7 +53,7 @@ final class MksAuthenticationException extends ExternalAccessException {
 }
 ```
 
-内置目录会把该显式详情用于 `EXTERNAL_ACCESS` 响应，但绝不会从诊断消息、cause 或
+内置目录会把该显式详情用于 `urn:jfoundry:problem:external-access` 响应，但绝不会从诊断消息、cause 或
 `cause.getMessage()` 推导公开详情。现有构造方法仍保持默认脱敏，并继续返回
 `The requested operation is temporarily unavailable.`。
 
