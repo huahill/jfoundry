@@ -25,13 +25,14 @@ EOF
 
 expect_rejected() {
     local name="$1"
+    local expected_output="${2:-${name}}"
     local output
     if output="$(java "${CHECKER}" "${FIXTURE_ROOT}" 2>&1)"; then
         echo "Expected ${name} fixture to be rejected." >&2
         exit 1
     fi
-    if [[ "${output}" != *"${name}"* ]]; then
-        echo "${name} fixture did not appear in checker output:" >&2
+    if [[ "${output}" != *"${expected_output}"* ]]; then
+        echo "${name} fixture did not produce ${expected_output}:" >&2
         echo "${output}" >&2
         exit 1
     fi
@@ -104,7 +105,7 @@ write_pom "jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus" '
 expect_rejected "invalid-quarkus"
 
 rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus"
-write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-bom-quarkus" '
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -116,10 +117,10 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-bom-quarkus" 
             </dependency>
         </dependencies>
     </dependencyManagement>'
-expect_rejected "invalid-bom-quarkus"
+expect_rejected "invalid-bom-quarkus" "spring-cross-runtime-dependency"
 
-rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-bom-quarkus"
-write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-foundation-import" '
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -131,10 +132,10 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-foundation-im
             </dependency>
         </dependencies>
     </dependencyManagement>'
-expect_rejected "invalid-foundation-import"
+expect_rejected "invalid-foundation-import" "runtime-bom-import"
 
-rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-foundation-import"
-write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-aggregate-import" '
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
+write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -146,9 +147,9 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-aggregate-imp
             </dependency>
         </dependencies>
     </dependencyManagement>'
-expect_rejected "invalid-aggregate-import"
+expect_rejected "invalid-aggregate-import" "runtime-bom-import"
 
-rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies/invalid-aggregate-import"
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
 write_pom "jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/invalid-helidon-test" '
     <dependencies>
         <dependency>
