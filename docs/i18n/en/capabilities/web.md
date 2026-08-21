@@ -101,10 +101,18 @@ as a JSON Pointer URI fragment:
 }
 ```
 
-Object-level constraints have no reliable JSON location and therefore contain only `detail`.
-Rejected values are never included because request fields may contain credentials, tokens, or large
-payloads. The runtime adapters deliberately exclude return-value and internal service validation
-failures from this client-error contract.
+Pointers describe locations in the JSON request document, not Java property paths in general. Field
+and container-element failures proven to originate from a JSON body can therefore use pointers such
+as `#/services/0`. Query, path, header, cookie, matrix, form, model-attribute, and multipart request
+parameters contain only `detail`, even when validation reports a nested Java property path. Object-level
+and cross-parameter constraints also contain only `detail` because they do not identify one JSON value.
+
+Malformed JSON, message-conversion failures, and other failures that occur before validation retain the
+runtime's HTTP bad-request problem type; they are not reported as request-validation problems. Rejected
+values are never included because request fields may contain credentials, tokens, or large payloads.
+The runtime adapters deliberately exclude return-value and internal service validation failures from
+this client-error contract. Spring MVC, Quarkus REST, and Helidon MP apply these provenance rules to the
+request-source metadata exposed by their own HTTP stacks while producing the same public response shape.
 
 Spring MVC obtains validation through its normal Web MVC integration. A Quarkus application must add
 `quarkus-hibernate-validator`; JFoundry registers the mapper only when that capability is present. A

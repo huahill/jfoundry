@@ -48,4 +48,31 @@ class ProblemDetailsResourceTest {
             assertFalse(problem.containsKey("code"));
         }
     }
+
+    @Test
+    void rendersNonDocumentRequestValidationWithoutPointers() {
+        assertDetailOnlyValidation(target.path("/jfoundry/problems/validation/query")
+                .queryParam("value", "x")
+                .request()
+                .get());
+        assertDetailOnlyValidation(target.path("/jfoundry/problems/validation/path/x")
+                .request()
+                .get());
+        assertDetailOnlyValidation(target.path("/jfoundry/problems/validation/header")
+                .request()
+                .header("X-Value", "x")
+                .get());
+    }
+
+    private static void assertDetailOnlyValidation(Response response) {
+        try (response) {
+            assertEquals(400, response.getStatus());
+            assertEquals("application/problem+json", response.getMediaType().toString());
+            JsonObject problem = response.readEntity(JsonObject.class);
+            assertEquals("urn:jfoundry:problem:request-validation", problem.getString("type"));
+            JsonObject error = problem.getJsonArray("errors").getJsonObject(0);
+            assertEquals("must have at least 3 characters", error.getString("detail"));
+            assertFalse(error.containsKey("pointer"));
+        }
+    }
 }

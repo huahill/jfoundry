@@ -81,8 +81,16 @@ URI fragment 编码的 `pointer`：
 }
 ```
 
-对象级约束没有可靠的 JSON 位置，因此只包含 `detail`。响应绝不会包含被拒绝的值，因为请求字段可能携带凭证、
-令牌或体积较大的数据。各运行时适配器会明确排除返回值校验和内部服务校验失败，不会把它们转换成客户端错误。
+`pointer` 描述的是 JSON 请求文档中的位置，而不是一般意义上的 Java 属性路径。因此，确认来自 JSON body 的字段
+与容器元素错误可以使用 `#/services/0` 之类的 pointer；query、path、header、cookie、matrix、form、
+model attribute 和 multipart 请求参数即使带有嵌套 Java 属性路径，也只包含 `detail`。对象级约束和跨参数约束
+无法定位到单个 JSON 值，同样只包含 `detail`。
+
+JSON 格式错误、消息转换失败以及其它发生在校验之前的失败会保留运行时的 HTTP bad request problem type，
+不会伪装成请求校验问题。响应绝不会包含被拒绝的值，因为请求字段可能携带凭证、令牌或体积较大的数据。
+各运行时适配器会明确排除返回值校验和内部服务校验失败，不会把它们转换成客户端错误。Spring MVC、
+Quarkus REST 和 Helidon MP 分别依据自身 HTTP 技术栈提供的请求来源元数据执行这些来源判定，同时保持相同的
+公开响应结构。
 
 Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须添加
 `quarkus-hibernate-validator`；JFoundry 只在检测到该 capability 时注册映射器。Helidon MP 应用必须添加

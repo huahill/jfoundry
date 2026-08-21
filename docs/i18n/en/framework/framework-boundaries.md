@@ -79,6 +79,13 @@ Test dependencies follow the same boundary. Core modules may use runtime-neutral
 H2, or native persistence-framework test support. Tests that bootstrap Spring, Quarkus, or Helidon belong
 in the matching direct runtime integration-test module and declare that runtime's test stack there.
 
+Jakarta specifications are not application runtimes by themselves. A framework-neutral infrastructure
+adapter may depend narrowly on a portable specification API when that API expresses the adapter's technical
+contract; `jfoundry-web` using the optional Jakarta Validation API to convert `ConstraintViolation` values is
+one example. This allowance does not apply to Domain or Application modules, and it does not make CDI
+lifecycle, JAX-RS dispatch, JTA coordination, or other container integration framework-neutral. Validation
+providers and runtime exception classification remain in tests or in the matching runtime adapters.
+
 CI runs `scripts/verify-dependency-boundaries.sh` before Maven tests. The XML-aware checker scans every
 reactor POM, including test dependencies and dependency management, and rejects cross-runtime coordinates,
 runtime dependencies in Core, and runtime-specific coordinates in Foundation. Its fixture suite and the
@@ -122,8 +129,9 @@ verification reduces feedback time but cannot replace the server-side gate.
 
 ## Acceptance Criteria
 
-- Core modules have no compile/provided dependency on Spring, Spring Boot, Helidon, Quarkus,
-  Micronaut, CDI, Jakarta runtime APIs, broker clients, or persistence framework details.
+- Domain and Application modules have no compile/provided dependency on Spring, Spring Boot, Helidon,
+  Quarkus, Micronaut, CDI, Jakarta APIs, broker clients, or persistence framework details. Infrastructure
+  adapters may use a narrowly scoped portable Jakarta specification API but not container integration APIs.
 - Adapter modules do not register Spring Boot auto-configuration directly.
 - Starters remain lightweight dependency choices.
 - Future runtime integrations can reuse core SPI and framework-neutral adapters without depending

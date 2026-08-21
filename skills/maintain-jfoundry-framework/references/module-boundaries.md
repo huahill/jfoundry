@@ -2,7 +2,11 @@
 
 ## Core Principle
 
-jfoundry's core modules must stay independent of concrete application runtimes. Spring, Spring Boot, Helidon, Quarkus, CDI, Jakarta runtime integration, scheduling, transaction synchronization, property binding, and auto-configuration belong outside the core.
+jfoundry's core modules must stay independent of concrete application runtimes. Spring, Spring Boot, Helidon,
+Quarkus, CDI, Jakarta container integration, scheduling, transaction synchronization, property binding, and
+auto-configuration belong outside the core. A framework-neutral infrastructure adapter may use a narrowly
+scoped portable Jakarta specification API when it expresses that adapter's technical contract; this does not
+permit a provider or container lifecycle dependency.
 
 Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in core modules when they express framework contracts or architecture semantics.
 
@@ -50,9 +54,12 @@ domain / architecture
 
 Practical rules:
 
-- Domain must not depend on Spring, MyBatis, JPA, broker clients, Jackson object mapping details, or runtime integration.
+- Domain must not depend on Spring, MyBatis, JPA, Jakarta APIs, broker clients, Jackson object mapping details,
+  or runtime integration.
 - Application modules define contracts and framework-neutral services. They may depend on domain abstractions and jMolecules semantics.
-- Infrastructure modules implement or consume application/domain contracts without registering Spring Boot auto-configuration.
+- Infrastructure modules implement or consume application/domain contracts without registering Spring Boot
+  auto-configuration. They may depend on a portable Jakarta specification API such as Jakarta Validation when
+  the dependency is capability-specific and does not add a provider or runtime container.
 - Spring runtime modules may depend on application contracts and framework-neutral adapters.
 - Helidon runtime modules may depend on application contracts and framework-neutral adapters, but must not
   introduce a Quarkus deployment layer or Spring Boot starter semantics.
@@ -71,7 +78,10 @@ Use jMolecules architecture annotations internally. The JFoundry wrapper annotat
 
 ## Red Flags
 
-- A core module starts depending on `spring-*`, `spring-boot-*`, servlet APIs, scheduling APIs, CDI, Jakarta runtime APIs, or runtime lifecycle APIs.
+- A Domain or Application module starts depending on `spring-*`, `spring-boot-*`, servlet APIs, scheduling APIs,
+  CDI, Jakarta APIs, or runtime lifecycle APIs.
+- An infrastructure module adds a Jakarta provider, CDI/JAX-RS/JTA container integration, or another runtime
+  lifecycle dependency under the label of a portable specification API.
 - An adapter module adds `AutoConfiguration.imports`.
 - A starter module gains Java source with runtime behavior.
 - A default starter starts pulling broker clients, Outbox store adapters, Inbox store adapters, JobRunr, or MyBatis-Plus stores implicitly.
