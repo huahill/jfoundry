@@ -60,6 +60,28 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
   runtime's direct integration-test module. Framework-neutral tests stay next to their core or infrastructure
   implementation.
 
+## Dependency Management Boundaries
+
+`jfoundry-foundation-dependencies` owns only runtime-neutral libraries and test utilities. A component
+family may have neutral coordinates in Foundation while its runtime-specific starters, deployment
+artifacts, or Native Image integrations remain outside it. For example, Foundation manages the neutral
+MyBatis-Plus, JobRunr, Redisson, and jMolecules coordinates, but it does not manage their Spring-specific
+artifacts.
+
+Each runtime BOM owns its own ecosystem: `jfoundry-spring-boot-dependencies` owns Spring Boot and
+Spring-specific integration coordinates, `jfoundry-quarkus-dependencies` owns Quarkus coordinates, and
+`jfoundry-helidon-dependencies` owns Helidon coordinates. Runtime BOMs remain independent and must not
+import Foundation or another runtime BOM.
+
+Test dependencies follow the same boundary. Core modules may use runtime-neutral JUnit, AssertJ, Mockito,
+H2, or native persistence-framework test support. Tests that bootstrap Spring, Quarkus, or Helidon belong
+in the matching direct runtime integration-test module and declare that runtime's test stack there.
+
+CI runs `scripts/verify-dependency-boundaries.sh` before Maven tests. The XML-aware checker scans every
+reactor POM, including test dependencies and dependency management, and rejects cross-runtime coordinates,
+runtime dependencies in Core, and runtime-specific coordinates in Foundation. Its fixture suite and the
+workflow self-check make removal or weakening of this gate visible in CI.
+
 ## Reliable Messaging Boundary
 
 `jfoundry-outbox-core` owns the message model, store contract, dispatch service, retry/backoff
@@ -104,3 +126,5 @@ verification reduces feedback time but cannot replace the server-side gate.
 - Starters remain lightweight dependency choices.
 - Future runtime integrations can reuse core SPI and framework-neutral adapters without depending
   on Spring Boot.
+- Foundation manages only runtime-neutral coordinates; each runtime BOM owns its matching ecosystem.
+- Core tests do not obtain runtime test frameworks through broad starter dependencies.
