@@ -13,6 +13,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
@@ -32,6 +33,7 @@ import java.util.Map;
 class PersistenceTestConfig {
 
     @Bean
+    @Primary
     TestDomainEventContext testDomainEventContext() {
         return new TestDomainEventContext();
     }
