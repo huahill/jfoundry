@@ -361,6 +361,7 @@ jobs:
             test "${release_tag}" = "${RELEASE_TAG}"
             gh release upload "${RELEASE_TAG}" release-evidence.tar.gz --clobber --repo "${GITHUB_REPOSITORY}"
             gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" \
+              --title "${RELEASE_TAG}" \
               --draft=false --prerelease="${is_prerelease}"
             exit 0
           fi
@@ -371,5 +372,5 @@ jobs:
           fi
           gh release create "${RELEASE_TAG}" release-evidence.tar.gz "${release_flags[@]}" \
             --repo "${GITHUB_REPOSITORY}" \
-            --title "JFoundry ${RELEASE_TAG}" \
+            --title "${RELEASE_TAG}" \
             --generate-notes

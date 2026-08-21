@@ -156,6 +156,7 @@ cat >> "${complete_workflow}" <<'YAML'
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           is_prerelease=false
           case "${RELEASE_VERSION}" in
@@ -165,8 +166,8 @@ cat >> "${complete_workflow}" <<'YAML'
           if [[ "${is_prerelease}" == "true" ]]; then
             release_flags+=(--prerelease --latest=false)
           fi
-          gh release create "${{ inputs.release_tag }}" --verify-tag
-          gh release edit "${{ inputs.release_tag }}" --draft=false --prerelease="${is_prerelease}"
+          gh release create "${RELEASE_TAG}" --verify-tag --title "${RELEASE_TAG}"
+          gh release edit "${RELEASE_TAG}" --title "${RELEASE_TAG}" --draft=false --prerelease="${is_prerelease}"
 YAML
 assert_accepts "${complete_workflow}"
 
@@ -256,6 +257,15 @@ assert_rejects "${missing_github_token_workflow}"
 missing_draft_publication_workflow="${temp_dir}/missing-draft-publication-release.yml"
 grep -v "gh release edit\|--draft=false" "${complete_workflow}" > "${missing_draft_publication_workflow}"
 assert_rejects "${missing_draft_publication_workflow}"
+
+missing_release_title_workflow="${temp_dir}/missing-release-title.yml"
+sed 's/ --title "${RELEASE_TAG}"//g' "${complete_workflow}" > "${missing_release_title_workflow}"
+assert_rejects "${missing_release_title_workflow}"
+
+prefixed_release_title_workflow="${temp_dir}/prefixed-release-title.yml"
+sed 's/--title "${RELEASE_TAG}"/--title "JFoundry ${RELEASE_TAG}"/g' \
+    "${complete_workflow}" > "${prefixed_release_title_workflow}"
+assert_rejects "${prefixed_release_title_workflow}"
 
 missing_prerelease_classification_workflow="${temp_dir}/missing-prerelease-classification-release.yml"
 sed -e '/is_prerelease=false/d' \
