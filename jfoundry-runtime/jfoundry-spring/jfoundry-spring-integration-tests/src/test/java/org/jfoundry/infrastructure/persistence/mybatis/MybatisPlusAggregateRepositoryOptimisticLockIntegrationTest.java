@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.persistence.mybatis;
 
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.infrastructure.persistence.mybatis.support.TestOrder;
 import org.jfoundry.infrastructure.persistence.mybatis.support.TestOrderId;
@@ -135,6 +136,7 @@ class MybatisPlusAggregateRepositoryOptimisticLockIntegrationTest {
         MybatisPlusInterceptor mybatisPlusInterceptor() {
             MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
             interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
+            interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
             return interceptor;
         }
     }
