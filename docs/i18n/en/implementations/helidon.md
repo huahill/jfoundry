@@ -124,7 +124,7 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
-Helidon MP 4.5.1 documents Narayana JTA Native Image support as experimental. With GraalVM Community
+Helidon MP 4.5.2 documents Narayana JTA Native Image support as experimental. With GraalVM Community
 25.0.2 on macOS ARM64, the JPA-enabled consumer fails during image generation because
 `org.xml.sax.helpers.LocatorImpl` reaches the image heap through
 `JpaExtension.processPersistenceXmls`. The Native CDI/Web-only consumer starts and serves Problem

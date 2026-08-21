@@ -137,7 +137,7 @@ The strongest evidence currently applies to:
   Inbox, PostgreSQL, and payment-projection path with two Native Image executables.
 - Quarkus 3.37.3 CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
   JVM consumer smoke test and a Native Image CI gate.
-- Helidon MP 4.5.1 CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem
+- Helidon MP 4.5.2 CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem
   Details. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
   JTA and JPA remain upstream experimental limitations, with a reproducible failure record in
   [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
