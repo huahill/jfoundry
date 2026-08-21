@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("middleware-integration")
 @QuarkusTest
-@QuarkusTestResource(PostgreSqlTestResource.class)
+@QuarkusTestResource(value = PostgreSqlTestResource.class, restrictToAnnotatedClass = true)
 class PostgreSqlOutboxJpaResourceTest {
 
     @Inject

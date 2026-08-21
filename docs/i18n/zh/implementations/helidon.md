@@ -36,7 +36,7 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 |---|---|---|
 | CDI 事务与本地领域事件 | `jfoundry-helidon-runtime` | Helidon MP 服务器与 JTA CDI 集成 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
-| RFC 9457 JAX-RS 响应 | `jfoundry-web-helidon-runtime` | Helidon MP 服务器 |
+| RFC 9457 JAX-RS 响应 | `jfoundry-web-helidon-runtime` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
 | Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon-runtime` | `OutboxMessageStore` 与真实 `MessageSender` |
 | JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
 | JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
@@ -87,6 +87,11 @@ jfoundry.outbox.dispatcher.enabled=true
 `ProblemDetailsRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。扩展字段在各运行时适配器中会保留
 JSON 标量、数组和对象类型。
 
+请求校验需要添加 `helidon-microprofile-bean-validation`。JFoundry 映射器只会把根对象属于 JAX-RS 资源
+入参的约束违反转换为 `urn:jfoundry:problem:request-validation`，且不会访问或返回被拒绝的值。返回值约束
+违反以及内部 CDI 服务的校验失败会继续抛出，由 Helidon 保留服务端错误处理。接受 JSON 请求体的应用还必须
+选择 Jersey JSON provider，例如用于 JSON-B 的 `jersey-media-json-binding`。
+
 ## PostgreSQL/JTA 中间件验证
 
 运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL，并验证真实的 JTA
@@ -112,6 +117,10 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
+原生使用方还会验证 JSON-B 请求反序列化、Bean Validation 和请求校验 Problem Details 响应。由于
+Helidon 会把 CDI 元数据写入镜像，该配置档会在构建期初始化校验 provider、EL 实现和 ClassMate 元数据，并为
+使用方自己的请求 DTO 字段注册反射。下游原生应用必须为自己的 JSON 请求类型和被校验请求类型提供对应的反射元数据。
+
 Helidon MP 4.5.3 将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 上使用 GraalVM Community
 25.0.2 时，启用 JPA 的使用方会在镜像生成阶段失败：
 `JpaExtension.processPersistenceXmls` 会使 `org.xml.sax.helpers.LocatorImpl` 进入 image heap。
@@ -131,8 +140,8 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh helidon
 ```
 
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。原生阶段只验证受支持的 CDI/Web
-使用方与 Problem Details 响应，不将原生 JTA 或 JPA 作为验收结论。通用
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。原生阶段会验证受支持的 CDI/Web
+使用方、常规 Problem Details 响应和请求校验响应，但不将原生 JTA 或 JPA 作为验收结论。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。
 
 ## 延后集成

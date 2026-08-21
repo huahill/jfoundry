@@ -37,7 +37,7 @@ Then select only the capabilities the application needs:
 |---|---|---|
 | CDI transactions and local domain events | `jfoundry-helidon-runtime` | Helidon MP server and JTA CDI integration |
 | JPA aggregate persistence | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate integration, datasource, and persistence unit |
-| RFC 9457 JAX-RS responses | `jfoundry-web-helidon-runtime` | Helidon MP server |
+| RFC 9457 JAX-RS responses | `jfoundry-web-helidon-runtime` | Helidon MP server; Bean Validation for request-validation mapping |
 | Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon-runtime` | an `OutboxMessageStore` and a real `MessageSender` |
 | JPA Outbox store | `jfoundry-outbox-jpa-helidon-runtime` | JPA capability and application migration |
 | JPA Inbox store | `jfoundry-inbox-jpa-helidon-runtime` | JPA capability and application migration |
@@ -97,6 +97,13 @@ It does not configure security. A Helidon security adapter that owns authenticat
 can render its own `401` or `403` descriptor with `ProblemDetailsRenderer.render(...)`. Extension
 values preserve JSON scalar, array, and object types across the runtime adapters.
 
+For request validation, add `helidon-microprofile-bean-validation`. The JFoundry mapper converts only
+constraint violations rooted in a JAX-RS resource input into
+`urn:jfoundry:problem:request-validation`; it never accesses or returns rejected values. Return-value
+violations and validation failures from internal CDI services are rethrown so Helidon retains its
+server-error handling. Applications that accept JSON request bodies must also select a Jersey JSON
+provider, such as `jersey-media-json-binding` for JSON-B.
+
 ## PostgreSQL/JTA Middleware Verification
 
 The runtime-local JVM integration profile starts PostgreSQL through Testcontainers and verifies a
@@ -124,6 +131,12 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
+The Native consumer also verifies JSON-B request deserialization, Bean Validation, and the request-
+validation Problem Details response. Because Helidon embeds CDI metadata into the image, the profile
+initializes the validation provider, EL implementation, and ClassMate metadata at build time and
+registers its request DTO fields for reflection. Downstream Native applications must provide
+equivalent reflection metadata for their own JSON and validated request types.
+
 Helidon MP 4.5.3 documents Narayana JTA Native Image support as experimental. With GraalVM Community
 25.0.2 on macOS ARM64, the JPA-enabled consumer fails during image generation because
 `org.xml.sax.helpers.LocatorImpl` reaches the image heap through
@@ -146,8 +159,9 @@ bash scripts/verify-runtime-ci.sh helidon
 ```
 
 Use `--stage middleware` or `--stage native` to run one stage. The native stage verifies the
-supported CDI/Web consumer and Problem Details response only; it does not claim Native JTA or JPA
-support. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
+supported CDI/Web consumer, ordinary Problem Details response, and request-validation response; it
+does not claim Native JTA or JPA support. The general `scripts/verify-ci-matrix.sh` remains the
+Docker-free Java 25 baseline.
 
 ## Deferred Integrations
 

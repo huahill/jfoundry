@@ -24,6 +24,10 @@ final class ProblemDetailsResponses {
         return problem(ProblemCatalog.forHttpStatus(status), headers);
     }
 
+    static Response forProblem(ProblemDescriptor descriptor) {
+        return problem(descriptor, null);
+    }
+
     private static Response problem(ProblemDescriptor descriptor, MultivaluedMap<String, Object> headers) {
         Response.ResponseBuilder response = Response.status(descriptor.status())
                 .type(PROBLEM_JSON)

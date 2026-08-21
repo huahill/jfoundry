@@ -1,6 +1,11 @@
 package org.jfoundry.web.helidon;
 
+import jakarta.validation.Valid;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.NotAllowedException;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.Provider;
@@ -11,7 +16,11 @@ import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ProblemDetailsExceptionMapperTest {
 
@@ -96,13 +105,106 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(ProblemDetailsExceptionMappers.ExternalAccessMapper.class.isAnnotationPresent(Provider.class)).isTrue();
         assertThat(ProblemDetailsExceptionMappers.DomainRuleViolationMapper.class.isAnnotationPresent(Provider.class)).isTrue();
         assertThat(ProblemDetailsExceptionMappers.DomainStateMapper.class.isAnnotationPresent(Provider.class)).isTrue();
+        assertThat(ProblemDetailsExceptionMappers.RequestValidationMapper.class.isAnnotationPresent(Provider.class)).isTrue();
         assertThat(ProblemDetailsExceptionMappers.WebApplicationMapper.class.isAnnotationPresent(Provider.class)).isTrue();
+    }
+
+    @Test
+    void rendersResourceRequestValidationAsTheSharedProblem() throws Exception {
+        Set<? extends jakarta.validation.ConstraintViolation<?>> violations = requestViolations(
+                new ValidationRequest(List.of()));
+        Response response = new ProblemDetailsExceptionMappers.RequestValidationMapper()
+                .toResponse(new jakarta.validation.ConstraintViolationException(violations));
+
+        assertThat(response.getStatus()).isEqualTo(400);
+        JsonObject problem = (JsonObject) response.getEntity();
+        assertThat(problem.getString("type")).isEqualTo("urn:jfoundry:problem:request-validation");
+        assertThat(problem.getString("title")).isEqualTo("Request validation failed");
+        assertThat(problem.getInt("status")).isEqualTo(400);
+        assertThat(problem.getString("detail"))
+                .isEqualTo("The request failed validation. See 'errors' for details.");
+        JsonObject error = problem.getJsonArray("errors").getJsonObject(0);
+        assertThat(error.getString("pointer")).isEqualTo("#/services");
+        assertThat(error.getString("detail")).isEqualTo("must not be empty");
+    }
+
+    @Test
+    void doesNotExposeInternalValidationAsAClientError() throws Exception {
+        Set<? extends jakarta.validation.ConstraintViolation<?>> violations = internalViolations();
+        var exception = new jakarta.validation.ConstraintViolationException(violations);
+
+        assertThatThrownBy(() -> new ProblemDetailsExceptionMappers.RequestValidationMapper().toResponse(exception))
+                .isSameAs(exception);
+    }
+
+    @Test
+    void doesNotExposeResourceReturnValueValidationAsAClientError() throws Exception {
+        Set<? extends jakarta.validation.ConstraintViolation<?>> violations = returnValueViolations();
+        var exception = new jakarta.validation.ConstraintViolationException(violations);
+
+        assertThatThrownBy(() -> new ProblemDetailsExceptionMappers.RequestValidationMapper().toResponse(exception))
+                .isSameAs(exception);
+    }
+
+    private static Set<? extends jakarta.validation.ConstraintViolation<?>> requestViolations(
+            ValidationRequest request) throws Exception {
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = factory.getValidator();
+            ValidationResource resource = new ValidationResource();
+            return validator.forExecutables().validateParameters(
+                    resource,
+                    ValidationResource.class.getDeclaredMethod("create", ValidationRequest.class),
+                    new Object[]{request});
+        }
+    }
+
+    private static Set<? extends jakarta.validation.ConstraintViolation<?>> internalViolations() throws Exception {
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = factory.getValidator();
+            InternalService service = new InternalService();
+            return validator.forExecutables().validateParameters(
+                    service,
+                    InternalService.class.getDeclaredMethod("execute", List.class),
+                    new Object[]{List.of()});
+        }
+    }
+
+    private static Set<? extends jakarta.validation.ConstraintViolation<?>> returnValueViolations() throws Exception {
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            Validator validator = factory.getValidator();
+            ValidationResource resource = new ValidationResource();
+            return validator.forExecutables().validateReturnValue(
+                    resource,
+                    ValidationResource.class.getDeclaredMethod("result"),
+                    "");
+        }
     }
 
     private static final class ReviewedExternalAccessException extends ExternalAccessException {
 
         private ReviewedExternalAccessException(String message, Throwable cause, String publicDetail) {
             super(message, cause, publicDetail);
+        }
+    }
+
+    private record ValidationRequest(@NotEmpty(message = "must not be empty") List<String> services) {
+    }
+
+    @Path("/validation")
+    private static final class ValidationResource {
+
+        public void create(@Valid ValidationRequest request) {
+        }
+
+        @NotEmpty(message = "must not be empty")
+        public String result() {
+            return "";
+        }
+    }
+
+    private static final class InternalService {
+
+        public void execute(@NotEmpty(message = "must not be empty") List<String> services) {
         }
     }
 }

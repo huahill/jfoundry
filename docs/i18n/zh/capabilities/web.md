@@ -59,6 +59,35 @@ final class MksAuthenticationException extends ExternalAccessException {
 
 应用可以提供 `ProblemMapper`，将自己拥有的异常映射为 `ProblemDescriptor`。这用于稳定的应用专属错误，避免泄露实现异常，也不应把 HTTP 关注点放入领域模型。
 
+### 请求校验问题
+
+Spring MVC、Quarkus REST 和 Helidon MP 对受支持的请求入参校验失败统一使用独立的
+`urn:jfoundry:problem:request-validation` type。其 `errors` 扩展遵循 RFC 9457 的 validation error
+示例：每一项都包含面向调用方的 `detail`；当错误在 JSON 请求文档中具有可靠位置时，还会包含以 JSON Pointer
+URI fragment 编码的 `pointer`：
+
+```json
+{
+  "type": "urn:jfoundry:problem:request-validation",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "The request failed validation. See 'errors' for details.",
+  "errors": [
+    {
+      "detail": "不能为空",
+      "pointer": "#/services"
+    }
+  ]
+}
+```
+
+对象级约束没有可靠的 JSON 位置，因此只包含 `detail`。响应绝不会包含被拒绝的值，因为请求字段可能携带凭证、
+令牌或体积较大的数据。各运行时适配器会明确排除返回值校验和内部服务校验失败，不会把它们转换成客户端错误。
+
+Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须添加
+`quarkus-hibernate-validator`；JFoundry 只在检测到该 capability 时注册映射器。Helidon MP 应用必须添加
+`helidon-microprofile-bean-validation`。应用仍需自行选择用于反序列化请求体的 JSON provider。
+
 ### 明确边界
 
 - 未知异常和受支持状态集合之外的 HTTP 失败会保留运行时原有处理。此能力不是应用的通用异常策略。
