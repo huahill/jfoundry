@@ -26,6 +26,29 @@ class SpringIntegrationDependencyScopeTest {
         assertThat(hasDirectDependency(dependencies, "jfoundry-jpa-spring-boot-support")).isFalse();
     }
 
+    @Test
+    void doesNotOverridePersistenceAutoConfigurationRuntimeDependencyWithTestScope() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        Document document = factory.newDocumentBuilder()
+                .parse(modulePom().toFile());
+        NodeList dependencies = document.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "dependency");
+
+        assertThat(hasDirectDependency(dependencies, "jfoundry-persistence-spring-boot-autoconfigure")).isFalse();
+    }
+
+    @Test
+    void nativeMybatisProfileKeepsPersistenceSpringOnCompileClasspath() throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        Document document = factory.newDocumentBuilder()
+                .parse(modulePom().toFile());
+
+        Element profile = findProfile(document, "native-mybatis-plus");
+        assertThat(profile).isNotNull();
+        assertThat(findDependencyScope(profile, "jfoundry-persistence-spring")).isEqualTo("compile");
+    }
+
     private Path modulePom() {
         Path current = Path.of("").toAbsolutePath().normalize();
         while (current != null) {
@@ -48,5 +71,30 @@ class SpringIntegrationDependencyScopeTest {
             }
         }
         return false;
+    }
+
+    private Element findProfile(Document document, String profileId) {
+        NodeList profiles = document.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "profile");
+        for (int index = 0; index < profiles.getLength(); index++) {
+            Element profile = (Element) profiles.item(index);
+            NodeList ids = profile.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "id");
+            if (ids.getLength() > 0 && profileId.equals(ids.item(0).getTextContent())) {
+                return profile;
+            }
+        }
+        return null;
+    }
+
+    private String findDependencyScope(Element profile, String artifactId) {
+        NodeList dependencies = profile.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "dependency");
+        for (int index = 0; index < dependencies.getLength(); index++) {
+            Element dependency = (Element) dependencies.item(index);
+            NodeList artifactIds = dependency.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "artifactId");
+            if (artifactIds.getLength() > 0 && artifactId.equals(artifactIds.item(0).getTextContent())) {
+                NodeList scopes = dependency.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "scope");
+                return scopes.getLength() == 0 ? "compile" : scopes.item(0).getTextContent();
+            }
+        }
+        return null;
     }
 }
