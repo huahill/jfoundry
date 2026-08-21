@@ -343,6 +343,10 @@ Result: `mvn validate`, `mvn test`, the dependency-boundary fixture and reposito
 `scripts/verify-ci-matrix.sh` all passed on Java 25. Spring and Helidon Native Image builds and startup probes
 passed. Quarkus Native Image and the PostgreSQL middleware profiles could not run because the local Docker
 daemon is unavailable; `verify-runtime-ci.sh quarkus --stage native` confirmed that environment prerequisite.
+GitHub subsequently exposed a Quarkus Native configuration mismatch: the profile selected PostgreSQL at build
+time while the application retained its default H2 URL at runtime. The Native integration tests now share a
+Quarkus test profile that starts PostgreSQL and passes its runtime configuration to the native application, while
+ordinary JVM tests retain their Docker-free H2 default.
 
 - [x] **Step 5: Commit build changes and final corrections**
 
