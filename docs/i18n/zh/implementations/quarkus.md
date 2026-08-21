@@ -284,6 +284,15 @@ Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行�
 </dependency>
 ```
 
+若要将 Bean Validation 请求失败映射为共享校验问题，还需添加可选的 Quarkus 校验能力：
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-hibernate-validator</artifactId>
+</dependency>
+```
+
 该扩展会引入 Quarkus REST Jackson 支持，并为六种 JFoundry application 与 domain 异常渲染
 `application/problem+json` 响应：`InvalidArgumentException`、`NotFoundException`、
 `ConflictException`、`ExternalAccessException`、`DomainRuleViolationException` 和
@@ -293,6 +302,11 @@ Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行�
 响应包含共享的 `type`、`title`、`status` 和 `detail` 字段；`type` 是稳定的机器可读问题标识。适配器会保留源
 Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它不会推断 Quarkus 未提供的响应头。未知异常
 和其他 HTTP 状态会继续使用正常的 Quarkus 行为，而不会被转换成 JFoundry 错误。
+
+存在 `quarkus-hibernate-validator` 时，部署处理器会注册 Quarkus REST 请求校验映射器。映射器使用
+`urn:jfoundry:problem:request-validation`，并输出共享的 `errors[].detail` 和可选
+`errors[].pointer` 成员；它不会访问或返回被拒绝的值。返回值校验失败会继续抛出，以保留 Quarkus 的服务端
+错误处理，避免被错误标记为客户端入参无效。
 
 该扩展不配置安全能力。拥有认证和授权语义的 Quarkus 安全适配器可使用公开的
 `ProblemDetailsRenderer.render(...)` API 渲染自己的 `401` 或 `403` 描述符。

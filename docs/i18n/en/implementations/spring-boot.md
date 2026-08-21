@@ -157,8 +157,9 @@ field, a `pointer` expressed as a JSON Pointer URI fragment. Object-level constr
 ```
 
 Rejected values are never included because request fields may contain credentials, tokens, or large
-payloads. This mapping is specific to Spring MVC's `MethodArgumentNotValidException`; it does not
-claim equivalent validation handling for Quarkus or Helidon.
+payloads. Spring MVC derives this shared contract from `MethodArgumentNotValidException`; Quarkus and
+Helidon derive the same external representation from their runtime-specific request-validation
+exceptions, as described in their implementation guides.
 
 `jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute

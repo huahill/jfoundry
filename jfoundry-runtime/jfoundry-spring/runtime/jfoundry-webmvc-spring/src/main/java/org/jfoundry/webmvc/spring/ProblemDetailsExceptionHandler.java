@@ -10,6 +10,7 @@ import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
+import org.jfoundry.problem.RequestValidationProblem;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import java.net.URI;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /// Maps JFoundry core exceptions to Spring MVC RFC 9457 Problem Details responses.
 @RestControllerAdvice
@@ -38,7 +37,6 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
 
     private static final Logger LOG = LoggerFactory.getLogger(ProblemDetailsExceptionHandler.class);
     private static final String SPRING_SECURITY_PACKAGE = "org.springframework.security.";
-    private static final URI REQUEST_VALIDATION_TYPE = URI.create("urn:jfoundry:problem:request-validation");
     private final ProblemMapper problemMapper;
 
     public ProblemDetailsExceptionHandler() {
@@ -114,15 +112,10 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode statusCode,
                                                                   WebRequest request) {
-        List<Map<String, String>> errors = exception.getBindingResult().getAllErrors().stream()
+        List<RequestValidationProblem.Error> errors = exception.getBindingResult().getAllErrors().stream()
                 .map(ProblemDetailsExceptionHandler::validationError)
                 .toList();
-        ProblemDescriptor descriptor = new ProblemDescriptor(
-                REQUEST_VALIDATION_TYPE,
-                "Request validation failed",
-                HttpStatus.BAD_REQUEST.value(),
-                "The request failed validation. See 'errors' for details.",
-                Map.of("errors", errors));
+        ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
                 HttpStatus.BAD_REQUEST, request);
     }
@@ -140,38 +133,37 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         return super.handleExceptionInternal(exception, problem, headers, statusCode, request);
     }
 
-    private static Map<String, String> validationError(ObjectError error) {
-        Map<String, String> validationError = new LinkedHashMap<>();
+    private static RequestValidationProblem.Error validationError(ObjectError error) {
+        String detail = error.getDefaultMessage() == null ? "is invalid" : error.getDefaultMessage();
         if (error instanceof FieldError fieldError) {
-            validationError.put("pointer", jsonPointer(fieldError.getField()));
+            return RequestValidationProblem.Error.atPath(fieldPath(fieldError.getField()), detail);
         }
-        validationError.put("detail", error.getDefaultMessage() == null ? "is invalid" : error.getDefaultMessage());
-        return Map.copyOf(validationError);
+        return RequestValidationProblem.Error.forRequest(detail);
     }
 
-    private static String jsonPointer(String field) {
-        StringBuilder pointer = new StringBuilder("#");
+    private static List<String> fieldPath(String field) {
+        List<String> path = new ArrayList<>();
         StringBuilder token = new StringBuilder();
         boolean bracketed = false;
         for (int index = 0; index < field.length(); index++) {
             char character = field.charAt(index);
             if (character == '.' && !bracketed) {
-                appendPointerToken(pointer, token);
+                appendPathToken(path, token);
             } else if (character == '[' && !bracketed) {
-                appendPointerToken(pointer, token);
+                appendPathToken(path, token);
                 bracketed = true;
             } else if (character == ']' && bracketed) {
-                appendPointerToken(pointer, token);
+                appendPathToken(path, token);
                 bracketed = false;
             } else {
                 token.append(character);
             }
         }
-        appendPointerToken(pointer, token);
-        return pointer.toString();
+        appendPathToken(path, token);
+        return List.copyOf(path);
     }
 
-    private static void appendPointerToken(StringBuilder pointer, StringBuilder token) {
+    private static void appendPathToken(List<String> path, StringBuilder token) {
         if (token.isEmpty()) {
             return;
         }
@@ -181,7 +173,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                 || (value.startsWith("\"") && value.endsWith("\"")))) {
             value = value.substring(1, value.length() - 1);
         }
-        pointer.append('/').append(value.replace("~", "~0").replace("/", "~1"));
+        path.add(value);
         token.setLength(0);
     }
 
@@ -194,7 +186,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
             return super.createResponseEntity(body, headers, statusCode, request);
         }
         if (body instanceof ProblemDetail problemDetail
-                && REQUEST_VALIDATION_TYPE.equals(problemDetail.getType())) {
+                && RequestValidationProblem.TYPE.equals(problemDetail.getType())) {
             return super.createResponseEntity(body, headers, statusCode, request);
         }
         ProblemDescriptor descriptor = ProblemCatalog.forHttpStatus(statusCode.value());

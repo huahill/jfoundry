@@ -1,0 +1,8 @@
+[
+  {
+    "name": "org.jfoundry.helidon.integration.ProblemDetailsResource$DeploymentRequest",
+    "allDeclaredConstructors": true,
+    "allDeclaredFields": true,
+    "allPublicMethods": true
+  }
+]

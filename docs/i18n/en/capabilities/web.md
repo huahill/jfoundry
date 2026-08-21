@@ -78,6 +78,39 @@ Applications can provide a `ProblemMapper` to map an owned exception to a `Probl
 Use this for stable, application-specific errors, rather than leaking implementation exceptions or
 forcing an HTTP concern into the domain model.
 
+### Request Validation Problems
+
+Spring MVC, Quarkus REST, and Helidon MP use the dedicated
+`urn:jfoundry:problem:request-validation` type for supported request-input validation failures. Its
+`errors` extension follows the RFC 9457 validation-error example. Every entry has a caller-facing
+`detail`; an error with a reliable location in the JSON request document also has a `pointer` encoded
+as a JSON Pointer URI fragment:
+
+```json
+{
+  "type": "urn:jfoundry:problem:request-validation",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "The request failed validation. See 'errors' for details.",
+  "errors": [
+    {
+      "detail": "must not be empty",
+      "pointer": "#/services"
+    }
+  ]
+}
+```
+
+Object-level constraints have no reliable JSON location and therefore contain only `detail`.
+Rejected values are never included because request fields may contain credentials, tokens, or large
+payloads. The runtime adapters deliberately exclude return-value and internal service validation
+failures from this client-error contract.
+
+Spring MVC obtains validation through its normal Web MVC integration. A Quarkus application must add
+`quarkus-hibernate-validator`; JFoundry registers the mapper only when that capability is present. A
+Helidon MP application must add `helidon-microprofile-bean-validation`. Applications also remain
+responsible for selecting the JSON provider used to deserialize request bodies.
+
 ### Deliberate Boundaries
 
 - Unknown exceptions and HTTP failures outside the supported status set retain the runtime's normal

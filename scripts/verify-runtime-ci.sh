@@ -105,6 +105,8 @@ helidon_native_smoke_test() {
     local log_file="/tmp/jfoundry-helidon-native.log"
     local headers_file="/tmp/jfoundry-helidon-problem.headers"
     local body_file="/tmp/jfoundry-helidon-problem.body"
+    local validation_headers_file="/tmp/jfoundry-helidon-validation-problem.headers"
+    local validation_body_file="/tmp/jfoundry-helidon-validation-problem.body"
     local application_pid
 
     "${application}" >"${log_file}" 2>&1 &
@@ -114,7 +116,14 @@ helidon_native_smoke_test() {
         if curl -sS -D "${headers_file}" -o "${body_file}" http://127.0.0.1:7001/jfoundry/problems; then
             if grep -q '^HTTP/1.1 400' "${headers_file}" \
                 && grep -qi '^Content-Type: application/problem+json' "${headers_file}" \
-                && grep -q '"status":400' "${body_file}"; then
+                && grep -q '"status":400' "${body_file}" \
+                && curl -sS -D "${validation_headers_file}" -o "${validation_body_file}" \
+                    -H 'Content-Type: application/json' -d '{}' \
+                    http://127.0.0.1:7001/jfoundry/problems/deployments \
+                && grep -q '^HTTP/1.1 400' "${validation_headers_file}" \
+                && grep -qi '^Content-Type: application/problem+json' "${validation_headers_file}" \
+                && grep -q '"type":"urn:jfoundry:problem:request-validation"' "${validation_body_file}" \
+                && grep -q '"pointer":"#/services"' "${validation_body_file}"; then
                 kill "${application_pid}" 2>/dev/null || true
                 wait "${application_pid}" 2>/dev/null || true
                 return 0

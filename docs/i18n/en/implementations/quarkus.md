@@ -326,6 +326,16 @@ supported runtimes are in [Web](../capabilities/web.md):
 </dependency>
 ```
 
+To map Bean Validation request failures to the shared validation problem, also add the optional
+Quarkus validation capability:
+
+```xml
+<dependency>
+    <groupId>io.quarkus</groupId>
+    <artifactId>quarkus-hibernate-validator</artifactId>
+</dependency>
+```
+
 The extension brings Quarkus REST Jackson support and renders `application/problem+json` responses
 for the six JFoundry application and domain exceptions: `InvalidArgumentException`,
 `NotFoundException`, `ConflictException`, `ExternalAccessException`,
@@ -337,6 +347,12 @@ machine-readable problem identifier. The adapter preserves non-entity headers su
 Jakarta REST response, including `Allow` when it is present. It does not infer headers that Quarkus
 does not provide. Unknown exceptions and other HTTP statuses retain normal Quarkus behavior instead
 of being converted into a JFoundry error.
+
+When `quarkus-hibernate-validator` is present, the deployment processor registers a mapper for
+Quarkus REST request validation. The mapper renders `urn:jfoundry:problem:request-validation` with
+the shared `errors[].detail` and optional `errors[].pointer` members. It never accesses or returns a
+rejected value. Return-value validation failures are rethrown so they retain Quarkus server-error
+handling instead of being mislabeled as invalid client input.
 
 The extension does not configure security. A Quarkus security adapter that owns authentication and
 authorization can render its own `401` or `403` descriptor with the public
