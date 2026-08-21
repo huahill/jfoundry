@@ -17,7 +17,7 @@
         <connection>${jfoundry.release.scm.connection}</connection>
         <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
         <url>${jfoundry.release.scm.url}</url>
-        <tag>v1.1.0</tag>
+        <tag>v1.2.0</tag>
     </scm>
     <properties>
         <project.build.outputTimestamp>2026-08-21T07:53:44Z</project.build.outputTimestamp>
