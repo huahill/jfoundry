@@ -37,9 +37,10 @@ described in [Getting Started](../integration/getting-started.md).
 
 ### Shared Contract
 
-Supported responses contain RFC 9457 `type`, `title`, `status`, and `detail` members, plus the
-stable JFoundry `code` extension. Custom extensions preserve JSON scalar, array, and object types.
-They cannot replace RFC 9457 reserved members.
+Supported responses contain RFC 9457 `type`, `title`, `status`, and `detail` members. The `type` URI
+is the stable machine-readable identifier for the problem. Custom extensions preserve JSON scalar,
+array, and object types. They cannot replace RFC 9457 reserved members and should be defined only
+when they add semantics for a specific problem type.
 
 The built-in catalog maps these JFoundry exceptions: `InvalidArgumentException`,
 `NotFoundException`, `ConflictException`, `ExternalAccessException`,
@@ -68,9 +69,10 @@ final class MksAuthenticationException extends ExternalAccessException {
 }
 ```
 
-The catalog uses that explicit detail for the `EXTERNAL_ACCESS` response. It never derives a public
-detail from the diagnostic message, the cause, or `cause.getMessage()`. Existing constructors remain
-masked and continue to produce `The requested operation is temporarily unavailable.`
+The catalog uses that explicit detail for the `urn:jfoundry:problem:external-access` response. It
+never derives a public detail from the diagnostic message, the cause, or `cause.getMessage()`.
+Existing constructors remain masked and continue to produce
+`The requested operation is temporarily unavailable.`
 
 Applications can provide a `ProblemMapper` to map an owned exception to a `ProblemDescriptor`.
 Use this for stable, application-specific errors, rather than leaking implementation exceptions or

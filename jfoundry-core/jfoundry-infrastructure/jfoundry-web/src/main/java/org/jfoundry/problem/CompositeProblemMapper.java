@@ -10,7 +10,7 @@ public final class CompositeProblemMapper implements ProblemMapper {
 
     private static final ProblemDescriptor INTERNAL_ERROR = new ProblemDescriptor(
             java.net.URI.create("urn:jfoundry:problem:internal-error"), "Internal server error", 500,
-            "The server failed to process the request.", java.util.Map.of("code", "INTERNAL_ERROR"));
+            "The server failed to process the request.", java.util.Map.of());
 
     private final List<ProblemMapper> mappers;
 

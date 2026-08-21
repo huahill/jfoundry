@@ -71,6 +71,35 @@ Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢�
 
 Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
 
+对于目录支持的 Spring MVC 客户端错误，JFoundry 保留目录中稳定的 `type` 和 `status`，同时使用 Spring
+Framework 针对具体异常生成的 `title` 和 `detail`，包括 `MessageSource` 本地化结果。例如，缺少请求参数时会
+指出参数名，请求方法不受支持时会指出该方法，请求体无法读取时会说明读取失败。Spring 未提供具体问题响应时，
+继续使用目录文案作为回退。服务端故障仍只使用经过审查的目录文案，不会暴露异常消息、cause 或其他诊断信息。
+类型转换失败时会在可用的情况下指出对应请求属性，但不会回显被拒绝的值。
+
+Spring MVC 请求体校验失败时使用独立的 `urn:jfoundry:problem:request-validation` type。它的
+`errors` 扩展遵循 RFC 9457 的 validation error 示例：每一项都包含面向调用方的 `detail`；错误属于字段时，
+还会包含以 JSON Pointer URI fragment 表示的 `pointer`。对象级约束没有可靠的 JSON 位置，因此只包含
+`detail`：
+
+```json
+{
+  "type": "urn:jfoundry:problem:request-validation",
+  "title": "Request validation failed",
+  "status": 400,
+  "detail": "The request failed validation. See 'errors' for details.",
+  "errors": [
+    {
+      "detail": "不能为空",
+      "pointer": "#/services"
+    }
+  ]
+}
+```
+
+响应不会包含被拒绝的值，因为请求字段可能携带凭证、令牌或体积较大的数据。此映射只处理 Spring MVC 的
+`MethodArgumentNotValidException`，不表示 Quarkus 或 Helidon 已提供相同的校验异常处理。
+
 `jfoundry-web-spring` 为出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对拥有该集成的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。默认的 `BASIC` HTTP 日志不会访问请求或响应 body。应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`；`FULL` 会记录经脱敏、限长的 JSON body，并可能为诊断读取未消费的错误响应 body。响应错误处理器本身不会读取、复制或保留下游响应体；拥有已明确约定下游协议的应用适配器仍应自行解析响应体。
 
 Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并将

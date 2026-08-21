@@ -27,8 +27,7 @@ class ProblemDetailsExceptionMapperTest {
                 "type", "urn:jfoundry:problem:invalid-argument",
                 "title", "Invalid argument",
                 "status", 400,
-                "detail", "order id is required",
-                "code", "INVALID_ARGUMENT"));
+                "detail", "order id is required"));
     }
 
     @Test
@@ -43,8 +42,7 @@ class ProblemDetailsExceptionMapperTest {
                 "type", "urn:jfoundry:problem:external-access",
                 "title", "Service temporarily unavailable",
                 "status", 503,
-                "detail", "Deployment authorization is temporarily unavailable.",
-                "code", "EXTERNAL_ACCESS"));
+                "detail", "Deployment authorization is temporarily unavailable."));
     }
 
     @Test
@@ -61,7 +59,7 @@ class ProblemDetailsExceptionMapperTest {
     void rendersDescriptorsForSecurityAdapters() {
         Response response = ProblemDetailsRenderer.render(new ProblemDescriptor(
                 java.net.URI.create("urn:company:problem:forbidden"), "Forbidden", 403,
-                "Access is denied.", Map.of("code", "FORBIDDEN")));
+                "Access is denied.", Map.of("policy", "administrators")));
 
         assertThat(response.getStatus()).isEqualTo(403);
         assertThat(response.getEntity()).isEqualTo(Map.of(
@@ -69,7 +67,7 @@ class ProblemDetailsExceptionMapperTest {
                 "title", "Forbidden",
                 "status", 403,
                 "detail", "Access is denied.",
-                "code", "FORBIDDEN"));
+                "policy", "administrators"));
     }
 
     private static final class ReviewedExternalAccessException extends ExternalAccessException {

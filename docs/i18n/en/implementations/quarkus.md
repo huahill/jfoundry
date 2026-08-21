@@ -332,10 +332,11 @@ for the six JFoundry application and domain exceptions: `InvalidArgumentExceptio
 `DomainRuleViolationException`, and `DomainStateException`. It also renders the shared contract for
 standard Jakarta REST failures with statuses `400`, `404`, `405`, `406`, `413`, `415`, and `503`.
 
-Responses contain the shared `type`, `title`, `status`, `detail`, and JFoundry `code` fields. The
-adapter preserves non-entity headers supplied by the source Jakarta REST response, including `Allow`
-when it is present. It does not infer headers that Quarkus does not provide. Unknown exceptions and
-other HTTP statuses retain normal Quarkus behavior instead of being converted into a JFoundry error.
+Responses contain the shared `type`, `title`, `status`, and `detail` fields; `type` is the stable
+machine-readable problem identifier. The adapter preserves non-entity headers supplied by the source
+Jakarta REST response, including `Allow` when it is present. It does not infer headers that Quarkus
+does not provide. Unknown exceptions and other HTTP statuses retain normal Quarkus behavior instead
+of being converted into a JFoundry error.
 
 The extension does not configure security. A Quarkus security adapter that owns authentication and
 authorization can render its own `401` or `403` descriptor with the public

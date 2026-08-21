@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.not;
 
 @QuarkusIntegrationTest
 class ProblemDetailsResourceIT {
@@ -21,7 +23,7 @@ class ProblemDetailsResourceIT {
                 .body("title", equalTo("Invalid argument"))
                 .body("status", equalTo(400))
                 .body("detail", equalTo("order id is required"))
-                .body("code", equalTo("INVALID_ARGUMENT"));
+                .body("$", not(hasKey("code")));
     }
 
     @Test
@@ -31,7 +33,8 @@ class ProblemDetailsResourceIT {
                 .then()
                 .statusCode(405)
                 .contentType("application/problem+json")
-                .body("code", equalTo("HTTP_METHOD_NOT_ALLOWED"));
+                .body("type", equalTo("urn:jfoundry:problem:http-method-not-allowed"))
+                .body("$", not(hasKey("code")));
     }
 
     @Test
@@ -42,6 +45,7 @@ class ProblemDetailsResourceIT {
                 .statusCode(405)
                 .contentType("application/problem+json")
                 .header("Allow", containsString("GET"))
-                .body("code", equalTo("HTTP_METHOD_NOT_ALLOWED"));
+                .body("type", equalTo("urn:jfoundry:problem:http-method-not-allowed"))
+                .body("$", not(hasKey("code")));
     }
 }

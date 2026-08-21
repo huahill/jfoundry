@@ -7,23 +7,30 @@ import org.jfoundry.application.exception.NotFoundException;
 import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
 import org.jfoundry.problem.CompositeProblemMapper;
+import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.lang.Nullable;
-import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-import org.springframework.web.util.WebUtils;
+
+import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /// Maps JFoundry core exceptions to Spring MVC RFC 9457 Problem Details responses.
 @RestControllerAdvice
@@ -31,6 +38,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
 
     private static final Logger LOG = LoggerFactory.getLogger(ProblemDetailsExceptionHandler.class);
     private static final String SPRING_SECURITY_PACKAGE = "org.springframework.security.";
+    private static final URI REQUEST_VALIDATION_TYPE = URI.create("urn:jfoundry:problem:request-validation");
     private final ProblemMapper problemMapper;
 
     public ProblemDetailsExceptionHandler() {
@@ -102,20 +110,110 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
     }
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(Exception exception,
-                                                             @Nullable Object body,
-                                                             HttpHeaders headers,
-                                                             HttpStatusCode statusCode,
-                                                             WebRequest request) {
-        if (!org.jfoundry.problem.ProblemCatalog.supportsHttpStatus(statusCode.value())) {
-            return super.handleExceptionInternal(exception, body, headers, statusCode, request);
-        }
-        ProblemDescriptor descriptor = org.jfoundry.problem.ProblemCatalog.forHttpStatus(statusCode.value());
-        if (statusCode.isSameCodeAs(HttpStatus.INTERNAL_SERVER_ERROR) && request instanceof ServletWebRequest) {
-            request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, exception, WebRequest.SCOPE_REQUEST);
-        }
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode statusCode,
+                                                                  WebRequest request) {
+        List<Map<String, String>> errors = exception.getBindingResult().getAllErrors().stream()
+                .map(ProblemDetailsExceptionHandler::validationError)
+                .toList();
+        ProblemDescriptor descriptor = new ProblemDescriptor(
+                REQUEST_VALIDATION_TYPE,
+                "Request validation failed",
+                HttpStatus.BAD_REQUEST.value(),
+                "The request failed validation. See 'errors' for details.",
+                Map.of("errors", errors));
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
+                HttpStatus.BAD_REQUEST, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException exception,
+                                                        HttpHeaders headers,
+                                                        HttpStatusCode statusCode,
+                                                        WebRequest request) {
+        String propertyName = exception.getPropertyName();
+        String detail = propertyName == null
+                ? "Failed to convert a request value."
+                : "Failed to convert request value for '" + propertyName + "'.";
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(statusCode, detail);
+        return super.handleExceptionInternal(exception, problem, headers, statusCode, request);
+    }
+
+    private static Map<String, String> validationError(ObjectError error) {
+        Map<String, String> validationError = new LinkedHashMap<>();
+        if (error instanceof FieldError fieldError) {
+            validationError.put("pointer", jsonPointer(fieldError.getField()));
+        }
+        validationError.put("detail", error.getDefaultMessage() == null ? "is invalid" : error.getDefaultMessage());
+        return Map.copyOf(validationError);
+    }
+
+    private static String jsonPointer(String field) {
+        StringBuilder pointer = new StringBuilder("#");
+        StringBuilder token = new StringBuilder();
+        boolean bracketed = false;
+        for (int index = 0; index < field.length(); index++) {
+            char character = field.charAt(index);
+            if (character == '.' && !bracketed) {
+                appendPointerToken(pointer, token);
+            } else if (character == '[' && !bracketed) {
+                appendPointerToken(pointer, token);
+                bracketed = true;
+            } else if (character == ']' && bracketed) {
+                appendPointerToken(pointer, token);
+                bracketed = false;
+            } else {
+                token.append(character);
+            }
+        }
+        appendPointerToken(pointer, token);
+        return pointer.toString();
+    }
+
+    private static void appendPointerToken(StringBuilder pointer, StringBuilder token) {
+        if (token.isEmpty()) {
+            return;
+        }
+        String value = token.toString();
+        if (value.length() >= 2
+                && ((value.startsWith("'") && value.endsWith("'"))
+                || (value.startsWith("\"") && value.endsWith("\"")))) {
+            value = value.substring(1, value.length() - 1);
+        }
+        pointer.append('/').append(value.replace("~", "~0").replace("/", "~1"));
+        token.setLength(0);
+    }
+
+    @Override
+    protected ResponseEntity<Object> createResponseEntity(Object body,
+                                                          HttpHeaders headers,
+                                                          HttpStatusCode statusCode,
+                                                          WebRequest request) {
+        if (!ProblemCatalog.supportsHttpStatus(statusCode.value())) {
+            return super.createResponseEntity(body, headers, statusCode, request);
+        }
+        if (body instanceof ProblemDetail problemDetail
+                && REQUEST_VALIDATION_TYPE.equals(problemDetail.getType())) {
+            return super.createResponseEntity(body, headers, statusCode, request);
+        }
+        ProblemDescriptor descriptor = ProblemCatalog.forHttpStatus(statusCode.value());
+        ProblemDetail problem = ProblemDetailRenderer.render(descriptor);
+        if (statusCode.is4xxClientError() && body instanceof ProblemDetail springProblem) {
+            copySpringProblemDetails(springProblem, problem);
+        }
+        return super.createResponseEntity(problem, headers,
                 HttpStatusCode.valueOf(descriptor.status()), request);
+    }
+
+    private static void copySpringProblemDetails(ProblemDetail source, ProblemDetail target) {
+        if (source.getTitle() != null) {
+            target.setTitle(source.getTitle());
+        }
+        if (source.getDetail() != null) {
+            target.setDetail(source.getDetail());
+        }
+        target.setInstance(source.getInstance());
     }
 
 }

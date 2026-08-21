@@ -28,7 +28,7 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(problem.getString("title")).isEqualTo("Invalid argument");
         assertThat(problem.getInt("status")).isEqualTo(400);
         assertThat(problem.getString("detail")).isEqualTo("order id is required");
-        assertThat(problem.getString("code")).isEqualTo("INVALID_ARGUMENT");
+        assertThat(problem.containsKey("code")).isFalse();
     }
 
     @Test
@@ -45,7 +45,7 @@ class ProblemDetailsExceptionMapperTest {
         assertThat(problem.getInt("status")).isEqualTo(503);
         assertThat(problem.getString("detail"))
                 .isEqualTo("Deployment authorization is temporarily unavailable.");
-        assertThat(problem.getString("code")).isEqualTo("EXTERNAL_ACCESS");
+        assertThat(problem.containsKey("code")).isFalse();
     }
 
     @Test
@@ -63,11 +63,11 @@ class ProblemDetailsExceptionMapperTest {
     void rendersDescriptorsForSecurityAdapters() {
         Response response = ProblemDetailsRenderer.render(new ProblemDescriptor(
                 java.net.URI.create("urn:company:problem:forbidden"), "Forbidden", 403,
-                "Access is denied.", java.util.Map.of("code", "FORBIDDEN")));
+                "Access is denied.", java.util.Map.of("policy", "administrators")));
 
         assertThat(response.getStatus()).isEqualTo(403);
         JsonObject problem = (JsonObject) response.getEntity();
-        assertThat(problem.getString("code")).isEqualTo("FORBIDDEN");
+        assertThat(problem.getString("policy")).isEqualTo("administrators");
     }
 
     @Test

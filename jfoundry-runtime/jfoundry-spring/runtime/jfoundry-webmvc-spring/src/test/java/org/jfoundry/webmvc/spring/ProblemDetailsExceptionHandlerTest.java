@@ -14,15 +14,27 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -31,7 +43,9 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.beans.PropertyChangeEvent;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,7 +64,7 @@ class ProblemDetailsExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = handler.handleInvalidArgument(
                 new InvalidArgumentException("pageSize must not exceed 200"));
 
-        assertProblem(response, HttpStatus.BAD_REQUEST, "INVALID_ARGUMENT", "Invalid argument",
+        assertProblem(response, HttpStatus.BAD_REQUEST, "Invalid argument",
                 "urn:jfoundry:problem:invalid-argument");
     }
 
@@ -58,7 +72,7 @@ class ProblemDetailsExceptionHandlerTest {
     void mapsNotFoundToNotFoundProblemDetail() {
         ResponseEntity<ProblemDetail> response = handler.handleNotFound(new NotFoundException("Environment not found"));
 
-        assertProblem(response, HttpStatus.NOT_FOUND, "NOT_FOUND", "Not found",
+        assertProblem(response, HttpStatus.NOT_FOUND, "Not found",
                 "urn:jfoundry:problem:not-found");
     }
 
@@ -66,7 +80,7 @@ class ProblemDetailsExceptionHandlerTest {
     void mapsConflictToConflictProblemDetail() {
         ResponseEntity<ProblemDetail> response = handler.handleConflict(new ConflictException("Version conflict"));
 
-        assertProblem(response, HttpStatus.CONFLICT, "CONFLICT", "Conflict",
+        assertProblem(response, HttpStatus.CONFLICT, "Conflict",
                 "urn:jfoundry:problem:conflict");
     }
 
@@ -75,7 +89,7 @@ class ProblemDetailsExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = handler.handleExternalAccess(
                 new ExternalAccessException("k8s api https://cluster.internal timed out"));
 
-        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_ACCESS", "Service temporarily unavailable",
+        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE, "Service temporarily unavailable",
                 "urn:jfoundry:problem:external-access");
         assertThat(response.getBody().getDetail()).isEqualTo("The requested operation is temporarily unavailable.");
     }
@@ -87,7 +101,7 @@ class ProblemDetailsExceptionHandlerTest {
                         new IllegalStateException("private key is invalid"),
                         "Deployment authorization is temporarily unavailable."));
 
-        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE, "EXTERNAL_ACCESS", "Service temporarily unavailable",
+        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE, "Service temporarily unavailable",
                 "urn:jfoundry:problem:external-access");
         assertThat(response.getBody().getDetail())
                 .isEqualTo("Deployment authorization is temporarily unavailable.");
@@ -98,7 +112,7 @@ class ProblemDetailsExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = handler.handleDomainRuleViolation(
                 new DomainRuleViolationException("Quota exceeded"));
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "DOMAIN_RULE_VIOLATION", "Domain rule violation",
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "Domain rule violation",
                 "urn:jfoundry:problem:domain-rule-violation");
     }
 
@@ -107,7 +121,7 @@ class ProblemDetailsExceptionHandlerTest {
         ResponseEntity<ProblemDetail> response = handler.handleDomainState(
                 new DomainStateException("Cannot delete running environment"));
 
-        assertProblem(response, HttpStatus.CONFLICT, "DOMAIN_STATE", "Domain state conflict",
+        assertProblem(response, HttpStatus.CONFLICT, "Domain state conflict",
                 "urn:jfoundry:problem:domain-state");
     }
 
@@ -115,24 +129,24 @@ class ProblemDetailsExceptionHandlerTest {
     void rendersDescriptorsForSecurityAdapters() {
         ProblemDetail problem = ProblemDetailRenderer.render(new ProblemDescriptor(
                 java.net.URI.create("urn:company:problem:unauthenticated"), "Unauthenticated", 401,
-                "Authentication is required.", Map.of("code", "UNAUTHENTICATED")));
+                "Authentication is required.", Map.of("realm", "deployments")));
 
         assertThat(problem.getStatus()).isEqualTo(401);
         assertThat(problem.getType()).hasToString("urn:company:problem:unauthenticated");
-        assertThat(problem.getProperties()).containsEntry("code", "UNAUTHENTICATED");
+        assertThat(problem.getProperties()).containsEntry("realm", "deployments");
     }
 
     @Test
     void rendersAnApplicationProblemMapperBeforeJFoundryDefaults() {
         ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/validation"), "Validation failed", 422,
-                "The request violates an application rule.", Map.of("code", "APPLICATION_VALIDATION", "field", "name")));
+                "The request violates an application rule.", Map.of("field", "name")));
         ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
 
         ResponseEntity<ProblemDetail> response = applicationHandler.handleInvalidArgument(
                 new InvalidArgumentException("internal detail"));
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_VALIDATION", "Validation failed",
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "Validation failed",
                 "https://example.test/problems/validation");
         assertThat(response.getBody().getProperties()).containsEntry("field", "name");
     }
@@ -141,13 +155,13 @@ class ProblemDetailsExceptionHandlerTest {
     void mapsUnhandledExceptionsWithAnApplicationProblemMapper() {
         ProblemMapper applicationMapper = exception -> Optional.of(new ProblemDescriptor(
                 java.net.URI.create("https://example.test/problems/application"), "Application failure", 422,
-                "The application cannot complete the request.", Map.of("code", "APPLICATION_FAILURE")));
+                "The application cannot complete the request.", Map.of()));
         ProblemDetailsExceptionHandler applicationHandler = new ProblemDetailsExceptionHandler(applicationMapper);
 
         ResponseEntity<ProblemDetail> response = applicationHandler.handleUnhandled(
                 new IllegalStateException("internal"));
 
-        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "APPLICATION_FAILURE", "Application failure",
+        assertProblem(response, HttpStatus.UNPROCESSABLE_CONTENT, "Application failure",
                 "https://example.test/problems/application");
     }
 
@@ -155,7 +169,7 @@ class ProblemDetailsExceptionHandlerTest {
     void mapsUnhandledExceptionsToASafeInternalServerErrorByDefault() {
         ResponseEntity<ProblemDetail> response = handler.handleUnhandled(new IllegalStateException("internal"));
 
-        assertProblem(response, HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Internal server error",
+        assertProblem(response, HttpStatus.INTERNAL_SERVER_ERROR, "Internal server error",
                 "urn:jfoundry:problem:internal-error");
         assertThat(response.getBody().getDetail()).isEqualTo("The server failed to process the request.");
     }
@@ -184,11 +198,138 @@ class ProblemDetailsExceptionHandlerTest {
 
     @ParameterizedTest
     @MethodSource("httpExceptionCases")
-    void mapsSpringMvcExceptionsToHttpProblemCodes(Exception exception, int status, String code) throws Exception {
+    void mapsSpringMvcExceptionsToSpecificHttpProblemDetails(Exception exception,
+                                                             int status,
+                                                             String type,
+                                                             String title,
+                                                             String detail) throws Exception {
         ResponseEntity<Object> response = handler.handleException(exception, webRequest());
 
         assertThat(response).isNotNull();
-        assertProblem(response, status, code);
+        assertProblem(response, status, type);
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getTitle()).isEqualTo(title);
+        assertThat(problem.getDetail()).isEqualTo(detail);
+    }
+
+    @Test
+    void preservesSpringProblemDetailsCreatedForUnreadableRequests() throws Exception {
+        HttpInputMessage inputMessage = new TestHttpInputMessage();
+        var exception = new HttpMessageNotReadableException("JSON parser diagnostic", inputMessage);
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertThat(response).isNotNull();
+        assertProblem(response, HttpStatus.BAD_REQUEST.value(), "urn:jfoundry:problem:http-bad-request");
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getTitle()).isEqualTo("Bad Request");
+        assertThat(problem.getDetail()).isEqualTo("Failed to read request");
+        assertThat(problem.toString()).doesNotContain("JSON parser diagnostic");
+    }
+
+    @Test
+    void preservesLocalizedSpringProblemTitlesAndDetails() throws Exception {
+        var localizedHandler = new ProblemDetailsExceptionHandler();
+        var messages = new StaticMessageSource();
+        Locale locale = Locale.SIMPLIFIED_CHINESE;
+        messages.addMessage(ErrorResponse.getDefaultTitleMessageCode(HttpRequestMethodNotSupportedException.class),
+                locale, "请求方法不受支持");
+        messages.addMessage(ErrorResponse.getDefaultDetailMessageCode(
+                HttpRequestMethodNotSupportedException.class, null), locale, "当前资源不支持该请求方法。");
+        localizedHandler.setMessageSource(messages);
+        LocaleContextHolder.setLocale(locale);
+
+        try {
+            ResponseEntity<Object> response = localizedHandler.handleException(
+                    new HttpRequestMethodNotSupportedException("POST", List.of("GET")), webRequest());
+
+            assertThat(response).isNotNull();
+            assertProblem(response, HttpStatus.METHOD_NOT_ALLOWED.value(),
+                    "urn:jfoundry:problem:http-method-not-allowed");
+            ProblemDetail problem = (ProblemDetail) response.getBody();
+            assertThat(problem.getTitle()).isEqualTo("请求方法不受支持");
+            assertThat(problem.getDetail()).isEqualTo("当前资源不支持该请求方法。");
+        } finally {
+            LocaleContextHolder.resetLocaleContext();
+        }
+    }
+
+    @Test
+    void mapsTypeMismatchWithoutExposingTheRejectedValue() throws Exception {
+        var exception = new TypeMismatchException(
+                new PropertyChangeEvent(this, "pageSize", null, "secret-value"), Integer.class, null);
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertThat(response).isNotNull();
+        assertProblem(response, HttpStatus.BAD_REQUEST.value(), "urn:jfoundry:problem:http-bad-request");
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getTitle()).isEqualTo("Bad Request");
+        assertThat(problem.getDetail()).isEqualTo("Failed to convert request value for 'pageSize'.");
+        assertThat(problem.toString()).doesNotContain("secret-value");
+    }
+
+    @Test
+    void keepsServerFailureDetailsSafe() throws Exception {
+        var exception = new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                "database password rejected");
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertThat(response).isNotNull();
+        assertProblem(response, HttpStatus.SERVICE_UNAVAILABLE.value(),
+                "urn:jfoundry:problem:http-service-unavailable");
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getTitle()).isEqualTo("Service unavailable");
+        assertThat(problem.getDetail()).isEqualTo("The service is temporarily unavailable.");
+        assertThat(problem.toString()).doesNotContain("database password rejected");
+    }
+
+    @Test
+    void mapsRequestBodyValidationErrorsToFieldLevelProblemDetails() throws Exception {
+        var bindingResult = new BeanPropertyBindingResult(new ValidationRequest(null), "request");
+        bindingResult.addError(new FieldError("request", "services", "secret-services", false,
+                new String[]{"NotEmpty"}, null, "must not be empty"));
+        bindingResult.addError(new FieldError("request", "services[0].image", "secret-value", false,
+                new String[]{"URL"}, null, "must be a valid URL"));
+        bindingResult.addError(new FieldError("request", "metadata[a/b~c]", "another-secret", false,
+                new String[]{"Valid"}, null, "is invalid"));
+        MethodParameter parameter = new MethodParameter(
+                ValidationController.class.getDeclaredMethod("validate", ValidationRequest.class), 0);
+        var exception = new MethodArgumentNotValidException(parameter, bindingResult);
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertProblem(response, HttpStatus.BAD_REQUEST.value(), "urn:jfoundry:problem:request-validation");
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getTitle()).isEqualTo("Request validation failed");
+        assertThat(problem.getDetail())
+                .isEqualTo("The request failed validation. See 'errors' for details.");
+        assertThat(problem.getProperties()).containsEntry("errors",
+                List.of(
+                        Map.of("detail", "must not be empty", "pointer", "#/services"),
+                        Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image"),
+                        Map.of("detail", "is invalid", "pointer", "#/metadata/a~1b~0c")));
+        assertThat(problem.toString()).doesNotContain("secret-services", "secret-value", "another-secret");
+    }
+
+    @Test
+    void mapsObjectValidationErrorsWithoutExposingRejectedValues() throws Exception {
+        var rejectedRequest = new ValidationRequest(List.of("secret-value"));
+        var bindingResult = new BeanPropertyBindingResult(rejectedRequest, "request");
+        bindingResult.addError(new ObjectError("request", null));
+        MethodParameter parameter = new MethodParameter(
+                ValidationController.class.getDeclaredMethod("validate", ValidationRequest.class), 0);
+        var exception = new MethodArgumentNotValidException(parameter, bindingResult);
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getDetail())
+                .isEqualTo("The request failed validation. See 'errors' for details.");
+        assertThat(problem.getProperties()).containsEntry("errors",
+                List.of(Map.of("detail", "is invalid")));
+        assertThat(problem.toString()).doesNotContain("secret-value");
     }
 
     @Test
@@ -209,11 +350,18 @@ class ProblemDetailsExceptionHandlerTest {
     private static Stream<Arguments> httpExceptionCases() {
         return Stream.of(
                 Arguments.of(new HttpRequestMethodNotSupportedException("POST", List.of("GET")),
-                        405, "HTTP_METHOD_NOT_ALLOWED"),
+                        405, "urn:jfoundry:problem:http-method-not-allowed", "Method Not Allowed",
+                        "Method 'POST' is not supported."),
                 Arguments.of(new HttpMediaTypeNotSupportedException(MediaType.APPLICATION_XML,
-                        List.of(MediaType.APPLICATION_JSON)), 415, "HTTP_UNSUPPORTED_MEDIA_TYPE"),
+                        List.of(MediaType.APPLICATION_JSON)), 415,
+                        "urn:jfoundry:problem:http-unsupported-media-type", "Unsupported Media Type",
+                        "Content-Type 'application/xml' is not supported."),
                 Arguments.of(new HttpMediaTypeNotAcceptableException(List.of(MediaType.APPLICATION_JSON)),
-                        406, "HTTP_NOT_ACCEPTABLE")
+                        406, "urn:jfoundry:problem:http-not-acceptable", "Not Acceptable",
+                        "Acceptable representations: [application/json]."),
+                Arguments.of(new MissingServletRequestParameterException("environmentId", "String"),
+                        400, "urn:jfoundry:problem:http-bad-request", "Bad Request",
+                        "Required parameter 'environmentId' is not present.")
         );
     }
 
@@ -237,9 +385,30 @@ class ProblemDetailsExceptionHandlerTest {
         }
     }
 
+    private static final class ValidationController {
+
+        void validate(ValidationRequest request) {
+        }
+    }
+
+    private record ValidationRequest(List<String> services) {
+    }
+
+    private static final class TestHttpInputMessage implements HttpInputMessage {
+
+        @Override
+        public java.io.InputStream getBody() {
+            return java.io.InputStream.nullInputStream();
+        }
+
+        @Override
+        public org.springframework.http.HttpHeaders getHeaders() {
+            return org.springframework.http.HttpHeaders.EMPTY;
+        }
+    }
+
     private static void assertProblem(ResponseEntity<ProblemDetail> response,
                                       HttpStatus status,
-                                      String code,
                                       String title,
                                       String type) {
         assertThat(response.getStatusCode()).isEqualTo(status);
@@ -247,14 +416,16 @@ class ProblemDetailsExceptionHandlerTest {
         assertThat(response.getBody().getStatus()).isEqualTo(status.value());
         assertThat(response.getBody().getTitle()).isEqualTo(title);
         assertThat(response.getBody().getType()).hasToString(type);
-        assertThat(response.getBody().getProperties()).containsEntry("code", code);
+        assertThat(response.getBody().getProperties() == null ? Map.of() : response.getBody().getProperties())
+                .doesNotContainKey("code");
     }
 
-    private static void assertProblem(ResponseEntity<Object> response, int status, String code) {
+    private static void assertProblem(ResponseEntity<Object> response, int status, String type) {
         assertThat(response.getStatusCode().value()).isEqualTo(status);
         assertThat(response.getBody()).isInstanceOf(ProblemDetail.class);
         ProblemDetail problem = (ProblemDetail) response.getBody();
         assertThat(problem.getStatus()).isEqualTo(status);
-        assertThat(problem.getProperties()).containsEntry("code", code);
+        assertThat(problem.getType()).hasToString(type);
+        assertThat(problem.getProperties() == null ? Map.of() : problem.getProperties()).doesNotContainKey("code");
     }
 }
