@@ -203,7 +203,7 @@ git commit -m "fix(web): classify Helidon validation parameter sources"
 - Modify: `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring/src/main/java/org/jfoundry/webmvc/spring/ProblemDetailsExceptionHandler.java`
 - Modify: `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring/src/test/java/org/jfoundry/webmvc/spring/ProblemDetailsExceptionHandlerTest.java`
 
-- [ ] **Step 1: Add failing MockMvc method-validation tests**
+- [x] **Step 1: Add failing MockMvc method-validation tests**
 
 Configure standalone MockMvc with a Bean Validation provider. Add controller methods covering request body,
 request parameter, path variable, header, cookie, matrix variable, request part, model attribute, body container
@@ -211,7 +211,7 @@ elements, cross-parameter validation, and constrained return values. Assert body
 other parameter source has detail only. Assert malformed JSON and conversion errors remain
 `urn:jfoundry:problem:http-bad-request`.
 
-- [ ] **Step 2: Run the focused Spring test and verify failure**
+- [x] **Step 2: Run the focused Spring test and verify failure**
 
 ```bash
 mvn -pl jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring -am \
@@ -221,7 +221,7 @@ mvn -pl jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring -am \
 Expected: `HandlerMethodValidationException` is handled as a generic bad request without the validation `errors`
 contract.
 
-- [ ] **Step 3: Implement `HandlerMethodValidationException` handling**
+- [x] **Step 3: Implement `HandlerMethodValidationException` handling**
 
 Override `handleHandlerMethodValidationException`. If `exception.isForReturnValue()` is true, rethrow it so normal
 server-error handling applies. Otherwise use `visitResults` and a visitor whose `requestBody` and
@@ -230,7 +230,7 @@ request parameter, request part, and `other` methods create detail-only errors. 
 as detail-only errors. Resolve messages through Spring's configured `MessageSource` and current locale. Render the
 shared `RequestValidationProblem` descriptor.
 
-- [ ] **Step 4: Run all Spring Web MVC tests**
+- [x] **Step 4: Run all Spring Web MVC tests**
 
 ```bash
 mvn -pl jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring -am test
@@ -238,7 +238,7 @@ mvn -pl jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring -am test
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit the Spring adapter**
+- [x] **Step 5: Commit the Spring adapter**
 
 ```bash
 git add jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring
