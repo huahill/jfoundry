@@ -331,6 +331,15 @@ jobs:
 YAML
 assert_accepts "${temp_dir}"
 
+ruby - "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'RUBY'
+path = ARGV.fetch(0)
+content = File.read(path)
+needle = "      - run: gh pr create\n"
+abort "Expected prepare-snapshot marker" unless content.sub!(needle, "#{needle}      - run: sed -i jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml\n")
+File.write(path, content)
+RUBY
+assert_rejects "${temp_dir}"
+
 write_compliant_dependabot
 cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
 version: 2
@@ -1287,12 +1296,18 @@ YAML
 assert_rejects "${temp_dir}"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-sed -i '/bash scripts\/verify-dependency-boundaries\.sh/d' "${temp_dir}/.github/workflows/ci.yml"
+ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
+path = ARGV.fetch(0)
+File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries.sh") }.join)
+RUBY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-sed -i '/bash scripts\/verify-dependency-boundaries-test\.sh/d' "${temp_dir}/.github/workflows/ci.yml"
+ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
+path = ARGV.fetch(0)
+File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries-test.sh") }.join)
+RUBY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 

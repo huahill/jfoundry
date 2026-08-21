@@ -98,8 +98,7 @@ jobs:
             fi
           done
           sed -i 's/<jfoundry.version>[^<]*<\//<jfoundry.version>'"${NEXT_VERSION}"'<\//g' \
-            jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
-            jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml
+            jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
