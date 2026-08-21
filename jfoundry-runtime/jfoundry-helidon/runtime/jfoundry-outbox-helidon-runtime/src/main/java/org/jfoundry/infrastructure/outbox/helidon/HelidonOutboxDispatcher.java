@@ -1,6 +1,6 @@
 package org.jfoundry.infrastructure.outbox.helidon;
 
-import io.helidon.scheduling.Scheduling;
+import io.helidon.scheduling.FixedRate;
 import io.helidon.scheduling.Task;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -17,7 +17,6 @@ import org.jfoundry.application.outbox.OutboxRuntimeIds;
 import org.jfoundry.application.transaction.TransactionRunner;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 /// Helidon scheduling trigger for the framework-neutral Outbox dispatch runtime.
 @Dependent
@@ -56,8 +55,8 @@ public class HelidonOutboxDispatcher implements OutboxDispatcher {
 
     @PostConstruct
     void schedule() {
-        if (enabled) task = Scheduling.fixedRateBuilder().initialDelay(interval.toMillis()).delay(interval.toMillis())
-                .timeUnit(TimeUnit.MILLISECONDS).task(ignored -> dispatch(batchSize)).build();
+        if (enabled) task = FixedRate.builder().delayBy(interval).interval(interval)
+                .task(ignored -> dispatch(batchSize)).build();
     }
 
     @PreDestroy
