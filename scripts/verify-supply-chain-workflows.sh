@@ -21,6 +21,15 @@ require_text() {
     fi
 }
 
+forbid_text() {
+    local file="$1"
+    local text="$2"
+    if grep -Fq -- "${text}" "${root_dir}/${file}"; then
+        echo "${file} must not contain: ${text}" >&2
+        exit 1
+    fi
+}
+
 verify_dependabot_policy() {
     ruby - "${root_dir}/.github/dependabot.yml" <<'RUBY'
 require "yaml"
@@ -227,6 +236,7 @@ require_text ".github/workflows/prepare-snapshot.yml" "pull-requests: write"
 require_text ".github/workflows/prepare-snapshot.yml" "versions:set"
 require_text ".github/workflows/prepare-snapshot.yml" "git push --set-upstream origin"
 require_text ".github/workflows/prepare-snapshot.yml" "gh pr create"
+forbid_text ".github/workflows/prepare-snapshot.yml" "jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml"
 verify_dependabot_auto_merge_workflow
 if grep -Fq -- "-DforceStdout | tail -n 1" "${root_dir}/.github/workflows/snapshot.yml"; then
     echo ".github/workflows/snapshot.yml must not use bare Maven 4 version extraction" >&2

@@ -82,7 +82,8 @@ is `1.0.0-RC1`.
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
 and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
 into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
-resolution for both direct Spring BOM imports and business projects that inherit either Spring parent,
+resolution for both direct Spring BOM imports and business projects that inherit the supported Spring
+Boot parent,
 checks for open High or Critical Dependabot alerts, and only then runs `verify` with
 the explicit Central plugin `publish` goal. The workflow requires the plugin to report a Central
 `deploymentId` before it treats the deployment as successful. It never changes POM versions or
@@ -121,8 +122,10 @@ is published as the normal stable GitHub Release.
 for the previously absent `io.github.xfoundries:jfoundry-spring-boot-parent:1.0.0` POM. It may run
 only from `main`, requires the exact `PUBLISH_JFOUNDRY_SPRING_BOOT_PARENT_1_0_0` confirmation value,
 and uses the protected `jfoundry` environment. The workflow requires that the Parent POM returns
-`404` from Maven Central while the already published `jfoundry-dependencies:1.0.0` and
-`jfoundry-spring-dependencies:1.0.0` POMs both return `200`.
+`404` from Maven Central while the already published `jfoundry-dependencies:1.0.0` and the historical
+`jfoundry-spring-dependencies:1.0.0` POMs both return `200`. The latter coordinate belongs only to
+the 1.0.0 remediation precondition; current releases use the separate
+`jfoundry-spring-boot-dependencies` and `jfoundry-spring-cloud-dependencies` lines.
 
 It signs and deploys only `jfoundry-boms/jfoundry-spring-boot-parent/pom.xml`, waits for the new POM
 to become visible, and uploads an attested evidence archive. After publication succeeds, it force
