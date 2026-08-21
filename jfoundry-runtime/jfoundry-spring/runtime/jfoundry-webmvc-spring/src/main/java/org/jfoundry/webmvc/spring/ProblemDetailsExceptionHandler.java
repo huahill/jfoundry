@@ -15,6 +15,9 @@ import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.MessageSource;
+import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -22,14 +25,26 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.MatrixVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /// Maps JFoundry core exceptions to Spring MVC RFC 9457 Problem Details responses.
 @RestControllerAdvice
@@ -112,9 +127,30 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode statusCode,
                                                                   WebRequest request) {
+        Locale locale = LocaleContextHolder.getLocale();
         List<RequestValidationProblem.Error> errors = exception.getBindingResult().getAllErrors().stream()
-                .map(ProblemDetailsExceptionHandler::validationError)
+                .map(error -> validationError(error, locale))
                 .toList();
+        ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
+        return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
+                HttpStatus.BAD_REQUEST, request);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHandlerMethodValidationException(
+            HandlerMethodValidationException exception,
+            HttpHeaders headers,
+            HttpStatusCode statusCode,
+            WebRequest request) {
+        if (exception.isForReturnValue()) {
+            throw exception;
+        }
+        Locale locale = LocaleContextHolder.getLocale();
+        List<RequestValidationProblem.Error> errors = new ArrayList<>();
+        exception.visitResults(new RequestValidationVisitor(errors, locale));
+        exception.getCrossParameterValidationResults().stream()
+                .map(error -> RequestValidationProblem.Error.forRequest(validationDetail(error, locale)))
+                .forEach(errors::add);
         ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
                 HttpStatus.BAD_REQUEST, request);
@@ -133,12 +169,113 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         return super.handleExceptionInternal(exception, problem, headers, statusCode, request);
     }
 
-    private static RequestValidationProblem.Error validationError(ObjectError error) {
-        String detail = error.getDefaultMessage() == null ? "is invalid" : error.getDefaultMessage();
+    private RequestValidationProblem.Error validationError(ObjectError error, Locale locale) {
+        String detail = validationDetail(error, locale);
         if (error instanceof FieldError fieldError) {
             return RequestValidationProblem.Error.atPath(fieldPath(fieldError.getField()), detail);
         }
         return RequestValidationProblem.Error.forRequest(detail);
+    }
+
+    private String validationDetail(MessageSourceResolvable error, Locale locale) {
+        MessageSource messageSource = getMessageSource();
+        String detail = messageSource == null ? error.getDefaultMessage() : messageSource.getMessage(error, locale);
+        return detail == null ? "is invalid" : detail;
+    }
+
+    private final class RequestValidationVisitor implements HandlerMethodValidationException.Visitor {
+
+        private final List<RequestValidationProblem.Error> errors;
+        private final Locale locale;
+
+        private RequestValidationVisitor(List<RequestValidationProblem.Error> errors, Locale locale) {
+            this.errors = errors;
+            this.locale = locale;
+        }
+
+        @Override
+        public void cookieValue(CookieValue annotation, ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void matrixVariable(MatrixVariable annotation, ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void modelAttribute(ModelAttribute annotation, ParameterErrors result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void pathVariable(PathVariable annotation, ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void requestBody(RequestBody annotation, ParameterErrors result) {
+            List<String> prefix = containerPath(result);
+            for (ObjectError error : result.getAllErrors()) {
+                String detail = validationDetail(error, locale);
+                if (error instanceof FieldError fieldError) {
+                    List<String> path = new ArrayList<>(prefix);
+                    path.addAll(fieldPath(fieldError.getField()));
+                    errors.add(path.isEmpty()
+                            ? RequestValidationProblem.Error.forRequest(detail)
+                            : RequestValidationProblem.Error.atPath(path, detail));
+                } else {
+                    errors.add(RequestValidationProblem.Error.forRequest(detail));
+                }
+            }
+        }
+
+        @Override
+        public void requestBodyValidationResult(RequestBody annotation, ParameterValidationResult result) {
+            List<String> path = containerPath(result);
+            for (MessageSourceResolvable error : result.getResolvableErrors()) {
+                String detail = validationDetail(error, locale);
+                errors.add(path.isEmpty()
+                        ? RequestValidationProblem.Error.forRequest(detail)
+                        : RequestValidationProblem.Error.atPath(path, detail));
+            }
+        }
+
+        @Override
+        public void requestHeader(RequestHeader annotation, ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void requestParam(RequestParam annotation, ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void requestPart(RequestPart annotation, ParameterErrors result) {
+            addRequestErrors(result);
+        }
+
+        @Override
+        public void other(ParameterValidationResult result) {
+            addRequestErrors(result);
+        }
+
+        private void addRequestErrors(ParameterValidationResult result) {
+            result.getResolvableErrors().stream()
+                    .map(error -> RequestValidationProblem.Error.forRequest(validationDetail(error, locale)))
+                    .forEach(errors::add);
+        }
+    }
+
+    private static List<String> containerPath(ParameterValidationResult result) {
+        if (result.getContainerIndex() != null) {
+            return List.of(result.getContainerIndex().toString());
+        }
+        if (result.getContainerKey() != null) {
+            return List.of(result.getContainerKey().toString());
+        }
+        return List.of();
     }
 
     private static List<String> fieldPath(String field) {

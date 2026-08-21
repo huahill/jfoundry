@@ -1,6 +1,7 @@
 package org.jfoundry.webmvc.spring;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotEmpty;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.application.exception.ExternalAccessException;
 import org.jfoundry.application.exception.InvalidArgumentException;
@@ -10,12 +11,14 @@ import org.jfoundry.domain.exception.DomainStateException;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
+import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,9 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
+import org.springframework.validation.method.MethodValidationResult;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -36,14 +42,29 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.MatrixVariable;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.beans.PropertyChangeEvent;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -52,7 +73,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ProblemDetailsExceptionHandlerTest {
@@ -333,6 +356,122 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     @Test
+    void mapsMethodValidationAccordingToRequestSource() throws Exception {
+        Method method = MethodValidationController.class.getDeclaredMethod("validate",
+                ValidationRequest.class, List.class, String.class, String.class, String.class,
+                String.class, String.class, ValidationRequest.class, ValidationRequest.class, String.class);
+        var target = new MethodValidationController();
+        List<ParameterValidationResult> results = new ArrayList<>();
+        results.add(beanResult(method, 0, "services[0].image", "must be a valid URL", null, null));
+        results.add(valueResult(method, 1, "must not be empty", List.of(""), 0, null));
+        results.add(valueResult(method, 2, "query is invalid"));
+        results.add(valueResult(method, 3, "path is invalid"));
+        results.add(valueResult(method, 4, "header is invalid"));
+        results.add(valueResult(method, 5, "cookie is invalid"));
+        results.add(valueResult(method, 6, "matrix is invalid"));
+        results.add(beanResult(method, 7, "services", "model is invalid", null, null));
+        results.add(beanResult(method, 8, "services", "part is invalid", null, null));
+        results.add(valueResult(method, 9, "other is invalid"));
+        var exception = new HandlerMethodValidationException(MethodValidationResult.create(
+                target, method, results, List.of(message("parameters are inconsistent"))));
+
+        ResponseEntity<Object> response = handler.handleException(exception, webRequest());
+
+        assertProblem(response, HttpStatus.BAD_REQUEST.value(), "urn:jfoundry:problem:request-validation");
+        ProblemDetail problem = (ProblemDetail) response.getBody();
+        assertThat(problem.getProperties()).containsEntry("errors", List.of(
+                Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image"),
+                Map.of("detail", "must not be empty", "pointer", "#/0"),
+                Map.of("detail", "query is invalid"),
+                Map.of("detail", "path is invalid"),
+                Map.of("detail", "header is invalid"),
+                Map.of("detail", "cookie is invalid"),
+                Map.of("detail", "matrix is invalid"),
+                Map.of("detail", "model is invalid"),
+                Map.of("detail", "part is invalid"),
+                Map.of("detail", "other is invalid"),
+                Map.of("detail", "parameters are inconsistent")));
+        assertThat(problem.toString()).doesNotContain("secret");
+    }
+
+    @Test
+    void resolvesMethodValidationMessagesWithTheConfiguredMessageSource() throws Exception {
+        Method method = MethodValidationController.class.getDeclaredMethod("localized", String.class);
+        var result = new ParameterValidationResult(
+                new MethodParameter(method, 0), "secret", List.of(new DefaultMessageSourceResolvable(
+                new String[]{"validation.localized"}, null, "default detail")),
+                null, null, null, (error, sourceType) -> null);
+        var exception = new HandlerMethodValidationException(MethodValidationResult.create(
+                new MethodValidationController(), method, List.of(result)));
+        var localizedHandler = new ProblemDetailsExceptionHandler();
+        var messages = new StaticMessageSource();
+        messages.addMessage("validation.localized", Locale.SIMPLIFIED_CHINESE, "参数不符合要求");
+        localizedHandler.setMessageSource(messages);
+        LocaleContextHolder.setLocale(Locale.SIMPLIFIED_CHINESE);
+
+        try {
+            ResponseEntity<Object> response = localizedHandler.handleException(exception, webRequest());
+
+            ProblemDetail problem = (ProblemDetail) response.getBody();
+            assertThat(problem.getProperties()).containsEntry("errors",
+                    List.of(Map.of("detail", "参数不符合要求")));
+        } finally {
+            LocaleContextHolder.resetLocaleContext();
+        }
+    }
+
+    @Test
+    void doesNotExposeMethodReturnValueValidationAsAClientError() throws Exception {
+        Method method = MethodValidationController.class.getDeclaredMethod("result");
+        var result = new ParameterValidationResult(
+                new MethodParameter(method, -1), "secret-return-value",
+                List.of(message("must not be empty")), null, null, null,
+                (error, sourceType) -> null);
+        var exception = new HandlerMethodValidationException(MethodValidationResult.create(
+                new MethodValidationController(), method, List.of(result)));
+
+        assertThatThrownBy(() -> handler.handleException(exception, webRequest()))
+                .isSameAs(exception);
+    }
+
+    @Test
+    void mapsActualSpringMvcMethodValidationByRequestSource() throws Exception {
+        var validator = new LocalValidatorFactoryBean();
+        validator.setMessageInterpolator(new ParameterMessageInterpolator());
+        validator.afterPropertiesSet();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new MethodValidationHttpController())
+                .setControllerAdvice(handler)
+                .setValidator(validator)
+                .build();
+
+        try {
+            String bodyResponse = mockMvc.perform(post("/method-validation/body")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("[\"\"]"))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode bodyProblem = JsonMapper.builder().build().readTree(bodyResponse);
+            assertThat(bodyProblem.path("type").asString())
+                    .isEqualTo("urn:jfoundry:problem:request-validation");
+            assertThat(bodyProblem.path("errors").get(0).path("pointer").asString()).isEqualTo("#/0");
+            assertThat(bodyProblem.path("errors").get(0).path("detail").asString())
+                    .isEqualTo("must not be empty");
+
+            String queryResponse = mockMvc.perform(get("/method-validation/query").queryParam("value", ""))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode queryProblem = JsonMapper.builder().build().readTree(queryResponse);
+            assertThat(queryProblem.path("type").asString())
+                    .isEqualTo("urn:jfoundry:problem:request-validation");
+            assertThat(queryProblem.path("errors").get(0).has("pointer")).isFalse();
+            assertThat(queryProblem.path("errors").get(0).path("detail").asString())
+                    .isEqualTo("must not be empty");
+        } finally {
+            validator.destroy();
+        }
+    }
+
+    @Test
     void preservesUnsupportedSpringMvcProblemDetails() throws Exception {
         ResponseStatusException exception = new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                 "Too many requests");
@@ -392,6 +531,74 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     private record ValidationRequest(List<String> services) {
+    }
+
+    private static final class MethodValidationController {
+
+        void validate(@RequestBody ValidationRequest body,
+                      @RequestBody List<String> bodyContainer,
+                      @RequestParam String query,
+                      @PathVariable String path,
+                      @RequestHeader String header,
+                      @CookieValue String cookie,
+                      @MatrixVariable String matrix,
+                      @ModelAttribute ValidationRequest model,
+                      @RequestPart ValidationRequest part,
+                      String other) {
+        }
+
+        void localized(@RequestParam String value) {
+        }
+
+        String result() {
+            return "";
+        }
+    }
+
+    @RestController
+    private static final class MethodValidationHttpController {
+
+        @PostMapping("/method-validation/body")
+        void body(@RequestBody List<@NotEmpty(message = "must not be empty") String> values) {
+        }
+
+        @GetMapping("/method-validation/query")
+        void query(@RequestParam @NotEmpty(message = "must not be empty") String value) {
+        }
+    }
+
+    private static ParameterValidationResult valueResult(Method method, int parameterIndex, String detail) {
+        return valueResult(method, parameterIndex, detail, null, null, null);
+    }
+
+    private static ParameterValidationResult valueResult(Method method,
+                                                         int parameterIndex,
+                                                         String detail,
+                                                         Object container,
+                                                         Integer containerIndex,
+                                                         Object containerKey) {
+        return new ParameterValidationResult(
+                new MethodParameter(method, parameterIndex), "secret-value", List.of(message(detail)),
+                container, containerIndex, containerKey, (error, sourceType) -> null);
+    }
+
+    private static ParameterErrors beanResult(Method method,
+                                              int parameterIndex,
+                                              String field,
+                                              String detail,
+                                              Integer containerIndex,
+                                              Object containerKey) {
+        var target = new ValidationRequest(List.of("secret-value"));
+        var bindingResult = new BeanPropertyBindingResult(target, "request");
+        bindingResult.addError(new FieldError("request", field, "secret-field", false,
+                new String[]{"Invalid"}, null, detail));
+        return new ParameterErrors(new MethodParameter(method, parameterIndex), target, bindingResult,
+                containerIndex == null && containerKey == null ? null : List.of(target),
+                containerIndex, containerKey);
+    }
+
+    private static DefaultMessageSourceResolvable message(String detail) {
+        return new DefaultMessageSourceResolvable(null, null, detail);
     }
 
     private static final class TestHttpInputMessage implements HttpInputMessage {
