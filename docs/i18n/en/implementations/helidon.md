@@ -1,13 +1,14 @@
 # Helidon MP Runtime Integration
 
-`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with Helidon MP 4.5.1. It is a
+`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with Helidon MP 4.5.2. It is a
 portable CDI/Jakarta runtime integration, not a Spring Boot starter and not a Quarkus extension.
 Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and application code.
 
 ## Dependency Composition
 
-Import the core JFoundry BOM, then the Helidon BOM for the same release line. The Helidon BOM manages
-the selected Helidon platform ecosystem only; it does not manage JFoundry module versions:
+Import the Helidon BOM before the core JFoundry BOM for the same release line. The Helidon BOM manages
+the selected Helidon platform ecosystem and its narrow Jackson annotations compatibility alignment;
+it does not manage JFoundry module versions:
 
 ```xml
 <dependencyManagement>

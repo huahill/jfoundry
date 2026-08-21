@@ -1,13 +1,13 @@
 # Helidon MP 运行时集成
 
-`jfoundry-helidon` 将 JFoundry 的运行时无关契约与 Helidon MP 4.5.1 组合。它是可移植的
+`jfoundry-helidon` 将 JFoundry 的运行时无关契约与 Helidon MP 4.5.2 组合。它是可移植的
 CDI/Jakarta 运行时集成，不是 Spring Boot 启动器，也不是 Quarkus 扩展。Helidon、CDI、JTA、
 JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 ## 依赖组合
 
-先导入核心 JFoundry BOM，再导入同一发布线的 Helidon BOM。Helidon BOM 只管理所选 Helidon
-平台生态版本，不管理 JFoundry 模块版本：
+先导入同一发布线的 Helidon BOM，再导入核心 JFoundry BOM。Helidon BOM 管理所选 Helidon
+平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本：
 
 ```xml
 <dependencyManagement>
