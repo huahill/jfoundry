@@ -309,27 +309,24 @@ mvn -Dmaven.repo.local="$clean_repo" -pl jfoundry-runtime/jfoundry-quarkus -am t
 Expected before the fix: Quarkus `generate-code` or extension descriptor generation cannot resolve one or more
 same-reactor `*-quarkus-deployment:1.3.0-SNAPSHOT` artifacts.
 
-Result: the clean-repository build completed all 111 reactor modules successfully. The expected resolution
-failure is no longer reproducible on the completed branch.
+Result: clean-repository builds passed locally, but GitHub's slower parallel reactor reproduced the failure:
+Quarkus augmentation started before four same-reactor deployment artifacts were packaged. The local results
+confirmed that a populated repository or favorable scheduling can mask the missing reactor edges.
 
 - [x] **Step 2: Apply the smallest reactor fix**
 
-Enable Quarkus bootstrap workspace discovery for the integration-test consumer so augmentation resolves
-same-reactor runtime and deployment projects from the Maven workspace during the `test` phase. Preserve the
-standard deployment-to-runtime Maven dependency and do not create a runtime-to-deployment dependency cycle. Keep
+Add test-scoped `pom` dependencies from the Quarkus integration-test consumer to every local deployment module.
+These dependencies exist only to give Maven's parallel reactor the missing ordering edges. Using `pom` type keeps
+deployment classes off the application classpath and avoids a runtime-to-deployment dependency cycle. Keep
 `scripts/verify-ci-matrix.sh` on `mvn test` so the local release-baseline command continues to reproduce the CI
 phase exactly.
-
-Result: no build change was applied because workspace resolution already succeeds without an explicit Quarkus
-workspace-discovery override. Adding the property without a failing case would not be a justified fix.
 
 - [x] **Step 3: Re-run the clean-repository build**
 
 Run the command from Step 1 with a new temporary repository. Expected: success without any preinstalled JFoundry
 snapshot artifacts.
 
-Result: the first clean-repository command already produced the expected successful result, so a second
-identical download and build was unnecessary.
+Result: the clean full reactor and focused Quarkus reactor passed with the isolated repository after the fix.
 
 - [x] **Step 4: Run focused and release-baseline verification**
 
@@ -354,9 +351,10 @@ git add pom.xml jfoundry-runtime scripts docs skills jfoundry-boms jfoundry-core
 git commit -m "build(quarkus): support clean reactor extension builds"
 ```
 
-Result: no Quarkus build change was necessary. The final correction commit fixed Spring MVC provenance for
-`MethodArgumentNotValidException` raised by model attributes and request parts, centralized deterministic error
-sorting, and completed RFC 3986 percent-encoding for JSON Pointer URI fragments.
+Result: the final correction commit fixed Spring MVC provenance for `MethodArgumentNotValidException` raised by
+model attributes and request parts, centralized deterministic error sorting, and completed RFC 3986
+percent-encoding for JSON Pointer URI fragments. A follow-up build commit adds the Quarkus reactor ordering edges
+after GitHub CI reproduced the scheduling-dependent deployment resolution failure.
 
 - [ ] **Step 6: Push and monitor the merge gate**
 
