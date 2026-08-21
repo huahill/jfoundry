@@ -9,7 +9,7 @@
 | Spring Boot-only line | Spring Boot 4.1.x |
 | Spring Cloud line | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
 | Quarkus | 3.37.3 |
-| Helidon MP | 4.5.1 |
+| Helidon MP | 4.5.2 |
 | Maven release tool | 4.0.0-rc-5 (experimental) |
 | Maven 3.9 | Consumer compatibility check |
 
@@ -22,10 +22,11 @@
 | Spring Cloud line Spring Cloud | 2025.1.2 |
 | Spring Cloud line Spring Cloud Alibaba | 2025.1.0.0 |
 | Quarkus | 3.37.3 |
-| Helidon MP | 4.5.1 |
+| Helidon MP | 4.5.2 |
 | MyBatis-Plus | 3.5.17 |
 | MyBatis-Plus Spring Boot 4 starter | 3.5.17 |
-| Jackson 3 | 3.1.4 |
+| Jackson 3 | 3.2.2 |
+| Helidon Jackson annotations compatibility override | 2.22 |
 | Jakarta Persistence | 3.2.0 |
 | Hibernate ORM | 7.2.19.Final |
 | Spring Kafka | 4.0.6 |
@@ -34,7 +35,7 @@
 | Redisson | 4.7.0 |
 | RocketMQ client | 5.5.0 |
 | Javassist override | 3.30.2-GA |
-| Helidon `groovy-all` compatibility override | 2.4.14 |
+| Helidon `groovy-all` compatibility override | 3.0.25 |
 
 Every business application aligning to this matrix imports `jfoundry-dependencies` and adds only the
 documented starters or runtime capabilities it needs. Spring Boot-only applications use
@@ -61,9 +62,11 @@ Maven 4 model warning. Maven 4 also reports imported-BOM conflicts from supporte
 ecosystems; the compatibility gate verifies successful package resolution rather than requiring
 a warning-free effective model.
 
-`jfoundry-helidon-dependencies` manages `org.codehaus.groovy:groovy-all:2.4.14` as a narrow
-platform-local compatibility override required by Maven release dependency validation. It is not a
-general JFoundry dependency-management rule.
+`jfoundry-helidon-dependencies` has two narrow platform-local compatibility overrides. It manages
+`org.codehaus.groovy:groovy-all:3.0.25` for Maven release dependency validation and
+`com.fasterxml.jackson.core:jackson-annotations:2.22` because Helidon's managed 2.21 line is not
+compatible with Foundation's Jackson Databind 3.2.2. These are not general JFoundry
+dependency-management rules.
 
 ## Verification Evidence
 
