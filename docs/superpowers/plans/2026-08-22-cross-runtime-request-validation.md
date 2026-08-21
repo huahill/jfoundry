@@ -102,7 +102,7 @@ git commit -m "feat(web): share Jakarta validation error conversion"
 - Modify: `jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime/src/main/java/org/jfoundry/web/quarkus/ProblemDetailsExceptionMappers.java`
 - Modify: `jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime/src/test/java/org/jfoundry/web/quarkus/ProblemDetailsExceptionMapperTest.java`
 
-- [ ] **Step 1: Add failing executable-validation coverage**
+- [x] **Step 1: Add failing executable-validation coverage**
 
 Extend the test resource with body, query, path, header, cookie, matrix, bean, class-level, cross-parameter,
 container-element, and return-value cases. Use real Jakarta executable validation to obtain violations. Assert:
@@ -115,7 +115,7 @@ assertThat(errorForCrossParameter).containsOnlyKeys("detail");
 
 Also assert that any exception containing a return-value violation is rethrown unchanged.
 
-- [ ] **Step 2: Run the focused Quarkus runtime test and verify failure**
+- [x] **Step 2: Run the focused Quarkus runtime test and verify failure**
 
 Run:
 
@@ -126,7 +126,7 @@ mvn -pl jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime -
 
 Expected: non-body cascaded properties incorrectly receive pointers or the new expectations fail.
 
-- [ ] **Step 3: Implement conservative Quarkus parameter provenance**
+- [x] **Step 3: Implement conservative Quarkus parameter provenance**
 
 Replace local Jakarta path conversion with `JakartaRequestValidationErrors.from`. Keep
 `ResteasyReactiveViolationException` classification local. Resolve the method and `ParameterNode` index from the
@@ -134,7 +134,7 @@ constraint path, then classify standard JAX-RS bound parameters and Quarkus REST
 non-document sources. Treat an ordinary unbound entity parameter containing only neutral annotations such as
 `@Valid` as the JSON document. Return false whenever method or binding metadata cannot be resolved.
 
-- [ ] **Step 4: Run the Quarkus runtime tests**
+- [x] **Step 4: Run the Quarkus runtime tests**
 
 Run the command from Step 2 and then:
 
@@ -144,7 +144,7 @@ mvn -pl jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime -
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit the Quarkus adapter**
+- [x] **Step 5: Commit the Quarkus adapter**
 
 ```bash
 git add jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-web-quarkus-runtime
