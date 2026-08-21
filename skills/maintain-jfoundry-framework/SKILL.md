@@ -62,6 +62,9 @@ For every module-placement decision, apply Onion Simple as defined in `reference
 - Keep Spring Boot auto-configuration only in capability-specific modules under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - Keep Spring Boot starters as dependency entry points. Do not put Java runtime logic in starter modules.
 - Keep framework-neutral technical adapters under `jfoundry-core/jfoundry-infrastructure`.
+- A framework-neutral infrastructure adapter may use a narrowly scoped portable Jakarta specification API
+  when it expresses the adapter's technical contract. Keep providers, CDI/JAX-RS/JTA container integration,
+  and runtime exception classification in runtime modules; Domain and Application modules remain Jakarta-free.
 - Keep reusable architecture tests under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`.
 - Keep runtime-specific integration verification in the direct `jfoundry-runtime/<runtime>/jfoundry-<runtime>-integration-tests` module; keep framework-neutral tests beside their core or infrastructure implementation.
 - Do not make default starters heavy. Outbox, Inbox, broker adapters, JobRunr, and MyBatis-Plus store adapters must remain explicit capability choices.

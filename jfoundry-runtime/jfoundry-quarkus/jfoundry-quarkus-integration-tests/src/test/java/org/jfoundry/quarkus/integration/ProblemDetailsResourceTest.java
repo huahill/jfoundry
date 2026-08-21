@@ -69,4 +69,35 @@ class ProblemDetailsResourceTest {
                 .body("errors[0]", not(hasKey("rejectedValue")))
                 .body("$", not(hasKey("code")));
     }
+
+    @Test
+    void rendersNonDocumentRequestValidationWithoutPointers() {
+        given()
+                .queryParam("value", "x")
+                .when()
+                .get("/jfoundry/problems/validation/query")
+                .then()
+                .statusCode(400)
+                .body("type", equalTo("urn:jfoundry:problem:request-validation"))
+                .body("errors[0].detail", equalTo("must have at least 3 characters"))
+                .body("errors[0]", not(hasKey("pointer")));
+
+        when()
+                .get("/jfoundry/problems/validation/path/x")
+                .then()
+                .statusCode(400)
+                .body("type", equalTo("urn:jfoundry:problem:request-validation"))
+                .body("errors[0].detail", equalTo("must have at least 3 characters"))
+                .body("errors[0]", not(hasKey("pointer")));
+
+        given()
+                .header("X-Value", "x")
+                .when()
+                .get("/jfoundry/problems/validation/header")
+                .then()
+                .statusCode(400)
+                .body("type", equalTo("urn:jfoundry:problem:request-validation"))
+                .body("errors[0].detail", equalTo("must have at least 3 characters"))
+                .body("errors[0]", not(hasKey("pointer")));
+    }
 }

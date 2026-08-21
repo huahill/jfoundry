@@ -47,6 +47,11 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 
 测试依赖遵循同一边界。core 模块可以使用运行时无关的 JUnit、AssertJ、Mockito、H2 或持久化框架原生测试支持。凡是启动 Spring、Quarkus 或 Helidon 的测试，都必须位于对应的直接运行时集成测试模块，并在该模块中声明相应运行时测试栈。
 
+Jakarta 规范本身不等同于应用运行时。当某个可移植规范 API 能表达基础设施适配器的技术契约时，运行时无关的
+基础设施适配器可以按最小范围依赖该 API；例如，`jfoundry-web` 通过可选的 Jakarta Validation API 转换
+`ConstraintViolation`。这一规则不适用于领域层和应用层，也不会把 CDI 生命周期、JAX-RS 请求派发、JTA 协调
+或其它容器集成变成运行时无关能力。校验 provider 和运行时异常分类仍应位于测试或对应的运行时适配器中。
+
 CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML 感知检查器扫描全部 reactor POM，包括测试依赖与依赖管理，并拒绝跨运行时坐标、core 中的运行时依赖以及 Foundation 中的运行时特定坐标。夹具测试和工作流自检会确保该门禁被删除或弱化时 CI 立即失败。
 
 ## 可靠消息边界
@@ -71,7 +76,9 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## 验收标准
 
-- 核心模块对 Spring、Spring Boot、Helidon、Quarkus、Micronaut、CDI、Jakarta 运行时 API、消息代理客户端和持久化框架细节没有编译期或仅提供依赖。
+- 领域层和应用层模块对 Spring、Spring Boot、Helidon、Quarkus、Micronaut、CDI、Jakarta API、消息代理客户端
+  和持久化框架细节没有编译期或仅提供依赖。基础设施适配器可以使用范围严格的可移植 Jakarta 规范 API，但不得
+  依赖容器集成 API。
 - 适配器模块不得直接注册 Spring Boot 自动配置。
 - 启动器保持为轻量依赖选择。
 - 未来运行时集成可以复用核心 SPI 和运行时无关适配器，而不依赖 Spring Boot。

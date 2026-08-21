@@ -259,19 +259,19 @@ git commit -m "fix(webmvc): map Spring method validation problems"
 - Modify: `skills/maintain-jfoundry-framework/SKILL.md`
 - Modify: `skills/maintain-jfoundry-framework/references/module-boundaries.md`
 
-- [ ] **Step 1: Add real-runtime request-source probes**
+- [x] **Step 1: Add real-runtime request-source probes**
 
 Add endpoints and HTTP assertions proving JSON body pointers and detail-only query/path/header validation in both
 Jakarta REST runtimes. Keep response assertions limited to the agreed RFC 9457 members and `errors` shape.
 
-- [ ] **Step 2: Update English and Chinese documentation**
+- [x] **Step 2: Update English and Chinese documentation**
 
 Document the validation/parsing boundary, pointer provenance, return-value exclusion, and cross-runtime parity.
 Clarify that stable Jakarta specification APIs may be used by runtime-neutral infrastructure adapters while
 container lifecycle and dispatch mechanisms remain runtime-specific. Keep the two language documents conceptually
 aligned and do not mix languages within a document.
 
-- [ ] **Step 3: Run JVM integration verification**
+- [x] **Step 3: Run JVM integration verification**
 
 ```bash
 mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify
@@ -280,7 +280,12 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am
 
 Expected: both commands pass and the new HTTP assertions observe the same public contract.
 
-- [ ] **Step 4: Commit integration coverage and docs**
+Result: the Quarkus and Helidon integration-test modules passed their regular `test` phase, including the new
+HTTP assertions. The Quarkus `jvm-integration` profile was also attempted, but Testcontainers could not start
+its PostgreSQL resource because `/var/run/docker.sock` is unavailable. The equivalent Helidon profile was not
+run because it requires the same unavailable Docker service.
+
+- [x] **Step 4: Commit integration coverage and docs**
 
 ```bash
 git add jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
