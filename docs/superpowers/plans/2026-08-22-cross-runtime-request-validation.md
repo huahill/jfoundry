@@ -20,7 +20,7 @@
 - Modify: `scripts/VerifyDependencyBoundaries.java`
 - Test: `scripts/tests/verify-dependency-boundaries-test.sh`
 
-- [ ] **Step 1: Write converter tests with synthetic Jakarta paths**
+- [x] **Step 1: Write converter tests with synthetic Jakarta paths**
 
 Create tests that construct deterministic `ConstraintViolation` and `Path.Node` fakes and assert this public API:
 
@@ -37,7 +37,7 @@ Cover nested properties, list indexes, map keys, JSON Pointer escaping through `
 class-level and cross-parameter detail-only errors, false provenance, deterministic sorting, and null-message
 fallback.
 
-- [ ] **Step 2: Run the focused test and verify it fails**
+- [x] **Step 2: Run the focused test and verify it fails**
 
 Run:
 
@@ -48,14 +48,14 @@ mvn -pl jfoundry-core/jfoundry-infrastructure/jfoundry-web -am \
 
 Expected: compilation fails because `JakartaRequestValidationErrors` does not exist.
 
-- [ ] **Step 3: Manage and declare the specification API**
+- [x] **Step 3: Manage and declare the specification API**
 
 Add `jakarta-validation.version` set to `3.1.1` and manage `jakarta.validation:jakarta.validation-api` in the
 Foundation BOM. Add it to `jfoundry-web` with `<optional>true</optional>`. Update the dependency-boundary checker
 and its fixture tests so portable Jakarta specification APIs are allowed in infrastructure adapters while Jakarta
 runtime/container APIs remain prohibited from Domain and Application modules.
 
-- [ ] **Step 4: Implement the converter**
+- [x] **Step 4: Implement the converter**
 
 Create this public contract:
 
@@ -74,19 +74,19 @@ public final class JakartaRequestValidationErrors {
 Use Java 23 Markdown documentation comments. Do not import Jakarta REST, CDI, a validation provider, or a runtime
 exception. The converter must not inspect rejected values.
 
-- [ ] **Step 5: Run focused tests and boundary verification**
+- [x] **Step 5: Run focused tests and boundary verification**
 
 Run:
 
 ```bash
 mvn -pl jfoundry-core/jfoundry-infrastructure/jfoundry-web -am test
-scripts/tests/verify-dependency-boundaries-test.sh
-scripts/verify-dependency-boundaries.sh
+bash scripts/verify-dependency-boundaries-test.sh
+bash scripts/verify-dependency-boundaries.sh
 ```
 
 Expected: all commands pass.
 
-- [ ] **Step 6: Commit the shared converter**
+- [x] **Step 6: Commit the shared converter**
 
 ```bash
 git add jfoundry-boms/jfoundry-foundation-dependencies/pom.xml \

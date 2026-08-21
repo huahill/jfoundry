@@ -34,6 +34,9 @@
     <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
     <archunit.version>1.5.0</archunit.version>
 
+    <!-- Validation -->
+    <jakarta-validation.version>3.1.1</jakarta-validation.version>
+
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
@@ -118,6 +121,13 @@
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit</artifactId>
         <version>${archunit.version}</version>
+      </dependency>
+
+      <!-- Validation -->
+      <dependency>
+        <groupId>jakarta.validation</groupId>
+        <artifactId>jakarta.validation-api</artifactId>
+        <version>${jakarta-validation.version}</version>
       </dependency>
 
       <!-- Persistence and database integration -->
