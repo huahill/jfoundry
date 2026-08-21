@@ -157,13 +157,13 @@ git commit -m "fix(web): classify Quarkus validation parameter sources"
 - Modify: `jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime/src/main/java/org/jfoundry/web/helidon/ProblemDetailsExceptionMappers.java`
 - Modify: `jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime/src/test/java/org/jfoundry/web/helidon/ProblemDetailsExceptionMapperTest.java`
 
-- [ ] **Step 1: Add failing Helidon/JAX-RS validation coverage**
+- [x] **Step 1: Add failing Helidon/JAX-RS validation coverage**
 
 Mirror the portable request-source cases from Task 2 using standard JAX-RS annotations. Preserve the existing
 internal-service and return-value tests. Add a mixed violation test proving that return-value validation prevents
 partial `400` conversion.
 
-- [ ] **Step 2: Run the focused Helidon test and verify failure**
+- [x] **Step 2: Run the focused Helidon test and verify failure**
 
 Run:
 
@@ -174,14 +174,14 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime -
 
 Expected: non-body cascaded properties incorrectly receive pointers or the new expectations fail.
 
-- [ ] **Step 3: Implement conservative Helidon parameter provenance**
+- [x] **Step 3: Implement conservative Helidon parameter provenance**
 
 Use `JakartaRequestValidationErrors.from` after `isResourceRequestValidation` succeeds. Resolve the executable and
 parameter index from Jakarta Validation path nodes. Standard JAX-RS parameter-binding and context annotations are
 detail-only; an ordinary unbound entity parameter is document eligible; unknown metadata is detail-only. Keep
 resource-root and return-value exclusion in the Helidon adapter.
 
-- [ ] **Step 4: Run all Helidon Web runtime tests**
+- [x] **Step 4: Run all Helidon Web runtime tests**
 
 ```bash
 mvn -pl jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime -am test
@@ -189,7 +189,7 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime -
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit the Helidon adapter**
+- [x] **Step 5: Commit the Helidon adapter**
 
 ```bash
 git add jfoundry-runtime/jfoundry-helidon/runtime/jfoundry-web-helidon-runtime

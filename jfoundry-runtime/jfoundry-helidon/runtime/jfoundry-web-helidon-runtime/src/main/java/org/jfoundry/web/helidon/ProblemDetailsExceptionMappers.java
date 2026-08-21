@@ -4,6 +4,8 @@ import jakarta.annotation.Priority;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.ElementKind;
+import jakarta.validation.Path.MethodNode;
+import jakarta.validation.Path.ParameterNode;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -15,11 +17,13 @@ import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.application.exception.NotFoundException;
 import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
+import org.jfoundry.problem.JakartaRequestValidationErrors;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.RequestValidationProblem;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /// Groups the precise Jakarta REST exception mappers used for JFoundry problem responses.
@@ -56,7 +60,8 @@ public final class ProblemDetailsExceptionMappers {
                 throw exception;
             }
             return ProblemDetailsResponses.forProblem(RequestValidationProblem.create(
-                    validationErrors(exception.getConstraintViolations())));
+                    JakartaRequestValidationErrors.from(exception.getConstraintViolations(),
+                            ProblemDetailsExceptionMappers::isRequestDocumentViolation)));
         }
     }
     @Provider
@@ -97,47 +102,59 @@ public final class ProblemDetailsExceptionMappers {
         return isJaxRsResource(type.getSuperclass());
     }
 
-    private static List<RequestValidationProblem.Error> validationErrors(
-            Iterable<? extends ConstraintViolation<?>> violations) {
-        List<RequestValidationProblem.Error> errors = new ArrayList<>();
-        for (ConstraintViolation<?> violation : violations) {
-            List<String> path = requestDocumentPath(violation);
-            String detail = violation.getMessage() == null ? "is invalid" : violation.getMessage();
-            errors.add(path.isEmpty()
-                    ? RequestValidationProblem.Error.forRequest(detail)
-                    : RequestValidationProblem.Error.atPath(path, detail));
-        }
-        return errors.stream()
-                .sorted(Comparator.comparing((RequestValidationProblem.Error error) -> String.join("/", error.path()))
-                        .thenComparing(RequestValidationProblem.Error::detail))
-                .toList();
-    }
-
-    private static List<String> requestDocumentPath(ConstraintViolation<?> violation) {
-        List<String> path = new ArrayList<>();
+    private static boolean isRequestDocumentViolation(ConstraintViolation<?> violation) {
+        MethodNode methodNode = null;
+        ParameterNode parameterNode = null;
         for (jakarta.validation.Path.Node node : violation.getPropertyPath()) {
-            if (node.getKind() != ElementKind.PROPERTY
-                    && node.getKind() != ElementKind.CONTAINER_ELEMENT
-                    && node.getKind() != ElementKind.BEAN) {
-                continue;
-            }
-            appendIterableLocation(path, node);
-            if (node.getKind() == ElementKind.PROPERTY && node.getName() != null) {
-                path.add(node.getName());
+            if (node.getKind() == ElementKind.METHOD) {
+                methodNode = node.as(MethodNode.class);
+            } else if (node.getKind() == ElementKind.PARAMETER) {
+                parameterNode = node.as(ParameterNode.class);
             }
         }
-        return List.copyOf(path);
+        if (methodNode == null || parameterNode == null || violation.getRootBeanClass() == null) {
+            return false;
+        }
+        List<Method> methods = matchingMethods(violation.getRootBeanClass(), methodNode.getName(),
+                methodNode.getParameterTypes());
+        int parameterIndex = parameterNode.getParameterIndex();
+        return !methods.isEmpty() && methods.stream()
+                .allMatch(method -> parameterIndex < method.getParameterCount()
+                        && !hasRequestParameterBinding(method.getParameters()[parameterIndex]));
     }
 
-    private static void appendIterableLocation(List<String> path, jakarta.validation.Path.Node node) {
-        if (!node.isInIterable()) {
+    private static List<Method> matchingMethods(Class<?> type, String name, List<Class<?>> parameterTypes) {
+        List<Method> methods = new ArrayList<>();
+        collectMatchingMethods(type, name, parameterTypes.toArray(Class[]::new), methods);
+        return List.copyOf(methods);
+    }
+
+    private static void collectMatchingMethods(Class<?> type, String name, Class<?>[] parameterTypes,
+                                               List<Method> methods) {
+        if (type == null || type == Object.class) {
             return;
         }
-        if (node.getIndex() != null) {
-            path.add(node.getIndex().toString());
-        } else if (node.getKey() != null) {
-            path.add(node.getKey().toString());
+        try {
+            methods.add(type.getDeclaredMethod(name, parameterTypes));
+        } catch (NoSuchMethodException ignored) {
+            // Continue through inherited resource contracts.
         }
+        for (Class<?> interfaceType : type.getInterfaces()) {
+            collectMatchingMethods(interfaceType, name, parameterTypes, methods);
+        }
+        collectMatchingMethods(type.getSuperclass(), name, parameterTypes, methods);
+    }
+
+    private static boolean hasRequestParameterBinding(Parameter parameter) {
+        return parameter.isAnnotationPresent(jakarta.ws.rs.BeanParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.CookieParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.FormParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.HeaderParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.MatrixParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.PathParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.QueryParam.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.core.Context.class)
+                || parameter.isAnnotationPresent(jakarta.ws.rs.container.Suspended.class);
     }
 
     private static boolean isReturnValueViolation(ConstraintViolation<?> violation) {
