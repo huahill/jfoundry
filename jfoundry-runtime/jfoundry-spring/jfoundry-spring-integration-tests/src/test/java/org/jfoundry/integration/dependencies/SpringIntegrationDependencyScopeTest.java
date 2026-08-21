@@ -27,18 +27,18 @@ class SpringIntegrationDependencyScopeTest {
     }
 
     @Test
-    void doesNotOverridePersistenceAutoConfigurationRuntimeDependencyWithTestScope() throws Exception {
+    void baseTestDependenciesIncludePersistenceAutoConfiguration() throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder()
                 .parse(modulePom().toFile());
-        NodeList dependencies = document.getElementsByTagNameNS(MAVEN_POM_NAMESPACE, "dependency");
 
-        assertThat(hasDirectDependency(dependencies, "jfoundry-persistence-spring-boot-autoconfigure")).isFalse();
+        assertThat(findDependencyScope(document.getDocumentElement(),
+                "jfoundry-persistence-spring-boot-autoconfigure")).isEqualTo("test");
     }
 
     @Test
-    void nativeMybatisProfileKeepsPersistenceSpringOnCompileClasspath() throws Exception {
+    void nativeMybatisProfileKeepsPersistenceSupportOnCompileClasspath() throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder()
@@ -47,6 +47,8 @@ class SpringIntegrationDependencyScopeTest {
         Element profile = findProfile(document, "native-mybatis-plus");
         assertThat(profile).isNotNull();
         assertThat(findDependencyScope(profile, "jfoundry-persistence-spring")).isEqualTo("compile");
+        assertThat(findDependencyScope(profile,
+                "jfoundry-persistence-spring-boot-autoconfigure")).isEqualTo("compile");
     }
 
     private Path modulePom() {
