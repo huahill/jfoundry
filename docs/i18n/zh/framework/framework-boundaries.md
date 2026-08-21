@@ -39,6 +39,16 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 - 消息代理客户端 `MessageSender` 适配器位于各自的运行时集成；应用层 `MessageSender` 与 `SendResult` 契约仍保持运行时无关。
 - 运行时特定的中间件集成测试和 Testcontainers 兼容性验证位于相应运行时直接包含的集成测试模块；运行时无关测试紧邻其所验证的 core 或 infrastructure 实现。
 
+## 依赖管理边界
+
+`jfoundry-foundation-dependencies` 只管理运行时无关的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、JobRunr、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
+
+各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。
+
+测试依赖遵循同一边界。core 模块可以使用运行时无关的 JUnit、AssertJ、Mockito、H2 或持久化框架原生测试支持。凡是启动 Spring、Quarkus 或 Helidon 的测试，都必须位于对应的直接运行时集成测试模块，并在该模块中声明相应运行时测试栈。
+
+CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML 感知检查器扫描全部 reactor POM，包括测试依赖与依赖管理，并拒绝跨运行时坐标、core 中的运行时依赖以及 Foundation 中的运行时特定坐标。夹具测试和工作流自检会确保该门禁被删除或弱化时 CI 立即失败。
+
 ## 可靠消息边界
 
 `jfoundry-outbox-core` 拥有消息模型、存储契约、派发服务、重试/退避契约和状态机。
@@ -65,3 +75,5 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 - 适配器模块不得直接注册 Spring Boot 自动配置。
 - 启动器保持为轻量依赖选择。
 - 未来运行时集成可以复用核心 SPI 和运行时无关适配器，而不依赖 Spring Boot。
+- Foundation 只管理运行时无关坐标；各运行时 BOM 管理与自身匹配的生态。
+- core 测试不得通过宽泛的启动器依赖间接获得运行时测试框架。

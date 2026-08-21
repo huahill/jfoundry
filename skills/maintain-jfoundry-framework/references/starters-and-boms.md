@@ -14,8 +14,9 @@ create a published parent or inheritance boundary.
 - Cloud applications use their own or a standard Maven parent (for example
   `spring-boot-starter-parent:4.0.7`) and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
-- `jfoundry-foundation-dependencies` manages low-level common dependency versions and all supported
-  coordinates of third-party component families shared with a runtime BOM.
+- `jfoundry-foundation-dependencies` manages low-level, runtime-neutral dependency versions and
+  coordinates. It does not manage runtime starters, deployment artifacts, or runtime-specific Native
+  Image integrations.
 - `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
   foundation and module BOMs and is the required JFoundry BOM for every external application.
@@ -23,7 +24,7 @@ create a published parent or inheritance boundary.
   `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` are standalone runtime BOMs.
   They do not import `jfoundry-dependencies` or `jfoundry-foundation-dependencies`; they manage only
   their runtime platform ecosystem. The aggregate `jfoundry-dependencies` BOM is the single public
-  entry point for Foundation-managed component families.
+  entry point for runtime-neutral, Foundation-managed coordinates.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and
@@ -72,11 +73,12 @@ ecosystem. A JFoundry adapter remains a separate module, API, and runtime-verifi
 
 When adding a module or third-party dependency, update the narrowest relevant BOM and any aggregate BOM that imports it.
 
-For a third-party component family used by runtime adapters, Foundation is the sole version owner. It
-manages every supported coordinate in that family, including runtime-specific starter or Native Image
-artifacts. Runtime BOMs must not redeclare the family version or any of those coordinates; applications
-obtain these constraints through the aggregate `jfoundry-dependencies` BOM. JobRunr, MyBatis-Plus,
-Redisson, and jMolecules Integrations follow this rule.
+For a third-party component family used by runtime adapters, split ownership by coordinate rather than
+placing the entire family in Foundation. Foundation manages only the family's runtime-neutral artifacts.
+The matching runtime BOM manages runtime starters, deployment artifacts, and runtime-specific Native
+Image integrations, using the same compatible component version when appropriate. JobRunr,
+MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule: their neutral artifacts remain in
+Foundation while their Spring-specific artifacts belong in `jfoundry-spring-boot-dependencies`.
 Do not separately override a starter's transitive dependencies unless JFoundry has an explicit,
 documented compatibility reason and verifies the replacement combination. In particular,
 `org.mybatis:mybatis-spring` follows `mybatis-plus-spring-boot4-starter` and is not managed by a

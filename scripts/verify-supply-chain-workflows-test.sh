@@ -192,6 +192,10 @@ jobs:
       - run: echo '${{ needs.dependency-review.result }}'
   consumer-pom-verification:
     steps:
+      - name: Test dependency boundary verifier
+        run: bash scripts/verify-dependency-boundaries-test.sh
+      - name: Verify dependency boundaries
+        run: bash scripts/verify-dependency-boundaries.sh
       - name: Test Consumer POM verification
         run: bash scripts/verify-consumer-pom-test.sh
 YAML
@@ -1281,6 +1285,17 @@ jobs:
           esac
 YAML
 assert_rejects "${temp_dir}"
+
+cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
+sed -i '/bash scripts\/verify-dependency-boundaries\.sh/d' "${temp_dir}/.github/workflows/ci.yml"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries.sh"
+mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
+
+cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
+sed -i '/bash scripts\/verify-dependency-boundaries-test\.sh/d' "${temp_dir}/.github/workflows/ci.yml"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries-test.sh"
+mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
+
 rm "${temp_dir}/.github/dependabot.yml"
 assert_rejects "${temp_dir}"
 assert_accepts "${ROOT_DIR}"
