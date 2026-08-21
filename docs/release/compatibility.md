@@ -8,8 +8,8 @@
 | Runtime Java | 25 |
 | Spring Boot-only line | Spring Boot 4.1.x |
 | Spring Cloud line | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
-| Quarkus | 3.37.3 |
-| Helidon MP | 4.5.2 |
+| Quarkus | 3.38.3 |
+| Helidon MP | 4.5.3 |
 | Maven release tool | 4.0.0-rc-5 (experimental) |
 | Maven 3.9 | Consumer compatibility check |
 
@@ -21,8 +21,8 @@
 | Spring Cloud line Spring Boot | 4.0.7 |
 | Spring Cloud line Spring Cloud | 2025.1.2 |
 | Spring Cloud line Spring Cloud Alibaba | 2025.1.0.0 |
-| Quarkus | 3.37.3 |
-| Helidon MP | 4.5.2 |
+| Quarkus | 3.38.3 |
+| Helidon MP | 4.5.3 |
 | MyBatis-Plus | 3.5.17 |
 | MyBatis-Plus Spring Boot 4 starter | 3.5.17 |
 | Jackson 3 | 3.2.2 |
@@ -94,7 +94,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
 
-Helidon MP 4.5.2 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
+Helidon MP 4.5.3 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
 macOS ARM64, adding Helidon's JPA integration also fails image generation through
 `JpaExtension.processPersistenceXmls`, with `org.xml.sax.helpers.LocatorImpl` retained in the image
 heap. The Native CDI/Web consumer starts and serves the JFoundry Problem Details response, but
