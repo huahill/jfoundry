@@ -5,7 +5,6 @@ import jakarta.validation.ElementKind;
 import jakarta.validation.Path;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -35,8 +34,7 @@ public final class JakartaRequestValidationErrors {
                     : RequestValidationProblem.Error.atPath(path, detail));
         }
         return errors.stream()
-                .sorted(Comparator.comparing((RequestValidationProblem.Error error) -> String.join("/", error.path()))
-                        .thenComparing(RequestValidationProblem.Error::detail))
+                .sorted(RequestValidationProblem.ERROR_ORDER)
                 .toList();
     }
 

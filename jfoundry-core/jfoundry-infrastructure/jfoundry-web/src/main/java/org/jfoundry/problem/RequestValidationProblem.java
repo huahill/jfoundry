@@ -1,7 +1,9 @@
 package org.jfoundry.problem;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +13,9 @@ import java.util.Objects;
 public final class RequestValidationProblem {
 
     public static final URI TYPE = URI.create("urn:jfoundry:problem:request-validation");
+    static final Comparator<Error> ERROR_ORDER = Comparator
+            .comparing(Error::path, RequestValidationProblem::comparePaths)
+            .thenComparing(Error::detail);
 
     private RequestValidationProblem() {
     }
@@ -19,6 +24,8 @@ public final class RequestValidationProblem {
     public static ProblemDescriptor create(List<? extends Error> errors) {
         Objects.requireNonNull(errors, "errors must not be null");
         List<Map<String, String>> renderedErrors = errors.stream()
+                .map(error -> Objects.requireNonNull(error, "errors must not contain null"))
+                .sorted(ERROR_ORDER)
                 .map(Error::toExtension)
                 .toList();
         return new ProblemDescriptor(
@@ -64,11 +71,26 @@ public final class RequestValidationProblem {
     }
 
     private static String jsonPointer(List<String> path) {
-        StringBuilder pointer = new StringBuilder("#");
+        StringBuilder pointer = new StringBuilder();
         for (String token : path) {
             pointer.append('/')
                     .append(token.replace("~", "~0").replace("/", "~1"));
         }
-        return pointer.toString();
+        try {
+            return new URI(null, null, pointer.toString()).toASCIIString();
+        } catch (URISyntaxException exception) {
+            throw new IllegalArgumentException("path cannot be rendered as a JSON Pointer URI fragment", exception);
+        }
+    }
+
+    private static int comparePaths(List<String> left, List<String> right) {
+        int commonLength = Math.min(left.size(), right.size());
+        for (int index = 0; index < commonLength; index++) {
+            int comparison = left.get(index).compareTo(right.get(index));
+            if (comparison != 0) {
+                return comparison;
+            }
+        }
+        return Integer.compare(left.size(), right.size());
     }
 }

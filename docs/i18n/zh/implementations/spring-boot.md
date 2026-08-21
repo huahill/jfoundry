@@ -77,10 +77,11 @@ Framework 针对具体异常生成的 `title` 和 `detail`，包括 `MessageSour
 继续使用目录文案作为回退。服务端故障仍只使用经过审查的目录文案，不会暴露异常消息、cause 或其他诊断信息。
 类型转换失败时会在可用的情况下指出对应请求属性，但不会回显被拒绝的值。
 
-Spring MVC 请求体校验失败时使用独立的 `urn:jfoundry:problem:request-validation` type。它的
-`errors` 扩展遵循 RFC 9457 的 validation error 示例：每一项都包含面向调用方的 `detail`；错误属于字段时，
-还会包含以 JSON Pointer URI fragment 表示的 `pointer`。对象级约束没有可靠的 JSON 位置，因此只包含
-`detail`：
+Spring MVC 请求入参校验失败时使用独立的 `urn:jfoundry:problem:request-validation` type。它的
+`errors` 扩展遵循 RFC 9457 的 validation error 示例：每一项都包含面向调用方的 `detail`；只有能够确认属于
+JSON body 字段的错误才会包含以 JSON Pointer URI fragment 表示的 `pointer`。query、path、header、cookie、
+matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约束与跨参数约束没有可靠的 JSON 位置，
+同样只包含 `detail`：
 
 ```json
 {
@@ -98,8 +99,8 @@ Spring MVC 请求体校验失败时使用独立的 `urn:jfoundry:problem:request
 ```
 
 响应不会包含被拒绝的值，因为请求字段可能携带凭证、令牌或体积较大的数据。Spring MVC 从
-`MethodArgumentNotValidException` 生成该共享契约；Quarkus 与 Helidon 则从各自运行时的请求校验异常生成
-相同的外部表示，具体见对应的实现指南。
+`MethodArgumentNotValidException` 与 `HandlerMethodValidationException` 生成该共享契约；返回值校验仍作为
+服务端失败处理。Quarkus 与 Helidon 则从各自运行时的请求校验异常生成相同的外部表示，具体见对应的实现指南。
 
 `jfoundry-web-spring` 为出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对拥有该集成的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。默认的 `BASIC` HTTP 日志不会访问请求或响应 body。应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`；`FULL` 会记录经脱敏、限长的 JSON body，并可能为诊断读取未消费的错误响应 body。响应错误处理器本身不会读取、复制或保留下游响应体；拥有已明确约定下游协议的应用适配器仍应自行解析响应体。
 
