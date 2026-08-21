@@ -65,29 +65,37 @@ class SpringBootParentPomTest {
     }
 
     @Test
-    void runtimeBomsDelegateSharedComponentFamiliesToTheCoreBom() throws Exception {
+    void springRuntimeBomOwnsSpringSpecificComponentFamilies() throws Exception {
         Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
         Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
         Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
-        assertThat(childText(child(foundation.getDocumentElement(), "properties"), "jobrunr.version"))
-                .isEqualTo("8.8.1");
-        assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
-        assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
+        assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
         assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
-        assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isTrue();
-        assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isFalse();
+        assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+
+        assertThat(managesDependency(boot, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
+        assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
+        assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
+        assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         assertThat(importedBoms(cloud)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         for (Document springLine : List.of(boot, cloud)) {
-            assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
-            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
+            assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter"))
+                    .isEqualTo(springLine == boot);
+            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
+                    .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
-            assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter")).isFalse();
-            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+            assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
+                    .isEqualTo(springLine == boot);
+            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring"))
+                    .isEqualTo(springLine == boot);
         }
     }
 
