@@ -299,7 +299,7 @@ git commit -m "test(web): verify request validation across runtimes"
 **Files:**
 - Modify: `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests/pom.xml`
 
-- [ ] **Step 1: Reproduce with a clean temporary repository**
+- [x] **Step 1: Reproduce with a clean temporary repository**
 
 ```bash
 clean_repo=$(mktemp -d)
@@ -309,7 +309,10 @@ mvn -Dmaven.repo.local="$clean_repo" -pl jfoundry-runtime/jfoundry-quarkus -am t
 Expected before the fix: Quarkus `generate-code` or extension descriptor generation cannot resolve one or more
 same-reactor `*-quarkus-deployment:1.3.0-SNAPSHOT` artifacts.
 
-- [ ] **Step 2: Apply the smallest reactor fix**
+Result: the clean-repository build completed all 111 reactor modules successfully. The expected resolution
+failure is no longer reproducible on the completed branch.
+
+- [x] **Step 2: Apply the smallest reactor fix**
 
 Enable Quarkus bootstrap workspace discovery for the integration-test consumer so augmentation resolves
 same-reactor runtime and deployment projects from the Maven workspace during the `test` phase. Preserve the
@@ -317,12 +320,18 @@ standard deployment-to-runtime Maven dependency and do not create a runtime-to-d
 `scripts/verify-ci-matrix.sh` on `mvn test` so the local release-baseline command continues to reproduce the CI
 phase exactly.
 
-- [ ] **Step 3: Re-run the clean-repository build**
+Result: no build change was applied because workspace resolution already succeeds without an explicit Quarkus
+workspace-discovery override. Adding the property without a failing case would not be a justified fix.
+
+- [x] **Step 3: Re-run the clean-repository build**
 
 Run the command from Step 1 with a new temporary repository. Expected: success without any preinstalled JFoundry
 snapshot artifacts.
 
-- [ ] **Step 4: Run focused and release-baseline verification**
+Result: the first clean-repository command already produced the expected successful result, so a second
+identical download and build was unnecessary.
+
+- [x] **Step 4: Run focused and release-baseline verification**
 
 ```bash
 mvn validate
@@ -333,12 +342,21 @@ scripts/verify-ci-matrix.sh
 Then run the runtime Native Image stages selected by `skills/maintain-jfoundry-framework/references/testing.md`
 for the shared Spring, Quarkus, and Helidon Web behavior. Expected: every command succeeds on Java 25.
 
-- [ ] **Step 5: Commit build changes and final corrections**
+Result: `mvn validate`, `mvn test`, the dependency-boundary fixture and repository checks, and
+`scripts/verify-ci-matrix.sh` all passed on Java 25. Spring and Helidon Native Image builds and startup probes
+passed. Quarkus Native Image and the PostgreSQL middleware profiles could not run because the local Docker
+daemon is unavailable; `verify-runtime-ci.sh quarkus --stage native` confirmed that environment prerequisite.
+
+- [x] **Step 5: Commit build changes and final corrections**
 
 ```bash
 git add pom.xml jfoundry-runtime scripts docs skills jfoundry-boms jfoundry-core
 git commit -m "build(quarkus): support clean reactor extension builds"
 ```
+
+Result: no Quarkus build change was necessary. The final correction commit fixed Spring MVC provenance for
+`MethodArgumentNotValidException` raised by model attributes and request parts, centralized deterministic error
+sorting, and completed RFC 3986 percent-encoding for JSON Pointer URI fragments.
 
 - [ ] **Step 6: Push and monitor the merge gate**
 

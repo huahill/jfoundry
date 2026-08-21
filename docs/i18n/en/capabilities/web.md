@@ -101,6 +101,9 @@ as a JSON Pointer URI fragment:
 }
 ```
 
+Pointer tokens escape `~` and `/` according to RFC 6901. The URI fragment representation also
+percent-encodes other characters as required by RFC 3986.
+
 Pointers describe locations in the JSON request document, not Java property paths in general. Field
 and container-element failures proven to originate from a JSON body can therefore use pointers such
 as `#/services/0`. Query, path, header, cookie, matrix, form, model-attribute, and multipart request

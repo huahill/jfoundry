@@ -70,8 +70,8 @@ A Bean Validation request failure uses the following shape:
 ```
 
 Each `errors` entry always has `detail`. It has `pointer` only when the failure can be located within the JSON
-request document. The pointer uses RFC 6901 fragment representation and escapes `~` as `~0` and `/` as `~1`.
-Rejected values are never included.
+request document. The pointer uses RFC 6901 fragment representation, escapes `~` as `~0` and `/` as `~1`, and
+percent-encodes the fragment according to RFC 3986. Rejected values are never included.
 
 Errors are sorted by logical document path and then detail so responses and tests remain deterministic. A null
 validation message falls back to `is invalid`.

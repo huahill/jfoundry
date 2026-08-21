@@ -81,6 +81,9 @@ URI fragment 编码的 `pointer`：
 }
 ```
 
+pointer token 会按照 RFC 6901 转义 `~` 和 `/`；URI fragment 表示还会按照 RFC 3986 对其它字符进行
+百分号编码。
+
 `pointer` 描述的是 JSON 请求文档中的位置，而不是一般意义上的 Java 属性路径。因此，确认来自 JSON body 的字段
 与容器元素错误可以使用 `#/services/0` 之类的 pointer；query、path、header、cookie、matrix、form、
 model attribute 和 multipart 请求参数即使带有嵌套 Java 属性路径，也只包含 `detail`。对象级约束和跨参数约束

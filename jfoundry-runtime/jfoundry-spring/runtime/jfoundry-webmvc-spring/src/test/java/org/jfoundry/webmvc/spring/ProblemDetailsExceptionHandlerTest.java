@@ -1,6 +1,7 @@
 package org.jfoundry.webmvc.spring;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.application.exception.ExternalAccessException;
@@ -29,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -75,6 +77,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -330,9 +333,9 @@ class ProblemDetailsExceptionHandlerTest {
                 .isEqualTo("The request failed validation. See 'errors' for details.");
         assertThat(problem.getProperties()).containsEntry("errors",
                 List.of(
+                        Map.of("detail", "is invalid", "pointer", "#/metadata/a~1b~0c"),
                         Map.of("detail", "must not be empty", "pointer", "#/services"),
-                        Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image"),
-                        Map.of("detail", "is invalid", "pointer", "#/metadata/a~1b~0c")));
+                        Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image")));
         assertThat(problem.toString()).doesNotContain("secret-services", "secret-value", "another-secret");
     }
 
@@ -380,17 +383,17 @@ class ProblemDetailsExceptionHandlerTest {
         assertProblem(response, HttpStatus.BAD_REQUEST.value(), "urn:jfoundry:problem:request-validation");
         ProblemDetail problem = (ProblemDetail) response.getBody();
         assertThat(problem.getProperties()).containsEntry("errors", List.of(
-                Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image"),
-                Map.of("detail", "must not be empty", "pointer", "#/0"),
-                Map.of("detail", "query is invalid"),
-                Map.of("detail", "path is invalid"),
-                Map.of("detail", "header is invalid"),
                 Map.of("detail", "cookie is invalid"),
+                Map.of("detail", "header is invalid"),
                 Map.of("detail", "matrix is invalid"),
                 Map.of("detail", "model is invalid"),
-                Map.of("detail", "part is invalid"),
                 Map.of("detail", "other is invalid"),
-                Map.of("detail", "parameters are inconsistent")));
+                Map.of("detail", "parameters are inconsistent"),
+                Map.of("detail", "part is invalid"),
+                Map.of("detail", "path is invalid"),
+                Map.of("detail", "query is invalid"),
+                Map.of("detail", "must not be empty", "pointer", "#/0"),
+                Map.of("detail", "must be a valid URL", "pointer", "#/services/0/image")));
         assertThat(problem.toString()).doesNotContain("secret");
     }
 
@@ -472,6 +475,39 @@ class ProblemDetailsExceptionHandlerTest {
     }
 
     @Test
+    void omitsPointersForActualSpringMvcBeanValidationOutsideTheRequestBody() throws Exception {
+        var validator = new LocalValidatorFactoryBean();
+        validator.setMessageInterpolator(new ParameterMessageInterpolator());
+        validator.afterPropertiesSet();
+        MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new MethodValidationHttpController())
+                .setControllerAdvice(handler)
+                .setValidator(validator)
+                .build();
+
+        try {
+            String modelResponse = mockMvc.perform(post("/method-validation/model").param("value", ""))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode modelProblem = JsonMapper.builder().build().readTree(modelResponse);
+            assertThat(modelProblem.path("type").asString())
+                    .isEqualTo("urn:jfoundry:problem:request-validation");
+            assertThat(modelProblem.path("errors").get(0).has("pointer")).isFalse();
+
+            var part = new MockMultipartFile("request", "request.json", MediaType.APPLICATION_JSON_VALUE,
+                    "{\"value\":\"\"}".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            String partResponse = mockMvc.perform(multipart("/method-validation/part").file(part))
+                    .andExpect(status().isBadRequest())
+                    .andReturn().getResponse().getContentAsString();
+            JsonNode partProblem = JsonMapper.builder().build().readTree(partResponse);
+            assertThat(partProblem.path("type").asString())
+                    .isEqualTo("urn:jfoundry:problem:request-validation");
+            assertThat(partProblem.path("errors").get(0).has("pointer")).isFalse();
+        } finally {
+            validator.destroy();
+        }
+    }
+
+    @Test
     void preservesUnsupportedSpringMvcProblemDetails() throws Exception {
         ResponseStatusException exception = new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
                 "Too many requests");
@@ -526,11 +562,14 @@ class ProblemDetailsExceptionHandlerTest {
 
     private static final class ValidationController {
 
-        void validate(ValidationRequest request) {
+        void validate(@RequestBody ValidationRequest request) {
         }
     }
 
     private record ValidationRequest(List<String> services) {
+    }
+
+    private record BeanValidationRequest(@NotEmpty(message = "must not be empty") String value) {
     }
 
     private static final class MethodValidationController {
@@ -564,6 +603,14 @@ class ProblemDetailsExceptionHandlerTest {
 
         @GetMapping("/method-validation/query")
         void query(@RequestParam @NotEmpty(message = "must not be empty") String value) {
+        }
+
+        @PostMapping("/method-validation/model")
+        void model(@Valid @ModelAttribute BeanValidationRequest request) {
+        }
+
+        @PostMapping(path = "/method-validation/part", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        void part(@Valid @RequestPart BeanValidationRequest request) {
         }
     }
 

@@ -81,6 +81,20 @@ class JakartaRequestValidationErrorsTest {
                         RequestValidationProblem.Error.atPath(List.of("z"), "z message"));
     }
 
+    @Test
+    void sortsByPathTokensWithoutJoinedPathCollisions() {
+        ConstraintViolation<?> slashToken = violation("same message",
+                node(ElementKind.PARAMETER, "request"), node(ElementKind.PROPERTY, "a/b"));
+        ConstraintViolation<?> nestedPath = violation("same message",
+                node(ElementKind.PARAMETER, "request"), node(ElementKind.PROPERTY, "a"),
+                node(ElementKind.PROPERTY, "b"));
+
+        assertThat(JakartaRequestValidationErrors.from(List.of(slashToken, nestedPath), ignored -> true))
+                .containsExactly(
+                        RequestValidationProblem.Error.atPath(List.of("a", "b"), "same message"),
+                        RequestValidationProblem.Error.atPath(List.of("a/b"), "same message"));
+    }
+
     @SuppressWarnings("unchecked")
     private static ConstraintViolation<?> violation(String message, Path.Node... nodes) {
         Path path = () -> List.of(nodes).iterator();

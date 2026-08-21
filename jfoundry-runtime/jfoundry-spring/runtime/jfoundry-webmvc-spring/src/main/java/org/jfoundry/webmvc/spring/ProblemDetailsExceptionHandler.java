@@ -128,8 +128,9 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                                                                   HttpStatusCode statusCode,
                                                                   WebRequest request) {
         Locale locale = LocaleContextHolder.getLocale();
+        boolean requestBody = exception.getParameter().hasParameterAnnotation(RequestBody.class);
         List<RequestValidationProblem.Error> errors = exception.getBindingResult().getAllErrors().stream()
-                .map(error -> validationError(error, locale))
+                .map(error -> validationError(error, locale, requestBody))
                 .toList();
         ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
@@ -169,9 +170,9 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         return super.handleExceptionInternal(exception, problem, headers, statusCode, request);
     }
 
-    private RequestValidationProblem.Error validationError(ObjectError error, Locale locale) {
+    private RequestValidationProblem.Error validationError(ObjectError error, Locale locale, boolean requestBody) {
         String detail = validationDetail(error, locale);
-        if (error instanceof FieldError fieldError) {
+        if (requestBody && error instanceof FieldError fieldError) {
             return RequestValidationProblem.Error.atPath(fieldPath(fieldError.getField()), detail);
         }
         return RequestValidationProblem.Error.forRequest(detail);

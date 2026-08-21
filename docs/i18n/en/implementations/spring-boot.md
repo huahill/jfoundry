@@ -135,11 +135,12 @@ problem body. Server-side failures continue to use reviewed catalog text rather 
 messages, causes, or other diagnostic details. Type-conversion failures identify the affected
 request property when available but do not echo its rejected value.
 
-Spring MVC request-body validation failures use the dedicated
+Spring MVC request-input validation failures use the dedicated
 `urn:jfoundry:problem:request-validation` type. Its `errors` extension follows the RFC 9457
-validation-error example: each entry has a human-readable `detail` and, when the error belongs to a
-field, a `pointer` expressed as a JSON Pointer URI fragment. Object-level constraints contain only
-`detail` because they have no reliable JSON location:
+validation-error example: each entry has a human-readable `detail` and, when the error can be proven
+to belong to a JSON body field, a `pointer` expressed as a JSON Pointer URI fragment. Query, path,
+header, cookie, matrix, model-attribute, and multipart errors contain only `detail`. Object-level and
+cross-parameter constraints also contain only `detail` because they have no reliable JSON location:
 
 ```json
 {
@@ -157,8 +158,9 @@ field, a `pointer` expressed as a JSON Pointer URI fragment. Object-level constr
 ```
 
 Rejected values are never included because request fields may contain credentials, tokens, or large
-payloads. Spring MVC derives this shared contract from `MethodArgumentNotValidException`; Quarkus and
-Helidon derive the same external representation from their runtime-specific request-validation
+payloads. Spring MVC derives this shared contract from `MethodArgumentNotValidException` and
+`HandlerMethodValidationException`; return-value validation remains a server-side failure. Quarkus
+and Helidon derive the same external representation from their runtime-specific request-validation
 exceptions, as described in their implementation guides.
 
 `jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
