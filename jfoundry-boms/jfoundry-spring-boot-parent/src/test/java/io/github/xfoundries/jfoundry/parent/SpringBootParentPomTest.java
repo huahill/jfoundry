@@ -111,6 +111,31 @@ class SpringBootParentPomTest {
     }
 
     @Test
+    void quarkusRuntimeBuildMatchesTheConsumerBomPlatformVersion() throws Exception {
+        Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus", "pom.xml"));
+        Document bom = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
+        String runtimeVersion = childText(child(runtime.getDocumentElement(), "properties"), "quarkus.version");
+        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
+
+        assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(bomVersion).isEqualTo("3.38.3");
+        assertThat(importedBoms(runtime)).containsExactly(
+                new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
+    }
+
+    @Test
+    void helidonRuntimeBuildUsesTheConsumerBomAsItsPlatformVersionSource() throws Exception {
+        Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon", "pom.xml"));
+        Document bom = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+
+        assertThat(property(runtime, "helidon.version")).isNull();
+        assertThat(childText(child(bom.getDocumentElement(), "properties"), "helidon.version"))
+                .isEqualTo("4.5.3");
+        assertThat(importedBoms(runtime)).containsExactly(
+                new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
+    }
+
+    @Test
     void springAutoconfigurationUsesTheMybatisPlusStarterInsteadOfManagingMybatisSpring() throws Exception {
         Path autoconfigure = Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "autoconfigure");
         Document persistence = document(autoconfigure.resolve(
@@ -177,6 +202,11 @@ class SpringBootParentPomTest {
                 .filter(candidate -> artifactId.equals(childText(candidate, "artifactId")))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private Element property(Document document, String name) {
+        Element properties = child(document.getDocumentElement(), "properties");
+        return properties == null ? null : child(properties, name);
     }
 
     private Element child(Element parent, String name) {
