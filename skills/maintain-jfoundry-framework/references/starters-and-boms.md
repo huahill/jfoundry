@@ -96,19 +96,15 @@ Starters are user-facing dependency entry points. They should:
 - avoid surprising transitive dependencies;
 - make heavy capabilities explicit.
 
-## Core Starter Layout
+## Runtime-Neutral Dependency Entry Points
 
-`jfoundry-core/jfoundry-starters` is a runtime-neutral dependency-composition group, not an Onion
-ring implementation. Keep Domain and Application starters directly under that directory. Place
-runtime-neutral starters that compose infrastructure adapters directly under
-`jfoundry-core/jfoundry-starters/infrastructure`.
+Do not publish runtime-neutral starter wrappers. Consumers depend directly on the Domain, Application,
+architecture-style, and framework-neutral adapter modules they use. In particular, architecture style is
+an explicit project choice: select `jfoundry-hexagonal` or `jfoundry-onion` instead of allowing a runtime
+integration to select or combine them implicitly.
 
-- Use capability and technology artifact IDs, such as `jfoundry-persistence-jpa-starter` and
-  `jfoundry-persistence-mybatis-plus-starter`; do not expose the `infrastructure` directory category
-  in the artifact ID.
-- Do not add an `infrastructure/pom.xml` or further nested starter directories.
-- Keep runtime-managed clients, broker senders, and platform lifecycle assembly in the matching
-  Spring, Quarkus, or Helidon integration rather than adding them to the core starter catalog.
+Keep runtime-managed clients, broker senders, and platform lifecycle assembly in the matching Spring,
+Quarkus, or Helidon integration.
 
 Default Spring Boot starter:
 

@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-persistence-jpa-starter</artifactId>
+            <artifactId>jfoundry-persistence-jpa</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

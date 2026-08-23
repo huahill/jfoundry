@@ -1,8 +1,8 @@
 # Capability Catalog
 
 Choose JFoundry by the business capability required, then select the matching runtime entry point.
-The coordinates below are consumer dependencies. Do not add an internal core or adapter module directly
-unless an application deliberately implements its own runtime integration.
+The coordinates below are consumer dependencies. Domain, application, architecture, and framework-neutral
+adapter modules are selected directly; runtime-specific wiring is selected through the matching runtime entry point.
 
 Every application imports `jfoundry-dependencies` and its matching runtime BOM as described in
 [Getting Started](../integration/getting-started.md). The matrix identifies the next dependency to
@@ -11,8 +11,8 @@ configuration.
 
 | Capability | Use it when | Spring Boot | Quarkus | Helidon MP | Guide |
 |---|---|---|---|---|---|
-| Domain modeling | The business model needs aggregates, value objects, domain events, and explicit invariants. | `jfoundry-domain-starter` | `jfoundry-domain-starter` | `jfoundry-domain-starter` | [Getting Started](../integration/getting-started.md) |
-| Application services | Use cases need explicit application boundaries, CQRS contracts, or domain-event orchestration. | `jfoundry-application-starter` | `jfoundry-application-starter` | `jfoundry-application-starter` | [Getting Started](../integration/getting-started.md) |
+| Domain modeling | The business model needs aggregates, value objects, domain events, and explicit invariants. | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [Getting Started](../integration/getting-started.md) |
+| Application services | Use cases need explicit application boundaries. Add CQRS, transactions, or domain-event modules only when required. | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [Getting Started](../integration/getting-started.md) |
 | Executable architecture rules | The project needs reusable ArchUnit checks for Hexagonal or Onion boundaries. | `jfoundry-architecture-test` (test scope) | `jfoundry-architecture-test` (test scope) | `jfoundry-architecture-test` (test scope) | [ArchUnit Architecture Rules](../framework/archunit-rules.md) |
 | Application transactions | A use case needs a runtime transaction boundary. | `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` | `jfoundry-helidon-runtime` | [Application Transactions](application-transactions.md) |
 | Aggregate persistence | An aggregate needs JPA or MyBatis-Plus persistence without turning repositories into generic query APIs. | `jfoundry-persistence-jpa-spring-boot-starter` or `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon-runtime` | [Aggregate Persistence](aggregate-persistence.md) |

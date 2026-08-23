@@ -10,7 +10,7 @@ Quarkus, Micronaut, CDI, or Jakarta EE runtime integration APIs. Stable low-intr
 such as jMolecules and `slf4j-api` may appear in core modules when they express contracts.
 
 `jfoundry-core` is a directory group for runtime-neutral framework modules. It contains the domain,
-architecture, application, infrastructure, and runtime-neutral starter aggregates; it does not change
+architecture, application, and infrastructure modules; it does not change
 the Onion dependency direction within those modules. `jfoundry-runtime` groups concrete
 runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`; Quarkus uses `runtime/` and
 `deployment/`; each runtime also has one direct `jfoundry-<runtime>-integration-tests` module.
@@ -22,7 +22,6 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
 | Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-domain-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
-| Runtime-neutral starter composition | `jfoundry-core/jfoundry-starters` for Domain and Application starters; `jfoundry-core/jfoundry-starters/infrastructure` for capability-named infrastructure adapter starters |
 | Spring runtime integration | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring integration tests | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
@@ -47,11 +46,8 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
   `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`. Future Helidon middleware
   or Testcontainers verification belongs in the same module. Helidon has no
   JFoundry deployment module or starter layer.
-- Starters are dependency entry points only; they must not contain runtime behavior. Keep Domain and
-  Application starters at `jfoundry-core/jfoundry-starters`; place runtime-neutral infrastructure
-  adapter starters directly under `jfoundry-core/jfoundry-starters/infrastructure`. Their artifact IDs
-  use capability and technology names, such as `jfoundry-persistence-jpa-starter`; do not add an
-  intermediate aggregator POM or further directory levels.
+- Consume Domain, Application, architecture-style, and framework-neutral adapter modules directly.
+  Runtime-specific starters are dependency entry points only and must not contain runtime behavior.
 - Framework-neutral database, serializer, and scheduler adapters belong under
   `jfoundry-core/jfoundry-infrastructure`.
 - Broker client `MessageSender` adapters belong to their runtime integration. The application-layer
