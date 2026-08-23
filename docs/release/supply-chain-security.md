@@ -27,14 +27,21 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 
 ## Dependabot Update Governance
 
-- Dependabot groups Maven patch updates. Only Maven-only patch pull requests may be queued for rebase
-  auto-merge, and they merge only after Dependency Review and the `Merge gate` succeed. Minor and
-  major Maven updates remain individual pull requests and require manual review.
+- Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
+  plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
+  plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
+  patch group so related updates available in the same Dependabot run are proposed together.
+- Grouping does not prove that every coordinate in a platform has published the same version.
+  Repository POM contracts require the Spring Boot parent to match the consumer BOM and the Quarkus
+  build tools to match the consumer BOM. An incomplete platform update therefore fails the `Merge
+  gate` instead of changing the supported baseline. Helidon has one platform version source in its
+  consumer BOM and does not need a multi-coordinate group.
+- Only Maven-only patch pull requests may be queued for rebase auto-merge, and they merge only after
+  Dependency Review and the `Merge gate` succeed. Minor and major Maven updates require manual review.
+  The complete supported runtime matrix remains the compatibility boundary for runtime changes.
 - Dependabot does not ignore runtime platform dependency-management updates. Spring Boot, Spring
-  Cloud, Spring Cloud Alibaba, Quarkus, and Helidon updates follow the same Maven policy as other
-  dependencies. Patch updates use the normal automatic path; minor and major runtime-platform updates
-  require manual review. The complete supported runtime matrix and `Merge gate` provide the
-  compatibility boundary in both cases.
+  Cloud, Spring Cloud Alibaba, Quarkus, and Helidon remain visible to dependency update and security
+  monitoring.
 - CodeQL `init` and `analyze` updates are atomic: they are upgraded together in the same pull request.
   GitHub Actions updates, including CodeQL updates, are never eligible for Maven auto-merge.
 

@@ -56,14 +56,51 @@ end
 maven_updates = updates.select { |update| update["package-ecosystem"] == "maven" }
 fail_policy("must contain exactly one Maven updates entry") unless maven_updates.size == 1
 
-expected_maven_groups = {
-    "jfoundry-maven-patches" => {
-        "patterns" => ["*"],
-        "update-types" => ["patch"]
-    }
-}
 maven_update = maven_updates.first
-fail_policy("Maven groups must be #{expected_maven_groups.inspect}") unless maven_update["groups"] == expected_maven_groups
+groups = maven_update["groups"]
+fail_policy("Maven groups must be a mapping") unless groups.is_a?(Hash)
+
+expected_group_names = [
+    "jfoundry-spring-boot-platform",
+    "jfoundry-quarkus-platform",
+    "jfoundry-maven-patches"
+]
+unless groups.keys == expected_group_names
+    fail_policy("Maven groups must be ordered as #{expected_group_names.join(', ')}")
+end
+
+expected_spring_boot_group = {
+    "patterns" => [
+        "org.springframework.boot:spring-boot-dependencies",
+        "org.springframework.boot:spring-boot-starter-parent",
+        "org.springframework.boot:spring-boot-maven-plugin"
+    ],
+    "update-types" => ["patch", "minor"]
+}
+unless groups["jfoundry-spring-boot-platform"] == expected_spring_boot_group
+    fail_policy("jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
+end
+
+expected_quarkus_group = {
+    "patterns" => [
+        "io.quarkus.platform:quarkus-bom",
+        "io.quarkus:quarkus-extension-maven-plugin",
+        "io.quarkus:quarkus-extension-processor",
+        "io.quarkus:quarkus-maven-plugin"
+    ],
+    "update-types" => ["patch", "minor"]
+}
+unless groups["jfoundry-quarkus-platform"] == expected_quarkus_group
+    fail_policy("jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
+end
+
+expected_patch_group = {
+    "patterns" => ["*"],
+    "update-types" => ["patch"]
+}
+unless groups["jfoundry-maven-patches"] == expected_patch_group
+    fail_policy("jfoundry-maven-patches must group all remaining patch updates")
+end
 
 fail_policy("Maven updates must not define ignore rules") if maven_update.key?("ignore")
 
