@@ -23,7 +23,7 @@
 | `jfoundry-inbox-spring-boot-starter` | Inbox 核心、`InboxTemplate` | Inbox 表存储 |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
-| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 业务 MyBatis-Plus 持久化入口：基础自动配置、共享持久化运行时支持、MyBatis-Plus Boot 启动器和默认技术审计处理器 | 运行时无关的 `jfoundry-persistence-mybatis-plus-starter`、Outbox/Inbox 存储 |
+| `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 业务 MyBatis-Plus 持久化入口：基础自动配置、共享持久化运行时支持、MyBatis-Plus Boot 启动器和默认技术审计处理器 | Outbox/Inbox 存储 |
 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个由 JPA 管理的实体图的 jfoundry JPA 适配器、共享 Spring 事务持久化上下文、Spring Boot JPA 运行时 | 对分离聚合执行合并、手动多表或多实体图同步算法、Outbox 和 Inbox 存储 |
 | `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` 异常响应 | 消息、Outbox、Inbox |
 

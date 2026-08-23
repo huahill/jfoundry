@@ -36,7 +36,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Quarkus consumer, middleware, or Native Image integration verification | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
 | Helidon MP CDI, JTA, JAX-RS, scheduling, or JPA runtime behavior | `jfoundry-runtime/jfoundry-helidon/runtime` |
 | Helidon MP consumer, middleware, or Native Image integration verification | `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests` |
-| User dependency entry point | `jfoundry-core/jfoundry-starters` for Domain/Application, `jfoundry-core/jfoundry-starters/infrastructure` for runtime-neutral infrastructure adapters, or `jfoundry-runtime/jfoundry-spring/starters` for Spring Boot |
+| User dependency entry point | A direct Domain, Application, architecture-style, or framework-neutral adapter dependency; use `jfoundry-runtime/jfoundry-spring/starters` for Spring Boot assembly |
 | Framework-neutral unit or adapter verification | Next to the core or infrastructure implementation under test |
 
 ## Decision Rules

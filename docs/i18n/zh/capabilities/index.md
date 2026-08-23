@@ -1,13 +1,13 @@
 # 能力目录
 
-先按业务所需能力选择 JFoundry，再选择对应运行时的接入依赖。下表列出的都是使用方依赖；除非应用明确实现自己的运行时集成，否则不要直接引入内部核心模块或适配器模块。
+先按业务所需能力选择 JFoundry，再选择对应运行时的接入依赖。下表列出的都是使用方依赖。领域、应用、架构和框架无关适配器模块由使用方直接选择；运行时专属装配通过对应运行时入口选择。
 
 每个应用都应按[接入指南](../integration/getting-started.md)导入 `jfoundry-dependencies` 与对应运行时 BOM。矩阵给出下一步应添加的依赖；详细指南会说明所需的配套模块、存储、传输方式和配置。
 
 | 能力 | 适用场景 | Spring Boot | Quarkus | Helidon MP | 指南 |
 |---|---|---|---|---|---|
-| 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain-starter` | `jfoundry-domain-starter` | `jfoundry-domain-starter` | [接入指南](../integration/getting-started.md) |
-| 应用服务 | 用例需要清晰的应用边界、CQRS 契约或领域事件编排。 | `jfoundry-application-starter` | `jfoundry-application-starter` | `jfoundry-application-starter` | [接入指南](../integration/getting-started.md) |
+| 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [接入指南](../integration/getting-started.md) |
+| 应用服务 | 用例需要清晰的应用边界；仅在需要时添加 CQRS、事务或领域事件模块。 | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [接入指南](../integration/getting-started.md) |
 | 可执行架构规则 | 项目需要可复用的 ArchUnit 检查来约束 Hexagonal 或 Onion 边界。 | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | [ArchUnit 架构规则](../framework/archunit-rules.md) |
 | 应用事务 | 用例需要运行时事务边界。 | `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` | `jfoundry-helidon-runtime` | [应用事务](application-transactions.md) |
 | 聚合持久化 | 聚合需要 JPA 或 MyBatis-Plus 持久化，同时不把 Repository 变为通用查询接口。 | `jfoundry-persistence-jpa-spring-boot-starter` 或 `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon-runtime` | [聚合持久化](aggregate-persistence.md) |

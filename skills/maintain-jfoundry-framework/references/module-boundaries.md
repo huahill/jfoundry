@@ -19,9 +19,6 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 - `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`: reusable ArchUnit and test helpers for framework users.
 - `jfoundry-application`: application-layer contracts, CQRS annotations, event dispatch contracts, messaging SPI, Outbox/Inbox core contracts.
 - `jfoundry-infrastructure`: framework-neutral technical adapters for persistence, messaging, payload serialization, JobRunr dispatching, and similar technologies.
-- `jfoundry-core/jfoundry-starters`: runtime-neutral dependency-composition modules. Domain and
-  Application starters are direct children; capability-named starters for infrastructure adapters live
-  directly under its `infrastructure` directory.
 
 ### Runtime Integration
 
@@ -60,6 +57,7 @@ Practical rules:
 - Infrastructure modules implement or consume application/domain contracts without registering Spring Boot
   auto-configuration. They may depend on a portable Jakarta specification API such as Jakarta Validation when
   the dependency is capability-specific and does not add a provider or runtime container.
+- Consumers select Domain, Application, architecture-style, and framework-neutral adapter modules directly.
 - Spring runtime modules may depend on application contracts and framework-neutral adapters.
 - Helidon runtime modules may depend on application contracts and framework-neutral adapters, but must not
   introduce a Quarkus deployment layer or Spring Boot starter semantics.

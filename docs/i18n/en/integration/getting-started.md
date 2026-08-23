@@ -77,9 +77,9 @@ Keep dependencies in the layer that owns them:
 
 | Module | Starting dependency |
 |--------|---------------------|
-| Domain | `jfoundry-domain-starter` |
-| Application | `jfoundry-application-starter` |
-| Infrastructure | The selected runtime-neutral capability starter, such as `jfoundry-persistence-jpa-starter` |
+| Domain | `jfoundry-domain` plus the explicitly selected `jfoundry-hexagonal` or `jfoundry-onion` architecture API when needed |
+| Application | `jfoundry-application-core` plus only the required capability modules, such as `jfoundry-transaction-core` or `jfoundry-cqrs` |
+| Infrastructure | The selected framework-neutral adapter, such as `jfoundry-persistence-jpa` |
 | Spring Boot assembly | `jfoundry-spring-boot-starter` plus only the required runtime capability starters |
 | Quarkus runtime integration | `jfoundry-quarkus-runtime` |
 | Helidon MP runtime integration | `jfoundry-helidon-runtime` |

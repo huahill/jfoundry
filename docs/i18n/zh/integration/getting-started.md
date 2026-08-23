@@ -61,9 +61,9 @@ Cloud 应用使用与受支持 Cloud 平台线兼容的自有或标准 Maven Par
 
 | 模块 | 起始依赖 |
 |------|----------|
-| Domain | `jfoundry-domain-starter` |
-| Application | `jfoundry-application-starter` |
-| Infrastructure | 所选运行时无关能力启动器，例如 `jfoundry-persistence-mybatis-plus-starter` |
+| Domain | `jfoundry-domain`，并按需显式选择 `jfoundry-hexagonal` 或 `jfoundry-onion` 架构 API |
+| Application | `jfoundry-application-core`，并仅引入所需能力模块，例如 `jfoundry-transaction-core` 或 `jfoundry-cqrs` |
+| Infrastructure | 所选框架无关适配器，例如 `jfoundry-persistence-mybatis-plus` |
 | Spring Boot 装配 | `jfoundry-spring-boot-starter` 加上实际需要的运行时能力启动器 |
 | Quarkus 运行时集成 | `jfoundry-quarkus-runtime` |
 | Helidon MP 运行时集成 | `jfoundry-helidon-runtime` |
