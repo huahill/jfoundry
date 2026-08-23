@@ -28,7 +28,7 @@
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
-        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-boot.version>4.1.1</spring-boot.version>
         <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
         <jobrunr.version>8.8.1</jobrunr.version>
