@@ -9,10 +9,10 @@ create a published parent or inheritance boundary.
   `jfoundry-dependencies` BOM for internal modules and must not be used as a consumer-facing BOM
   parent.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
-  `spring-boot-starter-parent:4.1.1` and imports `jfoundry-spring-boot-dependencies` before
+  the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
   `jfoundry-dependencies`.
-- Cloud applications use their own or a standard Maven parent (for example
-  `spring-boot-starter-parent:4.0.7`) and explicitly import `jfoundry-spring-cloud-dependencies`
+- Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
+  line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
 - `jfoundry-foundation-dependencies` manages low-level, runtime-neutral dependency versions and
   coordinates. It does not manage runtime starters, deployment artifacts, or runtime-specific Native
@@ -53,9 +53,10 @@ platform BOM and official Cloud or integration BOMs that business applications c
 that runtime. It never adds those libraries to an application's runtime classpath by itself; the
 application still declares each selected starter or client explicitly.
 
-`jfoundry-spring-boot-dependencies` manages only Spring Boot 4.1.1. The separate
-`jfoundry-spring-cloud-dependencies` line manages Spring Cloud 2025.1.2 and Spring Cloud Alibaba
-2025.1.0.0; the Cloud application's parent or another explicit BOM manages Spring Boot 4.0.7. This
+`jfoundry-spring-boot-dependencies` manages only the supported Boot-only Spring Boot line. The separate
+`jfoundry-spring-cloud-dependencies` line manages the supported Spring Cloud and Spring Cloud Alibaba
+line; the Cloud application's parent or another explicit BOM manages Spring Boot. Exact platform
+baselines belong in `docs/release/compatibility.md`. This
 allows a Cloud application to add an appropriate Cloud starter without a version while keeping the
 choice of configuration server, service discovery, traffic management, or other platform capability
 explicit in the application.
