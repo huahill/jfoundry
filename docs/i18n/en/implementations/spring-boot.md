@@ -9,7 +9,7 @@ capability is enabled by the base starter.
 
 Use `jfoundry-spring-boot-parent` as the Boot-only application's only Maven parent, then add
 `jfoundry-spring-boot-starter` in the runtime assembly module. The parent inherits
-`spring-boot-starter-parent:4.1.0`, sets Java 25, and imports `jfoundry-spring-boot-dependencies`
+`spring-boot-starter-parent:4.1.1`, sets Java 25, and imports `jfoundry-spring-boot-dependencies`
 before `jfoundry-dependencies`. The base starter intentionally remains small: it provides general
 Boot wiring and a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox,
 Inbox, JobRunr, or Redisson client.
@@ -199,7 +199,7 @@ Kafka, and RabbitMQ:
   -am -Pit verify
 ```
 
-The same module also contains a minimal Spring Boot 4.1.0 AOT consumer. On GraalVM Native Image, the
+The same module also contains a minimal Spring Boot 4.1.1 AOT consumer. On GraalVM Native Image, the
 `native` profile builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready`
 returns `ready`. This is the Native Image support claim for the base Spring Boot starter and Web MVC
 assembly. It does not certify optional persistence, broker, lock, or scheduler adapters; each such
@@ -216,7 +216,7 @@ starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, l
 Native executable, and verifies an insert, reload, update, and reload of a business-defined
 `AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
-claim applies to Spring Boot 4.1.0, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
+claim applies to Spring Boot 4.1.1, MyBatis-Plus 3.5.17, and PostgreSQL only; it does not certify
 JPA, brokers, Redisson, or JobRunr. It also verifies the built-in MyBatis-Plus Outbox and Inbox
 stores through append, paginated claim, idempotent claim, and processed-state operations:
 

@@ -5,7 +5,7 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 ## 装配模型
 
 将 `jfoundry-spring-boot-parent` 作为仅 Boot 应用的唯一 Maven Parent，再在运行时装配模块添加
-`jfoundry-spring-boot-starter`。该 Parent 继承 `spring-boot-starter-parent:4.1.0`，设置 Java 25，
+`jfoundry-spring-boot-starter`。该 Parent 继承 `spring-boot-starter-parent:4.1.1`，设置 Java 25，
 并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-boot-dependencies`。基础启动器保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
 
 需要 Spring Cloud 或 Spring Cloud Alibaba 的应用使用自有或标准 Maven Parent（例如 `spring-boot-starter-parent:4.0.7`），并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-cloud-dependencies`；Cloud BOM 管理 Spring Cloud 2025.1.2 和 Spring Cloud Alibaba 2025.1.0.0，Spring Boot 由 Parent 管理。不得组合两个 Spring 运行时 BOM。Cloud Alibaba 只属于 Cloud 平台线。
@@ -124,7 +124,7 @@ Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 
   -am -Pit verify
 ```
 
-同一模块还包含最小的 Spring Boot 4.1.0 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
+同一模块还包含最小的 Spring Boot 4.1.1 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
 CI 随后启动可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`。这构成基础 Spring Boot 启动器与
 Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消息代理、锁或调度器适配器。各项能力必须先具备
 独立的原生镜像集成验证，才能声明受支持：
@@ -138,7 +138,7 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 `native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
 原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
 业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
-`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于 Spring Boot 4.1.0、
+`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于 Spring Boot 4.1.1、
 MyBatis-Plus 3.5.17 与 PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。此外，它还会
 通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
 
