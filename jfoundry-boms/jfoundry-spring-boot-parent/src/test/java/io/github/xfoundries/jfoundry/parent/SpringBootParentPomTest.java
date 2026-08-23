@@ -20,7 +20,7 @@ class SpringBootParentPomTest {
         Document document = document(Path.of("pom.xml"));
 
         assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
-                new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.1.0"));
+                new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.1.1"));
         assertThat(childText(child(document.getDocumentElement(), "properties"), "jfoundry.version"))
                 .isEqualTo("1.3.0-SNAPSHOT");
         assertThat(importedBoms(document)).containsExactly(

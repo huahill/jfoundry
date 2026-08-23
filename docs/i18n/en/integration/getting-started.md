@@ -12,7 +12,7 @@ import both runtime BOMs.
 
 | Line | Parent | Runtime BOM | Platform baseline |
 |------|--------|-------------|-------------------|
-| Boot-only | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | Spring Boot 4.1.0 |
+| Boot-only | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | Spring Boot 4.1.1 |
 | Cloud | Your standard/application parent (for example `spring-boot-starter-parent:4.0.7`) | `jfoundry-spring-cloud-dependencies` | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
 
 For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven parent:
@@ -25,7 +25,7 @@ For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven
 </parent>
 ```
 
-It inherits `spring-boot-starter-parent:4.1.0`, sets the Java 25 baseline, and imports the Boot-only
+It inherits `spring-boot-starter-parent:4.1.1`, sets the Java 25 baseline, and imports the Boot-only
 runtime BOM before `jfoundry-dependencies`. Declare Spring Boot and JFoundry dependencies without a
 version, but continue to select each JFoundry capability starter explicitly. A Cloud application keeps
 its own or a standard Maven parent (for example `spring-boot-starter-parent:4.0.7`) and explicitly
