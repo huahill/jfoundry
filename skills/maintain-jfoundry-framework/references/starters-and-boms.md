@@ -147,12 +147,11 @@ Check:
 
 ## Release Compatibility
 
-For the first release line:
+For the current release line:
 
 - Java compile target: 25
 - Runtime Java baseline: 25
-- Spring Boot: 4.0.x
-- Spring Framework: 7.0.x
-- Maven release tool: 3.9.x
+- Exact runtime platform and release-tool baselines: `docs/release/compatibility.md`
 
-Do not silently move the first release line to Spring Boot 4, Spring Framework 7, or Jakarta EE 11. Treat that as a separate compatibility line unless the project explicitly changes release policy.
+Do not silently move a runtime or Jakarta EE major line. Treat that as a separate compatibility line
+unless the project explicitly changes release policy.

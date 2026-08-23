@@ -1,8 +1,10 @@
 # Helidon MP Runtime Integration
 
-`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with Helidon MP 4.5.3. It is a
+`jfoundry-helidon` composes JFoundry's runtime-neutral contracts with the supported Helidon MP line. It is a
 portable CDI/Jakarta runtime integration, not a Spring Boot starter and not a Quarkus extension.
 Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and application code.
+
+See the [compatibility matrix](../../../release/compatibility.md) for the exact platform version.
 
 ## Dependency Composition
 
@@ -137,8 +139,8 @@ initializes the validation provider, EL implementation, and ClassMate metadata a
 registers its request DTO fields for reflection. Downstream Native applications must provide
 equivalent reflection metadata for their own JSON and validated request types.
 
-Helidon MP 4.5.3 documents Narayana JTA Native Image support as experimental. With GraalVM Community
-25.0.2 on macOS ARM64, the JPA-enabled consumer fails during image generation because
+The supported Helidon MP line documents Narayana JTA Native Image support as experimental. In the
+tested GraalVM Community environment on macOS ARM64, the JPA-enabled consumer fails during image generation because
 `org.xml.sax.helpers.LocatorImpl` reaches the image heap through
 `JpaExtension.processPersistenceXmls`. The Native CDI/Web-only consumer starts and serves Problem
 Details, but executing `TransactionRunner` currently fails because Helidon's CDI transaction-manager
@@ -146,7 +148,8 @@ delegate is not initialized in the generated image. JVM JTA remains supported. T
 environment, JVM control result, and Native failure trace are recorded on
 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 JFoundry does not duplicate or replace Narayana to hide this upstream limitation, so Native JTA and
-JPA are not acceptance claims until Helidon provides working supported paths.
+JPA are not acceptance claims until Helidon provides working supported paths. Exact tested versions
+are recorded in the [compatibility matrix](../../../release/compatibility.md).
 
 ### CI-Aligned Local Verification
 

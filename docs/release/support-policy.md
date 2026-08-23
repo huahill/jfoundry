@@ -23,8 +23,8 @@ demo variants must upgrade from a published `1.0.0` artifact.
 The supported platform versions and Native Image evidence are maintained in the
 [Compatibility Matrix](compatibility.md). The supported scope is deliberately bounded:
 
-- Spring Boot 4.0.x, Quarkus 3.38.3, and Helidon MP 4.5.3 are supported only through their documented
-  JFoundry assemblies.
+- The supported Spring Boot, Quarkus, and Helidon MP lines are supported only through their
+  documented JFoundry assemblies.
 - Spring Native Image is validated for the base runtime plus MyBatis-Plus/PostgreSQL,
   Redisson/Redis, and JobRunr/PostgreSQL paths.
 - Helidon Native supports the documented CDI/Web consumer path. Helidon Native JTA and JPA are not

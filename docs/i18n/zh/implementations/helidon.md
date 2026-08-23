@@ -1,8 +1,10 @@
 # Helidon MP 运行时集成
 
-`jfoundry-helidon` 将 JFoundry 的运行时无关契约与 Helidon MP 4.5.3 组合。它是可移植的
+`jfoundry-helidon` 将 JFoundry 的运行时无关契约与受支持的 Helidon MP 平台线组合。它是可移植的
 CDI/Jakarta 运行时集成，不是 Spring Boot 启动器，也不是 Quarkus 扩展。Helidon、CDI、JTA、
 JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
+
+精确平台版本见[兼容矩阵](../../../release/compatibility.md)。
 
 ## 依赖组合
 
@@ -121,14 +123,14 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
 Helidon 会把 CDI 元数据写入镜像，该配置档会在构建期初始化校验 provider、EL 实现和 ClassMate 元数据，并为
 使用方自己的请求 DTO 字段注册反射。下游原生应用必须为自己的 JSON 请求类型和被校验请求类型提供对应的反射元数据。
 
-Helidon MP 4.5.3 将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 上使用 GraalVM Community
-25.0.2 时，启用 JPA 的使用方会在镜像生成阶段失败：
+受支持的 Helidon MP 平台线将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 的已测试
+GraalVM Community 环境中，启用 JPA 的使用方会在镜像生成阶段失败：
 `JpaExtension.processPersistenceXmls` 会使 `org.xml.sax.helpers.LocatorImpl` 进入 image heap。
 仅包含原生 CDI/Web 的使用方可以启动并提供 Problem Details，但执行 `TransactionRunner` 时仍会因
 Helidon CDI 事务管理器委托未在镜像中初始化而失败。JVM JTA 仍受支持。可复现环境、JVM
 对照结果与原生失败栈已记录在 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
 JFoundry 不会复制或替换 Narayana 来掩盖该上游限制，因此在 Helidon 提供可用的受支持路径前，原生 JTA 与
-JPA 都不能作为验收结论。
+JPA 都不能作为验收结论。精确测试版本记录在[兼容矩阵](../../../release/compatibility.md)。
 
 ### 本地 CI 对齐验证
 
