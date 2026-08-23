@@ -6,6 +6,19 @@ updates:
       interval: daily
     open-pull-requests-limit: 10
     groups:
+      jfoundry-spring-boot-platform:
+        patterns:
+          - org.springframework.boot:spring-boot-dependencies
+          - org.springframework.boot:spring-boot-starter-parent
+          - org.springframework.boot:spring-boot-maven-plugin
+        update-types: [patch, minor]
+      jfoundry-quarkus-platform:
+        patterns:
+          - io.quarkus.platform:quarkus-bom
+          - io.quarkus:quarkus-extension-maven-plugin
+          - io.quarkus:quarkus-extension-processor
+          - io.quarkus:quarkus-maven-plugin
+        update-types: [patch, minor]
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]

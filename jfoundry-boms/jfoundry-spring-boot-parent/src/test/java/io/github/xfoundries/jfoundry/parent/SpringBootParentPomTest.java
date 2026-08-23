@@ -17,16 +17,20 @@ class SpringBootParentPomTest {
 
     @Test
     void inheritsTheSupportedSpringBootParentAndImportsTheBootRuntimeLine() throws Exception {
-        Document document = document(Path.of("pom.xml"));
+        Document parent = document(Path.of("pom.xml"));
+        Document bom = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
+        Coordinate springBootParent = coordinate(child(parent.getDocumentElement(), "parent"));
+        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "spring-boot.version");
 
-        assertThat(coordinate(child(document.getDocumentElement(), "parent"))).isEqualTo(
-                new Coordinate("org.springframework.boot", "spring-boot-starter-parent", "4.1.1"));
-        assertThat(childText(child(document.getDocumentElement(), "properties"), "jfoundry.version"))
+        assertThat(springBootParent).isEqualTo(
+                new Coordinate("org.springframework.boot", "spring-boot-starter-parent", bomVersion));
+        assertThat(bomVersion).isEqualTo("4.1.1");
+        assertThat(childText(child(parent.getDocumentElement(), "properties"), "jfoundry.version"))
                 .isEqualTo("1.3.0-SNAPSHOT");
-        assertThat(importedBoms(document)).containsExactly(
+        assertThat(importedBoms(parent)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
-        assertThat(childText(child(document.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+        assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
     }
 
     @Test

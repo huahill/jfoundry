@@ -45,6 +45,19 @@ updates:
     schedule:
       interval: weekly
     groups:
+      jfoundry-spring-boot-platform:
+        patterns:
+          - org.springframework.boot:spring-boot-dependencies
+          - org.springframework.boot:spring-boot-starter-parent
+          - org.springframework.boot:spring-boot-maven-plugin
+        update-types: [patch, minor]
+      jfoundry-quarkus-platform:
+        patterns:
+          - io.quarkus.platform:quarkus-bom
+          - io.quarkus:quarkus-extension-maven-plugin
+          - io.quarkus:quarkus-extension-processor
+          - io.quarkus:quarkus-maven-plugin
+        update-types: [patch, minor]
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
@@ -331,6 +344,35 @@ jobs:
 YAML
 assert_accepts "${temp_dir}"
 
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+require "yaml"
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+groups = config.fetch("updates").first.fetch("groups")
+config.fetch("updates").first["groups"] = {
+  "jfoundry-maven-patches" => groups.fetch("jfoundry-maven-patches"),
+  "jfoundry-spring-boot-platform" => groups.fetch("jfoundry-spring-boot-platform"),
+  "jfoundry-quarkus-platform" => groups.fetch("jfoundry-quarkus-platform")
+}
+File.write(path, YAML.dump(config))
+RUBY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches"
+
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+require "yaml"
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+patterns = config.fetch("updates").first.fetch("groups").fetch("jfoundry-quarkus-platform").fetch("patterns")
+patterns.delete("io.quarkus.platform:quarkus-bom")
+File.write(path, YAML.dump(config))
+RUBY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates"
+
+write_compliant_dependabot
 ruby - "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'RUBY'
 path = ARGV.fetch(0)
 content = File.read(path)
