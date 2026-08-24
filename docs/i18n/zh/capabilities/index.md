@@ -9,7 +9,7 @@
 | 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [接入指南](../integration/getting-started.md) |
 | 应用服务 | 用例需要清晰的应用边界；仅在需要时添加 CQRS、事务或领域事件模块。 | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [接入指南](../integration/getting-started.md) |
 | 可执行架构规则 | 项目需要可复用的 ArchUnit 检查来约束 Hexagonal 或 Onion 边界。 | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | [ArchUnit 架构规则](../framework/archunit-rules.md) |
-| 应用事务 | 用例需要运行时事务边界。 | `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` | `jfoundry-helidon-runtime` | [应用事务](application-transactions.md) |
+| 应用事务 | 用例需要运行时事务边界。 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-quarkus-runtime` | `jfoundry-helidon-runtime` | [应用事务](application-transactions.md) |
 | 聚合持久化 | 聚合需要 JPA 或 MyBatis-Plus 持久化，同时不把 Repository 变为通用查询接口。 | `jfoundry-persistence-jpa-spring-boot-starter` 或 `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon-runtime` | [聚合持久化](aggregate-persistence.md) |
 | Web | HTTP API 需要 RFC 9457 问题响应，或者 Spring 应用需要显式选择的出站 `RestClient` 支持。 | Problem Details：`jfoundry-webmvc-spring-boot-starter`；HTTP 客户端：`jfoundry-web-spring-boot-starter` | Problem Details：`jfoundry-web-quarkus-runtime` | Problem Details：`jfoundry-web-helidon-runtime` | [Web](web.md) |
 | 直接消息投递 | 应用需要发布到消息代理，但不需要可靠的 Outbox 记录。 | `jfoundry-messaging-spring-boot-starter` 加一个消息代理启动器 | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` | 暂未提供 | [消息传输](message-delivery.md) |

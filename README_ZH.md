@@ -35,7 +35,12 @@
 ## AI 辅助架构工作流
 
 [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) 是
-JFoundry 在设计期的配套插件。它帮助 AI 编程代理从需求出发完成领域建模和架构决策，仅当项目选择 JFoundry 后才进入框架落地。它需要独立安装，不是运行时依赖，也不要求采用某种固定的组合架构。
+JFoundry 在设计期的配套插件。用户无需预先选择架构风格：`$domain-architecture-workflow` 会从需求出发完成领域建模，
+再依据已确认的业务需求、外部边界和项目约束判断是否需要完整架构风格；需要时，由工作流在
+[Hexagonal 与 Onion](docs/i18n/zh/framework/architecture-styles.md) 之间作出选择，随后才将决策映射为 JFoundry 模块和
+ArchUnit 规则。CQRS 仍是按需使用的局部模式。
+
+仅当项目选择 JFoundry 后，插件才进入框架落地。它需要独立安装，不是运行时依赖。
 
 与 JFoundry 配合使用的验证证据和边界见[采用就绪度与已验证范围](docs/i18n/zh/integration/adoption-readiness.md)。
 

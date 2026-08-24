@@ -36,9 +36,14 @@ Dependencies point inward. This keeps runtime integrations outside the core rath
 
 [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) is the
 Domain Architecture Plugin that complements JFoundry at design time. It guides an AI coding agent
-from requirements through domain modeling and architecture decisions, then enters JFoundry only
-when JFoundry is selected. It is installed separately and is not a runtime dependency or a
-mandatory combined architecture.
+from requirements through domain modeling and architecture decisions. Users do not choose an
+architecture style first: `$domain-architecture-workflow` uses confirmed business needs, external
+boundaries, and project constraints to decide whether a full style is justified and, when it is,
+whether [Hexagonal or Onion](docs/i18n/en/framework/architecture-styles.md) fits. Only then does it
+map the decision to JFoundry modules and ArchUnit rules. CQRS remains an optional, targeted pattern.
+
+The plugin enters JFoundry only after the framework is selected. It is installed separately and is
+not a runtime dependency.
 
 See [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md) for
 the evidence and boundaries of using the plugin together with JFoundry.

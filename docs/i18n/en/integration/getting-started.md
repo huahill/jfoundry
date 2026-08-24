@@ -1,71 +1,51 @@
 # Getting Started
 
-Start with the smallest architecture that serves the current business use case. jfoundry is most
-useful when a system needs explicit aggregates, invariants, domain events, architecture boundaries,
-or reliable external integration. A short CRUD prototype without those needs may be simpler with a
-plain runtime framework and ORM.
+JFoundry's core modules do not depend on Spring, Quarkus, or Helidon. Start from business needs and
+complete the domain and architecture decisions first, then select core capabilities and a runtime
+integration at the application's outer edge.
 
-## Choose A Parent, BOM, And Module Boundary
+## 1. Choose An Onboarding Path
 
-Choose one Spring platform line. The lines are intentionally incompatible and an application must not
-import both runtime BOMs.
+Architecture style determines code boundaries, dependency direction, and the rules that architecture
+tests enforce. It is a business-project decision, not a consequence of choosing Spring, Quarkus, or
+Helidon.
 
-| Line | Parent | Runtime BOM | Platform baseline |
-|------|--------|-------------|-------------------|
-| Boot-only | `jfoundry-spring-boot-parent` | `jfoundry-spring-boot-dependencies` | JFoundry-managed Boot-only line |
-| Cloud | Your standard/application parent compatible with the supported Cloud line | `jfoundry-spring-cloud-dependencies` | JFoundry-managed Cloud line |
+For AI-assisted development, use
+[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) and start
+with `$domain-architecture-workflow`. This is the recommended path for non-trivial business projects.
+The workflow starts from requirements and project evidence, performs domain modeling, decides
+whether a full architecture style is justified, selects Hexagonal or Onion when appropriate, and
+evaluates CQRS separately. It then produces traceable JFoundry landing guidance. Do not select the
+architecture style before invoking the workflow.
 
-See the [compatibility matrix](../../../release/compatibility.md) for the exact platform versions in
-each line.
+For manual onboarding, make the architecture decision directly:
 
-For a Boot-only application, use `jfoundry-spring-boot-parent` as the only Maven parent:
+| Choice | Use when | JFoundry entry point |
+|---|---|---|
+| Hexagonal | Inputs, outputs, ports, and adapters need explicit direction. | `jfoundry-hexagonal` and `JFoundryRules.hexagonalStrict()` |
+| Onion Simple | The main goal is inward dependencies and a protected domain core. | `jfoundry-onion` and `JFoundryRules.onionSimple()` |
+| Onion Classical | The team deliberately needs finer domain model, domain service, and application service rings. | `jfoundry-onion` and `JFoundryRules.onionClassical()` |
+| No full style yet | The scope is simple CRUD or a short-lived prototype with few business invariants. | Keep only the boundaries the project needs. |
 
-```xml
-<parent>
-    <groupId>io.github.xfoundries</groupId>
-    <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.3</version>
-</parent>
-```
+After the AI-assisted or manual decision, protect the selected style with
+`jfoundry-architecture-test`. Do not mix Hexagonal and Onion in the same analysis scope. CQRS is an
+optional pattern for genuine command/query asymmetry, not a third primary style. See
+[Architecture Styles](../framework/architecture-styles.md) for the complete manual decision guide.
 
-It inherits the supported Spring Boot parent, sets the Java 25 baseline, and imports the Boot-only
-runtime BOM before `jfoundry-dependencies`. Declare Spring Boot and JFoundry dependencies without a
-version, but continue to select each JFoundry capability starter explicitly. A Cloud application keeps
-its own or a standard Maven parent compatible with the supported Cloud line and explicitly imports
-the Cloud BOM and `jfoundry-dependencies`.
+## 2. Configure The Core BOM And Architecture Dependencies
 
-An application that must keep a different Maven parent imports `jfoundry-dependencies` for JFoundry
-module versions. An application that uses a supported runtime additionally imports exactly one
-matching runtime BOM: `jfoundry-spring-boot-dependencies`,
-`jfoundry-spring-cloud-dependencies`, `jfoundry-quarkus-dependencies`, or
-`jfoundry-helidon-dependencies`. Runtime BOMs manage only their platform ecosystems; they do not
-replace the core JFoundry BOM. Import the runtime BOM before `jfoundry-dependencies` so the runtime
-platform's managed constraints take precedence. Select versions from the intended release line; this
-project currently uses the following development version.
-
-The Boot-only BOM manages only Spring Boot. The Cloud BOM manages Spring Cloud and Spring Cloud
-Alibaba as one tested platform line; the application's parent or another explicit Boot BOM manages
-Spring Boot. This lets a Cloud application add a selected Cloud starter without a version; it does
-not add any Cloud starter automatically or imply that JFoundry provides an adapter for that starter.
-
-The following XML is the alternative for a Boot-only application that cannot use the JFoundry parent.
-For the Cloud line, replace the first import with `jfoundry-spring-cloud-dependencies`. For Quarkus
-or Helidon, use the matching runtime BOM and retain the second core BOM:
+Every external application must have `jfoundry-dependencies` in its dependency management. It is the
+public JFoundry BOM for core modules, architecture modules, and framework-neutral adapters. The
+supported `jfoundry-spring-boot-parent` imports it for applications that do not use Spring Cloud; other applications
+must import it explicitly. It belongs in `<dependencyManagement>` and is not a runtime dependency:
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-spring-boot-dependencies</artifactId>
-            <version>1.0.3</version>
-            <type>pom</type>
-            <scope>import</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
-            <version>1.0.3</version>
+            <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -73,74 +53,63 @@ or Helidon, use the matching runtime BOM and retain the second core BOM:
 </dependencyManagement>
 ```
 
-Keep dependencies in the layer that owns them:
+Then add dependencies by responsibility:
 
-| Module | Starting dependency |
-|--------|---------------------|
-| Domain | `jfoundry-domain` plus the explicitly selected `jfoundry-hexagonal` or `jfoundry-onion` architecture API when needed |
-| Application | `jfoundry-application-core` plus only the required capability modules, such as `jfoundry-transaction-core` or `jfoundry-cqrs` |
-| Infrastructure | The selected framework-neutral adapter, such as `jfoundry-persistence-jpa` |
-| Spring Boot assembly | `jfoundry-spring-boot-starter` plus only the required runtime capability starters |
-| Quarkus runtime integration | `jfoundry-quarkus-runtime` |
-| Helidon MP runtime integration | `jfoundry-helidon-runtime` |
+| Responsibility | Starting dependency |
+|---|---|
+| Domain model | `jfoundry-domain` |
+| Application services | `jfoundry-application-core` |
+| Primary architecture style | Choose one: `jfoundry-hexagonal` or `jfoundry-onion` |
+| Architecture verification | `jfoundry-architecture-test` in test scope |
+| Technical implementation | Select framework-neutral JPA, MyBatis-Plus, messaging, or other adapters as needed |
 
-Choose Hexagonal or Onion from domain and project constraints; jfoundry does not select an
-architecture style for a business project. Add ArchUnit tests before implementation grows around
-accidental dependencies.
-
-## Assemble A Minimal Spring Boot Runtime
-
-For a Spring Boot application using JPA business persistence, the runtime module starts with the
-base and JPA runtime starters:
+For example, a Hexagonal project directly depends on its domain module and architecture facade, then
+uses the architecture rules in test scope. Replace `jfoundry-hexagonal` with `jfoundry-onion` for an
+Onion project:
 
 ```xml
 <dependencies>
     <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring-boot-starter</artifactId>
+        <artifactId>jfoundry-domain</artifactId>
     </dependency>
     <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-persistence-jpa-spring-boot-starter</artifactId>
+        <artifactId>jfoundry-hexagonal</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-architecture-test</artifactId>
+        <scope>test</scope>
     </dependency>
 </dependencies>
 ```
 
-Configure the application's datasource and keep its persistence adapter in the infrastructure
-module. The JPA runtime starter does not add Outbox or Inbox stores. For MyBatis-Plus persistence,
-replace the JPA runtime starter with `jfoundry-persistence-mybatis-plus-spring-boot-starter`; it
-also leaves Outbox and Inbox stores explicit. See [JPA](../implementations/jpa.md),
-[MyBatis-Plus](../implementations/mybatis-plus.md), and
-[Spring Boot Runtime Assembly](../implementations/spring-boot.md) for the exact implementation
-boundaries.
+Domain and application modules must not depend on a concrete runtime. Persistence, messaging,
+Outbox, Inbox, and other capabilities also remain explicit choices rather than implicit base
+dependencies.
 
-## Add Capabilities Only When Needed
+## 3. Select A Runtime
 
-- Start with the [Capability Catalog](../capabilities/index.md). It maps a business need to the
-  supported runtime entry point and links to the contract and composition guidance.
-- Add [Application Transactions](../capabilities/application-transactions.md) or
-  [Distributed Locks](../capabilities/distributed-locks.md) when the use case needs them.
-- Add [Message Delivery](../capabilities/message-delivery.md) when the application needs a direct
-  broker producer; add [Reliable Messaging: Outbox And Inbox](../capabilities/reliable-messaging.md)
-  only when it also needs durable publication or consumer idempotency. Add Web MVC and scheduling
-  starters only for their corresponding capability.
+Each runtime has its own BOM and base entry point; do not mix runtime BOMs. When an application keeps
+its own Maven parent, import the matching runtime BOM before `jfoundry-dependencies`; the supported
+JFoundry Boot parent manages both for Spring Boot applications that do not use Spring Cloud. See the runtime guide for its Parent,
+BOM, and dependency composition.
 
-The [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md)
-details individual Spring starters, properties, and registration conditions.
+| Runtime | Base entry point | Setup guide |
+|---|---|---|
+| Spring Boot | Select the required Spring Boot capability starter; the shared baseline is usually transitive | [Spring Boot Runtime Assembly](../implementations/spring-boot.md) |
+| Quarkus | `jfoundry-quarkus-runtime` | [Quarkus Runtime Integration](../implementations/quarkus.md) |
+| Helidon MP | `jfoundry-helidon-runtime` | [Helidon MP Runtime Integration](../implementations/helidon.md) |
 
-For runtime-specific dependency setup, composition, and verification, see
-[Spring Boot Runtime Assembly](../implementations/spring-boot.md),
-[Quarkus Runtime Integration](../implementations/quarkus.md), and
-[Helidon MP Runtime Integration](../implementations/helidon.md).
+Runtime entry points assemble capabilities; they do not belong in domain or application code.
 
-## Reading Path
+## 4. Add Capabilities As Needed
 
-1. Define boundaries with [Architecture Styles](../framework/architecture-styles.md) and
-   [ArchUnit Architecture Rules](../framework/archunit-rules.md).
-2. Model aggregates and choose repository/read-side contracts with
-   [Repository and Read-side Contracts](../modeling/repository-vs-read-contracts.md).
-3. Apply [Aggregate Persistence](../capabilities/aggregate-persistence.md) through the selected
-   implementation.
+Use the [Capability Catalog](../capabilities/index.md) to select aggregate persistence, transactions,
+Web, messaging, Outbox/Inbox, distributed locks, or observability. Each capability page lists the
+matching entry points and current support scope for every runtime.
 
-See [Adoption Readiness and Validated Scope](adoption-readiness.md) before relying on a capability
-in production.
+Before implementation, continue with
+[Repository and Read-side Contracts](../modeling/repository-vs-read-contracts.md). Before production
+adoption, review [Adoption Readiness and Validated Scope](adoption-readiness.md).
