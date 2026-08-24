@@ -126,6 +126,26 @@ reasons.
 
 ![onion-architecture.png](../../assets/onion-architecture.png)
 
+### How To Choose
+
+| Perspective | Better fit | Simple example |
+|---|---|---|
+| Hexagonal | External inputs and outputs need explicit driver, port, and adapter roles. | An order system receives REST commands, persists aggregates, publishes Kafka events, and calls a payment SDK. |
+| Hexagonal | An existing controller-service-mapper design is being separated into primary ports, secondary ports, and adapters. | A controller calls a primary port, the application calls a secondary port, and a MyBatis adapter implements it. |
+| Hexagonal | Reliable event externalization treats Outbox storage, `MessageSender`, and broker delivery as external capabilities. | Creating an order records an Outbox message that a Kafka sender later delivers. |
+| Onion | The primary concern is inward dependencies and domain-core protection rather than explicit port direction. | A pricing or approval rules library centers on aggregates, value objects, and domain services with few external integrations. |
+| Onion | An existing project already separates domain, application, and infrastructure with inward dependencies. | Keep the Onion package structure and add JFoundry annotations and ArchUnit rules. |
+| Onion Classical | The team deliberately uses distinct domain model, domain service, application service, and infrastructure rings. | A mature domain platform already has stable Onion Classical terminology and boundaries. |
+| No full style yet | The scope is simple CRUD, a short-lived prototype, or has few business invariants and external ports. | An administration tool only maintains a small number of forms and lists. |
+
+Quick decision:
+
+```text
+Need explicit external input/output direction -> Hexagonal
+Need inward dependencies and domain-centered ring language -> Onion
+Simple CRUD or short-lived prototype -> Do not introduce a full style yet
+```
+
 ## Rule Entry Points
 
 ```java

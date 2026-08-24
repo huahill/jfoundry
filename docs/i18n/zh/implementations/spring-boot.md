@@ -2,30 +2,62 @@
 
 Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通过 Spring Boot 启动器和条件化自动配置组装已选择的能力，不会让 Spring API 进入领域或应用模型；基础启动器也不代表自动启用全部能力。
 
-## 装配模型
+## 公共前置依赖
 
-将 `jfoundry-spring-boot-parent` 作为仅 Boot 应用的唯一 Maven Parent，再在运行时装配模块添加
-`jfoundry-spring-boot-starter`。该 Parent 继承受支持的 Spring Boot Parent，设置 Java 25，
-并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-boot-dependencies`。基础启动器保持轻量：它提供通用 Boot 装配和基于 Spring 的 `TransactionRunner`，但不引入持久化提供方、消息代理、Outbox、Inbox、JobRunr 或 Redisson 客户端。
+所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理，它管理 JFoundry 核心、架构和框架无关适配器的版本。
+使用 JFoundry Boot Parent 时由 Parent 自动导入，否则应用需要显式导入。它属于 `<dependencyManagement>`，不是运行时
+依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。
 
-需要 Spring Cloud 或 Spring Cloud Alibaba 的应用使用与受支持 Cloud 平台线兼容的自有或标准 Maven Parent，并在 `jfoundry-dependencies` 前导入 `jfoundry-spring-cloud-dependencies`；Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba，Spring Boot 由 Parent 管理。不得组合两个 Spring 运行时 BOM。Cloud Alibaba 只属于 Cloud 平台线。
+## Spring Boot
+
+仅使用 Spring Boot 的应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent。该 Parent 继承受支持的
+Spring Boot Parent，设置 Java 25，并已经按正确顺序导入 `jfoundry-spring-boot-dependencies` 与
+`jfoundry-dependencies`；使用该 Parent 时不需要再次手动导入这两个 BOM。
 
 ```xml
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.3</version>
+    <version>${jfoundry.version}</version>
 </parent>
-
-<dependencies>
-    <dependency>
-        <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring-boot-starter</artifactId>
-    </dependency>
-</dependencies>
 ```
 
-必须保留不同 Parent 的应用，可按[接入指南](../integration/getting-started.md)直接导入两份 JFoundry BOM；此时应用自行管理 Java 与 Spring Boot Parent 配置。
+`jfoundry-spring-boot-starter` 只是所有 Spring Boot 能力启动器共用的最小基础层，不代表事务、持久化、消息或
+Outbox 等业务能力。通常直接选择所需的能力启动器；它会按需传递该基础层，不要把基础 starter 当作事务启动器。
+
+## Spring Cloud
+
+需要 Spring Cloud 或 Spring Cloud Alibaba 的应用不能使用上面的 JFoundry Boot Parent。应用应使用与受支持
+Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-spring-cloud-dependencies`，再导入
+`jfoundry-dependencies`：
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 Parent 或另一个显式 Boot BOM 管理。
+不得同时导入 `jfoundry-spring-boot-dependencies` 与 `jfoundry-spring-cloud-dependencies`。Cloud BOM 只管理平台生态，
+不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
+
+保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)先导入
+`jfoundry-spring-boot-dependencies`，再导入 `jfoundry-dependencies`，并自行管理 Java 与 Spring Boot 版本。
 
 其它能力都需要显式选择，从而使应用的数据源、投递、调度和分布式锁决策保持清晰。
 
@@ -33,7 +65,7 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 | 需求 | 添加 | 边界 |
 |---|---|---|
-| 本地应用事务 | `jfoundry-spring-boot-starter` | 提供 Spring `TransactionRunner`，应用可替换。 |
+| 本地应用事务 | `jfoundry-transaction-spring-boot-starter` | 提供 Spring `TransactionRunner` 集成；事务管理器由 Spring Boot 或应用提供。 |
 | 本地领域事件监听 | `jfoundry-domain-event-spring-boot-starter` | 通过 Spring 应用事件发布领域事件；不是 Outbox 或消息代理。 |
 | MyBatis-Plus 聚合持久化 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 仅业务聚合持久化，不含 Outbox/Inbox 存储。 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
@@ -124,7 +156,7 @@ Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 
   -am -Pit verify
 ```
 
-同一模块还包含面向受支持仅 Boot 平台线的最小 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
+同一模块还包含面向受支持 Spring Boot 版本的最小 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
 CI 随后启动可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`。这构成基础 Spring Boot 启动器与
 Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消息代理、锁或调度器适配器。各项能力必须先具备
 独立的原生镜像集成验证，才能声明受支持：
@@ -138,8 +170,8 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 `native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
 原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
 业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
-`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的仅 Boot 与 MyBatis-Plus
-平台线以及 PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。精确测试版本记录在
+`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
+PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。精确测试版本记录在
 [兼容矩阵](../../../release/compatibility.md)。此外，它还会
 通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
 

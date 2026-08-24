@@ -6,7 +6,7 @@ infrastructure 模块之外。
 
 ## 依赖配置
 
-先导入核心 JFoundry BOM，再导入同一发布线的 Quarkus BOM，最后添加运行时扩展。
+依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加运行时扩展。
 `jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
@@ -48,7 +48,7 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 
 | Spring Boot 能力 | Quarkus 依赖组合 |
 |---|---|
-| `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` |
+| Spring Boot 运行时基线 | `jfoundry-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-outbox-jpa-quarkus-runtime`；需要派发时再加 `jfoundry-outbox-quarkus-runtime` |

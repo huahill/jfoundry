@@ -5,39 +5,71 @@ Boot starters and conditional auto-configuration to assemble selected capabiliti
 make Spring APIs part of the domain or application model, and it does not imply that every
 capability is enabled by the base starter.
 
-## Assembly Model
+## Common Prerequisite
 
-Use `jfoundry-spring-boot-parent` as the Boot-only application's only Maven parent, then add
-`jfoundry-spring-boot-starter` in the runtime assembly module. The parent inherits
-the supported Spring Boot parent, sets Java 25, and imports `jfoundry-spring-boot-dependencies`
-before `jfoundry-dependencies`. The base starter intentionally remains small: it provides general
-Boot wiring and a Spring-backed `TransactionRunner`, but no persistence provider, broker, Outbox,
-Inbox, JobRunr, or Redisson client.
+Every external application must have `jfoundry-dependencies` in dependency management. It manages
+versions for JFoundry core, architecture, and framework-neutral adapter modules. The JFoundry Boot
+parent imports it automatically; other applications must import it explicitly. It belongs in
+`<dependencyManagement>` and is not a runtime dependency. A Spring runtime BOM manages Spring
+platform versions only; it does not replace the core JFoundry BOM.
 
-An application that needs Spring Cloud or Spring Cloud Alibaba keeps its own or a standard Maven
-parent compatible with the supported Cloud line and imports
-`jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`; the Cloud BOM manages Spring
-Cloud and Spring Cloud Alibaba, while the parent manages Spring Boot. Do not
-combine the two Spring runtime BOMs. Cloud Alibaba belongs only to the Cloud line.
+## Spring Boot
+
+A Spring Boot application that does not use Spring Cloud should use `jfoundry-spring-boot-parent` as
+its only Maven parent. The parent
+inherits the supported Spring Boot parent, sets Java 25, and already imports
+`jfoundry-spring-boot-dependencies` followed by `jfoundry-dependencies`; applications using this
+parent must not import those two BOMs again.
 
 ```xml
 <parent>
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.0.3</version>
+    <version>${jfoundry.version}</version>
 </parent>
-
-<dependencies>
-    <dependency>
-        <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-spring-boot-starter</artifactId>
-    </dependency>
-</dependencies>
 ```
 
-An application that must retain a different parent can import the two JFoundry BOMs directly as
-shown in [Getting Started](../integration/getting-started.md). It must then manage its Java and
-Spring Boot parent configuration itself.
+`jfoundry-spring-boot-starter` is only the minimal shared baseline for Spring Boot capability starters.
+It does not provide transactions, persistence, messaging, or Outbox. Usually select the capability
+starter the application needs; that starter brings the shared baseline when required. Do not treat the
+base starter as the transaction starter.
+
+## Spring Cloud
+
+An application that needs Spring Cloud or Spring Cloud Alibaba must not use the JFoundry Boot parent.
+Use an application or standard Maven parent compatible with the supported Spring Cloud versions, then import
+`jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`:
+
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-dependencies</artifactId>
+            <version>${jfoundry.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+```
+
+The Cloud BOM manages Spring Cloud and Spring Cloud Alibaba; Spring Boot remains managed by the
+application parent or another explicit Boot BOM. Do not import both
+`jfoundry-spring-boot-dependencies` and `jfoundry-spring-cloud-dependencies`. The Cloud BOM manages
+the platform ecosystem only; it does not add Cloud starters or imply that JFoundry provides an
+adapter for every Cloud component.
+
+An application retaining another parent while using Spring Boot without Spring Cloud should import
+`jfoundry-spring-boot-dependencies` before `jfoundry-dependencies` as described in
+[Getting Started](../integration/getting-started.md), then manage Java and Spring Boot versions itself.
 
 Add every other capability explicitly. This keeps a Spring Boot application honest about its
 database, delivery, scheduling, and distributed-lock choices.
@@ -46,7 +78,7 @@ database, delivery, scheduling, and distributed-lock choices.
 
 | Need | Add | Boundary |
 |---|---|---|
-| Local application transactions | `jfoundry-spring-boot-starter` | Supplies the Spring `TransactionRunner`; applications may replace it. |
+| Local application transactions | `jfoundry-transaction-spring-boot-starter` | Supplies Spring `TransactionRunner` integration; Spring Boot or the application provides the transaction manager. |
 | Local domain-event listeners | `jfoundry-domain-event-spring-boot-starter` | Publishes domain events through Spring application events; it is not an Outbox or broker. |
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
@@ -199,7 +231,7 @@ Kafka, and RabbitMQ:
   -am -Pit verify
 ```
 
-The same module also contains a minimal AOT consumer for the supported Boot-only line. On GraalVM Native Image, the
+The same module also contains a minimal AOT consumer for the supported Spring Boot version. On GraalVM Native Image, the
 `native` profile builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready`
 returns `ready`. This is the Native Image support claim for the base Spring Boot starter and Web MVC
 assembly. It does not certify optional persistence, broker, lock, or scheduler adapters; each such
@@ -216,7 +248,7 @@ starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, l
 Native executable, and verifies an insert, reload, update, and reload of a business-defined
 `AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
-claim applies to the supported Boot-only and MyBatis-Plus lines with PostgreSQL; it does not certify
+claim applies to the supported Spring Boot and MyBatis-Plus versions with PostgreSQL; it does not certify
 JPA, brokers, Redisson, or JobRunr. Exact tested versions are recorded in the
 [compatibility matrix](../../../release/compatibility.md). It also verifies the built-in MyBatis-Plus Outbox and Inbox
 stores through append, paginated claim, idempotent claim, and processed-state operations:

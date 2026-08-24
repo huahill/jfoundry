@@ -6,7 +6,7 @@ outside the domain, application, and infrastructure modules.
 
 ## Dependency Setup
 
-Import the core JFoundry BOM, then the Quarkus BOM for the same release line, and finally add the
+Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
 runtime extension. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
 it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
@@ -51,7 +51,7 @@ artifact automatically.
 
 | Spring Boot capability | Quarkus dependency composition |
 |---|---|
-| `jfoundry-spring-boot-starter` | `jfoundry-quarkus-runtime` |
+| Spring Boot runtime baseline | `jfoundry-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-outbox-jpa-quarkus-runtime` and `jfoundry-outbox-quarkus-runtime` when dispatching is required |
