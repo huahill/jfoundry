@@ -211,6 +211,17 @@ jobs:
         run: bash scripts/verify-dependency-boundaries.sh
       - name: Test Consumer POM verification
         run: bash scripts/verify-consumer-pom-test.sh
+      - name: Verify release POM metadata
+        run: bash scripts/verify-release-pom-metadata.sh
+      - name: Test release POM metadata verification
+        run: bash scripts/verify-release-pom-metadata-test.sh
+      - name: Verify reactor Consumer POMs
+        run: |
+          ./mvnw -Dmaven.repo.local="${consumer_pom_repository}" install
+          maven_3="$(command -v mvn)"
+          if [[ "$("${maven_3}" --version)" != "Apache Maven 3."* ]]; then exit 1; fi
+          bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
+            "${maven_3}" "$(pwd)/mvnw"
 YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
@@ -1343,6 +1354,14 @@ path = ARGV.fetch(0)
 File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries.sh") }.join)
 RUBY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries.sh"
+mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
+
+cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
+ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
+path = ARGV.fetch(0)
+File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-consumer-pom.sh") }.join)
+RUBY
+assert_rejects_with_message "${temp_dir}" '.github/workflows/ci.yml must contain: bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"

@@ -26,7 +26,7 @@ class SpringBootParentPomTest {
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", bomVersion));
         assertThat(bomVersion).isEqualTo("4.1.1");
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "jfoundry.version"))
-                .isEqualTo("1.3.0");
+                .isEqualTo(childText(parent.getDocumentElement(), "version"));
         assertThat(importedBoms(parent)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
@@ -49,9 +49,10 @@ class SpringBootParentPomTest {
     }
 
     @Test
-    void standalonePublishedPomsUseTheReleaseTag() throws Exception {
+    void independentPublishedPomsUseVersionAppropriateScmTags() throws Exception {
         List<Path> pomPaths = List.of(
                 Path.of("pom.xml"),
+                Path.of("..", "..", "pom.xml"),
                 Path.of("..", "jfoundry-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
@@ -59,13 +60,34 @@ class SpringBootParentPomTest {
                 Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+        String reactorVersion = childText(
+                document(Path.of("..", "..", "pom.xml")).getDocumentElement(), "version");
+        String expectedLiteralTag = expectedLiteralScmTag(reactorVersion);
 
         for (Path pomPath : pomPaths) {
             Document document = document(pomPath);
+            assertThat(childText(document.getDocumentElement(), "version"))
+                    .as("project version for %s", pomPath)
+                    .isEqualTo(reactorVersion);
             assertThat(childText(child(document.getDocumentElement(), "scm"), "tag"))
                     .as("SCM tag for %s", pomPath)
-                    .isEqualTo("v1.2.0");
+                    .isIn("v${project.version}", expectedLiteralTag);
         }
+    }
+
+    private String expectedLiteralScmTag(String reactorVersion) {
+        if (!reactorVersion.endsWith("-SNAPSHOT")) {
+            return "v" + reactorVersion;
+        }
+
+        String[] parts = reactorVersion
+                .substring(0, reactorVersion.length() - "-SNAPSHOT".length())
+                .split("\\.");
+        assertThat(parts).as("SNAPSHOT version segments").hasSize(3);
+        assertThat(parts[2]).as("SNAPSHOT patch version").isEqualTo("0");
+        int minor = Integer.parseInt(parts[1]);
+        assertThat(minor).as("SNAPSHOT minor version").isPositive();
+        return "v%s.%d.0".formatted(parts[0], minor - 1);
     }
 
     @Test

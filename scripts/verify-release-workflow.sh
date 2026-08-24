@@ -68,6 +68,7 @@ require_text "Verify immutable release source"
 require_text "Verify complete CI"
 require_text 'test "${{ inputs.release_tag }}" = "v${version}"'
 require_text 'test -z "$(git status --porcelain)"'
+require_text "bash scripts/verify-release-pom-metadata.sh"
 require_count "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'" 2
 require_text "gh run view"
 require_text "actions: read"
@@ -135,6 +136,16 @@ for bom_pom_file in "${bom_pom_files[@]}"; do
     require_pom_text "<autoPublish>true</autoPublish>"
     require_pom_text "<waitUntil>PUBLISHED</waitUntil>"
 done
+
+immutable_source_line="$(grep -n -F "Verify immutable release source" "${workflow_file}" | head -n 1 | cut -d: -f1)"
+release_pom_metadata_line="$(grep -n -F "bash scripts/verify-release-pom-metadata.sh" "${workflow_file}" | head -n 1 | cut -d: -f1)"
+complete_ci_line="$(grep -n -F "Verify complete CI" "${workflow_file}" | head -n 1 | cut -d: -f1)"
+if [[ -z "${immutable_source_line}" || -z "${release_pom_metadata_line}" || -z "${complete_ci_line}" ||
+      "${release_pom_metadata_line}" -le "${immutable_source_line}" ||
+      "${release_pom_metadata_line}" -ge "${complete_ci_line}" ]]; then
+    echo "Release POM metadata must be verified as part of the immutable release source step." >&2
+    exit 1
+fi
 
 central_verification_line="$(grep -n -F "Verify Maven Central publication" "${workflow_file}" | head -n 1 | cut -d: -f1)"
 github_release_line="$(grep -n -F "Create GitHub Release" "${workflow_file}" | head -n 1 | cut -d: -f1)"

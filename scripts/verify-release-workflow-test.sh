@@ -54,6 +54,7 @@ jobs:
           )"
           test "${{ inputs.release_tag }}" = "v${version}"
           test -z "$(git status --porcelain)"
+          bash scripts/verify-release-pom-metadata.sh
           git fetch origin +refs/heads/main:refs/remotes/origin/main --no-tags
           git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
       - name: Verify complete CI
@@ -303,6 +304,20 @@ assert_rejects "${missing_ci_workflow}"
 missing_consumer_pom_verification_workflow="${temp_dir}/missing-consumer-pom-verification-release.yml"
 grep -v "Verify Maven Central Consumer POMs\|verify-consumer-pom.sh" "${complete_workflow}" > "${missing_consumer_pom_verification_workflow}"
 assert_rejects "${missing_consumer_pom_verification_workflow}"
+
+missing_release_pom_metadata_workflow="${temp_dir}/missing-release-pom-metadata-release.yml"
+grep -v "verify-release-pom-metadata.sh" "${complete_workflow}" > "${missing_release_pom_metadata_workflow}"
+assert_rejects "${missing_release_pom_metadata_workflow}"
+
+misplaced_release_pom_metadata_workflow="${temp_dir}/misplaced-release-pom-metadata-release.yml"
+ruby - "${complete_workflow}" "${misplaced_release_pom_metadata_workflow}" <<'RUBY'
+source, target = ARGV
+content = File.read(source)
+metadata_call = "          bash scripts/verify-release-pom-metadata.sh\n"
+abort "Expected release POM metadata call" unless content.sub!(metadata_call, "")
+File.write(target, "#{content}#{metadata_call}")
+RUBY
+assert_rejects "${misplaced_release_pom_metadata_workflow}"
 
 directory_provenance_subject_workflow="${temp_dir}/directory-provenance-subject-release.yml"
 sed 's#subject-path: release-evidence.tar.gz#subject-path: release-evidence/\*\*#' \

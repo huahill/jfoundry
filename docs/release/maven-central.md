@@ -9,7 +9,7 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 ## Prerequisites
 
 - Java 25.
-- The checked-in Maven Wrapper, currently Maven `4.0.0-rc-5` with Consumer POM transformation enabled.
+- The checked-in Maven Wrapper, currently Maven `4.0.0-rc-6` with Consumer POM transformation enabled.
 - Maven `3.9.16` for Maven Central publication and the release consumer-compatibility check.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
@@ -68,7 +68,7 @@ Then run the release profile through `verify` so sources, Javadocs, and local si
 ./mvnw -Prelease -DskipTests verify
 ```
 
-The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle. With Maven 4, release publication explicitly invokes `org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish` after `verify`; it does not rely on the plugin's dynamic `deploy` lifecycle integration.
+The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle. The protected workflow uses Maven 4 to generate and verify Consumer POMs, then uses Maven 3.9.16 for the Central `deploy` lifecycle.
 
 If GPG is not configured locally, the release-profile verification may fail at the signing step. Failures before signing, including compilation, source JARs, Javadocs, metadata, placeholder metadata guards, or Central publishing plugin setup, must be fixed before release.
 
@@ -79,13 +79,13 @@ developer checkout. The release tag must point to a committed non-SNAPSHOT react
 matches the tag exactly. For example, `v1.0.0-RC1` must point to source whose root and reactor version
 is `1.0.0-RC1`.
 
-The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship
-and a clean source tree, runs `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor
-into an isolated repository, verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
+The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship,
+a clean source tree, and matching SCM tags on every independent publication POM. It then runs
+`./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor into an isolated repository,
+and verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
 resolution for both direct Spring BOM imports and business projects that inherit the supported Spring
-Boot parent,
-checks for open High or Critical Dependabot alerts, and only then runs `verify` with
-the explicit Central plugin `publish` goal. The workflow requires the plugin to report a Central
+Boot parent. It checks for open High or Critical Dependabot alerts and only then runs the serial
+Maven 3.9.16 `deploy` lifecycle. The workflow requires the plugin to report a Central
 `deploymentId` before it treats the deployment as successful. It never changes POM versions or
 pushes a branch during publication.
 
@@ -95,7 +95,14 @@ POMs remain maintainable parent/BOM-based POMs; Maven 4 produces flattened Consu
 artifacts. The workflow archives those transformed POMs and checks that Maven 3.9 and Maven 4 can
 consume them before publication.
 
-Maven Central publication itself currently runs with Apache Maven `3.9.16`. Maven 4 RC5 does not
+The ordinary CI Maven 4 compatibility job performs the same isolated reactor installation and
+Maven 3.9/Maven 4 consumer resolution before a release tag can be created. Its expected Spring Boot
+parent version is read from the generated `jfoundry-spring-boot-dependencies` Consumer POM, so the
+verification cannot remain green by sharing a stale hardcoded version with its test fixture. Release
+POM metadata verification also requires each non-SNAPSHOT independent BOM or parent SCM tag to match
+the project version; the next minor SNAPSHOT line retains the immediately preceding stable tag.
+
+Maven Central publication itself currently runs with Apache Maven `3.9.16`. Maven 4 RC6 does not
 reliably apply the Central plugin lifecycle extension, and an explicit plugin goal packages Maven 4
 Consumer POM attachments as nonstandard `*-consumer.pom` files that Central cannot associate with
 artifact coordinates. The workflow downloads Maven 3.9.16 from Apache's repository, verifies its

@@ -72,6 +72,14 @@ for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry
 XML
 done
 
+spring_boot_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
+ruby - "${spring_boot_bom_fixture}" <<'RUBY'
+path = ARGV.fetch(0)
+content = File.read(path)
+content.sub!("  <dependencyManagement>", "  <properties><spring-boot.version>9.8.7</spring-boot.version></properties>\n  <dependencyManagement>")
+File.write(path, content)
+RUBY
+
 cloud_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
 cat > "${cloud_bom_fixture}" <<'XML'
 <project>
@@ -166,16 +174,16 @@ write_parent() {
 XML
 }
 
-write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 assert_accepts
 
 write_parent jfoundry-spring-boot-parent 4.0.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 assert_rejects "a Spring Boot parent with the Cloud-line Boot version"
-write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
 assert_rejects "a Spring Boot parent that imports the Cloud runtime BOM"
-write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies jfoundry-dependencies jfoundry-spring-boot-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-dependencies jfoundry-spring-boot-dependencies
 assert_rejects "a Spring Boot parent that imports the core BOM before the runtime BOM"
-write_parent jfoundry-spring-boot-parent 4.1.0 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 
 assert_accepts_without_xmllint
 

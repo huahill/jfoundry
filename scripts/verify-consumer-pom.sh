@@ -166,7 +166,13 @@ verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
 verify_independent_bom "jfoundry-spring-boot-dependencies"
 verify_spring_cloud_bom
-verify_spring_parent "jfoundry-spring-boot-parent" "4.1.0" "jfoundry-spring-boot-dependencies"
+spring_boot_bom_pom="$(pom_path "jfoundry-spring-boot-dependencies")"
+spring_boot_version="$(xml_query property-value "${spring_boot_bom_pom}" "spring-boot.version")"
+if [[ -z "${spring_boot_version}" ]]; then
+    echo "Consumer POM must define spring-boot.version: ${spring_boot_bom_pom}" >&2
+    exit 1
+fi
+verify_spring_parent "jfoundry-spring-boot-parent" "${spring_boot_version}" "jfoundry-spring-boot-dependencies"
 
 if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
     if [[ -z "${maven3_bin}" || -z "${maven4_bin}" ]]; then

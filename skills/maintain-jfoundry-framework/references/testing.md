@@ -42,6 +42,7 @@ mvn test
 | Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
 | Helidon Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
 | Starter POM | `mvn -pl <starter-module> -am test` or `mvn validate` for dependency shape |
+| Release POM or Consumer POM | `bash scripts/verify-release-pom-metadata-test.sh && bash scripts/verify-release-pom-metadata.sh && bash scripts/verify-consumer-pom-test.sh` |
 
 ## Test Expectations
 

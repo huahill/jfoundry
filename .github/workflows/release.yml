@@ -63,6 +63,8 @@ jobs:
           esac
           echo "version=${version}" >> "${GITHUB_OUTPUT}"
 
+          bash scripts/verify-release-pom-metadata.sh
+
       - name: Verify complete CI
         env:
           GH_TOKEN: ${{ github.token }}
