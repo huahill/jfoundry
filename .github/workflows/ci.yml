@@ -76,6 +76,9 @@ jobs:
       - name: Verify release workflow
         run: bash scripts/verify-release-workflow.sh
 
+      - name: Verify release POM metadata
+        run: bash scripts/verify-release-pom-metadata.sh
+
       - name: Verify release SBOM configuration
         run: bash scripts/verify-release-sbom.sh
 
@@ -87,6 +90,9 @@ jobs:
 
       - name: Test Consumer POM verification
         run: bash scripts/verify-consumer-pom-test.sh
+
+      - name: Test release POM metadata verification
+        run: bash scripts/verify-release-pom-metadata-test.sh
 
       - name: Test release governance verifiers
         run: |
@@ -339,6 +345,26 @@ jobs:
 
       - name: Check Maven 4 package compatibility
         run: ./mvnw -B -DskipTests package
+
+      - name: Verify reactor Consumer POMs
+        run: |
+          set -euo pipefail
+
+          consumer_pom_repository="${RUNNER_TEMP}/jfoundry-consumer-pom-repository"
+          ./mvnw -B -DskipTests -Dmaven.repo.local="${consumer_pom_repository}" install
+          version="$(
+            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
+              sed -n 's/^\[INFO\] \[stdout\] //p' |
+              tail -n 1
+          )"
+          maven_3="$(command -v mvn)"
+          maven_3_details="$("${maven_3}" --version)"
+          if [[ "${maven_3_details}" != "Apache Maven 3."* ]]; then
+            echo "Consumer POM compatibility requires Maven 3, but found: ${maven_3_details}" >&2
+            exit 1
+          fi
+          bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
+            "${maven_3}" "$(pwd)/mvnw"
 
   merge-gate:
     name: Merge gate

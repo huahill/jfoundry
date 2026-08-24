@@ -257,6 +257,15 @@ require_text ".github/workflows/ci.yml" "fail-on-severity: high"
 require_text ".github/workflows/ci.yml" "needs.dependency-review.result"
 require_text ".github/workflows/ci.yml" "Test Consumer POM verification"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-consumer-pom-test.sh"
+require_text ".github/workflows/ci.yml" "Verify release POM metadata"
+require_text ".github/workflows/ci.yml" "bash scripts/verify-release-pom-metadata.sh"
+require_text ".github/workflows/ci.yml" "bash scripts/verify-release-pom-metadata-test.sh"
+require_text ".github/workflows/ci.yml" "Verify reactor Consumer POMs"
+require_text ".github/workflows/ci.yml" '-Dmaven.repo.local="${consumer_pom_repository}" install'
+require_text ".github/workflows/ci.yml" 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
+require_text ".github/workflows/ci.yml" 'maven_3="$(command -v mvn)"'
+require_text ".github/workflows/ci.yml" '"Apache Maven 3."*'
+require_text ".github/workflows/ci.yml" '"${maven_3}" "$(pwd)/mvnw"'
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries.sh"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries-test.sh"
 require_text ".github/workflows/release.yml" "actions/upload-artifact"

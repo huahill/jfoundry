@@ -7,8 +7,9 @@ import org.w3c.dom.Node;
 public class VerifyConsumerPomXml {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
-            throw new IllegalArgumentException("Usage: VerifyConsumerPomXml <imported-artifact-ids|parent-coordinate> <pom>");
+        if (args.length < 2 || args.length > 3) {
+            throw new IllegalArgumentException(
+                    "Usage: VerifyConsumerPomXml <imported-artifact-ids|parent-coordinate|property-value> <pom> [property]");
         }
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -19,6 +20,12 @@ public class VerifyConsumerPomXml {
         switch (args[0]) {
             case "imported-artifact-ids" -> printImportedArtifactIds(project);
             case "parent-coordinate" -> printParentCoordinate(project);
+            case "property-value" -> {
+                if (args.length != 3) {
+                    throw new IllegalArgumentException("property-value requires a property name");
+                }
+                printPropertyValue(project, args[2]);
+            }
             default -> throw new IllegalArgumentException("Unsupported query: " + args[0]);
         }
     }
@@ -46,6 +53,13 @@ public class VerifyConsumerPomXml {
             return;
         }
         System.out.print(text(parent, "groupId") + ':' + text(parent, "artifactId") + ':' + text(parent, "version") + '\n');
+    }
+
+    private static void printPropertyValue(Element project, String property) {
+        Element properties = child(project, "properties");
+        if (properties != null) {
+            System.out.print(text(properties, property) + '\n');
+        }
     }
 
     private static Element child(Element parent, String name) {
