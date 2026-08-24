@@ -1,6 +1,6 @@
 # Helidon MP 运行时集成
 
-`jfoundry-helidon` 将 JFoundry 的运行时无关契约与受支持的 Helidon MP 平台线组合。它是可移植的
+`jfoundry-helidon` 将 JFoundry 的运行时无关契约与受支持的 Helidon MP 版本组合。它是可移植的
 CDI/Jakarta 运行时集成，不是 Spring Boot 启动器，也不是 Quarkus 扩展。Helidon、CDI、JTA、
 JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
@@ -8,7 +8,7 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 ## 依赖组合
 
-先导入同一发布线的 Helidon BOM，再导入核心 JFoundry BOM。Helidon BOM 管理所选 Helidon
+依次导入版本相同的 Helidon BOM 与核心 JFoundry BOM。Helidon BOM 管理所选 Helidon
 平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本：
 
 ```xml
@@ -123,7 +123,7 @@ mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
 Helidon 会把 CDI 元数据写入镜像，该配置档会在构建期初始化校验 provider、EL 实现和 ClassMate 元数据，并为
 使用方自己的请求 DTO 字段注册反射。下游原生应用必须为自己的 JSON 请求类型和被校验请求类型提供对应的反射元数据。
 
-受支持的 Helidon MP 平台线将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 的已测试
+受支持的 Helidon MP 版本将 Narayana JTA 的原生镜像支持标为实验性。在 macOS ARM64 的已测试
 GraalVM Community 环境中，启用 JPA 的使用方会在镜像生成阶段失败：
 `JpaExtension.processPersistenceXmls` 会使 `org.xml.sax.helpers.LocatorImpl` 进入 image heap。
 仅包含原生 CDI/Web 的使用方可以启动并提供 Problem Details，但执行 `TransactionRunner` 时仍会因

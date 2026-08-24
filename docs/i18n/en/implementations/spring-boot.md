@@ -86,10 +86,10 @@ database, delivery, scheduling, and distributed-lock choices.
 | Outbound `RestClient` support and configurable HTTP logging | `jfoundry-web-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
 | JSON serialization contract | `jfoundry-messaging-spring-boot-starter` | Adds Spring messaging integration and the default Jackson `PayloadSerializer`, but no real sender. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |
-| Outbox runtime | `jfoundry-outbox-spring-boot-starter` | Adds externalization and Spring scheduling integration; select a store and sender separately. |
-| JPA or MyBatis-Plus Outbox store | Matching `jfoundry-outbox-*-spring-boot-starter` | Database store only; applications own migrations. |
+| Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds recording, externalization, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
+| Outbox store | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application `OutboxMessageStore` | Persists Outbox records only; built-in store starters also bring the Outbox capability, while applications still own migrations. |
 | Inbox runtime and store | `jfoundry-inbox-spring-boot-starter` plus one `jfoundry-inbox-*-spring-boot-starter` | Consumer idempotency; applications own migrations. |
-| JobRunr Outbox dispatch | `jfoundry-outbox-jobrunr-spring-boot-starter` | Optional dispatcher; still needs an Outbox store and real sender. |
+| Outbox dispatch trigger | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application dispatcher | JobRunr replaces the built-in trigger and brings the Outbox capability transitively; every option still needs an Outbox store and real sender. |
 | Redisson distributed lock | `jfoundry-lock-redisson-spring-boot-starter` | Optional cross-instance locking only. |
 
 The exact starter catalog, configuration properties, conditions, and bean precedence are maintained
@@ -126,15 +126,17 @@ time and an empty actor provider; applications normally contribute `AuditActorPr
 security integration.
 
 Both are deliberately separate from reliable messaging stores. Add the matching Outbox or Inbox
-starter only after the use case requires durable external publication or consumer idempotency.
+starter only after the use case requires durable external publication or consumer idempotency;
+normally use the same persistence technology for business data and the reliable messaging store.
 Aggregate mapping, optimistic-locking, and repository-shape decisions remain in the
 [JPA](jpa.md) and [MyBatis-Plus](mybatis-plus.md) implementation guides.
 
 ## Reliable Messaging
 
-The Outbox starter provides transaction-aware recording, scheduled dispatch integration, recovery,
-and cleanup according to its configured mode. It does not create a database table and it does not
-invent a message destination. Copy the selected SQL template into the application's own migration
+Outbox assembly has four independent decisions: capability, store, dispatch trigger, and message
+transport. The shared `outbox` prefix indicates which capability an adapter serves; it does not make
+JPA, MyBatis-Plus, or JobRunr a complete Outbox solution. JFoundry does not create database tables or
+invent message destinations. Copy the selected SQL template into the application's own migration
 process.
 
 `jfoundry-messaging-spring-boot-starter` does not register a fallback `MessageSender`. Before

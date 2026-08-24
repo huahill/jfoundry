@@ -13,7 +13,7 @@
 | 聚合持久化 | 聚合需要 JPA 或 MyBatis-Plus 持久化，同时不把 Repository 变为通用查询接口。 | `jfoundry-persistence-jpa-spring-boot-starter` 或 `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon-runtime` | [聚合持久化](aggregate-persistence.md) |
 | Web | HTTP API 需要 RFC 9457 问题响应，或者 Spring 应用需要显式选择的出站 `RestClient` 支持。 | Problem Details：`jfoundry-webmvc-spring-boot-starter`；HTTP 客户端：`jfoundry-web-spring-boot-starter` | Problem Details：`jfoundry-web-quarkus-runtime` | Problem Details：`jfoundry-web-helidon-runtime` | [Web](web.md) |
 | 直接消息投递 | 应用需要发布到消息代理，但不需要可靠的 Outbox 记录。 | `jfoundry-messaging-spring-boot-starter` 加一个消息代理启动器 | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` | 暂未提供 | [消息传输](message-delivery.md) |
-| 可靠消息 | 消息必须事务性记录、延后派发或被幂等处理。 | `jfoundry-outbox-spring-boot-starter` 或 `jfoundry-inbox-spring-boot-starter` | `jfoundry-outbox-quarkus-runtime` 或 `jfoundry-inbox-jpa-quarkus-runtime` | `jfoundry-outbox-helidon-runtime` 或 `jfoundry-inbox-jpa-helidon-runtime` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
+| 可靠消息 | 消息必须事务性记录、延后派发或被幂等处理。 | Outbox 能力加显式选择的存储与发送器，或 Inbox 能力加存储 | `jfoundry-outbox-quarkus-runtime` 或 `jfoundry-inbox-jpa-quarkus-runtime` | `jfoundry-outbox-helidon-runtime` 或 `jfoundry-inbox-jpa-helidon-runtime` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
 | 分布式锁 | 数据库约束与幂等仍不足时，用例需要跨实例协调。 | `jfoundry-lock-redisson-spring-boot-starter` | 暂未提供 | 暂未提供 | [分布式锁](distributed-locks.md) |
 | 可观测性 | 框架操作需要受限维度的指标与追踪，且不能暴露业务标识。 | `jfoundry-observability-spring-boot-starter` | `jfoundry-observability-otel` | `jfoundry-observability-otel` | [可观测性](observability.md) |
 
