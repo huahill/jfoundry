@@ -10,6 +10,27 @@ idempotency; it does not itself select a broker.
 
 ![transactional-outbox.png](../../assets/outbox/transactional-outbox.png)
 
+## Compose The Capability
+
+Outbox is assembled from separate choices. An ORM or scheduler suffix identifies one adapter for
+the capability; it does not identify a complete Outbox solution.
+
+| Decision | Purpose | Spring Boot selection |
+|---|---|---|
+| Outbox capability | Records, externalizes, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
+| Store adapter | Persists `OutboxMessageStore` records | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application implementation |
+| Dispatch trigger | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application dispatcher |
+| Message transport | Sends the claimed payload | A broker-specific `jfoundry-messaging-*-spring-boot-starter` or an application `MessageSender` |
+
+Aggregate persistence is a separate choice. A `jfoundry-persistence-*-spring-boot-starter` persists
+business aggregates; a `jfoundry-outbox-*-spring-boot-starter` persists Outbox records. Selecting one
+does not select the other.
+
+These are separate responsibilities, not necessarily separate direct Maven declarations. The
+built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-boot-starter`
+transitively, so an application does not declare it again. That dependency is Spring Boot assembly
+convenience; the store and dispatcher remain replaceable adapters.
+
 ## Event Flow
 
 ```text
@@ -61,7 +82,10 @@ records only. Runtime dispatch triggering and maintenance scheduling are impleme
 ## Runtime Transaction Boundaries
 
 `OutboxTemplate.append(...)` joins the business transaction; it never starts an independent
-transaction. In the Spring Boot runtime, dispatch instead uses three independent short database
+transaction. Normally select the same persistence technology for business data and the Outbox
+store, and ensure both writes participate in the same local transaction.
+
+In the Spring Boot runtime, dispatch uses three independent short database
 transactions: claim records, send each claimed payload outside a database transaction, then mark
 the result. Recovery and each cleanup batch also run in independent transactions. This applies to
 both JPA and MyBatis-Plus stores.
@@ -96,7 +120,7 @@ jfoundry/sql/outbox/postgresql/create_outbox_event.sql
 jfoundry/sql/inbox/common/create_inbox_message.sql
 ```
 
-## Choose A Store
+## Implementation Guides
 
 | Need | Guide |
 |------|-------|

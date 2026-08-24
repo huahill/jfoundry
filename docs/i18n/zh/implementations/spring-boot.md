@@ -73,10 +73,10 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 | 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-web-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
 | JSON 序列化契约 | `jfoundry-messaging-spring-boot-starter` | 提供 Spring 消息集成和默认 Jackson `PayloadSerializer`，不提供真实发送器。 |
 | Kafka、RabbitMQ 或 RocketMQ 投递 | 对应 `jfoundry-messaging-*-spring-boot-starter` | 显式选择具体消息代理传输方式。 |
-| Outbox 运行时 | `jfoundry-outbox-spring-boot-starter` | 提供外部化和 Spring 调度集成；存储与发送器需另选。 |
-| JPA 或 MyBatis-Plus Outbox 存储 | 对应 `jfoundry-outbox-*-spring-boot-starter` | 只提供数据库存储；迁移由应用负责。 |
+| Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供记录、外部化、恢复、清理和内置定时派发触发。手工组合时直接添加；内置存储与 JobRunr 启动器会传递引入它。 |
+| Outbox 存储 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用 `OutboxMessageStore` | 只持久化 Outbox 记录；内置存储启动器也会引入 Outbox 能力，迁移仍由应用负责。 |
 | Inbox 运行时与存储 | `jfoundry-inbox-spring-boot-starter` 加一个 `jfoundry-inbox-*-spring-boot-starter` | 消费端幂等；迁移由应用负责。 |
-| JobRunr Outbox 调度 | `jfoundry-outbox-jobrunr-spring-boot-starter` | 可选派发器，仍需要 Outbox 存储和真实发送器。 |
+| Outbox 派发触发方式 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用派发器 | JobRunr 会替换内置触发方式并传递引入 Outbox 能力；任何选项仍需要 Outbox 存储和真实发送器。 |
 | Redisson 分布式锁 | `jfoundry-lock-redisson-spring-boot-starter` | 仅可选的跨实例锁能力。 |
 
 完整启动器清单、配置项、条件和 Bean 优先级见 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)。
@@ -91,11 +91,11 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-mybatis-plus-spring-boot-starter` 装配业务聚合的 MyBatis-Plus 持久化能力，并为实现 `AuditStampHolder` 的数据对象装配默认技术审计处理器；JPA 对应启动器则装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
 
-二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](mybatis-plus.md) 与 [JPA](jpa.md) 实现指南。
+二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器；业务数据与可靠消息存储通常使用相同的持久化技术。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](mybatis-plus.md) 与 [JPA](jpa.md) 实现指南。
 
 ## 可靠消息
 
-Outbox 启动器按配置模式提供事务感知的记录、调度投递、恢复和清理。它不会创建数据库表，也不会虚构消息目的地；将所选 SQL 模板复制到应用自己的迁移流程中。
+Outbox 装配包含四项独立决策：能力、存储、派发触发方式和消息传输。模块名中相同的 `outbox` 前缀只表示适配器服务于该能力，不表示 JPA、MyBatis-Plus 或 JobRunr 各自构成完整方案。JFoundry 不会创建数据库表，也不会虚构消息目的地；将所选 SQL 模板复制到应用自己的迁移流程中。
 
 `jfoundry-messaging-spring-boot-starter` 不会注册回退 `MessageSender`。启用投递前，必须添加一个消息代理专用启动器或提供应用 `MessageSender`，否则不存在生产投递路径。自动 Outbox 事件记录默认关闭，通过 `jfoundry.domain.event.dispatch.outbox.enabled=true` 启用。它只写入标注 `@Externalized` 的领域事件或被 `DomainEventExternalizer` 选中的事件，绝不会从持久化变更推断消息。直接选择消息代理见[消息传输](../capabilities/message-delivery.md)，Outbox 与 Inbox 语义见[可靠消息](../capabilities/reliable-messaging.md)。
 

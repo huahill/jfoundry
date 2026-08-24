@@ -6,6 +6,23 @@
 
 ![transactional-outbox.png](../../assets/outbox/transactional-outbox.png)
 
+## 组合能力
+
+Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器后缀表示该能力的一种适配器，不表示一套完整的 Outbox 方案。
+
+| 决策 | 作用 | Spring Boot 选择 |
+|---|---|---|
+| Outbox 能力 | 负责记录、外部化、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
+| 存储适配器 | 持久化 `OutboxMessageStore` 记录 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用实现 |
+| 派发触发方式 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用派发器 |
+| 消息传输 | 发送已领取的消息载荷 | 消息代理专用的 `jfoundry-messaging-*-spring-boot-starter` 或应用 `MessageSender` |
+
+聚合持久化是另一项独立选择。`jfoundry-persistence-*-spring-boot-starter` 持久化业务聚合，
+`jfoundry-outbox-*-spring-boot-starter` 持久化 Outbox 记录；选择其中一项不会自动选择另一项。
+
+职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
+`jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利，存储与派发器仍可替换。
+
 ## 事件流
 
 ```text
@@ -26,7 +43,7 @@
 
 ## Payload 契约
 
-将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。消费者应将消息信封反序列化为各自的版本化契约。应选择保持线格式可移植且不暴露 JVM 类型名的消息载荷序列化器。
+将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。消费者应将消息信封反序列化为各自的版本化契约。应选择保持消息格式可移植且不暴露 JVM 类型名的消息载荷序列化器。
 
 ## Outbox 状态机
 
@@ -40,7 +57,9 @@ Recovery 将卡住的 `DISPATCHING` 消息恢复为 `PENDING`。Cleanup 只删�
 
 ## 运行时事务边界
 
-`OutboxTemplate.append(...)` 加入业务事务，不会自行开启独立事务。Spring Boot 运行时的派发则使用三个独立的短数据库事务：领取记录、在数据库事务外发送每条已领取的消息载荷、再记录发送结果。恢复和每个清理批次也在独立事务中执行。JPA 和 MyBatis-Plus 存储均遵循这一语义。
+`OutboxTemplate.append(...)` 加入业务事务，不会自行开启独立事务。业务数据与 Outbox 存储通常选择相同的持久化技术，并确保两次写入加入同一个本地事务。
+
+Spring Boot 运行时的派发使用三个独立的短数据库事务：领取记录、在数据库事务外发送每条已领取的消息载荷、再记录发送结果。恢复和每个清理批次也在独立事务中执行。JPA 和 MyBatis-Plus 存储均遵循这一语义。
 
 `InboxTemplate` 先在新事务中领取消息。处理器与 `PROCESSED` 状态迁移在第二个独立事务中执行。处理器失败时，该事务回滚，新的事务会记录 `FAILED`，然后重新抛出原始异常。只有存在 `TransactionRunner` 时，Boot 才会创建具备该语义的模板。直接使用 `new InboxTemplate(store)` 属于手工运行时 API，调用方必须为存储提供所需的事务边界。
 
@@ -58,7 +77,7 @@ jfoundry/sql/outbox/postgresql/create_outbox_event.sql
 jfoundry/sql/inbox/common/create_inbox_message.sql
 ```
 
-## 选择存储实现
+## 实现指南
 
 | 需求 | 指南 |
 |------|------|

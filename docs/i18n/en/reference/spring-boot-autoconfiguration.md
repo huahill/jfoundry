@@ -19,9 +19,9 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` adapter | Outbox store |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` adapter | Outbox store |
 | `jfoundry-outbox-spring-boot-starter` | Outbox core, `OutboxTemplate`, domain-event externalization, scheduled dispatch integration | Outbox table store, JobRunr |
-| `jfoundry-outbox-jpa-spring-boot-starter` | JPA `OutboxMessageStore` adapter | Database migration execution |
-| `jfoundry-outbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `OutboxMessageStore` adapter | Database migration execution |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | JobRunr Outbox dispatcher | Outbox table store |
+| `jfoundry-outbox-jpa-spring-boot-starter` | Outbox capability plus the JPA `OutboxMessageStore` adapter | Database migration execution |
+| `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox capability plus the MyBatis-Plus `OutboxMessageStore` adapter | Database migration execution |
+| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox capability plus the JobRunr dispatch trigger | Outbox table store |
 | `jfoundry-inbox-spring-boot-starter` | Inbox core and `InboxTemplate` | Inbox table store |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` adapter and supported-database claim strategy | Database migration execution, claim support for database products other than PostgreSQL and MySQL |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |

@@ -131,14 +131,14 @@ from Hexagonal Port/Adapter conventions.
 The strongest evidence currently applies to:
 
 - Java 25 business applications.
-- The supported Spring Boot and Spring Framework lines, including JVM middleware integration and GraalVM
+- The supported Spring Boot and Spring Framework versions, including JVM middleware integration and GraalVM
   Native Image verification for the base runtime, MyBatis-Plus persistence, Redisson locking, and
   JobRunr Outbox dispatching. The expense approval demo additionally verifies its Kafka, Outbox,
   Inbox, PostgreSQL, and payment-projection path with two Native Image executables.
-- The supported Quarkus line's CDI discovery and Jakarta Transactions `TransactionRunner` integration, with a
+- CDI discovery and Jakarta Transactions `TransactionRunner` integration for the supported Quarkus version, with a
   JVM consumer smoke test and a Native Image CI gate.
-- The supported Helidon MP line's CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem
-  Details. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
+- CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem Details for the
+  supported Helidon MP version. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
   JTA and JPA remain upstream experimental limitations, with a reproducible failure record in
   [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 - MyBatis-Plus business persistence with PostgreSQL.

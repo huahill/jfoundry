@@ -17,9 +17,9 @@
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` 适配器 | Outbox 存储 |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` 适配器 | Outbox 存储 |
 | `jfoundry-outbox-spring-boot-starter` | Outbox 核心、`OutboxTemplate`、领域事件外部化、定时派发集成 | Outbox 表存储、JobRunr |
-| `jfoundry-outbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `OutboxMessageStore` 适配器 | 数据库迁移执行 |
-| `jfoundry-outbox-jpa-spring-boot-starter` | JPA `OutboxMessageStore` 适配器 | 数据库迁移执行 |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | JobRunr Outbox 派发器 | Outbox 表存储 |
+| `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox 能力与 MyBatis-Plus `OutboxMessageStore` 适配器 | 数据库迁移执行 |
+| `jfoundry-outbox-jpa-spring-boot-starter` | Outbox 能力与 JPA `OutboxMessageStore` 适配器 | 数据库迁移执行 |
+| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox 能力与 JobRunr 派发触发方式 | Outbox 表存储 |
 | `jfoundry-inbox-spring-boot-starter` | Inbox 核心、`InboxTemplate` | Inbox 表存储 |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
