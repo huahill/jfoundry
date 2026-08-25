@@ -31,7 +31,7 @@
         <spring-boot.version>4.1.1</spring-boot.version>
         <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
-        <jobrunr.version>8.8.1</jobrunr.version>
+        <jobrunr.version>8.8.2</jobrunr.version>
         <redisson.version>4.7.0</redisson.version>
     </properties>
     <dependencyManagement>
