@@ -6,7 +6,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>jfoundry-spring-cloud-dependencies</name>
     <description>Spring Cloud platform dependency management BOM for jfoundry applications.</description>
