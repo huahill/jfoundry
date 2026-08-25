@@ -6,7 +6,7 @@ operations.
 
 ## Automated Controls
 
-- Dependabot monitors Maven and GitHub Actions dependencies and proposes updates weekly.
+- Dependabot monitors Maven dependencies daily and GitHub Actions dependencies weekly.
 - Dependency Review blocks pull requests that add a High or Critical known vulnerability, or one of
   the prohibited copyleft licenses: AGPL-3.0, GPL-2.0-only, GPL-3.0-only, and SSPL-1.0.
 - CodeQL analyzes Java/Kotlin source and GitHub Actions workflows on pull requests, `main`, and a
@@ -31,6 +31,11 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
   patch group so related updates available in the same Dependabot run are proposed together.
+- Quarkus platform coordinates use a one-day patch cooldown and a seven-day minor/major cooldown.
+  Spring Boot platform coordinates are explicitly excluded from the cooldown so the daily schedule
+  can propose new releases promptly. The Quarkus delay gives platform publishers and Maven Central
+  mirrors time to expose related coordinates before a routine update is proposed; it is a buffer, not
+  an atomic publication guarantee. Other Maven dependencies retain the normal Dependabot timing.
 - Grouping does not prove that every coordinate in a platform has published the same version.
   Repository POM contracts require the Spring Boot parent to match the consumer BOM and the Quarkus
   build tools to match the consumer BOM. An incomplete platform update therefore fails the `Merge

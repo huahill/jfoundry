@@ -57,6 +57,30 @@ maven_updates = updates.select { |update| update["package-ecosystem"] == "maven"
 fail_policy("must contain exactly one Maven updates entry") unless maven_updates.size == 1
 
 maven_update = maven_updates.first
+expected_maven_cooldown = {
+    "default-days" => 1,
+    "semver-major-days" => 7,
+    "semver-minor-days" => 7,
+    "semver-patch-days" => 1,
+    "include" => [
+        "org.springframework.boot:spring-boot-dependencies",
+        "org.springframework.boot:spring-boot-starter-parent",
+        "org.springframework.boot:spring-boot-maven-plugin",
+        "io.quarkus.platform:quarkus-bom",
+        "io.quarkus:quarkus-extension-maven-plugin",
+        "io.quarkus:quarkus-extension-processor",
+        "io.quarkus:quarkus-maven-plugin"
+    ],
+    "exclude" => [
+        "org.springframework.boot:spring-boot-dependencies",
+        "org.springframework.boot:spring-boot-starter-parent",
+        "org.springframework.boot:spring-boot-maven-plugin"
+    ]
+}
+unless maven_update["cooldown"] == expected_maven_cooldown
+    fail_policy("Maven updates must use the #{expected_maven_cooldown.inspect} cooldown")
+end
+
 groups = maven_update["groups"]
 fail_policy("Maven groups must be a mapping") unless groups.is_a?(Hash)
 
