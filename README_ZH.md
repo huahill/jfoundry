@@ -30,6 +30,8 @@
 
 依赖方向始终指向内层。因此运行时集成位于核心之外，而不是每个应用的必需依赖。
 
+在仓库结构中，`jfoundry-core/` 归集运行时无关模块，`jfoundry-runtime/` 归集 Spring、Quarkus 和 Helidon 集成，`jfoundry-boms/` 提供依赖管理。这些目录是源码分组，不是 Maven 聚合模块。
+
 ![jfoundry 模块架构](docs/i18n/assets/jfoundry-module-architecture.svg)
 
 ## AI 辅助架构工作流
