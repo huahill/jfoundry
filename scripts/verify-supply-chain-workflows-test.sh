@@ -44,6 +44,23 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 1
+      semver-major-days: 7
+      semver-minor-days: 7
+      semver-patch-days: 1
+      include:
+        - org.springframework.boot:spring-boot-dependencies
+        - org.springframework.boot:spring-boot-starter-parent
+        - org.springframework.boot:spring-boot-maven-plugin
+        - io.quarkus.platform:quarkus-bom
+        - io.quarkus:quarkus-extension-maven-plugin
+        - io.quarkus:quarkus-extension-processor
+        - io.quarkus:quarkus-maven-plugin
+      exclude:
+        - org.springframework.boot:spring-boot-dependencies
+        - org.springframework.boot:spring-boot-starter-parent
+        - org.springframework.boot:spring-boot-maven-plugin
     groups:
       jfoundry-spring-boot-platform:
         patterns:
@@ -382,6 +399,39 @@ patterns.delete("io.quarkus.platform:quarkus-bom")
 File.write(path, YAML.dump(config))
 RUBY
 assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates"
+
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+require "yaml"
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+config.fetch("updates").first.fetch("cooldown")["semver-minor-days"] = 1
+File.write(path, YAML.dump(config))
+RUBY
+assert_rejects_with_message "${temp_dir}" 'Dependabot update policy is invalid: Maven updates must use the {"default-days"=>1, "semver-major-days"=>7, "semver-minor-days"=>7, "semver-patch-days"=>1, "include"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin", "io.quarkus.platform:quarkus-bom", "io.quarkus:quarkus-extension-maven-plugin", "io.quarkus:quarkus-extension-processor", "io.quarkus:quarkus-maven-plugin"], "exclude"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin"]} cooldown'
+
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+require "yaml"
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+config.fetch("updates").first.fetch("cooldown").fetch("include").delete("io.quarkus.platform:quarkus-bom")
+File.write(path, YAML.dump(config))
+RUBY
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
+require "yaml"
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+config.fetch("updates").first.fetch("cooldown")["exclude"] = []
+File.write(path, YAML.dump(config))
+RUBY
+assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
 ruby - "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'RUBY'
