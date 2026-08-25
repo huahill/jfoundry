@@ -139,28 +139,40 @@ responsible for selecting the JSON provider used to deserialize request bodies.
   Quarkus REST behavior.
 - [Helidon MP Runtime Integration](../implementations/helidon.md) covers CDI and JAX-RS behavior.
 
-## Outbound HTTP Client Integration
+## Spring HTTP Integration And Diagnostic Logging
 
-`jfoundry-web-spring` is an opt-in Spring Web integration for selected outbound `RestClient` calls.
-Configure only the builder owned by the integration with `RestClientSupport.configure(builder)`, then
-execute that call through `RestClientSupport.execute(...)`. A non-success response becomes an
-`HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind while retaining the original exception as
-its cause for server-side diagnostics. The Spring MVC adapter logs external-access and otherwise
-unhandled exceptions with their stack traces at `ERROR`; Problem Details responses never include a
-cause or stack trace. The default `BASIC` HTTP logging records query-free request metadata and response
-statuses only when its logger is enabled at `DEBUG`; it does not access either body.
+`jfoundry-web-spring` provides opt-in outbound `RestClient` support. Configure only the builder owned
+by the integration with `RestClientSupport.configure(builder)`, then execute that call through
+`RestClientSupport.execute(...)`. A non-success response becomes an `HttpResponseException` containing
+only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
+safe failure kind while retaining the original exception as its cause for server-side diagnostics.
 
-Applications can select `NONE`, `HEADERS`, or `FULL` through
-`RestClientSupport.configure(builder, HttpLoggingLevel)`. `HEADERS` redacts sensitive headers. `FULL`
-also redacts and limits JSON body logs to 8 KiB, and can read an unconsumed error response body for
-that diagnostic purpose. The response error handler itself does not read, copy, or retain a downstream
-response body. An application adapter that owns a documented downstream protocol must perform any body
-parsing itself. The
-[Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents the Spring-specific
-composition and boundary in more detail.
+The APIs are organized by abstraction level. Import `HttpLoggingLevel` and `HttpLoggingSupport` from
+`org.jfoundry.http.spring`, `HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
+`RestClient` facade and translated exceptions from `org.jfoundry.web.spring.client`. These replace the
+old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
+remains in `org.jfoundry.web.spring`.
 
-Spring Boot applications can add `jfoundry-web-spring-boot-starter` and set
-`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`. The property is applied to
-Spring Boot-managed `RestClient.Builder` instances; manually created builders still use the explicit
-`RestClientSupport.configure(builder, HttpLoggingLevel)` API.
+Outbound logging defaults to `BASIC`. Applications can select all four levels through
+`RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use
+`jfoundry.web.rest-client.logging-level`, also defaulting to `BASIC`. The client `durationMs` starts
+immediately before `ClientHttpRequestExecution.execute(...)` and ends when response headers are
+available or execution fails. It excludes response-body consumption and decoding and is not
+end-to-end latency.
+
+The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFilter`. It is disabled
+by default with `jfoundry.web.server.logging-level=NONE`; set `BASIC`, `HEADERS`, or `FULL` to enable it.
+Inbound `durationMs` runs from initial Filter entry to synchronous completion or terminal async
+complete, error, or timeout. It does not claim that the client has received all response bytes.
+
+Both directions emit only at `DEBUG`. `BASIC` records query-free method/URI, status or failure, and
+`durationMs` without body wrappers. `HEADERS` adds headers after case-insensitive redaction of
+authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
+nested-field redaction and retains at most 8 KiB; non-JSON, malformed, incomplete, and oversized bodies
+are described rather than exposed. The client may read an unconsumed error response on close for this
+diagnostic purpose. Servlet capture forwards bytes immediately and does not delay streaming output.
+
+These diagnostic access logs do not replace Micrometer metrics or traces, and they do not publish or
+stand in for application-owned business audit events. The
+[Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents composition and replacement
+rules in more detail.

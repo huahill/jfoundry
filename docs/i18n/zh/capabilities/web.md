@@ -111,15 +111,33 @@ Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须�
 - [Quarkus 运行时集成](../implementations/quarkus.md)说明扩展组合与 Quarkus REST 行为。
 - [Helidon MP 运行时集成](../implementations/helidon.md)说明 CDI 与 JAX-RS 行为。
 
-## 出站 HTTP 客户端集成
+## Spring HTTP 集成与诊断日志
 
-`jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对由该集成拥有的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行该调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。Spring MVC 适配器会以 `ERROR` 级别记录外部访问异常和其他未处理异常的堆栈；Problem Details 响应不会包含 cause 或堆栈。默认的 `BASIC` HTTP 日志只会在对应 logger 开启 `DEBUG` 时记录移除 query 后的请求元数据和响应状态，不会访问任一 body。
+`jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式集成。只对该集成拥有的 builder 使用
+`RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行调用。非成功响应会转换为
+只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
+`HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。
 
-应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`。`HEADERS` 会脱敏敏感 header；`FULL` 还会脱敏 JSON body、限制日志内容为 8 KiB，并可能为了诊断未消费的错误响应而读取其 body。响应错误处理器本身不会读取、复制或保留下游响应 body；拥有已明确约定下游协议的应用适配器仍应自行完成响应 body 解析。
+API 现在按抽象层级组织。`HttpLoggingLevel` 与 `HttpLoggingSupport` 位于
+`org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，
+`RestClient` 外观与转换后的异常位于 `org.jfoundry.web.spring.client`。这些新位置替代原来的
+`org.jfoundry.web.spring` 位置，不提供兼容别名；`ProblemDetailRenderer` 仍位于原包。
 
-Spring Boot 应用可以加入 `jfoundry-web-spring-boot-starter`，并将
-`jfoundry.web.rest-client.logging-level` 设置为 `NONE`、`BASIC`、`HEADERS` 或 `FULL`。该配置会应用于
-Spring Boot 管理的 `RestClient.Builder`；应用直接创建的 builder 仍需使用显式的
-`RestClientSupport.configure(builder, HttpLoggingLevel)` API。
+出站日志默认使用 `BASIC`。应用可通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择四种级别；
+Spring Boot 管理的 builder 使用同样默认值为 `BASIC` 的
+`jfoundry.web.rest-client.logging-level`。客户端 `durationMs` 从调用
+`ClientHttpRequestExecution.execute(...)` 前开始，到响应 header 可用或执行失败时结束，不包含响应 body
+消费与解码，也不是端到端延迟。
 
-Spring 专属的组合方式与边界见 [Spring Boot 运行时装配](../implementations/spring-boot.md)。
+Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。该能力默认以
+`jfoundry.web.server.logging-level=NONE` 关闭；可设置为 `BASIC`、`HEADERS` 或 `FULL`。入站
+`durationMs` 从 Filter 初始入口持续到同步完成，或异步 complete、error、timeout 终态；它不表示客户端已经收到全部响应字节。
+
+两个方向都只在对应 logger 开启 `DEBUG` 时输出。`BASIC` 记录移除 query 后的 method/URI、状态或失败以及
+`durationMs`，且不创建 body 包装器。`HEADERS` 增加 header，并以不区分大小写的方式脱敏授权信息、凭证、
+cookie、token、secret 与 API key。`FULL` 增加经过嵌套字段脱敏的 JSON body，最多保留 8 KiB；非 JSON、
+格式错误、未完整消费或超限 body 只记录安全描述。客户端可能在关闭响应时读取未消费的错误响应 body；Servlet
+捕获会立即转发字节，不会延迟流式输出。
+
+这些诊断访问日志不能替代 Micrometer 指标或追踪，也不会发布或替代由应用拥有的业务审计事件。Spring 专属的
+组合方式与替换规则见 [Spring Boot 运行时装配](../implementations/spring-boot.md)。
