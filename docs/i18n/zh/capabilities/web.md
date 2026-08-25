@@ -130,7 +130,7 @@ Spring Boot 管理的 builder 使用同样默认值为 `BASIC` 的
 消费与解码，也不是端到端延迟。
 
 Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。该能力默认以
-`jfoundry.web.server.logging-level=NONE` 关闭；可设置为 `BASIC`、`HEADERS` 或 `FULL`。入站
+`jfoundry.web.mvc.logging-level=NONE` 关闭；可设置为 `BASIC`、`HEADERS` 或 `FULL`。入站
 `durationMs` 从 Filter 初始入口持续到同步完成，或异步 complete、error、timeout 终态；它不表示客户端已经收到全部响应字节。
 
 两个方向都只在对应 logger 开启 `DEBUG` 时输出。`BASIC` 记录移除 query 后的 method/URI、状态或失败以及
