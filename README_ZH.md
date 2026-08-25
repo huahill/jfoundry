@@ -64,7 +64,7 @@ ArchUnit 规则。CQRS 仍是按需使用的局部模式。
 | 架构 | Hexagonal 和 Onion 语义，以及 ArchUnit 规则 |
 | 应用层 | 应用服务、事务边界、CQRS 和领域事件编排 |
 | 持久化 | 聚合持久化契约，以及 MyBatis-Plus 和 JPA 实现 |
-| Web | 面向 Spring MVC、Quarkus REST 和 Helidon MP JAX-RS 的 RFC 9457 Problem Details，以及显式选择的 Spring `RestClient` 集成 |
+| Web | 面向 Spring MVC、Quarkus REST 和 Helidon MP JAX-RS 的 RFC 9457 Problem Details 与安全 HTTP 诊断日志，以及 Spring 和 MicroProfile REST Client 日志 |
 | 消息传输 | 运行时无关的出站传输契约，以及显式选择的 Kafka、RabbitMQ、RocketMQ 适配器 |
 | 可靠消息 | Transactional Outbox、Inbox 幂等、消息和序列化 SPI |
 | 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA 与 Outbox/Inbox 装配 |
@@ -74,13 +74,13 @@ ArchUnit 规则。CQRS 仍是按需使用的局部模式。
 - **选择能力**：先从[能力目录](docs/i18n/zh/capabilities/index.md)开始，将业务需求映射到受支持运行时的依赖入口。
 - **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md)。
-- **Web**：先阅读[Web](docs/i18n/zh/capabilities/web.md)，再为 HTTP API 选择 RFC 9457 Problem Details，或为出站客户端选择显式的 Spring `RestClient` 集成。
+- **Web**：先阅读[Web](docs/i18n/zh/capabilities/web.md)，再选择 RFC 9457 Problem Details 或运行时专属的 HTTP 服务端与 REST Client 诊断日志。
 - **消息传输**：通过[消息传输](docs/i18n/zh/capabilities/message-delivery.md)选择直接使用的 Kafka、RabbitMQ、RocketMQ 或应用自有传输适配器。
 - **Spring Boot + MyBatis-Plus（常用组合）**：先完成 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md)，再接入 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 聚合持久化；这是一条常见接入路径，不改变 JPA 的同等支持地位。
 - **可靠消息**：先阅读[可靠消息](docs/i18n/zh/capabilities/reliable-messaging.md)，再从对应的 [MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md) 指南中选择其存储实现。
 - **Spring Boot**：通过 [Spring Boot 运行时装配](docs/i18n/zh/implementations/spring-boot.md) 使用启动器与条件化自动配置组装已选择的能力；其属性、条件与 Bean 优先级见 [Spring Boot 自动配置参考](docs/i18n/zh/reference/spring-boot-autoconfiguration.md)。
-- **Quarkus**：通过 [Quarkus 运行时集成](docs/i18n/zh/implementations/quarkus.md) 使用显式扩展组合接入 CDI 事务、当前覆盖 RFC 9457 Problem Details 的 Web 支持、领域事件分发、基于 JPA 的可靠消息、Kafka 与 RabbitMQ 投递并验证原生镜像。
-- **Helidon MP**：通过 [Helidon MP 运行时集成](docs/i18n/zh/implementations/helidon.md) 显式组合 CDI/JTA、JPA、Outbox/Inbox 与当前覆盖 RFC 9457 Problem Details 的 Web 支持。其原生镜像当前验证 CDI/Web；Helidon Narayana JTA 的原生执行仍是上游实验性能力。
+- **Quarkus**：通过 [Quarkus 运行时集成](docs/i18n/zh/implementations/quarkus.md) 使用显式扩展组合接入 CDI 事务、Problem Details 与 HTTP 日志、领域事件分发、基于 JPA 的可靠消息、Kafka 与 RabbitMQ 投递并验证原生镜像。
+- **Helidon MP**：通过 [Helidon MP 运行时集成](docs/i18n/zh/implementations/helidon.md) 显式组合 CDI/JTA、JPA、Outbox/Inbox、Problem Details 与 HTTP 日志。其原生镜像当前验证 CDI/Web；Helidon Narayana JTA 的原生执行仍是上游实验性能力。
 
 ## 最小接入
 

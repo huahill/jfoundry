@@ -1,4 +1,4 @@
-package org.jfoundry.http.spring;
+package org.jfoundry.http;
 
 /// Selects the detail recorded for HTTP client or server diagnostic logs.
 ///

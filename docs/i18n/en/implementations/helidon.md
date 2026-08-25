@@ -87,7 +87,7 @@ one of these defaults in a portable Helidon application, declare the replacement
 `@Alternative` with a priority greater than `1`; a plain CDI bean does not override an enabled
 alternative.
 
-## Web Problems
+## Web Integration
 
 `jfoundry-web-helidon-runtime` maps JFoundry application and domain exceptions to RFC 9457
 `application/problem+json` JAX-RS responses. It keeps Helidon's ordinary handling for unknown
@@ -105,6 +105,24 @@ constraint violations rooted in a JAX-RS resource input into
 violations and validation failures from internal CDI services are rethrown so Helidon retains its
 server-error handling. Applications that accept JSON request bodies must also select a Jersey JSON
 provider, such as `jersey-media-json-binding` for JSON-B.
+
+The same runtime module registers a JAX-RS request/response filter and reader/writer interceptors for
+diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging-level`, defaulting to `NONE`.
+Enable `BASIC`, `HEADERS`, or `FULL` together with `DEBUG` for
+`org.jfoundry.http.helidon.HttpLoggingProvider`.
+
+When the application selects `helidon-microprofile-rest-client`, JFoundry automatically registers its
+provider with every MicroProfile REST Client builder. Outbound logging uses
+`jfoundry.web.rest-client.logging-level`, defaulting to `BASIC`; the Web runtime does not add the
+client implementation itself. This integration is verified on the JVM. Helidon 4.5.3's REST Client
+Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
+Client logging is not a release support claim. Spring `WebClient` is not supported.
+
+URI queries, user information, and fragments are never logged. Sensitive headers and nested JSON
+fields are redacted case-insensitively, and body capture is capped at 8 KiB. Client duration ends when
+response headers arrive, while body logs appear after consumption or close. Jakarta REST has no
+portable transport-failure callback, so this adapter does not depend on Helidon-private hooks to
+claim Spring-equivalent failure logging.
 
 ## PostgreSQL/JTA Middleware Verification
 

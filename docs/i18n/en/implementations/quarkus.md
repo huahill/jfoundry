@@ -63,10 +63,10 @@ artifact automatically.
 
 Quarkus is not a Spring starter translation layer. Its explicit composition currently covers CDI/JTA
 transactions, local CDI domain-event delivery, JPA aggregate persistence, JPA Outbox and Inbox
-stores, Outbox dispatch and maintenance, Kafka and RabbitMQ delivery, and RFC 9457 Problem Details.
-The generic `jfoundry-web-quarkus-runtime` extension currently provides the Problem Details adapter
-and is the home for future Quarkus Web inbound integration; it does not move web semantics into the
-core.
+stores, Outbox dispatch and maintenance, Kafka and RabbitMQ delivery, RFC 9457 Problem Details, and
+safe inbound and MicroProfile REST Client diagnostic logging. The generic
+`jfoundry-web-quarkus-runtime` extension owns the Quarkus REST boundary without moving Web lifecycle
+APIs into the core.
 
 MyBatis-Plus aggregate persistence, RocketMQ delivery, Redisson distributed locks, and JobRunr
 assembly are not supported Quarkus compositions today. Do not add the framework-neutral adapters or
@@ -315,8 +315,8 @@ does not provide a dispatcher, scheduler, serializer, automatic event externaliz
 ## Problem Details (RFC 9457)
 
 Add `jfoundry-web-quarkus-runtime` when a Quarkus REST application needs the shared RFC 9457 error
-contract. The extension is named for the broader Quarkus Web boundary; Problem Details is its
-currently implemented capability. The runtime-neutral contract and the dependency choices for all
+contract. The same extension also provides the HTTP diagnostic logging described below. The
+runtime-neutral contract and the dependency choices for all
 supported runtimes are in [Web](../capabilities/web.md):
 
 ```xml
@@ -358,6 +358,24 @@ The extension does not configure security. A Quarkus security adapter that owns 
 authorization can render its own `401` or `403` descriptor with the public
 `ProblemDetailsRenderer.render(...)` API.
 
+## HTTP Diagnostic Logging
+
+`jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer
+interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging-level`; it defaults to
+`NONE`. `BASIC`, `HEADERS`, and `FULL` require the
+`org.jfoundry.http.quarkus.HttpLoggingProvider` category at `DEBUG`.
+
+When the application selects a Quarkus MicroProfile REST Client extension, JFoundry also registers
+the provider with every REST Client builder. Outbound logging uses
+`jfoundry.web.rest-client.logging-level`, defaulting to `BASIC`. It does not add a REST Client
+implementation by itself. Spring `WebClient` is not supported by this adapter.
+
+All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are
+redacted case-insensitively, and `FULL` retains at most 8 KiB. Client duration ends when response
+headers arrive; response-body logging occurs after consumption or close. Jakarta REST exposes no
+portable transport-failure callback, so the adapter does not use runtime-private hooks to claim
+Spring-equivalent client failure logging.
+
 ## PostgreSQL Middleware Verification
 
 The runtime-local JVM integration profile starts PostgreSQL through Testcontainers. It verifies that
@@ -397,6 +415,7 @@ use `bash scripts/verify-runtime-ci.sh all` with both environment variables set.
 ## Current Scope
 
 This Quarkus integration covers CDI discovery, application transactions, RFC 9457 Problem Details,
+HTTP server and MicroProfile REST Client diagnostic logging,
 application-service domain-event dispatch, JPA aggregate persistence context assembly, optional JPA Outbox and
 Inbox storage, automatic externalization for explicitly marked events, Kafka and RabbitMQ message delivery, and
 optional Outbox dispatch, recovery, and cleanup. It does not yet provide Quarkus assembly for MyBatis-Plus,

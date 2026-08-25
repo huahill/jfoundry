@@ -1,6 +1,6 @@
 package org.jfoundry.web.spring.client;
 
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 
 import org.springframework.http.converter.HttpMessageConversionException;

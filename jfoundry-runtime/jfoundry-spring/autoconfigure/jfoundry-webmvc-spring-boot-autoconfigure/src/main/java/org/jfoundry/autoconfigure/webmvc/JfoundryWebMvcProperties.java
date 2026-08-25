@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.webmvc;
 
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /// Spring Boot properties for inbound JFoundry Web MVC integrations.
