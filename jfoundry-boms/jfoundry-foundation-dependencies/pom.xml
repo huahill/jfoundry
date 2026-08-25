@@ -40,7 +40,7 @@
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.4.5.Final</hibernate.version>
+    <hibernate.version>7.4.6.Final</hibernate.version>
     <h2.version>2.4.240</h2.version>
     <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
@@ -62,7 +62,7 @@
     <caffeine.version>3.1.8</caffeine.version>
 
     <!-- Messaging and background jobs -->
-    <jobrunr.version>8.8.1</jobrunr.version>
+    <jobrunr.version>8.8.2</jobrunr.version>
     <kafka-clients.version>4.3.1</kafka-clients.version>
     <mqttv3.version>1.2.5</mqttv3.version>
     <rabbitmq-amqp-client.version>5.34.0</rabbitmq-amqp-client.version>
