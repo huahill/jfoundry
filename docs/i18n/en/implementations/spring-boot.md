@@ -201,18 +201,31 @@ exceptions, as described in their implementation guides.
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. The default `BASIC` HTTP logging does not
-access request or response bodies. Applications can select `NONE`, `HEADERS`, or `FULL` with
-`RestClientSupport.configure(builder, HttpLoggingLevel)`; `FULL` logs redacted, size-limited JSON
-bodies and can read an unconsumed error response body for diagnostics. The response error handler
-itself does not read, copy, or retain a downstream response body; an application adapter that owns a
-documented downstream protocol must perform any body parsing itself.
+become an `HttpRequestException` with a safe failure kind. Import the logging policy from
+`org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
+the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
+locations have no forwarding aliases.
 
 Spring Boot applications can use `jfoundry-web-spring-boot-starter` and set
-`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`. The setting is applied to
-Spring Boot-managed `RestClient.Builder` instances. Applications that create a builder directly with
-`RestClient.builder()` must continue to select the level with
-`RestClientSupport.configure(builder, HttpLoggingLevel)`.
+`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
+`BASIC`. Applications that create a builder directly with `RestClient.builder()` must select the level
+with `RestClientSupport.configure(builder, HttpLoggingLevel)`. Outbound `durationMs` uses a monotonic
+clock from execution-chain entry until response headers arrive or execution fails. Response-body
+consumption and decoding occur outside that boundary.
+
+`jfoundry-webmvc-spring-boot-starter` auto-configures `HttpLoggingFilter` for Servlet applications.
+`jfoundry.web.server.logging-level` defaults to `NONE`, so upgrades do not silently increase access-log
+volume. Enabled registration covers `REQUEST`, `ASYNC`, and `ERROR`, supports async processing, and
+defaults to `Ordered.HIGHEST_PRECEDENCE + 20`, before Spring Security's normal registration. An
+application-provided `HttpLoggingFilter` or `FilterRegistrationBean<HttpLoggingFilter>` replaces this
+default when forwarding, tracing, or security topology requires another order.
+
+Inbound duration ends when the synchronous chain completes or the async request reaches terminal
+complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at
+most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
+directions log only at `DEBUG`, always remove URI queries, redact sensitive headers and nested JSON
+fields, and omit unsafe body representations. These logs supplement rather than replace Micrometer
+metrics/traces and application-owned business audit events.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that
 cannot be met by database constraints, idempotency, or local synchronization.

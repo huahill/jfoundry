@@ -25,7 +25,7 @@
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 业务 MyBatis-Plus 持久化入口：基础自动配置、共享持久化运行时支持、MyBatis-Plus Boot 启动器和默认技术审计处理器 | Outbox/Inbox 存储 |
 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个由 JPA 管理的实体图的 jfoundry JPA 适配器、共享 Spring 事务持久化上下文、Spring Boot JPA 运行时 | 对分离聚合执行合并、手动多表或多实体图同步算法、Outbox 和 Inbox 存储 |
-| `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` 异常响应 | 消息、Outbox、Inbox |
+| `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` 异常响应与默认关闭的入站 Servlet HTTP 日志 | 消息、Outbox、Inbox、出站 `RestClient` 支持 |
 
 ## 配置项
 
@@ -37,6 +37,7 @@
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | 当存在 `DomainEventOutboxRecorder` Bean 时，开启 Outbox 领域事件派发。 |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
 | `jfoundry.web.rest-client.logging-level` | `BASIC` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
+| `jfoundry.web.server.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用的级别仍要求 Filter logger 开启 `DEBUG`。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
@@ -81,6 +82,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`、JPA `InboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Inbox 适配器。用户提供的 `InboxMessageStore` 或 `JpaInboxClaimStrategy` 优先；内置领取策略仅支持 PostgreSQL 和 MySQL，未知数据库产品在应用未提供策略时会快速失败。 |
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC 应用且处理器类存在；没有已有 JFoundry 处理器。它先于 Spring Boot Web MVC 自动配置运行，使 Boot 的通用问题详情处理器回退。 |
+| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`、`JfoundryWebMvcProperties` | Servlet 应用与 Filter API 存在，且应用未提供 `HttpLoggingFilter` 或对应注册。`NONE` 创建 disabled registration；启用后以 `HIGHEST_PRECEDENCE + 20` 覆盖 request、async、error 派发。 |
 | `WebRestClientAutoConfiguration` | `RestClientCustomizer`、`JfoundryWebProperties` | Spring Boot `RestClient` 类和 `jfoundry-web-spring` 存在；customizer 将配置的日志级别应用到 Boot 管理的 builder。 |
 
 ## 说明
@@ -98,6 +100,9 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   `tools.jackson.databind.ObjectMapper`；Outbox 启动器通过消息启动器继承该能力。JFoundry 不支持
   Spring Boot 的 Jackson 2 兼容模块。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
+- 入站与出站 HTTP 日志相互独立。两者都只在 `DEBUG` 输出，移除 URI query，脱敏凭证、cookie、token、
+  secret 与 API key，并将 `FULL` JSON body 捕获限制为 8 KiB。客户端时长在响应 header 到达时结束；Servlet
+  时长在同步或异步终态完成时结束。两者都不是端到端客户端延迟，也不是业务审计事件。
 - 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.mode` 是构建期的结构化配置。必须将
   选定值传给 `process-aot`；仅在启动原生可执行文件时变更该值，无法恢复被 AOT 裁剪的 Bean。需要不同
   派发模式的部署应构建独立镜像。

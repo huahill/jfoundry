@@ -134,12 +134,29 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 `MethodArgumentNotValidException` 与 `HandlerMethodValidationException` 生成该共享契约；返回值校验仍作为
 服务端失败处理。Quarkus 与 Helidon 则从各自运行时的请求校验异常生成相同的外部表示，具体见对应的实现指南。
 
-`jfoundry-web-spring` 为出站 `RestClient` 调用提供显式选择的 Spring Web 集成。只对拥有该集成的 builder 使用 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的 `HttpRequestException`。默认的 `BASIC` HTTP 日志不会访问请求或响应 body。应用可以通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择 `NONE`、`HEADERS` 或 `FULL`；`FULL` 会记录经脱敏、限长的 JSON body，并可能为诊断读取未消费的错误响应 body。响应错误处理器本身不会读取、复制或保留下游响应体；拥有已明确约定下游协议的应用适配器仍应自行解析响应体。
+`jfoundry-web-spring` 为出站 `RestClient` 调用提供显式 Spring Web 集成。只对拥有该集成的 builder 使用
+`RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
+只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
+`HttpRequestException`。日志策略从 `org.jfoundry.http.spring` 导入，执行链拦截器从
+`org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
+`org.jfoundry.web.spring` 位置不提供转发别名。
 
-Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并将
-`jfoundry.web.rest-client.logging-level` 设置为 `NONE`、`BASIC`、`HEADERS` 或 `FULL`。该配置会应用于
-Spring Boot 管理的 `RestClient.Builder`。应用通过 `RestClient.builder()` 直接创建 builder 时，
-仍需使用 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择级别。
+Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并通过
+`jfoundry.web.rest-client.logging-level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `BASIC`。
+直接通过 `RestClient.builder()` 创建 builder 时，仍需使用
+`RestClientSupport.configure(builder, HttpLoggingLevel)`。出站 `durationMs` 使用单调时钟，从进入执行链开始，
+到响应 header 到达或执行失败时结束；响应 body 消费与解码不在该边界内。
+
+`jfoundry-webmvc-spring-boot-starter` 会为 Servlet 应用自动配置 `HttpLoggingFilter`。
+`jfoundry.web.server.logging-level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后的注册覆盖
+`REQUEST`、`ASYNC` 与 `ERROR`，支持异步处理，默认顺序为 `Ordered.HIGHEST_PRECEDENCE + 20`，位于 Spring
+Security 常规注册之前。应用可以提供自己的 `HttpLoggingFilter` 或
+`FilterRegistrationBean<HttpLoggingFilter>`，以适配转发、追踪或安全拓扑所需的其他顺序。
+
+入站时长在同步链完成，或异步请求进入 complete、error、timeout 终态时结束。`FULL` 使用 tee 包装器立即转发
+请求与响应字节，并最多保留 8 KiB；该时长不表示客户端何时收到流式响应。两个方向都只在 `DEBUG` 输出，始终移除
+URI query，并脱敏敏感 header 与嵌套 JSON 字段；不安全的 body 表示会被省略。这些日志用于补充而不是替代
+Micrometer 指标/追踪与应用拥有的业务审计事件。
 
 Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约束、幂等或本地同步不足以满足该需求时使用。
 

@@ -27,7 +27,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |
 | `jfoundry-persistence-jpa-spring-boot-starter` | jfoundry JPA adapter for one managed entity graph per aggregate, shared Spring transaction persistence context, Spring Boot JPA runtime | Detached aggregate merge, manual multi-table or multi-graph synchronization algorithms, Outbox and Inbox stores |
 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business MyBatis-Plus persistence entry point: base auto-configuration, shared persistence runtime support, the MyBatis-Plus Boot starter, and the default technical audit handler | Outbox/Inbox stores |
-| `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` exception handling | Messaging, Outbox, Inbox |
+| `jfoundry-webmvc-spring-boot-starter` | Web MVC `ProblemDetail` exception handling and disabled-by-default inbound Servlet HTTP logging | Messaging, Outbox, Inbox, outbound `RestClient` support |
 
 ## Configuration Properties
 
@@ -39,6 +39,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | Enables Outbox-backed domain event dispatch when a `DomainEventOutboxRecorder` bean exists. |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
 | `jfoundry.web.rest-client.logging-level` | `BASIC` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
+| `jfoundry.web.server.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled levels require the Filter logger at `DEBUG`. |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |
@@ -84,6 +85,7 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`, JPA `InboxMessageStore` | `EntityManagerFactory` and the JPA Inbox adapter are present. A user `InboxMessageStore` or `JpaInboxClaimStrategy` takes precedence; built-in claim strategies support only PostgreSQL and MySQL, and an unknown database product fails fast unless the application supplies a strategy. |
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC application and handler class are present; no existing JFoundry handler. It runs before Spring Boot Web MVC auto-configuration, causing Boot's generic problem-details handler to back off. |
+| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`, `JfoundryWebMvcProperties` | Servlet application and Filter APIs are present; no application `HttpLoggingFilter` or matching registration exists. `NONE` creates a disabled registration; enabled levels cover request, async, and error dispatches at `HIGHEST_PRECEDENCE + 20`. |
 | `WebRestClientAutoConfiguration` | `RestClientCustomizer`, `JfoundryWebProperties` | Spring Boot RestClient classes and `jfoundry-web-spring` are present; the customizer applies the configured logging level to Boot-managed builders. |
 
 ## Notes
@@ -104,6 +106,10 @@ bean into the default recorder. Applications normally provide these mappings wit
   `tools.jackson.databind.ObjectMapper`; the Outbox starter inherits this capability through messaging.
   JFoundry does not support Spring Boot's Jackson 2 compatibility module.
 - Distributed lock support is explicit. The default Spring Boot starter does not pull Redisson.
+- Inbound and outbound HTTP logging are independent. Both emit only at `DEBUG`, remove URI queries,
+  redact credentials, cookies, tokens, secrets, and API keys, and cap `FULL` JSON body capture at 8 KiB.
+  Client duration ends at response headers; Servlet duration ends at synchronous or async terminal
+  completion. Neither is an end-to-end client latency measurement or a business audit event.
 - For a Spring Boot Native Image, `jfoundry.outbox.dispatcher.mode` is a build-time structural
   setting. Pass the selected value to `process-aot`; changing it only when starting the native
   executable cannot restore beans that AOT excluded. Build a distinct image when a deployment needs
