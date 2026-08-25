@@ -148,7 +148,7 @@ Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并通过
 到响应 header 到达或执行失败时结束；响应 body 消费与解码不在该边界内。
 
 `jfoundry-webmvc-spring-boot-starter` 会为 Servlet 应用自动配置 `HttpLoggingFilter`。
-`jfoundry.web.server.logging-level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后的注册覆盖
+`jfoundry.web.mvc.logging-level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后的注册覆盖
 `REQUEST`、`ASYNC` 与 `ERROR`，支持异步处理，默认顺序为 `Ordered.HIGHEST_PRECEDENCE + 20`，位于 Spring
 Security 常规注册之前。应用可以提供自己的 `HttpLoggingFilter` 或
 `FilterRegistrationBean<HttpLoggingFilter>`，以适配转发、追踪或安全拓扑所需的其他顺序。

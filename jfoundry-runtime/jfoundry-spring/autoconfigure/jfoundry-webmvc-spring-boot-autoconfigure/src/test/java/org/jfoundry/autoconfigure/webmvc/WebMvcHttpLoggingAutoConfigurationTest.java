@@ -38,7 +38,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     void bindsEveryEnabledLevel() {
         for (var level : new HttpLoggingLevel[]{HttpLoggingLevel.BASIC, HttpLoggingLevel.HEADERS,
                 HttpLoggingLevel.FULL}) {
-            runner.withPropertyValues("jfoundry.web.server.logging-level=" + level)
+            runner.withPropertyValues("jfoundry.web.mvc.logging-level=" + level)
                     .run(context -> {
                         var registration = registration(context);
                         assertThat(registration.isEnabled()).isTrue();
@@ -49,7 +49,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     @Test
     void configuresAsyncDispatchTypesAndDefaultOrder() {
-        runner.withPropertyValues("jfoundry.web.server.logging-level=BASIC")
+        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
                 .run(context -> {
                     var registration = registration(context);
                     assertThat(registration.isAsyncSupported()).isTrue();

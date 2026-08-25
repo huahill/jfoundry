@@ -214,7 +214,7 @@ clock from execution-chain entry until response headers arrive or execution fail
 consumption and decoding occur outside that boundary.
 
 `jfoundry-webmvc-spring-boot-starter` auto-configures `HttpLoggingFilter` for Servlet applications.
-`jfoundry.web.server.logging-level` defaults to `NONE`, so upgrades do not silently increase access-log
+`jfoundry.web.mvc.logging-level` defaults to `NONE`, so upgrades do not silently increase access-log
 volume. Enabled registration covers `REQUEST`, `ASYNC`, and `ERROR`, supports async processing, and
 defaults to `Ordered.HIGHEST_PRECEDENCE + 20`, before Spring Security's normal registration. An
 application-provided `HttpLoggingFilter` or `FilterRegistrationBean<HttpLoggingFilter>` replaces this

@@ -37,7 +37,7 @@
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | 当存在 `DomainEventOutboxRecorder` Bean 时，开启 Outbox 领域事件派发。 |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
 | `jfoundry.web.rest-client.logging-level` | `BASIC` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
-| `jfoundry.web.server.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用的级别仍要求 Filter logger 开启 `DEBUG`。 |
+| `jfoundry.web.mvc.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用的级别仍要求 Filter logger 开启 `DEBUG`。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |

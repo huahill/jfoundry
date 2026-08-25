@@ -4,7 +4,7 @@ import org.jfoundry.http.spring.HttpLoggingLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /// Spring Boot properties for inbound JFoundry Web MVC integrations.
-@ConfigurationProperties(prefix = "jfoundry.web.server")
+@ConfigurationProperties(prefix = "jfoundry.web.mvc")
 public class JfoundryWebMvcProperties {
 
     private HttpLoggingLevel loggingLevel = HttpLoggingLevel.NONE;

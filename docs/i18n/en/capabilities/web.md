@@ -161,7 +161,7 @@ available or execution fails. It excludes response-body consumption and decoding
 end-to-end latency.
 
 The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFilter`. It is disabled
-by default with `jfoundry.web.server.logging-level=NONE`; set `BASIC`, `HEADERS`, or `FULL` to enable it.
+by default with `jfoundry.web.mvc.logging-level=NONE`; set `BASIC`, `HEADERS`, or `FULL` to enable it.
 Inbound `durationMs` runs from initial Filter entry to synchronous completion or terminal async
 complete, error, or timeout. It does not claim that the client has received all response bytes.
 
