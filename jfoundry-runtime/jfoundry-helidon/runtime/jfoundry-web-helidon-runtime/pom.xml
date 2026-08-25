@@ -12,7 +12,9 @@
         <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web</artifactId></dependency>
         <dependency><groupId>io.helidon.microprofile.server</groupId><artifactId>helidon-microprofile-server</artifactId></dependency>
         <dependency><groupId>jakarta.ws.rs</groupId><artifactId>jakarta.ws.rs-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>jakarta.json</groupId><artifactId>jakarta.json-api</artifactId></dependency>
         <dependency><groupId>jakarta.validation</groupId><artifactId>jakarta.validation-api</artifactId><scope>provided</scope></dependency>
+        <dependency><groupId>org.eclipse.microprofile.rest.client</groupId><artifactId>microprofile-rest-client-api</artifactId><scope>provided</scope><optional>true</optional></dependency>
         <dependency><groupId>io.helidon.microprofile.bean-validation</groupId><artifactId>helidon-microprofile-bean-validation</artifactId><scope>test</scope></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
         <dependency><groupId>org.assertj</groupId><artifactId>assertj-core</artifactId><scope>test</scope></dependency>

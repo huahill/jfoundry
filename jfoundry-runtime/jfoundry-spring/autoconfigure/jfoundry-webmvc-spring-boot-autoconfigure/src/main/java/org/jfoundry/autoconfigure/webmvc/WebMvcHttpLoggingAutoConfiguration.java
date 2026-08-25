@@ -3,7 +3,7 @@ package org.jfoundry.autoconfigure.webmvc;
 import java.util.EnumSet;
 
 import jakarta.servlet.DispatcherType;
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

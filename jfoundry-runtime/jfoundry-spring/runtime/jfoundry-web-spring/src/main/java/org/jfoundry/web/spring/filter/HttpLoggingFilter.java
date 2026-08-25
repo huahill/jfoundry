@@ -31,7 +31,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.HttpLoggingSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

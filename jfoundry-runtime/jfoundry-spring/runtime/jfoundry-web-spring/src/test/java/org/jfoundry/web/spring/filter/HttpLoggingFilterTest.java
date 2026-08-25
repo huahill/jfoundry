@@ -14,7 +14,7 @@ import ch.qos.logback.core.read.ListAppender;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletException;
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

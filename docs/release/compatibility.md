@@ -70,7 +70,7 @@ dependency-management rules.
 
 ## Verification Evidence
 
-Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. The Spring MyBatis-Plus, Redisson, and JobRunr Native Image verification evidence was recorded on 2026-07-30 with the same GraalVM and Maven versions. Maven 4 Consumer POM release verification was added on 2026-08-01 and now runs with RC6; ordinary CI and the release workflow perform a clean Maven 4 install and verify the installed POMs with Maven 3.9 and Maven 4 before deployment.
+Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. The Spring MyBatis-Plus, Redisson, and JobRunr Native Image verification evidence was recorded on 2026-07-30 with the same GraalVM and Maven versions. HTTP logging runtime verification was refreshed on 2026-08-25 with GraalVM Community `25.0.4` and Maven wrapper `4.0.0-rc-6`. Maven 4 Consumer POM release verification was added on 2026-08-01 and now runs with RC6; ordinary CI and the release workflow perform a clean Maven 4 install and verify the installed POMs with Maven 3.9 and Maven 4 before deployment.
 
 | Gate | Command | Result |
 |------|---------|--------|
@@ -89,7 +89,7 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Maven Consumer POM contract | Maven `4.0.0-rc-6`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC6 | PASS on 2026-08-24; verifies flattened child POMs, both direct Spring BOM lines, the Boot parent, and Cloud Alibaba versionless resolution with Maven 3.9 and Maven 4 |
 | Spring Cloud BOM resolution | Versionless Spring Cloud Alibaba Nacos Discovery consumer with `jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies` | Required before Central deploy; rejects the unsupported Spring Boot 4.1.1 plus Spring Cloud 2025.1.2 combination |
 | Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | Historical PASS on Java 21; Java 25 revalidation is required by the release baseline |
-| Helidon Native CDI/Web consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-07-24 |
+| Helidon Native CDI/Web server consumer smoke test | GraalVM 25, `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package`, then HTTP Problem Details smoke | PASS on 2026-08-25 with GraalVM Community 25.0.4 |
 
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
@@ -103,6 +103,13 @@ initialized in the image. The environment, JVM PostgreSQL/JTA/JPA control result
 trace are recorded in [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
 JVM Helidon JTA is supported; Native JTA and JPA are not release acceptance claims until upstream
 support works.
+
+Helidon MP 4.5.3 REST Client is also JVM-only in the current acceptance matrix. Adding
+`helidon-microprofile-rest-client` to the GraalVM Community 25.0.4 image classpath fails during
+initialization because Helidon's `RestClientSubstitution.ReflectionUtilSubstitution` contains an
+unannotated substitution method. JFoundry keeps that implementation in JVM integration-test scope;
+the Web runtime exposes only the optional MicroProfile REST Client SPI and the Native CDI/Web server
+smoke does not claim Native REST Client support.
 
 ## Release Gates
 

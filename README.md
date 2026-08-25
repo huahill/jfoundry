@@ -69,7 +69,7 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 | Architecture | Hexagonal and Onion semantics with ArchUnit rules |
 | Application | Application services, transaction boundaries, CQRS, and domain-event orchestration |
 | Persistence | Aggregate persistence contracts with JPA and MyBatis-Plus implementations |
-| Web | RFC 9457 Problem Details for Spring MVC, Quarkus REST, and Helidon MP JAX-RS, plus opt-in Spring `RestClient` integration |
+| Web | RFC 9457 Problem Details and safe HTTP diagnostic logging for Spring MVC, Quarkus REST, and Helidon MP JAX-RS, plus Spring and MicroProfile REST Client logging |
 | Message delivery | Runtime-neutral outbound transport contracts with explicit Kafka, RabbitMQ, and RocketMQ adapters |
 | Reliable messaging | Transactional Outbox, Inbox idempotency, messaging, and serialization SPI |
 | Runtime integration | Spring Framework and Spring Boot assembly; Quarkus and Helidon CDI/Jakarta Transactions, JPA, and Outbox/Inbox assembly |
@@ -79,12 +79,12 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 - **Choose a capability**: start with the [Capability Catalog](docs/i18n/en/capabilities/index.md) to map a business need to its supported runtime dependency.
 - **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/repository-vs-read-contracts.md).
 - **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
-- **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details for an HTTP API or the opt-in Spring `RestClient` integration for an outbound client.
+- **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details or runtime-specific HTTP server and REST Client diagnostic logging.
 - **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
 - **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md) guide.
 - **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
-- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, Web support currently covering RFC 9457 Problem Details, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
-- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, and Web support currently covering RFC 9457 Problem Details. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
+- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, Problem Details and HTTP logging, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
+- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, Problem Details, and HTTP logging. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
 
 ## Minimal Setup
 

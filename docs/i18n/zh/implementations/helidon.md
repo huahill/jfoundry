@@ -79,7 +79,7 @@ jfoundry.outbox.dispatcher.enabled=true
 和 recorder。若要在可移植 Helidon 应用中替换这些默认实现，应用实现必须声明为已启用的 CDI `@Alternative`，且
 `@Priority` 高于 `1`；普通 CDI Bean 不能覆盖已启用的 alternative。
 
-## Web Problem
+## Web 集成
 
 `jfoundry-web-helidon-runtime` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
@@ -93,6 +93,19 @@ JSON 标量、数组和对象类型。
 入参的约束违反转换为 `urn:jfoundry:problem:request-validation`，且不会访问或返回被拒绝的值。返回值约束
 违反以及内部 CDI 服务的校验失败会继续抛出，由 Helidon 保留服务端错误处理。接受 JSON 请求体的应用还必须
 选择 Jersey JSON provider，例如用于 JSON-B 的 `jersey-media-json-binding`。
+
+同一运行时模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
+`jfoundry.web.helidon.logging-level`，默认值为 `NONE`。选择 `BASIC`、`HEADERS` 或 `FULL` 时，还需为
+`org.jfoundry.http.helidon.HttpLoggingProvider` 开启 `DEBUG`。
+
+应用选择 `helidon-microprofile-rest-client` 后，JFoundry 会把 provider 自动注册到每个 MicroProfile REST Client
+builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `BASIC`；Web 运行时本身不会引入
+客户端实现。该集成已通过 JVM 验证。Helidon 4.5.3 的 REST Client 原生镜像 substitution 与当前 GraalVM 25
+基线不兼容，因此原生 REST Client 日志暂不属于发布支持声明。当前不支持 Spring `WebClient`。
+
+日志不会包含 URI query、user info 或 fragment。敏感 header 与嵌套 JSON 字段会以不区分大小写的方式脱敏，
+body 捕获上限为 8 KiB。客户端时长在响应 header 到达时结束，body 日志在消费或关闭后出现。Jakarta REST
+没有可移植的传输失败回调，因此该适配器不会依赖 Helidon 私有 hook 来声称与 Spring 相同的失败日志。
 
 ## PostgreSQL/JTA 中间件验证
 

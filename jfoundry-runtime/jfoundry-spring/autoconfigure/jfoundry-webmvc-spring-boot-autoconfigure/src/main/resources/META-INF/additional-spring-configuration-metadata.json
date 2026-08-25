@@ -2,7 +2,7 @@
   "properties": [
     {
       "name": "jfoundry.web.mvc.logging-level",
-      "type": "org.jfoundry.http.spring.HttpLoggingLevel",
+      "type": "org.jfoundry.http.HttpLoggingLevel",
       "defaultValue": "NONE",
       "description": "Inbound Servlet HTTP logging detail: NONE, BASIC, HEADERS, or FULL. Logging is emitted only when the filter logger is enabled at DEBUG."
     }

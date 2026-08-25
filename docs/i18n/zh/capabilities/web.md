@@ -1,17 +1,19 @@
 # Web
 
-`jfoundry-web` 是 JFoundry 运行时无关的 Web 能力基础。它负责共享的 HTTP 问题语义，运行时适配器再通过各自的 HTTP 技术栈渲染这些语义。当前已发布的 Web 能力包括面向 HTTP API 的 RFC 9457 Problem Details，以及面向 Spring 应用的显式出站 HTTP 客户端支持。
+`jfoundry-web` 是 JFoundry 运行时无关的 Web 能力基础。它负责共享的 HTTP 问题语义，运行时适配器再通过各自的 HTTP 技术栈渲染这些语义。当前已发布的 Web 能力包括 RFC 9457 Problem Details，以及面向 Spring、Quarkus 和 Helidon 的安全诊断 HTTP 日志。
 
 ## 选择 Web 能力
 
 | 需求 | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
 | 为 HTTP API 提供 RFC 9457 Problem Details | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| 出站 HTTP 客户端支持 | `jfoundry-web-spring-boot-starter` 或 `jfoundry-web-spring` | 暂未提供 | 暂未提供 |
+| 入站 HTTP 诊断日志 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
+| 出站 HTTP 诊断日志 | `jfoundry-web-spring-boot-starter` 或 `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` 配合 MicroProfile REST Client | `jfoundry-web-helidon-runtime` 配合 MicroProfile REST Client |
 
 `jfoundry-web-spring` 要求应用自行提供 Spring Web API。Spring Boot 应用可以加入
 `jfoundry-web-spring-boot-starter`，它提供 Spring Boot `RestClient` 集成以及
-`jfoundry.web.rest-client.logging-level` 配置项。“暂未提供”表示 JFoundry 当前未发布该运行时的适配器，不构成隐含的支持声明。
+`RestClient` 集成。Quarkus 与 Helidon 应用需要选择对应运行时的 MicroProfile REST Client 实现；
+JFoundry 运行时模块随后会自动注册日志 provider。
 
 ## Problem Details（RFC 9457）
 
@@ -111,15 +113,15 @@ Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须�
 - [Quarkus 运行时集成](../implementations/quarkus.md)说明扩展组合与 Quarkus REST 行为。
 - [Helidon MP 运行时集成](../implementations/helidon.md)说明 CDI 与 JAX-RS 行为。
 
-## Spring HTTP 集成与诊断日志
+## HTTP 集成与诊断日志
 
 `jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式集成。只对该集成拥有的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行调用。非成功响应会转换为
 只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。
 
-API 现在按抽象层级组织。`HttpLoggingLevel` 与 `HttpLoggingSupport` 位于
-`org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，
+API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 位于 `org.jfoundry.http`，Spring 专属的
+`HttpLoggingSupport` 位于 `org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，
 `RestClient` 外观与转换后的异常位于 `org.jfoundry.web.spring.client`。这些新位置替代原来的
 `org.jfoundry.web.spring` 位置，不提供兼容别名；`ProblemDetailRenderer` 仍位于原包。
 
@@ -129,15 +131,29 @@ Spring Boot 管理的 builder 使用同样默认值为 `BASIC` 的
 `ClientHttpRequestExecution.execute(...)` 前开始，到响应 header 可用或执行失败时结束，不包含响应 body
 消费与解码，也不是端到端延迟。
 
-Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。该能力默认以
-`jfoundry.web.mvc.logging-level=NONE` 关闭；可设置为 `BASIC`、`HEADERS` 或 `FULL`。入站
-`durationMs` 从 Filter 初始入口持续到同步完成，或异步 complete、error、timeout 终态；它不表示客户端已经收到全部响应字节。
+Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。Quarkus 与 Helidon 的 Web 运行时模块会
+注册等价的 JAX-RS provider。入站日志默认关闭，可通过对应运行时的配置项选择 `BASIC`、`HEADERS` 或 `FULL`：
 
-两个方向都只在对应 logger 开启 `DEBUG` 时输出。`BASIC` 记录移除 query 后的 method/URI、状态或失败以及
+| 运行时 | 入站配置项 | 默认值 |
+|---|---|---|
+| Spring MVC | `jfoundry.web.mvc.logging-level` | `NONE` |
+| Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
+| Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
+
+Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
+`jfoundry.web.rest-client.logging-level`，默认值为 `BASIC`。Spring 应用也可以通过
+`RestClientSupport.configure(builder, HttpLoggingLevel)` 为手工 builder 选择级别。JFoundry 当前不集成
+Spring `WebClient`，响应式调用不属于此契约。
+
+所有运行时都只在对应 provider logger 开启 `DEBUG` 时输出。`BASIC` 记录移除 query 后的 method/URI、状态以及
 `durationMs`，且不创建 body 包装器。`HEADERS` 增加 header，并以不区分大小写的方式脱敏授权信息、凭证、
 cookie、token、secret 与 API key。`FULL` 增加经过嵌套字段脱敏的 JSON body，最多保留 8 KiB；非 JSON、
-格式错误、未完整消费或超限 body 只记录安全描述。客户端可能在关闭响应时读取未消费的错误响应 body；Servlet
-捕获会立即转发字节，不会延迟流式输出。
+格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能改变 HTTP 处理。
+
+入站 `durationMs` 在同步完成或运行时的终态响应阶段结束，不表示调用方已经收到全部流式字节。客户端
+`durationMs` 在响应 header 可用时结束，不包含后续 body 消费与解码。Jakarta REST 客户端过滤器没有可移植的
+传输失败回调，因此 Quarkus 与 Helidon 不依赖运行时私有 hook 来伪造 Spring 专属的传输失败事件。响应 body
+日志只会在 body 被消费或关闭后出现。
 
 这些诊断访问日志不能替代 Micrometer 指标或追踪，也不会发布或替代由应用拥有的业务审计事件。Spring 专属的
-组合方式与替换规则见 [Spring Boot 运行时装配](../implementations/spring-boot.md)。
+各运行时指南进一步说明组合方式与 logger 配置。

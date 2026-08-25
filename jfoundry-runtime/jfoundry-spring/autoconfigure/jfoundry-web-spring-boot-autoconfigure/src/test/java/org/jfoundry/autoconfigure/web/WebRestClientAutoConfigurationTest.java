@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;

@@ -59,9 +59,9 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 ## 已支持范围
 
 Quarkus 不是 Spring starter 的翻译层。当前显式依赖组合覆盖 CDI/JTA 事务、本地 CDI 领域事件投递、JPA
-聚合持久化、JPA Outbox 和 Inbox 存储、Outbox 派发与维护、Kafka 和 RabbitMQ 投递，以及 RFC 9457 Problem Details。
-通用的 `jfoundry-web-quarkus-runtime` 扩展当前提供 Problem Details 适配器，并作为后续 Quarkus Web
-入站集成的归属；它不会将 Web 语义移入核心。
+聚合持久化、JPA Outbox 和 Inbox 存储、Outbox 派发与维护、Kafka 和 RabbitMQ 投递、RFC 9457 Problem Details，
+以及安全的入站与 MicroProfile REST Client 诊断日志。通用的 `jfoundry-web-quarkus-runtime` 扩展负责
+Quarkus REST 边界，但不会将 Web 生命周期 API 移入核心。
 
 当前并不支持 MyBatis-Plus 聚合持久化、RocketMQ 投递、Redisson 分布式锁或 JobRunr 的 Quarkus 组合。不要以
 运行时无关适配器或 Spring 启动器替代；只有当项目自行拥有该集成时，才选择自定义应用适配器。
@@ -275,7 +275,7 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 ## Problem Details（RFC 9457）
 
 Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-quarkus-runtime`。该扩展以更宽泛的
-Quarkus Web 边界命名，Problem Details 是当前已实现的能力。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)：
+Quarkus Web 边界命名，同一扩展还提供下文所述的 HTTP 诊断日志。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)：
 
 ```xml
 <dependency>
@@ -311,6 +311,20 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 该扩展不配置安全能力。拥有认证和授权语义的 Quarkus 安全适配器可使用公开的
 `ProblemDetailsRenderer.render(...)` API 渲染自己的 `401` 或 `403` 描述符。
 
+## HTTP 诊断日志
+
+`jfoundry-web-quarkus-runtime` 会注册 Quarkus REST 请求/响应 filter 与 reader/writer interceptor。
+入站日志通过 `jfoundry.web.quarkus.logging-level` 配置，默认值为 `NONE`。选择 `BASIC`、`HEADERS`
+或 `FULL` 时，还需为 `org.jfoundry.http.quarkus.HttpLoggingProvider` category 开启 `DEBUG`。
+
+应用选择 Quarkus MicroProfile REST Client 扩展后，JFoundry 还会把 provider 自动注册到每个 REST Client
+builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `BASIC`；JFoundry 不会自行引入
+REST Client 实现。该适配器不支持 Spring `WebClient`。
+
+所有 URI 都会移除 query、user info 与 fragment。敏感 header 和嵌套 JSON 字段以不区分大小写的方式脱敏，
+`FULL` 最多保留 8 KiB。客户端时长在响应 header 到达时结束，响应 body 日志在消费或关闭后出现。Jakarta REST
+没有可移植的传输失败回调，因此该适配器不会依赖运行时私有 hook 来声称与 Spring 相同的客户端失败日志。
+
 ## PostgreSQL 中间件验证
 
 运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL。它验证 Quarkus 的
@@ -345,6 +359,7 @@ bash scripts/verify-runtime-ci.sh quarkus
 
 ## 当前范围
 
-当前 Quarkus 集成覆盖 CDI 发现、应用事务、RFC 9457 Problem Details、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
+当前 Quarkus 集成覆盖 CDI 发现、应用事务、RFC 9457 Problem Details、HTTP 服务端与 MicroProfile REST Client
+诊断日志、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
 Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。它尚未提供
 MyBatis-Plus、RocketMQ 或启动器的 Quarkus 装配；这些能力仍是后续的显式工作项。

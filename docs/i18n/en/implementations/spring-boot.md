@@ -201,8 +201,8 @@ exceptions, as described in their implementation guides.
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. Import the logging policy from
-`org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
+become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLevel` from
+`org.jfoundry.http`, Spring's logging support from `org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
 the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
 locations have no forwarding aliases.
 

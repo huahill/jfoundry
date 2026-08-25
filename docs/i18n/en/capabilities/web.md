@@ -2,20 +2,21 @@
 
 `jfoundry-web` is JFoundry's runtime-neutral Web capability foundation. It owns shared HTTP problem
 semantics, while runtime adapters render those semantics through their respective HTTP stacks. The
-currently published Web capabilities are RFC 9457 Problem Details for HTTP APIs and opt-in outbound
-HTTP client support for Spring applications.
+currently published Web capabilities are RFC 9457 Problem Details and safe diagnostic HTTP logging
+for Spring, Quarkus, and Helidon applications.
 
 ## Select A Web Capability
 
 | Need | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
 | RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Outbound HTTP client support | `jfoundry-web-spring-boot-starter` or `jfoundry-web-spring` | Not provided | Not provided |
+| Inbound HTTP diagnostic logging | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
+| Outbound HTTP diagnostic logging | `jfoundry-web-spring-boot-starter` or `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` with MicroProfile REST Client | `jfoundry-web-helidon-runtime` with MicroProfile REST Client |
 
 `jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
-can add `jfoundry-web-spring-boot-starter`, which supplies the Spring Boot RestClient integration and
-the `jfoundry.web.rest-client.logging-level` property. `Not provided` means that JFoundry does not currently
-publish an adapter for that runtime; it is not an implicit support claim.
+can add `jfoundry-web-spring-boot-starter`, which supplies the Spring Boot `RestClient` integration.
+Quarkus and Helidon applications select their runtime's MicroProfile REST Client implementation;
+the JFoundry runtime module then registers its logging provider automatically.
 
 ## Problem Details (RFC 9457)
 
@@ -139,7 +140,7 @@ responsible for selecting the JSON provider used to deserialize request bodies.
   Quarkus REST behavior.
 - [Helidon MP Runtime Integration](../implementations/helidon.md) covers CDI and JAX-RS behavior.
 
-## Spring HTTP Integration And Diagnostic Logging
+## HTTP Integration And Diagnostic Logging
 
 `jfoundry-web-spring` provides opt-in outbound `RestClient` support. Configure only the builder owned
 by the integration with `RestClientSupport.configure(builder)`, then execute that call through
@@ -147,8 +148,9 @@ by the integration with `RestClientSupport.configure(builder)`, then execute tha
 only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
 safe failure kind while retaining the original exception as its cause for server-side diagnostics.
 
-The APIs are organized by abstraction level. Import `HttpLoggingLevel` and `HttpLoggingSupport` from
-`org.jfoundry.http.spring`, `HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
+The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` from
+`org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
+`HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
 `RestClient` facade and translated exceptions from `org.jfoundry.web.spring.client`. These replace the
 old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
 remains in `org.jfoundry.web.spring`.
@@ -160,19 +162,35 @@ immediately before `ClientHttpRequestExecution.execute(...)` and ends when respo
 available or execution fails. It excludes response-body consumption and decoding and is not
 end-to-end latency.
 
-The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFilter`. It is disabled
-by default with `jfoundry.web.mvc.logging-level=NONE`; set `BASIC`, `HEADERS`, or `FULL` to enable it.
-Inbound `durationMs` runs from initial Filter entry to synchronous completion or terminal async
-complete, error, or timeout. It does not claim that the client has received all response bytes.
+The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFilter`. Quarkus and
+Helidon register equivalent JAX-RS providers through their Web runtime modules. Inbound logging is
+disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, or `FULL` to enable it:
 
-Both directions emit only at `DEBUG`. `BASIC` records query-free method/URI, status or failure, and
+| Runtime | Inbound property | Default |
+|---|---|---|
+| Spring MVC | `jfoundry.web.mvc.logging-level` | `NONE` |
+| Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
+| Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
+
+Outbound Spring `RestClient` and MicroProfile REST Client logging use
+`jfoundry.web.rest-client.logging-level`, defaulting to `BASIC`. Spring applications can also select
+the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.
+JFoundry does not currently integrate Spring `WebClient`; reactive calls are outside this contract.
+
+All runtimes emit only when the provider logger is enabled at `DEBUG`. `BASIC` records query-free
+method/URI, status, and
 `durationMs` without body wrappers. `HEADERS` adds headers after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
 nested-field redaction and retains at most 8 KiB; non-JSON, malformed, incomplete, and oversized bodies
-are described rather than exposed. The client may read an unconsumed error response on close for this
-diagnostic purpose. Servlet capture forwards bytes immediately and does not delay streaming output.
+are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
+
+Inbound `durationMs` ends at synchronous completion or the runtime's terminal response phase; it does
+not measure when the caller receives all streamed bytes. Client `durationMs` ends when response headers
+are available and excludes later response-body consumption and decoding. Jakarta REST client filters
+have no portable transport-failure callback, so Quarkus and Helidon cannot emit the Spring-specific
+transport-failure event without relying on runtime-private hooks. Response-body logs appear only after
+the body is consumed or closed.
 
 These diagnostic access logs do not replace Micrometer metrics or traces, and they do not publish or
 stand in for application-owned business audit events. The
-[Spring Boot Runtime Assembly](../implementations/spring-boot.md) documents composition and replacement
-rules in more detail.
+runtime guides document composition and logger configuration in more detail.

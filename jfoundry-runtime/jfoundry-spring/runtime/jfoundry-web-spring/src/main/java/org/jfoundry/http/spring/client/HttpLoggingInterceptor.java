@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.HttpLoggingSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

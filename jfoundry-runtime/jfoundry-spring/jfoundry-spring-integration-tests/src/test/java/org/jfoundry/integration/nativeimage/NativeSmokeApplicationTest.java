@@ -1,7 +1,7 @@
 package org.jfoundry.integration.nativeimage;
 
 import org.junit.jupiter.api.Test;
-import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
