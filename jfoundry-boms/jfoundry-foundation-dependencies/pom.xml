@@ -70,7 +70,7 @@
     <rocketmq-client.version>5.5.0</rocketmq-client.version>
 
     <!-- Runtime utilities -->
-    <javassist.version>3.32.0-GA</javassist.version>
+    <javassist.version>3.33.0-GA</javassist.version>
     <opentelemetry.version>1.62.0</opentelemetry.version>
     <slf4j.version>2.0.18</slf4j.version>
     <snakeyaml.version>2.6</snakeyaml.version>
