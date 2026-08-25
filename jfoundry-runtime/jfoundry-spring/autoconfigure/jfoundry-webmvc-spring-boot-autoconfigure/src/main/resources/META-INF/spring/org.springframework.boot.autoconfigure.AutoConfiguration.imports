@@ -1,1 +1,2 @@
 org.jfoundry.autoconfigure.webmvc.WebMvcProblemDetailAutoConfiguration
+org.jfoundry.autoconfigure.webmvc.WebMvcHttpLoggingAutoConfiguration

@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
-import org.jfoundry.web.spring.HttpLoggingLevel;
+import org.jfoundry.http.spring.HttpLoggingLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /// Spring Boot properties for outbound JFoundry Web integrations.

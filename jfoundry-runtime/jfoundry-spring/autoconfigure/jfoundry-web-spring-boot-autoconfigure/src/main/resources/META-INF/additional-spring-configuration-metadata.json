@@ -9,7 +9,7 @@
   "properties": [
     {
       "name": "jfoundry.web.rest-client.logging-level",
-      "type": "org.jfoundry.web.spring.HttpLoggingLevel",
+      "type": "org.jfoundry.http.spring.HttpLoggingLevel",
       "defaultValue": "BASIC",
       "description": "Outbound RestClient logging detail: NONE, BASIC, HEADERS, or FULL."
     }

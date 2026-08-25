@@ -1,4 +1,4 @@
-package org.jfoundry.web.spring;
+package org.jfoundry.web.spring.client;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
