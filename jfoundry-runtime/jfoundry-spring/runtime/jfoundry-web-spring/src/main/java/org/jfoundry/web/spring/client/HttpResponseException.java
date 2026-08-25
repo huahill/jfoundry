@@ -1,4 +1,4 @@
-package org.jfoundry.web.spring;
+package org.jfoundry.web.spring.client;
 
 import org.jfoundry.application.exception.ExternalAccessException;
 import org.springframework.http.HttpStatusCode;

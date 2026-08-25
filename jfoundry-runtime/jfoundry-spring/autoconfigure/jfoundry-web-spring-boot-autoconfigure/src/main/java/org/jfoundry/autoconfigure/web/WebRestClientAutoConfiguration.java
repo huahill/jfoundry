@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
-import org.jfoundry.web.spring.RestClientSupport;
+import org.jfoundry.web.spring.client.RestClientSupport;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

@@ -1,4 +1,7 @@
-package org.jfoundry.web.spring;
+package org.jfoundry.web.spring.client;
+
+import org.jfoundry.http.spring.HttpLoggingLevel;
+import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.web.client.ResourceAccessException;
@@ -39,8 +42,6 @@ public final class RestClientSupport {
         Objects.requireNonNull(operation, "operation must not be null");
         try {
             return operation.get();
-        } catch (HttpResponseException exception) {
-            throw exception;
         } catch (RestClientException exception) {
             throw new HttpRequestException(classify(exception), exception);
         }

@@ -1,4 +1,4 @@
-package org.jfoundry.web.spring;
+package org.jfoundry.web.spring.client;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
