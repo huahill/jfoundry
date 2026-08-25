@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -11,6 +12,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.awaitility.Awaitility;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,7 +57,7 @@ class HttpLoggingWebMvcIntegrationTest {
     @Test
     void recordsOneTerminalLogForSuccessfulAndFailedRequests() throws Exception {
         assertThat(get("/jfoundry/native/ready").statusCode()).isEqualTo(200);
-        assertThat(terminalLogs("/jfoundry/native/ready")).singleElement()
+        assertThat(awaitTerminalLogs("/jfoundry/native/ready")).singleElement()
                 .satisfies(message -> {
                     assertThat(message).contains("status=200");
                     assertThat(duration(message)).isGreaterThanOrEqualTo(0);
@@ -63,7 +65,7 @@ class HttpLoggingWebMvcIntegrationTest {
 
         logs.list.clear();
         assertThat(get("/jfoundry/native/failure").statusCode()).isEqualTo(500);
-        assertThat(terminalLogs("/jfoundry/native/failure")).singleElement()
+        assertThat(awaitTerminalLogs("/jfoundry/native/failure")).singleElement()
                 .satisfies(message -> {
                     assertThat(message).contains("status=500");
                     assertThat(duration(message)).isGreaterThanOrEqualTo(0);
@@ -76,7 +78,7 @@ class HttpLoggingWebMvcIntegrationTest {
 
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body()).isEqualTo("async-ready");
-        assertThat(terminalLogs("/jfoundry/native/async")).singleElement()
+        assertThat(awaitTerminalLogs("/jfoundry/native/async")).singleElement()
                 .satisfies(message -> {
                     assertThat(message).contains("status=200");
                     assertThat(duration(message)).isGreaterThanOrEqualTo(40);
@@ -95,6 +97,13 @@ class HttpLoggingWebMvcIntegrationTest {
                 .map(ILoggingEvent::getFormattedMessage)
                 .filter(message -> message.contains(path) && message.contains("durationMs="))
                 .toList();
+    }
+
+    private List<String> awaitTerminalLogs(String path) {
+        Awaitility.await()
+                .atMost(Duration.ofSeconds(2))
+                .untilAsserted(() -> assertThat(terminalLogs(path)).hasSize(1));
+        return terminalLogs(path);
     }
 
     private static long duration(String message) {
