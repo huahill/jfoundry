@@ -64,6 +64,8 @@ JPA are currently accepted exceptions, tracked with reproducible evidence in
 
 When changing framework behavior, public APIs, module boundaries, starter dependencies, auto-configuration, configuration properties, SQL templates, architecture rules, compatibility baselines, or user-facing workflows, check whether README, `docs/i18n/en/`, `docs/i18n/zh/`, and `skills/maintain-jfoundry-framework` need matching updates. Documentation updates should describe the current behavior, not historical implementation details. If an English user-facing doc is updated and a corresponding Chinese doc exists, update both or state why only one language is affected.
 
+When a code, module, or documentation change affects the repository module layout, dependency direction, runtime composition, BOM or parent structure, or architecture description, update `docs/i18n/assets/jfoundry-module-architecture.drawio` and regenerate `docs/i18n/assets/jfoundry-module-architecture.svg` from it. Verify that the shared diagram remains accurate for both `README.md` and `README_ZH.md`; do not edit the generated SVG independently.
+
 ## SQL Templates
 
 jfoundry ships SQL only as copyable templates. Do not place framework SQL templates under Flyway's default `db/migration` path, and do not make framework jars auto-create business tables. Business applications should copy templates into their own Flyway/Liquibase migrations or execute DDL manually through their operational process.

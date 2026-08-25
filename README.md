@@ -30,6 +30,8 @@ runtime integration
 
 Dependencies point inward. This keeps runtime integrations outside the core rather than making a particular framework a requirement for every application.
 
+At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules.
+
 ![jfoundry module architecture](docs/i18n/assets/jfoundry-module-architecture.svg)
 
 ## AI-Assisted Architecture Workflow
