@@ -1,93 +1,81 @@
 <mxfile host="Electron" agent="Codex">
-  <diagram id="jfoundry-module-architecture" name="JFoundry module architecture">
-    <mxGraphModel dx="1629" dy="1056" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <diagram id="jfoundry-module-architecture" name="JFoundry repository architecture">
+    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1F2937;" value="jfoundry module dependency overview" vertex="1">
-          <mxGeometry height="40" width="620" x="70" y="30" as="geometry" />
+
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1F2937;" value="jfoundry repository modules and dependency direction" vertex="1">
+          <mxGeometry height="40" width="900" x="60" y="25" as="geometry" />
         </mxCell>
-        <mxCell id="subtitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#4B5563;" value="Solid arrows show declared module dependencies and point to the depended-on module. Runtime groups summarize capability-specific composition." vertex="1">
-          <mxGeometry height="30" width="1180" x="70" y="75" as="geometry" />
+        <mxCell id="subtitle" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#4B5563;" value="Dashed containers are source directory groupings. Solid arrows point to depended-on modules; dashed arrows show runtime composition. BOMs manage versions only." vertex="1">
+          <mxGeometry height="30" width="1300" x="60" y="67" as="geometry" />
         </mxCell>
-        <mxCell id="core-boundary" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#475569;fontSize=14;fontStyle=1;align=left;verticalAlign=top;spacingTop=16;spacingLeft=31;container=1;pointerEvents=0;spacingRight=0;" value="&lt;font style=&quot;font-size: 18px;&quot;&gt;Runtime-neutral framework core&lt;/font&gt;" vertex="1">
-          <mxGeometry height="550" width="980" x="250" y="261" as="geometry" />
+
+        <mxCell id="runtime-group" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=17;fontStyle=1;align=left;verticalAlign=top;spacingTop=14;spacingLeft=24;container=0;pointerEvents=0;" value="jfoundry-runtime/   source grouping (no aggregator POM)" vertex="1">
+          <mxGeometry height="275" width="1480" x="60" y="115" as="geometry" />
         </mxCell>
-        <mxCell id="domain" parent="core-boundary" style="ellipse;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;strokeWidth=3;fontColor=#172554;fontSize=15;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-domain&lt;/b&gt;&lt;br&gt;Aggregates · value objects&lt;br&gt;domain events · repositories" vertex="1">
-          <mxGeometry height="137.5" width="247.57894736842107" x="366.21052631578954" y="181.0033333333333" as="geometry" />
+        <mxCell id="quarkus-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=2;fontColor=#0C4A6E;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-quarkus&lt;/b&gt;&lt;br&gt;&lt;br&gt;runtime extensions&lt;br&gt;deployment processors&lt;br&gt;integration tests" vertex="1">
+          <mxGeometry height="145" width="410" x="90" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="application" parent="core-boundary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=14;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-application&lt;/b&gt;&lt;br&gt;Application services · transactions&lt;br&gt;events · messaging SPI&lt;br&gt;Outbox · Inbox" vertex="1">
-          <mxGeometry height="118.16" width="247.58" x="681" y="190.67" as="geometry" />
+        <mxCell id="helidon-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-helidon&lt;/b&gt;&lt;br&gt;&lt;br&gt;runtime modules&lt;br&gt;integration tests" vertex="1">
+          <mxGeometry height="145" width="410" x="595" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="architecture" parent="core-boundary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=14;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-architecture&lt;/b&gt;&lt;br&gt;Hexagonal · Onion · CQRS&lt;br&gt;ArchUnit rules" vertex="1">
-          <mxGeometry height="128.33333333333331" width="237.26315789473688" x="10.001578947368424" y="185.91666666666666" as="geometry" />
+        <mxCell id="spring-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFE4E6;strokeColor=#E11D48;strokeWidth=2;fontColor=#881337;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-spring&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Framework adapters&lt;br&gt;Boot auto-configuration and capability starters&lt;br&gt;integration tests" vertex="1">
+          <mxGeometry height="145" width="410" x="1100" y="190" as="geometry" />
         </mxCell>
-        <mxCell id="infrastructure" parent="core-boundary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=2;fontColor=#78350F;fontSize=14;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-infrastructure&lt;/b&gt;&lt;br&gt;JPA · MyBatis-Plus · Jackson&lt;br&gt;Kafka · RabbitMQ · RocketMQ&lt;br&gt;JobRunr · Redisson" vertex="1">
-          <mxGeometry height="110" width="330.1052631578948" x="599.5789473684212" y="403.3333333333333" as="geometry" />
+
+        <mxCell id="core-group" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=17;fontStyle=1;align=left;verticalAlign=top;spacingTop=14;spacingLeft=24;container=0;pointerEvents=0;" value="jfoundry-core/   source grouping (no aggregator POM)" vertex="1">
+          <mxGeometry height="390" width="1480" x="60" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="non-spring-starters" parent="core-boundary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF7ED;strokeColor=#EA580C;strokeWidth=2;fontColor=#7C2D12;fontSize=13;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-starters&lt;/b&gt;&lt;br&gt;Runtime-neutral dependency entry points&lt;br&gt;domain · application · JPA / MyBatis-Plus" vertex="1">
-          <mxGeometry height="76" width="330" x="350" y="38" as="geometry" />
+        <mxCell id="architecture" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3E8FF;strokeColor=#9333EA;strokeWidth=2;fontColor=#581C87;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-architecture&lt;/b&gt;&lt;br&gt;&lt;br&gt;Hexagonal, Onion, CQRS&lt;br&gt;ArchUnit rules" vertex="1">
+          <mxGeometry height="175" width="300" x="90" y="515" as="geometry" />
         </mxCell>
-        <mxCell id="e-starters-domain" edge="1" parent="core-boundary" source="non-spring-starters" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#EA580C;fontColor=#9A3412;labelBackgroundColor=#FFFFFF;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="domain" value="selects">
+        <mxCell id="domain" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DBEAFE;strokeColor=#2563EB;strokeWidth=2;fontColor=#172554;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-domain&lt;/b&gt;&lt;br&gt;&lt;br&gt;aggregates, value objects&lt;br&gt;domain events, repositories" vertex="1">
+          <mxGeometry height="175" width="300" x="450" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="application" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#DCFCE7;strokeColor=#16A34A;strokeWidth=2;fontColor=#14532D;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-application&lt;/b&gt;&lt;br&gt;&lt;br&gt;services, transactions, events&lt;br&gt;messaging and serialization SPI&lt;br&gt;Outbox / Inbox contracts" vertex="1">
+          <mxGeometry height="175" width="300" x="810" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="infrastructure" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=2;fontColor=#78350F;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-infrastructure&lt;/b&gt;&lt;br&gt;&lt;br&gt;persistence and message stores&lt;br&gt;serialization, locks, observability&lt;br&gt;job execution and Web semantics" vertex="1">
+          <mxGeometry height="175" width="300" x="1170" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="consumer-note" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontColor=#475569;" value="Consumers select domain and application capabilities, architecture modules as needed, and framework-neutral adapters directly." vertex="1">
+          <mxGeometry height="40" width="1200" x="200" y="745" as="geometry" />
+        </mxCell>
+
+        <mxCell id="bom-group" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=17;fontStyle=1;align=left;verticalAlign=top;spacingTop=14;spacingLeft=24;container=0;pointerEvents=0;" value="jfoundry-boms/   source grouping (no aggregator POM)" vertex="1">
+          <mxGeometry height="210" width="1480" x="60" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="core-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Core dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;jfoundry-dependencies&lt;br&gt;foundation and modules BOMs" vertex="1">
+          <mxGeometry height="105" width="650" x="90" y="925" as="geometry" />
+        </mxCell>
+        <mxCell id="runtime-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Runtime dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Boot / Spring Cloud / Quarkus / Helidon BOMs&lt;br&gt;jfoundry-spring-boot-parent" vertex="1">
+          <mxGeometry height="105" width="650" x="860" y="925" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e-application-domain" edge="1" parent="1" source="application" target="domain" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.42;exitDx=0;exitDy=0;entryX=1;entryY=0.42;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="depends on">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-starters-application" edge="1" parent="core-boundary" source="non-spring-starters" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#EA580C;fontColor=#9A3412;labelBackgroundColor=#FFFFFF;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="application" value="selects">
+        <mxCell id="e-infrastructure-application" edge="1" parent="1" source="infrastructure" target="application" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#D97706;fontColor=#92400E;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.42;exitDx=0;exitDy=0;entryX=1;entryY=0.42;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="implements / uses">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-starters-infrastructure" edge="1" parent="core-boundary" source="non-spring-starters" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#EA580C;fontColor=#9A3412;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="infrastructure" value="selects">
+        <mxCell id="e-infrastructure-domain" edge="1" parent="1" source="infrastructure" target="domain" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#D97706;fontColor=#92400E;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="uses">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="960.07" y="76.07" />
-              <mxPoint x="960.07" y="458.33" />
+              <mxPoint x="1320" y="720" />
+              <mxPoint x="600" y="720" />
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="quarkus-runtime" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=2;fontColor=#0C4A6E;fontSize=13;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-quarkus&lt;/b&gt;&lt;br&gt;runtime · deployment · integration tests&lt;br&gt;uses domain + application contracts&lt;br&gt;composes selected infrastructure adapters" vertex="1">
-          <mxGeometry height="100" width="300" x="340" y="118" as="geometry" />
-        </mxCell>
-        <mxCell id="spring-runtime" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFE4E6;strokeColor=#E11D48;strokeWidth=2;fontColor=#881337;fontSize=13;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-spring&lt;/b&gt;&lt;br&gt;runtime · integration tests&lt;br&gt;Boot auto-configuration · Boot starters&lt;br&gt;uses domain + application contracts&lt;br&gt;composes selected infrastructure adapters" vertex="1">
-          <mxGeometry height="100" width="360" x="1020" y="118" as="geometry" />
-        </mxCell>
-        <mxCell id="helidon-runtime" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=13;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-helidon&lt;/b&gt;&lt;br&gt;runtime · integration tests&lt;br&gt;uses domain + application contracts&lt;br&gt;composes selected infrastructure adapters" vertex="1">
-          <mxGeometry height="100" width="300" x="680" y="118" as="geometry" />
-        </mxCell>
-        <mxCell id="dependencies" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=13;align=center;verticalAlign=middle;" value="&lt;b&gt;jfoundry-dependencies&lt;/b&gt;&lt;br&gt;BOMs · version alignment&lt;br&gt;All jfoundry modules" vertex="1">
-          <mxGeometry height="90" width="220" x="20" y="700" as="geometry" />
-        </mxCell>
-        <mxCell id="e-application-domain" edge="1" parent="1" source="application" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="domain" value="depends on">
+        <mxCell id="e-quarkus-core" edge="1" parent="1" source="quarkus-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#0284C7;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-infrastructure-application" edge="1" parent="1" source="infrastructure" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#D97706;fontColor=#92400E;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="application" value="implements / uses">
+        <mxCell id="e-helidon-core" edge="1" parent="1" source="helidon-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#059669;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-infrastructure-domain" edge="1" parent="1" source="infrastructure" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#D97706;fontColor=#92400E;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;endArrow=block;endFill=1;" target="domain" value="uses">
+        <mxCell id="e-spring-core" edge="1" parent="1" source="spring-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#E11D48;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
           <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-quarkus-core" edge="1" parent="1" source="quarkus-runtime" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#0284C7;fontColor=#075985;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;" target="core-boundary" value="runtime composition">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-helidon-core" edge="1" parent="1" source="helidon-runtime" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#059669;fontColor=#047857;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;" target="core-boundary" value="runtime composition">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-spring-core" edge="1" parent="1" source="spring-runtime" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#E11D48;fontColor=#9F1239;labelBackgroundColor=#FFFFFF;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;" target="core-boundary" value="runtime composition">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-architecture-domain" edge="1" parent="1" source="architecture" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#9333EA;fontColor=#7E22CE;labelBackgroundColor=#FFFFFF;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;" target="domain" value="defines semantics">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e-architecture-application" edge="1" parent="1" source="architecture" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#9333EA;fontColor=#7E22CE;labelBackgroundColor=#FFFFFF;exitX=0.7;exitY=0;exitDx=0;exitDy=0;entryX=0.4;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;" target="application" value="constrains">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="436.73" y="390" />
-              <mxPoint x="1059" y="390" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="legend-runtime" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#374151;" value="Solid arrows: declared module dependency (arrow points to the depended-on module)" vertex="1">
-          <mxGeometry height="30" width="600" x="70" y="890" as="geometry" />
-        </mxCell>
-        <mxCell id="legend-governance" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=12;fontColor=#374151;" value="Dashed arrows: aggregation-level relationship, such as runtime composition or architecture governance" vertex="1">
-          <mxGeometry height="30" width="850" x="70" y="930" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
