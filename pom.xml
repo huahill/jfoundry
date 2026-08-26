@@ -78,6 +78,7 @@
         <module>jfoundry-core/jfoundry-domain</module>
         <module>jfoundry-core/jfoundry-application</module>
         <module>jfoundry-core/jfoundry-infrastructure</module>
+        <module>jfoundry-runtime/jfoundry-jakarta</module>
         <module>jfoundry-runtime/jfoundry-spring</module>
         <module>jfoundry-runtime/jfoundry-quarkus</module>
         <module>jfoundry-runtime/jfoundry-helidon</module>

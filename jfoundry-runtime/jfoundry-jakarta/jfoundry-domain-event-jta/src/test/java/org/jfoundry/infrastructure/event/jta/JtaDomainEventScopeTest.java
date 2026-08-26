@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.event.quarkus;
+package org.jfoundry.infrastructure.event.jta;
 
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
@@ -16,14 +16,14 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class QuarkusDomainEventScopeTest {
+class JtaDomainEventScopeTest {
 
     @Test
     void makesOutboxEventsAvailableBeforeTransactionCompletionAndDispatchesLocalEventsAfterCommit() throws Exception {
         RecordingTransactionSynchronizationRegistry transactionRegistry =
                 new RecordingTransactionSynchronizationRegistry();
         transactionRegistry.activate();
-        QuarkusDomainEventScope scope = new QuarkusDomainEventScope(transactionRegistry);
+        JtaDomainEventScope scope = new JtaDomainEventScope(transactionRegistry);
         RecordingBeforeCommitDispatcher outbox = new RecordingBeforeCommitDispatcher();
         RecordingAfterCommitDispatcher local = new RecordingAfterCommitDispatcher();
 

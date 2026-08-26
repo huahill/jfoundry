@@ -4,6 +4,12 @@
 portable CDI/Jakarta runtime integration, not a Spring Boot starter and not a Quarkus extension.
 Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and application code.
 
+Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
+`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, and `jfoundry-web-jaxrs` implementations.
+Helidon-owned runtime classes remain the public CDI/provider entry points and retain portable-extension,
+service-loading, scheduling, logging, and Native Image behavior. Applications select the Helidon runtime
+modules rather than assembling these shared implementation modules.
+
 See the [compatibility matrix](../../../release/compatibility.md) for the exact platform version.
 
 ## Dependency Composition

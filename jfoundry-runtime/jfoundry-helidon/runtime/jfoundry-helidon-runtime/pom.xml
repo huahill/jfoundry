@@ -22,6 +22,14 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-transaction-jta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-jta</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-application-core</artifactId>
         </dependency>
         <dependency>

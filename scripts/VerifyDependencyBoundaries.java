@@ -74,6 +74,9 @@ public final class VerifyDependencyBoundaries {
         if (module == ModuleKind.FOUNDATION_BOM && (spring || quarkus || helidon || isRuntimeMarker(coordinate))) {
             violations.add(format(pom, coordinate, context, "foundation-runtime-coordinate"));
         }
+        if (module == ModuleKind.JAKARTA && (spring || quarkus || helidon)) {
+            violations.add(format(pom, coordinate, context, "jakarta-cross-runtime-dependency"));
+        }
         if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOM) && (quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "spring-cross-runtime-dependency"));
         }
@@ -152,6 +155,9 @@ public final class VerifyDependencyBoundaries {
         }
         if (path.startsWith("jfoundry-runtime/jfoundry-spring/")) {
             return ModuleKind.SPRING;
+        }
+        if (path.startsWith("jfoundry-runtime/jfoundry-jakarta/")) {
+            return ModuleKind.JAKARTA;
         }
         if (path.startsWith("jfoundry-runtime/jfoundry-quarkus/")) {
             return ModuleKind.QUARKUS;
@@ -238,6 +244,7 @@ public final class VerifyDependencyBoundaries {
     }
 
     private enum ModuleKind {
-        CORE, FOUNDATION_BOM, SPRING, QUARKUS, HELIDON, SPRING_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
+        CORE, FOUNDATION_BOM, JAKARTA, SPRING, QUARKUS, HELIDON,
+        SPRING_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
     }
 }

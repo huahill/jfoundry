@@ -22,6 +22,8 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 
 ### Runtime Integration
 
+- `jfoundry-runtime/jfoundry-jakarta`: portable JAX-RS and JTA implementations shared by Jakarta-based
+  runtimes, without CDI registration, provider discovery, runtime logging bridges, or container lifecycle.
 - `jfoundry-runtime/jfoundry-spring/runtime`: Spring Framework adapters such as local event publishing, transaction runner, messaging sender wrappers, outbox transaction/scheduling integration, and Web MVC ProblemDetail support.
 - `jfoundry-runtime/jfoundry-spring/autoconfigure/*`: capability-specific Spring Boot auto-configuration, conditions, properties, and runtime wiring.
 - `jfoundry-runtime/jfoundry-spring/starters`: dependency entry points only.
@@ -59,6 +61,8 @@ Practical rules:
   the dependency is capability-specific and does not add a provider or runtime container.
 - Consumers select Domain, Application, architecture-style, and framework-neutral adapter modules directly.
 - Spring runtime modules may depend on application contracts and framework-neutral adapters.
+- Jakarta shared adapter modules may depend on portable Jakarta or MicroProfile specification APIs and core
+  contracts, but must not depend on Spring, Quarkus, Helidon, providers, or runtime lifecycle implementations.
 - Helidon runtime modules may depend on application contracts and framework-neutral adapters, but must not
   introduce a Quarkus deployment layer or Spring Boot starter semantics.
 - Boot auto-configuration wires beans, conditions, properties, and integration defaults.

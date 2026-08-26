@@ -10,6 +10,7 @@
     <description>Helidon MP JAX-RS runtime integration for JFoundry web adapters.</description>
     <dependencies>
         <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web</artifactId></dependency>
+        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web-jaxrs</artifactId></dependency>
         <dependency><groupId>io.helidon.microprofile.server</groupId><artifactId>helidon-microprofile-server</artifactId></dependency>
         <dependency><groupId>jakarta.ws.rs</groupId><artifactId>jakarta.ws.rs-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>jakarta.json</groupId><artifactId>jakarta.json-api</artifactId></dependency>

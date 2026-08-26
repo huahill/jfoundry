@@ -11,9 +11,11 @@ such as jMolecules and `slf4j-api` may appear in core modules when they express 
 
 `jfoundry-core` is a directory group for runtime-neutral framework modules. It contains the domain,
 architecture, application, and infrastructure modules; it does not change
-the Onion dependency direction within those modules. `jfoundry-runtime` groups concrete
-runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`; Quarkus uses `runtime/` and
-`deployment/`; each runtime also has one direct `jfoundry-<runtime>-integration-tests` module.
+the Onion dependency direction within those modules. `jfoundry-runtime` groups outer runtime adapters.
+`jfoundry-jakarta` contains portable JAX-RS and JTA implementations shared by Jakarta-based runtimes;
+it does not own CDI registration or a container lifecycle. Spring uses `runtime/`, `autoconfigure/`, and
+`starters/`; Quarkus uses `runtime/` and `deployment/`; each runtime also has one direct
+`jfoundry-<runtime>-integration-tests` module.
 
 ## Module Roles
 
@@ -22,6 +24,7 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
 | Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-domain-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
+| Shared Jakarta adapters | `jfoundry-web-jaxrs`, `jfoundry-transaction-jta`, `jfoundry-domain-event-jta` |
 | Spring runtime integration | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring integration tests | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
@@ -38,6 +41,10 @@ runtime integrations: Spring uses `runtime/`, `autoconfigure/`, and `starters/`;
   `AutoConfiguration.imports` belong in their capability-specific module under `../../../../jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - Spring middleware and Testcontainers verification belongs in
   `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`.
+- Portable JAX-RS filtering and body logging, Jakarta Transactions execution, and JTA domain-event
+  coordination shared by multiple runtimes belong under `jfoundry-runtime/jfoundry-jakarta`. These modules
+  do not register CDI beans or providers; concrete runtimes remain responsible for discovery, lifecycle,
+  configuration keys, logging bridges, build-time processing, and Native Image integration.
 - Quarkus runtime and Native Image verification belongs in
   `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`. Future Quarkus
   middleware or Testcontainers verification belongs in the same module.
@@ -78,9 +85,9 @@ in the matching direct runtime integration-test module and declare that runtime'
 Jakarta specifications are not application runtimes by themselves. A framework-neutral infrastructure
 adapter may depend narrowly on a portable specification API when that API expresses the adapter's technical
 contract; `jfoundry-web` using the optional Jakarta Validation API to convert `ConstraintViolation` values is
-one example. This allowance does not apply to Domain or Application modules, and it does not make CDI
-lifecycle, JAX-RS dispatch, JTA coordination, or other container integration framework-neutral. Validation
-providers and runtime exception classification remain in tests or in the matching runtime adapters.
+one example. This allowance does not apply to Domain or Application modules. Portable container-facing
+implementations shared by more than one runtime belong in `jfoundry-jakarta`, not Core; CDI lifecycle,
+runtime registration, providers, and runtime exception classification remain in the concrete runtime adapters.
 
 CI runs `scripts/verify-dependency-boundaries.sh` before Maven tests. The XML-aware checker scans every
 reactor POM, including test dependencies and dependency management, and rejects cross-runtime coordinates,
@@ -132,5 +139,7 @@ verification reduces feedback time but cannot replace the server-side gate.
 - Starters remain lightweight dependency choices.
 - Future runtime integrations can reuse core SPI and framework-neutral adapters without depending
   on Spring Boot.
+- Jakarta-based runtimes reuse `jfoundry-jakarta` implementations while retaining runtime-local registration,
+  lifecycle, configuration, logging, build-time, and Native Image behavior.
 - Foundation manages only runtime-neutral coordinates; each runtime BOM owns its matching ecosystem.
 - Core tests do not obtain runtime test frameworks through broad starter dependencies.

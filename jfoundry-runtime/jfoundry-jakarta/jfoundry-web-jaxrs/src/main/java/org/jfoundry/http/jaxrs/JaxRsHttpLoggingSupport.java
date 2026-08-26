@@ -1,4 +1,4 @@
-package org.jfoundry.http.helidon;
+package org.jfoundry.http.jaxrs;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -27,7 +27,7 @@ final class JaxRsHttpLoggingSupport {
             return "<empty>";
         }
         if (!isJson(contentType)) {
-            return "<omitted: content-type=" + contentType + ">";
+            return "<omitted: content-type=" + describeContentType(contentType) + ">";
         }
         try (var reader = Json.createReader(new ByteArrayInputStream(body.bytes()))) {
             var json = reader.readValue();
@@ -44,6 +44,13 @@ final class JaxRsHttpLoggingSupport {
     static boolean isJson(MediaType contentType) {
         return contentType != null && (MediaType.APPLICATION_JSON_TYPE.isCompatible(contentType)
                 || contentType.getSubtype().toLowerCase(Locale.ROOT).endsWith("+json"));
+    }
+
+    private static String describeContentType(MediaType contentType) {
+        if (contentType == null) {
+            return "unknown";
+        }
+        return contentType.getType() + "/" + contentType.getSubtype();
     }
 
     private static JsonValue redact(JsonValue value) {

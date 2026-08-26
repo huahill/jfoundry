@@ -4,6 +4,12 @@
 `TransactionRunner` as a CDI bean. It keeps Quarkus, CDI, Jakarta Transactions, and GraalVM types
 outside the domain, application, and infrastructure modules.
 
+Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
+`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, and `jfoundry-web-jaxrs` implementations.
+Quarkus-owned runtime classes remain the public CDI/provider entry points, while deployment modules
+retain Arc registration, augmentation, RESTEasy Reactive integration, and Native Image behavior.
+Applications select the Quarkus runtime modules rather than assembling these shared implementation modules.
+
 ## Dependency Setup
 
 Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
