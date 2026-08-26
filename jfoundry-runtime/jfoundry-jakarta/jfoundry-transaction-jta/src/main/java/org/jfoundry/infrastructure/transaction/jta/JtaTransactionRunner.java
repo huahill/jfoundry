@@ -54,6 +54,7 @@ public class JtaTransactionRunner implements TransactionRunner {
     private <T> T callInNewTransaction(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
         boolean timeoutConfigured = false;
         boolean transactionStarted = false;
+        Throwable failure = null;
         try {
             if (options.timeout().isPresent()) {
                 transactionManager.setTransactionTimeout(Math.toIntExact(options.timeout().get().toSeconds()));
@@ -64,19 +65,19 @@ public class JtaTransactionRunner implements TransactionRunner {
             T result = callback.execute();
             transactionManager.commit();
             return result;
-        } catch (Exception ex) {
+        } catch (Exception | Error ex) {
+            failure = ex;
             if (transactionStarted) {
-                rollbackIfActive();
+                runCleanupPreserving(ex, this::rollbackIfActive);
             }
             throw ex;
-        } catch (Error error) {
-            if (transactionStarted) {
-                rollbackIfActive();
-            }
-            throw error;
         } finally {
             if (timeoutConfigured) {
-                transactionManager.setTransactionTimeout(0);
+                if (failure == null) {
+                    transactionManager.setTransactionTimeout(0);
+                } else {
+                    runCleanupPreserving(failure, () -> transactionManager.setTransactionTimeout(0));
+                }
             }
         }
     }
@@ -84,12 +85,9 @@ public class JtaTransactionRunner implements TransactionRunner {
     private <T> T callInExistingTransaction(TransactionCallback<T> callback) throws Exception {
         try {
             return callback.execute();
-        } catch (Exception ex) {
-            transactionManager.setRollbackOnly();
+        } catch (Exception | Error ex) {
+            runCleanupPreserving(ex, transactionManager::setRollbackOnly);
             throw ex;
-        } catch (Error error) {
-            transactionManager.setRollbackOnly();
-            throw error;
         }
     }
 
@@ -106,10 +104,18 @@ public class JtaTransactionRunner implements TransactionRunner {
         }
 
         Transaction suspended = transactionManager.suspend();
+        Throwable failure = null;
         try {
             return callback.execute();
+        } catch (Exception | Error ex) {
+            failure = ex;
+            throw ex;
         } finally {
-            transactionManager.resume(suspended);
+            if (failure == null) {
+                transactionManager.resume(suspended);
+            } else {
+                runCleanupPreserving(failure, () -> transactionManager.resume(suspended));
+            }
         }
     }
 
@@ -129,5 +135,20 @@ public class JtaTransactionRunner implements TransactionRunner {
         if (isTransactionActive()) {
             transactionManager.rollback();
         }
+    }
+
+    private static void runCleanupPreserving(Throwable failure, CleanupOperation cleanup) {
+        try {
+            cleanup.run();
+        } catch (Exception | Error cleanupFailure) {
+            if (cleanupFailure != failure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    private interface CleanupOperation {
+        void run() throws Exception;
     }
 }
