@@ -6,7 +6,7 @@
 
 jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micronaut、CDI 或 Jakarta EE 运行时集成 API。jMolecules 和 `slf4j-api` 等稳定且低侵入的库只有在表达契约时才可进入 core。
 
-`jfoundry-core` 是运行时无关框架模块的目录分组，包含领域、架构、应用和基础设施模块；它不改变这些模块内部的 Onion 依赖方向。`jfoundry-runtime` 聚合具体运行时集成：Spring 使用 `runtime/`、`autoconfigure/` 和 `starters/`，Quarkus 使用 `runtime/` 和 `deployment/`；每种运行时均直接包含一个 `jfoundry-<runtime>-integration-tests` 模块。
+`jfoundry-core` 是运行时无关框架模块的目录分组，包含领域、架构、应用和基础设施模块；它不改变这些模块内部的 Onion 依赖方向。`jfoundry-runtime` 聚合外层运行时适配器。`jfoundry-jakarta` 包含由多个 Jakarta 运行时复用的可移植 JAX-RS 与 JTA 实现，但不负责 CDI 注册或容器生命周期。Spring 使用 `runtime/`、`autoconfigure/` 和 `starters/`，Quarkus 使用 `runtime/` 和 `deployment/`；每种运行时均直接包含一个 `jfoundry-<runtime>-integration-tests` 模块。
 
 ## 模块职责
 
@@ -15,6 +15,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
 | 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-domain-event-externalization-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-inbox-core` |
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
+| 共享 Jakarta 适配器 | `jfoundry-web-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring 集成测试 | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
@@ -28,6 +29,9 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 - Spring Framework 生命周期、事务同步、调度、事件发布、MVC API 和 Spring 侧客户端包装器位于 `../../../../jfoundry-runtime/jfoundry-spring/runtime`。
 - Spring Boot 条件、`@ConfigurationProperties`、Bean 装配、元数据和 `AutoConfiguration.imports` 位于 `../../../../jfoundry-runtime/jfoundry-spring/autoconfigure` 下对应的能力模块。
 - Spring 中间件和 Testcontainers 验证位于 `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`。
+- 多个运行时共用的可移植 JAX-RS 过滤与正文日志、Jakarta Transactions 执行和 JTA 领域事件协调位于
+  `jfoundry-runtime/jfoundry-jakarta`。这些模块不注册 CDI Bean 或 provider；具体运行时仍负责发现、生命周期、
+  配置项、日志桥、构建期处理与原生镜像集成。
 - Quarkus 运行时和原生镜像验证位于 `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`；未来的 Quarkus 中间件或 Testcontainers 验证也位于该模块。
 - Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime/jfoundry-helidon/runtime`；当前原生镜像验证位于 `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`，未来的 Helidon 中间件或 Testcontainers 验证也位于该模块。Helidon 没有 JFoundry 部署模块或启动器层。
 - 使用方应直接依赖领域、应用、架构风格和框架无关适配器模块。运行时专属启动器只是依赖入口，
@@ -46,8 +50,8 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 
 Jakarta 规范本身不等同于应用运行时。当某个可移植规范 API 能表达基础设施适配器的技术契约时，运行时无关的
 基础设施适配器可以按最小范围依赖该 API；例如，`jfoundry-web` 通过可选的 Jakarta Validation API 转换
-`ConstraintViolation`。这一规则不适用于领域层和应用层，也不会把 CDI 生命周期、JAX-RS 请求派发、JTA 协调
-或其它容器集成变成运行时无关能力。校验 provider 和运行时异常分类仍应位于测试或对应的运行时适配器中。
+`ConstraintViolation`。这一规则不适用于领域层和应用层。由多个运行时复用、面向容器的可移植实现位于
+`jfoundry-jakarta`，而不是 core；CDI 生命周期、运行时注册、provider 与运行时异常分类仍位于具体运行时适配器中。
 
 CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML 感知检查器扫描全部 reactor POM，包括测试依赖与依赖管理，并拒绝跨运行时坐标、core 中的运行时依赖以及 Foundation 中的运行时特定坐标。夹具测试和工作流自检会确保该门禁被删除或弱化时 CI 立即失败。
 
@@ -79,5 +83,7 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 - 适配器模块不得直接注册 Spring Boot 自动配置。
 - 启动器保持为轻量依赖选择。
 - 未来运行时集成可以复用核心 SPI 和运行时无关适配器，而不依赖 Spring Boot。
+- 基于 Jakarta 的运行时复用 `jfoundry-jakarta` 实现，同时在各自模块内保留运行时注册、生命周期、配置、日志、
+  构建期与原生镜像行为。
 - Foundation 只管理运行时无关坐标；各运行时 BOM 管理与自身匹配的生态。
 - core 测试不得通过宽泛的启动器依赖间接获得运行时测试框架。

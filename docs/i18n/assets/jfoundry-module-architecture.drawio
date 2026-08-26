@@ -16,13 +16,16 @@
           <mxGeometry height="275" width="1480" x="60" y="115" as="geometry" />
         </mxCell>
         <mxCell id="quarkus-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#E0F2FE;strokeColor=#0284C7;strokeWidth=2;fontColor=#0C4A6E;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-quarkus&lt;/b&gt;&lt;br&gt;&lt;br&gt;runtime extensions&lt;br&gt;deployment processors&lt;br&gt;integration tests" vertex="1">
-          <mxGeometry height="145" width="410" x="90" y="190" as="geometry" />
+          <mxGeometry height="145" width="300" x="90" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="jakarta-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=2;fontColor=#78350F;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-jakarta&lt;/b&gt;&lt;br&gt;&lt;br&gt;shared JAX-RS adapters&lt;br&gt;shared JTA transaction and event coordination&lt;br&gt;no runtime registration" vertex="1">
+          <mxGeometry height="145" width="300" x="450" y="190" as="geometry" />
         </mxCell>
         <mxCell id="helidon-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#ECFDF5;strokeColor=#059669;strokeWidth=2;fontColor=#065F46;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-helidon&lt;/b&gt;&lt;br&gt;&lt;br&gt;runtime modules&lt;br&gt;integration tests" vertex="1">
-          <mxGeometry height="145" width="410" x="595" y="190" as="geometry" />
+          <mxGeometry height="145" width="300" x="810" y="190" as="geometry" />
         </mxCell>
         <mxCell id="spring-runtime" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFE4E6;strokeColor=#E11D48;strokeWidth=2;fontColor=#881337;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-spring&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Framework adapters&lt;br&gt;Boot auto-configuration and capability starters&lt;br&gt;integration tests" vertex="1">
-          <mxGeometry height="145" width="410" x="1100" y="190" as="geometry" />
+          <mxGeometry height="145" width="340" x="1170" y="190" as="geometry" />
         </mxCell>
 
         <mxCell id="core-group" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=17;fontStyle=1;align=left;verticalAlign=top;spacingTop=14;spacingLeft=24;container=0;pointerEvents=0;" value="jfoundry-core/   source grouping (no aggregator POM)" vertex="1">
@@ -68,13 +71,22 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e-quarkus-core" edge="1" parent="1" source="quarkus-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#0284C7;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+        <mxCell id="e-quarkus-jakarta" edge="1" parent="1" source="quarkus-runtime" target="jakarta-runtime" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#0284C7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="reuses">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-helidon-core" edge="1" parent="1" source="helidon-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#059669;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+        <mxCell id="e-helidon-jakarta" edge="1" parent="1" source="helidon-runtime" target="jakarta-runtime" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#059669;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="reuses">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="e-spring-core" edge="1" parent="1" source="spring-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#E11D48;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.8;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+        <mxCell id="e-quarkus-core" edge="1" parent="1" source="quarkus-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#0284C7;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.12;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-jakarta-core" edge="1" parent="1" source="jakarta-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#D97706;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.38;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-helidon-core" edge="1" parent="1" source="helidon-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#059669;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.62;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e-spring-core" edge="1" parent="1" source="spring-runtime" target="core-group" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;dashPattern=6 4;strokeWidth=2;strokeColor=#E11D48;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.88;entryY=0;entryDx=0;entryDy=0;endArrow=open;endFill=0;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
       </root>

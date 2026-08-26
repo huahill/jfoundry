@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.transaction.quarkus;
+package org.jfoundry.infrastructure.transaction.jta;
 
 import jakarta.transaction.Status;
 import jakarta.transaction.Transaction;
@@ -15,12 +15,12 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class QuarkusTransactionRunnerTest {
+class JtaTransactionRunnerTest {
 
     @Test
     void startsAndCommitsTransactionWhenNoTransactionExists() throws Exception {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         String result = runner.call(TransactionOptions.builder()
                 .timeout(Duration.ofSeconds(12))
@@ -37,7 +37,7 @@ class QuarkusTransactionRunnerTest {
     void joinsAnExistingTransactionAndMarksItRollbackOnlyWhenTheCallbackFails() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         transactionManager.activateExistingTransaction();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
             throw new IOException("write failed");
@@ -55,7 +55,7 @@ class QuarkusTransactionRunnerTest {
     void suspendsAnExistingTransactionForRequiresNewAndResumesItAfterCommit() throws Exception {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         transactionManager.activateExistingTransaction();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         String result = runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.REQUIRES_NEW)
@@ -73,7 +73,7 @@ class QuarkusTransactionRunnerTest {
     void runsWithoutATransactionForNotSupportedAndResumesTheExistingTransaction() throws Exception {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         transactionManager.activateExistingTransaction();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         String result = runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.NOT_SUPPORTED)
@@ -92,7 +92,7 @@ class QuarkusTransactionRunnerTest {
     @Test
     void runsWithoutStartingATransactionForSupportsWhenNoneExists() throws Exception {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         String result = runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.SUPPORTS)
@@ -106,7 +106,7 @@ class QuarkusTransactionRunnerTest {
     @Test
     void rollsBackAnOwnedTransactionAndRethrowsTheOriginalCheckedException() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
             throw new IOException("write failed");
@@ -122,7 +122,7 @@ class QuarkusTransactionRunnerTest {
     @Test
     void requiresAnExistingTransactionForMandatory() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.MANDATORY)
@@ -135,7 +135,7 @@ class QuarkusTransactionRunnerTest {
     void rejectsNeverWhenATransactionExists() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         transactionManager.activateExistingTransaction();
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(transactionManager);
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.NEVER)
@@ -146,7 +146,7 @@ class QuarkusTransactionRunnerTest {
 
     @Test
     void rejectsReadOnlyTransactionsBecauseJakartaTransactionsCannotExpressThem() {
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(new RecordingTransactionManager());
+        JtaTransactionRunner runner = new JtaTransactionRunner(new RecordingTransactionManager());
 
         assertThatThrownBy(() -> runner.call(TransactionOptions.builder()
                 .readOnly(true)
@@ -157,7 +157,7 @@ class QuarkusTransactionRunnerTest {
 
     @Test
     void rejectsNamedTransactionsBecauseJakartaTransactionsCannotExpressThem() {
-        QuarkusTransactionRunner runner = new QuarkusTransactionRunner(new RecordingTransactionManager());
+        JtaTransactionRunner runner = new JtaTransactionRunner(new RecordingTransactionManager());
 
         assertThatThrownBy(() -> runner.call(TransactionOptions.builder()
                 .name("confirm-order")

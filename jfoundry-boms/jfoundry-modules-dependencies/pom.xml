@@ -214,6 +214,27 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-jakarta</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-web-jaxrs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-transaction-jta</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-jta</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-spring</artifactId>
         <version>${project.version}</version>
         <type>pom</type>

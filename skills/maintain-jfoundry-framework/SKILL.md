@@ -59,6 +59,8 @@ For every module-placement decision, apply Onion Simple as defined in `reference
 
 - Keep `jfoundry-domain`, `jfoundry-architecture`, and `jfoundry-application` modules independent of Spring, Spring Boot, web frameworks, broker clients, persistence framework details, CDI, and Jakarta runtime APIs.
 - Keep Spring Framework runtime adapters under `jfoundry-runtime/jfoundry-spring/runtime`.
+- Keep portable JAX-RS and JTA implementations shared by Jakarta-based runtimes under
+  `jfoundry-runtime/jfoundry-jakarta`; keep registration and lifecycle behavior in each concrete runtime.
 - Keep Spring Boot auto-configuration only in capability-specific modules under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - Keep Spring Boot starters as dependency entry points. Do not put Java runtime logic in starter modules.
 - Keep framework-neutral technical adapters under `jfoundry-core/jfoundry-infrastructure`.

@@ -105,6 +105,26 @@ write_pom "jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus" '
 expect_rejected "invalid-quarkus"
 
 rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus"
+write_pom "jfoundry-runtime/jfoundry-jakarta/invalid-quarkus" '
+    <dependencies>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+    </dependencies>'
+expect_rejected "invalid-jakarta-quarkus" "jakarta-cross-runtime-dependency"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-jakarta/invalid-quarkus"
+write_pom "jfoundry-runtime/jfoundry-jakarta/allowed-jta" '
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.transaction</groupId>
+            <artifactId>jakarta.transaction-api</artifactId>
+        </dependency>
+    </dependencies>'
+expect_allowed "allowed-jakarta-jta"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-runtime/jfoundry-jakarta/allowed-jta"
 write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>

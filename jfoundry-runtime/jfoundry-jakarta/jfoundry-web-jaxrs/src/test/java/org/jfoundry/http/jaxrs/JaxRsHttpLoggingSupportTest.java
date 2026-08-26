@@ -1,4 +1,4 @@
-package org.jfoundry.http.quarkus;
+package org.jfoundry.http.jaxrs;
 
 import java.nio.charset.StandardCharsets;
 
@@ -24,7 +24,7 @@ class JaxRsHttpLoggingSupportTest {
     @Test
     void supportsStructuredJsonMediaTypes() {
         assertThat(JaxRsHttpLoggingSupport.describeBody(
-                MediaType.valueOf("application/problem+json"), complete("{\"token\":\"secret\"}")))
+                new MediaType("application", "problem+json"), complete("{\"token\":\"secret\"}")))
                 .isEqualTo("{\"token\":\"<redacted>\"}");
     }
 

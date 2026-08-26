@@ -31,6 +31,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Spring Web MVC ProblemDetail adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring` |
 | Spring Boot conditions/properties/wiring | A capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure` |
 | Spring runtime or middleware integration verification | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
+| Portable JAX-RS or JTA implementation shared by Jakarta runtimes | `jfoundry-runtime/jfoundry-jakarta` |
 | Quarkus runtime extension behavior | `jfoundry-runtime/jfoundry-quarkus/runtime` |
 | Quarkus build-time processor or Native Image registration | `jfoundry-runtime/jfoundry-quarkus/deployment` |
 | Quarkus consumer, middleware, or Native Image integration verification | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
@@ -52,6 +53,10 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 - If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in the matching capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - If a test verifies middleware behavior through Spring's runtime wiring or Testcontainers, put it under `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`.
 - If the code uses Quarkus build steps, augmentation APIs, or Native Image build items, put it under `jfoundry-runtime/jfoundry-quarkus/deployment`; otherwise put Quarkus CDI runtime behavior under `jfoundry-runtime/jfoundry-quarkus/runtime`.
+- If JAX-RS or JTA implementation code is semantically identical across Jakarta-based runtimes, put the
+  portable implementation under `jfoundry-runtime/jfoundry-jakarta`; keep CDI registration, provider discovery,
+  configuration ownership, runtime logging bridges, build-time processing, and Native Image integration in the
+  concrete runtime modules.
 - If a test verifies Quarkus runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`.
 - If the code uses Helidon MP CDI lifecycle, Jakarta transactions, JAX-RS, scheduling, or Helidon JPA integration, put it under `jfoundry-runtime/jfoundry-helidon/runtime`. Keep Helidon Native consumer checks under `jfoundry-helidon/jfoundry-helidon-integration-tests`; do not create a Quarkus-style deployment module without an upstream Helidon build-time extension model.
 - If a test verifies Helidon runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`.

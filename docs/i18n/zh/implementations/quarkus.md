@@ -4,6 +4,11 @@
 它使 Quarkus、CDI、Jakarta Transactions 与 GraalVM 类型始终位于 domain、application 和
 infrastructure 模块之外。
 
+其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
+`jfoundry-domain-event-jta` 和 `jfoundry-web-jaxrs` 实现。Quarkus 自有运行时类仍是公开的 CDI/provider
+入口，部署模块继续负责 Arc 注册、增强、RESTEasy Reactive 集成与原生镜像行为。应用应选择 Quarkus
+运行时模块，而不是自行组合这些共享实现模块。
+
 ## 依赖配置
 
 依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加运行时扩展。

@@ -22,6 +22,10 @@
             <artifactId>jfoundry-web</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-web-jaxrs</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>

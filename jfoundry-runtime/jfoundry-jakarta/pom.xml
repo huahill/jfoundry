@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-parent</artifactId>
+        <version>1.4.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jfoundry-jakarta</artifactId>
+    <packaging>pom</packaging>
+
+    <name>jfoundry-jakarta</name>
+    <description>Shared Jakarta runtime adapters for JFoundry.</description>
+
+    <modules>
+        <module>jfoundry-web-jaxrs</module>
+        <module>jfoundry-transaction-jta</module>
+        <module>jfoundry-domain-event-jta</module>
+    </modules>
+</project>
