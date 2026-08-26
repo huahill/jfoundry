@@ -44,6 +44,11 @@ Before changing a framework-neutral contract or a behavior implemented by runtim
 
 Apply runtime-specific APIs only inside their runtime adapters. Put a shared semantic marker or contract in the framework-neutral core only when it expresses behavior needed by more than one runtime. Do not move lifecycle APIs such as Spring transaction synchronization or JTA callbacks into core merely to make the implementations look uniform.
 
+Keep logging contracts portable across runtimes. Shared Jakarta or framework-neutral adapters should accept a
+logging callback or SPI rather than bind to a concrete runtime logging system. A concrete runtime adapter should
+use the facade that its runtime guarantees, such as SLF4J in Quarkus or `System.Logger` in Helidon. Cross-runtime
+consistency means equal observable logging behavior, configuration, and redaction, not necessarily the same API.
+
 ## Java Platform Baseline
 
 Treat the root POM's `maven.compiler.release` as the source of truth for Java language and JDK API choices. Before adding or modifying Java code:
@@ -52,6 +57,11 @@ Treat the root POM's `maven.compiler.release` as the source of truth for Java la
 2. Prefer a stable, semantically better API available in the target release over a legacy alternative retained only by habit. For example, use `ScopedValue` for dynamically scoped contextual state when lexical binding is the intended model.
 3. Do not mechanically replace every older API. `ThreadLocal` remains appropriate when mutable, thread-owned state is genuinely required; record the reason when retaining it is non-obvious.
 4. Verify the affected module with the configured Java baseline, including a focused regression test when the choice prevents a return to an unsuitable API.
+
+At transaction, resource, or lifecycle boundaries, catching `Error` is permitted only to perform mandatory
+cleanup or invalidate state before immediately rethrowing it. Do not recover from or wrap an `Error`. If cleanup
+fails while another `Exception` or `Error` is already in flight, retain the original failure and attach each
+cleanup failure with `Throwable.addSuppressed`; add focused tests for both the primary and cleanup failures.
 
 ## Non-Negotiable Boundaries
 

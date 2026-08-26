@@ -93,7 +93,7 @@ final class JaxRsHttpLoggingSupport {
 
         void capture(byte[] source, int offset, int length) {
             var remaining = HttpLoggingPolicy.MAX_BODY_BYTES - this.bytes.size();
-            var retained = Math.min(Math.max(remaining, 0), length);
+            var retained = Math.clamp(remaining, 0, length);
             this.bytes.write(source, offset, retained);
             if (retained < length) {
                 this.truncated = true;
