@@ -1,6 +1,7 @@
 package org.jfoundry.domain.entity.agg;
 
 import org.jfoundry.domain.event.EventRecordable;
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 import org.jmolecules.event.types.DomainEvent;
@@ -45,7 +46,7 @@ public abstract class BaseAggregateRoot<T extends AggregateRoot<T, ID>, ID exten
     /// root instance across threads, including async jobs and message listeners.
     /// Pass aggregate state across threads through immutable snapshots or by
     /// reloading the aggregate instance.
-    protected transient List<DomainEvent> events;
+    protected transient @Nullable List<DomainEvent> events;
 
     public BaseAggregateRoot(ID id) {
         this.id = id;

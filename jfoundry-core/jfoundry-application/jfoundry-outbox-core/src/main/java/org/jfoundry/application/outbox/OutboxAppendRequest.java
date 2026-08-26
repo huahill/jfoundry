@@ -1,5 +1,7 @@
 package org.jfoundry.application.outbox;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 
 /**
@@ -18,13 +20,13 @@ import java.time.Instant;
 public record OutboxAppendRequest(
         String eventId,
         String topic,
-        String payloadKey,
+        @Nullable String payloadKey,
         String payloadType,
         Object payload,
         Instant occurredAt,
-        String aggregateType,
-        String aggregateId,
-        Long aggregateVersion) {
+        @Nullable String aggregateType,
+        @Nullable String aggregateId,
+        @Nullable Long aggregateVersion) {
 
     /**
      * Creates a request without aggregate routing metadata.
@@ -32,7 +34,7 @@ public record OutboxAppendRequest(
     public static OutboxAppendRequest of(
             String eventId,
             String topic,
-            String payloadKey,
+            @Nullable String payloadKey,
             String payloadType,
             Object payload,
             Instant occurredAt) {

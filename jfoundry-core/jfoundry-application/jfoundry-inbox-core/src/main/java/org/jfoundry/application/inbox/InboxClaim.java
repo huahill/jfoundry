@@ -1,9 +1,11 @@
 package org.jfoundry.application.inbox;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /// The result of attempting to acquire processing ownership for an Inbox message.
-public record InboxClaim(InboxClaimResult result, String claimToken, InboxClaimSource source) {
+public record InboxClaim(InboxClaimResult result, @Nullable String claimToken, @Nullable InboxClaimSource source) {
 
     public InboxClaim {
         Objects.requireNonNull(result, "result must not be null");

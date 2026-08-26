@@ -13,6 +13,13 @@
     <description>Application-layer reliability contracts and services.</description>
     <packaging>pom</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+    </dependencies>
+
     <modules>
         <module>jfoundry-application-core</module>
         <module>jfoundry-transaction-core</module>

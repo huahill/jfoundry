@@ -1,5 +1,7 @@
 package org.jfoundry.application.lock;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /// Executes callbacks while holding a distributed lock.
@@ -11,7 +13,7 @@ public interface LockExecutor {
     }
 
     /// Executes the callback while the key is held according to the supplied options.
-    <T> T execute(LockKey key, LockOptions options, LockCallback<T> callback) throws Exception;
+    <T> @Nullable T execute(LockKey key, LockOptions options, LockCallback<T> callback) throws Exception;
 }
 
 final class DefaultLockExecutor implements LockExecutor {
@@ -23,7 +25,7 @@ final class DefaultLockExecutor implements LockExecutor {
     }
 
     @Override
-    public <T> T execute(LockKey key, LockOptions options, LockCallback<T> callback) throws Exception {
+    public <T> @Nullable T execute(LockKey key, LockOptions options, LockCallback<T> callback) throws Exception {
         Objects.requireNonNull(key, "key must not be null");
         Objects.requireNonNull(options, "options must not be null");
         Objects.requireNonNull(callback, "callback must not be null");

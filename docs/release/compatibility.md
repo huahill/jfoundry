@@ -24,6 +24,7 @@
 | Quarkus | 3.38.3 |
 | Helidon MP | 4.5.3 |
 | MyBatis-Plus | 3.5.17 |
+| JSpecify | 1.0.1 |
 | MyBatis-Plus Spring Boot 4 starter | 3.5.17 |
 | Jackson 3 | 3.2.2 |
 | Helidon Jackson annotations compatibility override | 2.22 |

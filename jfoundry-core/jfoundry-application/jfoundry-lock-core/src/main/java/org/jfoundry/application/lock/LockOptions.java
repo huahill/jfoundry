@@ -1,5 +1,7 @@
 package org.jfoundry.application.lock;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,7 +45,7 @@ public record LockOptions(
     public static final class Builder {
 
         private Duration waitTime = Duration.ZERO;
-        private Duration leaseTime;
+        private @Nullable Duration leaseTime;
         private LockFailureMode failureMode = LockFailureMode.THROW;
 
         private Builder() {
