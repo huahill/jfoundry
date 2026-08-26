@@ -124,6 +124,7 @@ class NativeMybatisPlusApplicationTest {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.body())
                 .contains("\"outboxClaimed\":true")
+                .contains("\"outboxCleaned\":true")
                 .contains("\"inboxCompleted\":true");
     }
 }

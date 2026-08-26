@@ -4,6 +4,7 @@ import org.jfoundry.application.inbox.InboxClaim;
 import org.jfoundry.application.inbox.InboxMessageStore;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
+import org.jfoundry.application.outbox.OutboxMessageStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -56,17 +57,26 @@ class NativeMybatisPlusResource {
     NativeMybatisPlusTechnicalStoresResult exerciseTechnicalStores() {
         Instant now = Instant.now();
         OutboxMessage message = OutboxMessage.newPending(
-                "native-outbox-event", "native-topic", null, "native.payload", "{}", now);
+                "native-outbox-event", "native-topic", null, "native.payload", "{}",
+                now.minus(Duration.ofDays(2)));
         outboxStore.append(message);
-        boolean outboxClaimed = outboxStore.claimDispatchable(1, "native-image")
+        OutboxMessage claimedMessage = outboxStore.claimDispatchable(1, "native-image")
                 .stream()
-                .anyMatch(candidate -> candidate.getEventId().equals(message.getEventId()));
+                .filter(candidate -> candidate.getEventId().equals(message.getEventId()))
+                .findFirst()
+                .orElse(null);
+        boolean outboxClaimed = claimedMessage != null;
+        if (outboxClaimed) {
+            outboxStore.markAsPublished(claimedMessage.getEventId(), claimedMessage.getClaimToken());
+        }
+        boolean outboxCleaned = outboxClaimed && outboxStore.deleteByStatusAndOccurredAtBefore(
+                OutboxMessageStatus.PUBLISHED, now.minus(Duration.ofDays(1)), 10) == 1;
 
         InboxClaim claim = inboxStore.claim(
                 "native-inbox-message", "native-consumer", now, Duration.ofMinutes(1));
         boolean inboxCompleted = claim.acquired() && inboxStore.markProcessed(
                 "native-inbox-message", "native-consumer", claim.claimToken(), Instant.now());
 
-        return new NativeMybatisPlusTechnicalStoresResult(outboxClaimed, inboxCompleted);
+        return new NativeMybatisPlusTechnicalStoresResult(outboxClaimed, outboxCleaned, inboxCompleted);
     }
 }
