@@ -155,9 +155,9 @@ The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggi
 old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
 remains in `org.jfoundry.web.spring`.
 
-Outbound logging defaults to `BASIC`. Applications can select all four levels through
+Outbound logging defaults to `NONE`. Applications can select all four levels through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use
-`jfoundry.web.rest-client.logging-level`, also defaulting to `BASIC`. The client `durationMs` starts
+`jfoundry.web.rest-client.logging-level`, also defaulting to `NONE`. The client `durationMs` starts
 immediately before `ClientHttpRequestExecution.execute(...)` and ends when response headers are
 available or execution fails. It excludes response-body consumption and decoding and is not
 end-to-end latency.
@@ -173,15 +173,16 @@ disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, 
 | Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
 
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
-`jfoundry.web.rest-client.logging-level`, defaulting to `BASIC`. Spring applications can also select
+`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring applications can also select
 the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.
 JFoundry does not currently integrate Spring `WebClient`; reactive calls are outside this contract.
 
-All runtimes emit only when the provider logger is enabled at `DEBUG`. `BASIC` records query-free
-method/URI, status, and
-`durationMs` without body wrappers. `HEADERS` adds headers after case-insensitive redaction of
+All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records separate request and
+response events with query-free method/URI, status, and `durationMs` without body wrappers. `HEADERS` adds
+separate request-header and response-header events after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
-nested-field redaction and retains at most 8 KiB; non-JSON, malformed, incomplete, and oversized bodies
+nested-field redaction as separate request-body and response-body events and retains at most 8 KiB; non-JSON,
+malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
 
 Inbound `durationMs` ends at synchronous completion or the runtime's terminal response phase; it does

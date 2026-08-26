@@ -55,27 +55,39 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
 
     private final String serverLoggingLevel;
 
-    private final BooleanSupplier debugEnabled;
+    private final BooleanSupplier infoEnabled;
 
-    private final DebugLogger logger;
+    private final InfoLogger logger;
 
     private final LongSupplier nanoTime;
 
     /// Creates the shared provider implementation.
     protected AbstractJaxRsHttpLoggingProvider(
             String serverLoggingLevel,
-            BooleanSupplier debugEnabled,
-            DebugLogger logger,
-            LongSupplier nanoTime) {
+            BooleanSupplier infoEnabled,
+            LongSupplier nanoTime,
+            InfoLogger logger) {
         this.serverLoggingLevel = Objects.requireNonNull(serverLoggingLevel, "serverLoggingLevel must not be null");
-        this.debugEnabled = Objects.requireNonNull(debugEnabled, "debugEnabled must not be null");
+        this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.logger = Objects.requireNonNull(logger, "logger must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
 
+    /// Creates the shared provider with the former debug-named logging bridge.
+    ///
+    /// @deprecated since 1.4; use the constructor accepting {@link InfoLogger}.
+    @Deprecated(since = "1.4")
+    protected AbstractJaxRsHttpLoggingProvider(
+            String serverLoggingLevel,
+            BooleanSupplier enabled,
+            DebugLogger logger,
+            LongSupplier nanoTime) {
+        this(serverLoggingLevel, enabled, nanoTime, logger::debug);
+    }
+
     @Override
     public void filter(ContainerRequestContext request) {
-        if (!this.debugEnabled.getAsBoolean()) {
+        if (!this.infoEnabled.getAsBoolean()) {
             return;
         }
         var level = configuredLevel(this.serverLoggingLevel, HttpLoggingLevel.NONE);
@@ -87,7 +99,7 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         request.setProperty(SERVER_STATE, state);
         logServerRequest(request, state);
         if (level.includesBodies()) {
-            var body = bodyLog(captured -> debug(
+            var body = bodyLog(captured -> info(
                     "HTTP server request body: method={0}, uri={1}, body={2}", state.method(), state.uri(),
                     JaxRsHttpLoggingSupport.describeBody(request.getMediaType(), captured)));
             request.setProperty(SERVER_REQUEST_BODY, body);
@@ -103,19 +115,15 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         if (state == null) {
             return;
         }
-        safely(() -> {
-            var durationMs = elapsedMillis(state.startedAt());
-            if (state.level().includesHeaders()) {
-                debug("HTTP server response: method={0}, uri={1}, status={2}, headers={3}, durationMs={4}",
-                        state.method(), state.uri(), response.getStatus(),
-                        HttpLoggingPolicy.describeHeaders(response.getStringHeaders()), durationMs);
-            } else {
-                debug("HTTP server response: method={0}, uri={1}, status={2}, durationMs={3}",
-                        state.method(), state.uri(), response.getStatus(), durationMs);
-            }
-        });
+        safely(() -> info("HTTP server response: method={0}, uri={1}, status={2}, durationMs={3}",
+                state.method(), state.uri(), response.getStatus(), elapsedMillis(state.startedAt())));
+        if (state.level().includesHeaders()) {
+            safely(() -> info("HTTP server response headers: method={0}, uri={1}, status={2}, headers={3}",
+                    state.method(), state.uri(), response.getStatus(),
+                    HttpLoggingPolicy.describeHeaders(response.getStringHeaders())));
+        }
         if (state.level().includesBodies()) {
-            var body = bodyLog(captured -> debug(
+            var body = bodyLog(captured -> info(
                     "HTTP server response body: method={0}, uri={1}, status={2}, body={3}", state.method(), state.uri(),
                     response.getStatus(), JaxRsHttpLoggingSupport.describeBody(response.getMediaType(), captured)));
             request.setProperty(SERVER_RESPONSE_BODY, body);
@@ -127,26 +135,23 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
 
     @Override
     public void filter(ClientRequestContext request) {
-        if (!this.debugEnabled.getAsBoolean()) {
+        if (!this.infoEnabled.getAsBoolean()) {
             return;
         }
-        var level = configuredLevel(CLIENT_LOGGING_LEVEL, HttpLoggingLevel.BASIC);
+        var level = configuredLevel(CLIENT_LOGGING_LEVEL, HttpLoggingLevel.NONE);
         if (level == HttpLoggingLevel.NONE) {
             return;
         }
         var state = new ClientState(request.getMethod(), HttpLoggingPolicy.withoutQuery(request.getUri()),
                 level, this.nanoTime.getAsLong());
         request.setProperty(CLIENT_STATE, state);
-        safely(() -> {
-            if (level.includesHeaders()) {
-                debug("HTTP client request: method={0}, uri={1}, headers={2}", state.method(), state.uri(),
-                        HttpLoggingPolicy.describeHeaders(request.getStringHeaders()));
-            } else {
-                debug("HTTP client request: method={0}, uri={1}", state.method(), state.uri());
-            }
-        });
+        safely(() -> info("HTTP client request: method={0}, uri={1}", state.method(), state.uri()));
+        if (level.includesHeaders()) {
+            safely(() -> info("HTTP client request headers: method={0}, uri={1}, headers={2}",
+                    state.method(), state.uri(), HttpLoggingPolicy.describeHeaders(request.getStringHeaders())));
+        }
         if (level.includesBodies()) {
-            var body = bodyLog(captured -> debug(
+            var body = bodyLog(captured -> info(
                     "HTTP client request body: method={0}, uri={1}, body={2}", state.method(), state.uri(),
                     JaxRsHttpLoggingSupport.describeBody(request.getMediaType(), captured)));
             request.setProperty(CLIENT_REQUEST_BODY, body);
@@ -162,18 +167,17 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         if (state == null) {
             return;
         }
-        safely(() -> {
-            var durationMs = elapsedMillis(state.startedAt());
-            if (state.level().includesHeaders()) {
-                debug("HTTP client response: status={0}, headers={1}, durationMs={2}", response.getStatus(),
-                        HttpLoggingPolicy.describeHeaders(response.getHeaders()), durationMs);
-            } else {
-                debug("HTTP client response: status={0}, durationMs={1}", response.getStatus(), durationMs);
-            }
-        });
+        safely(() -> info("HTTP client response: method={0}, uri={1}, status={2}, durationMs={3}",
+                state.method(), state.uri(), response.getStatus(), elapsedMillis(state.startedAt())));
+        if (state.level().includesHeaders()) {
+            safely(() -> info("HTTP client response headers: method={0}, uri={1}, status={2}, headers={3}",
+                    state.method(), state.uri(), response.getStatus(),
+                    HttpLoggingPolicy.describeHeaders(response.getHeaders())));
+        }
         if (state.level().includesBodies()) {
-            var body = bodyLog(captured -> debug(
-                    "HTTP client response body: status={0}, body={1}", response.getStatus(),
+            var body = bodyLog(captured -> info(
+                    "HTTP client response body: method={0}, uri={1}, status={2}, body={3}",
+                    state.method(), state.uri(), response.getStatus(),
                     JaxRsHttpLoggingSupport.describeBody(response.getMediaType(), captured)));
             if (response.hasEntity()) {
                 request.setProperty(CLIENT_RESPONSE_BODY, body);
@@ -229,14 +233,11 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
     }
 
     private void logServerRequest(ContainerRequestContext request, ServerState state) {
-        safely(() -> {
-            if (state.level().includesHeaders()) {
-                debug("HTTP server request: method={0}, uri={1}, headers={2}", state.method(), state.uri(),
-                        HttpLoggingPolicy.describeHeaders(request.getHeaders()));
-            } else {
-                debug("HTTP server request: method={0}, uri={1}", state.method(), state.uri());
-            }
-        });
+        safely(() -> info("HTTP server request: method={0}, uri={1}", state.method(), state.uri()));
+        if (state.level().includesHeaders()) {
+            safely(() -> info("HTTP server request headers: method={0}, uri={1}, headers={2}",
+                    state.method(), state.uri(), HttpLoggingPolicy.describeHeaders(request.getHeaders())));
+        }
     }
 
     private long elapsedMillis(long startedAt) {
@@ -247,13 +248,13 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         try {
             return ConfigProvider.getConfig().getOptionalValue(name, HttpLoggingLevel.class).orElse(defaultValue);
         } catch (RuntimeException exception) {
-            safely(() -> debug("HTTP logging configuration could not be read: property={0}", name));
+            safely(() -> info("HTTP logging configuration could not be read: property={0}", name));
             return defaultValue;
         }
     }
 
-    private void debug(String message, Object... arguments) {
-        this.logger.debug(message, arguments);
+    private void info(String message, Object... arguments) {
+        this.logger.info(message, arguments);
     }
 
     private static BodyLog bodyLog(Consumer<JaxRsHttpLoggingSupport.BodyCapture> logger) {
@@ -268,11 +269,22 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         }
     }
 
-    /// Runtime-specific bridge for debug logging with {@link java.text.MessageFormat} placeholders.
+    /// Runtime-specific bridge for info logging with {@link java.text.MessageFormat} placeholders.
+    @FunctionalInterface
+    public interface InfoLogger {
+
+        /// Writes one info message without affecting HTTP processing when the backend fails.
+        void info(String message, Object... arguments);
+    }
+
+    /// Former runtime-specific bridge for debug logging.
+    ///
+    /// @deprecated since 1.4; use {@link InfoLogger}.
+    @Deprecated(since = "1.4")
     @FunctionalInterface
     public interface DebugLogger {
 
-        /// Writes one debug message without affecting HTTP processing when the backend fails.
+        /// Writes one debug message.
         void debug(String message, Object... arguments);
     }
 

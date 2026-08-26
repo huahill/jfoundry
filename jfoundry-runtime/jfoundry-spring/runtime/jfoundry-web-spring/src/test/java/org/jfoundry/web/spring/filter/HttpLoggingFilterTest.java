@@ -36,7 +36,7 @@ class HttpLoggingFilterTest {
     @BeforeEach
     void captureLogs() {
         logger = (Logger) LoggerFactory.getLogger(HttpLoggingFilter.class);
-        logger.setLevel(Level.DEBUG);
+        logger.setLevel(Level.INFO);
         logs = new ListAppender<>();
         logs.start();
         logger.addAppender(logs);
@@ -49,7 +49,7 @@ class HttpLoggingFilterTest {
     }
 
     @Test
-    void noneAndDisabledDebugDelegateWithOriginalObjectsWithoutQueryingClock() throws Exception {
+    void noneAndDisabledInfoDelegateWithOriginalObjectsWithoutQueryingClock() throws Exception {
         var clockQueries = new AtomicInteger();
         LongSupplier clock = () -> {
             clockQueries.incrementAndGet();
@@ -96,6 +96,7 @@ class HttpLoggingFilterTest {
                 "HTTP server request: method=POST, uri=https://service.test/orders",
                 "HTTP server response: method=POST, uri=https://service.test/orders, status=201, "
                         + "completion=complete, durationMs=25");
+        assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(messages()).noneMatch(message -> message.contains("access_token"));
     }
 
@@ -144,7 +145,10 @@ class HttpLoggingFilterTest {
         assertThat(messages()).noneMatch(message -> message.contains("秘密") || message.contains("隐藏"))
                 .anyMatch(message -> message.contains("\"password\":\"<redacted>\""))
                 .anyMatch(message -> message.contains("\"access_token\":\"<redacted>\""))
-                .anyMatch(message -> message.contains("小明") && message.contains("成功"));
+                .anyMatch(message -> message.startsWith("HTTP server request body:")
+                        && message.contains("小明"))
+                .anyMatch(message -> message.startsWith("HTTP server response body:")
+                        && message.contains("成功"));
     }
 
     @Test
@@ -187,8 +191,10 @@ class HttpLoggingFilterTest {
 
         assertThat(response.getContentAsString()).isEqualTo("{\"result\":\"kept\"}");
         assertThat(messages()).noneMatch(message -> message.contains("discarded-secret"))
-                .anyMatch(message -> message.contains("requestBody={\"name\":\"Ada\"}"))
-                .anyMatch(message -> message.contains("responseBody={\"result\":\"kept\"}"));
+                .anyMatch(message -> message.startsWith("HTTP server request body:")
+                        && message.contains("body={\"name\":\"Ada\"}"))
+                .anyMatch(message -> message.startsWith("HTTP server response body:")
+                        && message.contains("body={\"result\":\"kept\"}"));
     }
 
     @Test
@@ -206,8 +212,10 @@ class HttpLoggingFilterTest {
         });
 
         assertThat(response.getContentAsByteArray()).containsExactly(largeBody);
-        assertThat(messages()).anyMatch(message -> message.contains("requestBody=<not fully consumed>"))
-                .anyMatch(message -> message.contains("responseBody=<truncated at 8192 bytes>"))
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP server request body:")
+                        && message.contains("body=<not fully consumed>"))
+                .anyMatch(message -> message.startsWith("HTTP server response body:")
+                        && message.contains("body=<truncated at 8192 bytes>"))
                 .noneMatch(message -> message.contains("secret"));
 
         logs.list.clear();
@@ -218,7 +226,8 @@ class HttpLoggingFilterTest {
             actualResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
             actualResponse.getOutputStream().write("{".getBytes(StandardCharsets.UTF_8));
         });
-        assertThat(messages()).anyMatch(message -> message.contains("responseBody=<omitted: invalid JSON>"));
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP server response body:")
+                && message.contains("body=<omitted: invalid JSON>"));
     }
 
     @Test

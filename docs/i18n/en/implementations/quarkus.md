@@ -368,12 +368,11 @@ authorization can render its own `401` or `403` descriptor with the public
 
 `jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer
 interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging-level`; it defaults to
-`NONE`. `BASIC`, `HEADERS`, and `FULL` require the
-`org.jfoundry.http.quarkus.HttpLoggingProvider` category at `DEBUG`.
+`NONE`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
 
 When the application selects a Quarkus MicroProfile REST Client extension, JFoundry also registers
 the provider with every REST Client builder. Outbound logging uses
-`jfoundry.web.rest-client.logging-level`, defaulting to `BASIC`. It does not add a REST Client
+`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. It does not add a REST Client
 implementation by itself. Spring `WebClient` is not supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are
