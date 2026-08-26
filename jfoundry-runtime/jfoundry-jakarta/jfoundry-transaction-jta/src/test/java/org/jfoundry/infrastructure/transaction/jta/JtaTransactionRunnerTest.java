@@ -14,6 +14,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 class JtaTransactionRunnerTest {
 
@@ -120,6 +121,76 @@ class JtaTransactionRunnerTest {
     }
 
     @Test
+    void rollsBackAnOwnedTransactionAndRethrowsTheOriginalError() {
+        RecordingTransactionManager transactionManager = new RecordingTransactionManager();
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
+        AssertionError failure = new AssertionError("fatal failure");
+
+        Throwable thrown = catchThrowable(() -> runner.call(() -> {
+            throw failure;
+        }));
+
+        assertThat(thrown).isSameAs(failure);
+        assertThat(transactionManager.rollbacks).isEqualTo(1);
+    }
+
+    @Test
+    void preservesTheOriginalFailureWhenRollbackAndTimeoutResetAlsoFail() {
+        RecordingTransactionManager transactionManager = new RecordingTransactionManager();
+        RuntimeException rollbackFailure = new IllegalStateException("rollback failed");
+        RuntimeException timeoutResetFailure = new IllegalStateException("timeout reset failed");
+        transactionManager.rollbackFailure = rollbackFailure;
+        transactionManager.timeoutResetFailure = timeoutResetFailure;
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
+        IOException failure = new IOException("write failed");
+
+        Throwable thrown = catchThrowable(() -> runner.call(TransactionOptions.builder()
+                .timeout(Duration.ofSeconds(12))
+                .build(), () -> {
+            throw failure;
+        }));
+
+        assertThat(thrown).isSameAs(failure);
+        assertThat(thrown.getSuppressed()).containsExactly(rollbackFailure, timeoutResetFailure);
+    }
+
+    @Test
+    void preservesTheOriginalFailureWhenMarkingAnExistingTransactionRollbackOnlyFails() {
+        RecordingTransactionManager transactionManager = new RecordingTransactionManager();
+        transactionManager.activateExistingTransaction();
+        RuntimeException cleanupFailure = new IllegalStateException("rollback-only failed");
+        transactionManager.rollbackOnlyFailure = cleanupFailure;
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
+        IOException failure = new IOException("write failed");
+
+        Throwable thrown = catchThrowable(() -> runner.call(() -> {
+            throw failure;
+        }));
+
+        assertThat(thrown).isSameAs(failure);
+        assertThat(thrown.getSuppressed()).containsExactly(cleanupFailure);
+    }
+
+    @Test
+    void preservesTheOriginalFailureWhenResumingASuspendedTransactionFails() {
+        RecordingTransactionManager transactionManager = new RecordingTransactionManager();
+        transactionManager.activateExistingTransaction();
+        RuntimeException cleanupFailure = new IllegalStateException("resume failed");
+        transactionManager.resumeFailure = cleanupFailure;
+        JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
+        IOException failure = new IOException("write failed");
+
+        Throwable thrown = catchThrowable(() -> runner.call(TransactionOptions.builder()
+                .propagation(TransactionPropagation.NOT_SUPPORTED)
+                .build(), () -> {
+            throw failure;
+        }));
+
+        assertThat(thrown).isSameAs(failure);
+        assertThat(thrown.getSuppressed()).containsExactly(cleanupFailure);
+    }
+
+    @Test
     void requiresAnExistingTransactionForMandatory() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
@@ -178,6 +249,10 @@ class JtaTransactionRunnerTest {
         private int resumes;
         private final List<Integer> timeoutSeconds = new ArrayList<>();
         private Transaction suspendedTransaction;
+        private RuntimeException rollbackFailure;
+        private RuntimeException rollbackOnlyFailure;
+        private RuntimeException resumeFailure;
+        private RuntimeException timeoutResetFailure;
 
         private void activateExistingTransaction() {
             active = true;
@@ -213,6 +288,9 @@ class JtaTransactionRunnerTest {
 
         @Override
         public void resume(Transaction transaction) {
+            if (resumeFailure != null) {
+                throw resumeFailure;
+            }
             active = transaction != null;
             existingTransactionActive = transaction == suspendedTransaction;
             resumes++;
@@ -260,18 +338,27 @@ class JtaTransactionRunnerTest {
 
         @Override
         public void rollback() {
+            if (rollbackFailure != null) {
+                throw rollbackFailure;
+            }
             active = false;
             rollbacks++;
         }
 
         @Override
         public void setRollbackOnly() {
+            if (rollbackOnlyFailure != null) {
+                throw rollbackOnlyFailure;
+            }
             rollbackOnlyMarks++;
         }
 
         @Override
         public void setTransactionTimeout(int seconds) {
             timeoutSeconds.add(seconds);
+            if (seconds == 0 && timeoutResetFailure != null) {
+                throw timeoutResetFailure;
+            }
         }
     }
 }
