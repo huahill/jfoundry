@@ -70,6 +70,14 @@ verify_spring_metadata \
     'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure' \
     'jfoundry-domain-event-spring-boot-autoconfigure' \
     'jfoundry.domain.event'
+verify_spring_metadata \
+    'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-web-spring-boot-autoconfigure' \
+    'jfoundry-web-spring-boot-autoconfigure' \
+    'jfoundry.web.rest-client.logging-level'
+verify_spring_metadata \
+    'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure' \
+    'jfoundry-webmvc-spring-boot-autoconfigure' \
+    'jfoundry.web.mvc.logging-level'
 
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-quarkus-deployment' \
