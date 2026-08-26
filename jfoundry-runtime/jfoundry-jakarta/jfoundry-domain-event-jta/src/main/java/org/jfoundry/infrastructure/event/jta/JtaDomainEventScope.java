@@ -15,10 +15,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-/// Thread-bound domain-event scope coordinated with Jakarta Transactions.
+/// Dynamically scoped domain-event context coordinated with Jakarta Transactions.
 public class JtaDomainEventScope {
 
-    private static final ThreadLocal<State> CURRENT = new ThreadLocal<>();
+    private static final ScopedValue<State> CURRENT = ScopedValue.newInstance();
     private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
 
     /// Creates a scope backed by the runtime's transaction synchronization registry.
@@ -32,40 +32,36 @@ public class JtaDomainEventScope {
     }
 
     <T> T invoke(List<DomainEventDispatcher> dispatchers, ScopedOperation<T> operation) throws Exception {
-        if (CURRENT.get() != null) {
+        if (CURRENT.isBound()) {
             return operation.call(false);
         }
 
-        CURRENT.set(new State(dispatchers, transactionSynchronizationRegistry));
-        try {
-            return operation.call(true);
-        } finally {
-            CURRENT.remove();
-        }
+        return ScopedValue.where(CURRENT, new State(dispatchers, transactionSynchronizationRegistry))
+                .call(() -> operation.call(true));
     }
 
     /// Registers an aggregate with the currently active application-service scope, when present.
     public void register(EventRecordable aggregate) {
-        State state = CURRENT.get();
+        State state = current();
         if (state != null) {
             state.register(aggregate);
         }
     }
 
     void markFailed() {
-        State state = CURRENT.get();
+        State state = current();
         if (state != null) {
             state.failed = true;
         }
     }
 
     boolean failed() {
-        State state = CURRENT.get();
+        State state = current();
         return state != null && state.failed;
     }
 
     List<DomainEvent> drainEvents() {
-        State state = CURRENT.get();
+        State state = current();
         if (state == null) {
             return List.of();
         }
@@ -73,8 +69,12 @@ public class JtaDomainEventScope {
     }
 
     boolean hasTransactionEvents() {
-        State state = CURRENT.get();
+        State state = current();
         return state != null && state.hasTransactionEvents();
+    }
+
+    private State current() {
+        return CURRENT.isBound() ? CURRENT.get() : null;
     }
 
     @FunctionalInterface

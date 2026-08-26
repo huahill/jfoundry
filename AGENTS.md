@@ -17,6 +17,13 @@ This is a Java 25 multi-module Maven project for a jMolecules-based, runtime-neu
 
 Use Java 25 features where they simplify the model, especially records for immutable value objects. Follow the existing package root `org.jfoundry.*` and standard Maven layout. Keep domain modules free of Spring and persistence dependencies; place Spring auto-configuration in capability-specific modules under `jfoundry-runtime/jfoundry-spring/autoconfigure`, Spring runtime adapters under `jfoundry-runtime/jfoundry-spring/runtime`, persistence and broker adapters under `jfoundry-core/jfoundry-infrastructure`, reusable architecture test rules under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`, and runtime-specific integration verification in the direct `jfoundry-<runtime>-integration-tests` module. Name tests with a `*Test` suffix. No formatter plugin is configured, so match the surrounding Java style: four-space indentation, clear method names, and concise English Javadocs/comments only where API intent or non-obvious behavior needs explanation.
 
+Prefer stable Java 25 APIs that match the intended semantics. Use `ScopedValue` for lexically bounded dynamic
+context; retain `ThreadLocal` only for genuinely mutable, thread-owned state and document non-obvious cases.
+Catch `Error` only at boundaries that must clean up or invalidate state, rethrow it immediately, and preserve
+the primary failure when cleanup also fails by attaching cleanup failures as suppressed exceptions. Shared
+runtime-neutral or Jakarta adapters must not bind to a concrete runtime logging system. Runtime adapters should
+use the logging facade guaranteed by their target runtime, so equivalent behavior need not use the same facade.
+
 ## Architecture Boundaries
 
 JFoundry framework internals use Onion Simple: `domain`, `application`, and `infrastructure` are the dependency

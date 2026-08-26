@@ -19,6 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class JtaDomainEventScopeTest {
 
     @Test
+    void bindsScopeStateUsingScopedValue() throws NoSuchFieldException {
+        assertThat(JtaDomainEventScope.class.getDeclaredField("CURRENT").getType())
+                .isEqualTo(ScopedValue.class);
+    }
+
+    @Test
     void makesOutboxEventsAvailableBeforeTransactionCompletionAndDispatchesLocalEventsAfterCommit() throws Exception {
         RecordingTransactionSynchronizationRegistry transactionRegistry =
                 new RecordingTransactionSynchronizationRegistry();
