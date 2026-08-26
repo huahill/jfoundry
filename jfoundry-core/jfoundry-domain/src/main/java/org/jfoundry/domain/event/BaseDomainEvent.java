@@ -1,5 +1,6 @@
 package org.jfoundry.domain.event;
 
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.event.types.DomainEvent;
 
 import java.time.Instant;
@@ -40,7 +41,7 @@ public abstract class BaseDomainEvent implements DomainEvent {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

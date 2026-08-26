@@ -31,15 +31,16 @@ public final class InboxProcessor {
         if (!claim.acquired()) {
             return claim.executionResult();
         }
+        String claimToken = Objects.requireNonNull(claim.claimToken(), "acquired claim must have a token");
         try {
             handler.handle();
-            if (!store.markProcessed(messageId, consumerName, claim.claimToken(), now)) {
+            if (!store.markProcessed(messageId, consumerName, claimToken, now)) {
                 throw new IllegalStateException("Inbox processing ownership was lost");
             }
             return InboxExecutionResult.PROCESSED;
         } catch (RuntimeException exception) {
             try {
-                store.markFailed(messageId, consumerName, claim.claimToken(), exception.getMessage(), now);
+                store.markFailed(messageId, consumerName, claimToken, exception.getMessage(), now);
             } catch (RuntimeException recordingException) {
                 exception.addSuppressed(recordingException);
             }

@@ -1,6 +1,8 @@
 package org.jfoundry.application.outbox;
 
 import org.jfoundry.application.messaging.MessagePropagation;
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.time.Instant;
 
@@ -16,39 +18,40 @@ import java.time.Instant;
 /// {@link #markPublished()} / {@link #markFailed(String, int, BackoffStrategy)} /
 /// {@link #reactivate()}. Entering and leaving {@code DISPATCHING} is controlled
 /// by atomic claim and recovery operations, see {@code claimDispatchable}.
+@NullUnmarked
 public class OutboxMessage {
 
     private String eventId;
     private String topic;
-    private String payloadKey;
+    private @Nullable String payloadKey;
     private String payloadType;
     private String payloadJson;
     private MessagePropagation propagation = MessagePropagation.empty();
-    private String aggregateType;
-    private String aggregateId;
-    private Long aggregateVersion;
+    private @Nullable String aggregateType;
+    private @Nullable String aggregateId;
+    private @Nullable Long aggregateVersion;
     private String status;
     private int retryCount;
-    private String errorMessage;
+    private @Nullable String errorMessage;
     private Instant occurredAt;
-    private Instant lastAttemptAt;
-    private Instant nextRetryAt;
+    private @Nullable Instant lastAttemptAt;
+    private @Nullable Instant nextRetryAt;
     private Instant createdAt;
     private Instant updatedAt;
     /// Time of the latest successful atomic claim. Used with
     /// {@code idx_outbox_claim (status, claimed_at)} to detect and recover stuck
     /// DISPATCHING records.
-    private Instant claimedAt;
+    private @Nullable Instant claimedAt;
     /// Identifier of the pod that claimed this entry, usually hostname plus short UUID.
-    private String claimedBy;
+    private @Nullable String claimedBy;
     /// Unique token generated for the current {@code claimDispatchable} call.
     /// <p>
     /// Read-back matches this token exactly so stale DISPATCHING records from a
     /// previous batch, potentially left behind after a failed state update, are
     /// not mixed into the current batch. Cleared when leaving DISPATCHING.
-    private String claimToken;
+    private @Nullable String claimToken;
 
-    public static OutboxMessage newPending(String eventId, String topic, String payloadKey,
+    public static OutboxMessage newPending(String eventId, String topic, @Nullable String payloadKey,
                                           String payloadType, String payloadJson, Instant occurredAt) {
         OutboxMessage entry = new OutboxMessage();
         Instant now = Instant.now();
@@ -68,9 +71,10 @@ public class OutboxMessage {
         return entry;
     }
 
-    public static OutboxMessage newPending(String eventId, String topic, String payloadKey,
+    public static OutboxMessage newPending(String eventId, String topic, @Nullable String payloadKey,
                                           String payloadType, String payloadJson, Instant occurredAt,
-                                          String aggregateType, String aggregateId, Long aggregateVersion) {
+                                          @Nullable String aggregateType, @Nullable String aggregateId,
+                                          @Nullable Long aggregateVersion) {
         OutboxMessage entry = newPending(eventId, topic, payloadKey, payloadType, payloadJson, occurredAt);
         entry.aggregateType = aggregateType;
         entry.aggregateId = aggregateId;
@@ -89,7 +93,7 @@ public class OutboxMessage {
         this.updatedAt = now;
     }
 
-    public void markFailed(String errorMessage, int maxRetries, BackoffStrategy backoff) {
+    public void markFailed(@Nullable String errorMessage, int maxRetries, BackoffStrategy backoff) {
         int retryCountBefore = this.retryCount;
         Instant now = Instant.now();
         this.lastAttemptAt = now;
@@ -132,42 +136,42 @@ public class OutboxMessage {
     public void setEventId(String eventId) { this.eventId = eventId; }
     public String getTopic() { return topic; }
     public void setTopic(String topic) { this.topic = topic; }
-    public String getPayloadKey() { return payloadKey; }
-    public void setPayloadKey(String payloadKey) { this.payloadKey = payloadKey; }
+    public @Nullable String getPayloadKey() { return payloadKey; }
+    public void setPayloadKey(@Nullable String payloadKey) { this.payloadKey = payloadKey; }
     public String getPayloadType() { return payloadType; }
     public void setPayloadType(String payloadType) { this.payloadType = payloadType; }
     public String getPayloadJson() { return payloadJson; }
     public void setPayloadJson(String payloadJson) { this.payloadJson = payloadJson; }
     public MessagePropagation getPropagation() { return propagation; }
-    public void setPropagation(MessagePropagation propagation) {
+    public void setPropagation(@Nullable MessagePropagation propagation) {
         this.propagation = propagation == null ? MessagePropagation.empty() : propagation;
     }
-    public String getAggregateType() { return aggregateType; }
-    public void setAggregateType(String aggregateType) { this.aggregateType = aggregateType; }
-    public String getAggregateId() { return aggregateId; }
-    public void setAggregateId(String aggregateId) { this.aggregateId = aggregateId; }
-    public Long getAggregateVersion() { return aggregateVersion; }
-    public void setAggregateVersion(Long aggregateVersion) { this.aggregateVersion = aggregateVersion; }
+    public @Nullable String getAggregateType() { return aggregateType; }
+    public void setAggregateType(@Nullable String aggregateType) { this.aggregateType = aggregateType; }
+    public @Nullable String getAggregateId() { return aggregateId; }
+    public void setAggregateId(@Nullable String aggregateId) { this.aggregateId = aggregateId; }
+    public @Nullable Long getAggregateVersion() { return aggregateVersion; }
+    public void setAggregateVersion(@Nullable Long aggregateVersion) { this.aggregateVersion = aggregateVersion; }
     public OutboxMessageStatus getStatus() { return OutboxMessageStatus.valueOf(status); }
     public void setStatus(OutboxMessageStatus status) { this.status = status.name(); }
     public int getRetryCount() { return retryCount; }
     public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public @Nullable String getErrorMessage() { return errorMessage; }
+    public void setErrorMessage(@Nullable String errorMessage) { this.errorMessage = errorMessage; }
     public Instant getOccurredAt() { return occurredAt; }
     public void setOccurredAt(Instant occurredAt) { this.occurredAt = occurredAt; }
-    public Instant getLastAttemptAt() { return lastAttemptAt; }
-    public void setLastAttemptAt(Instant lastAttemptAt) { this.lastAttemptAt = lastAttemptAt; }
-    public Instant getNextRetryAt() { return nextRetryAt; }
-    public void setNextRetryAt(Instant nextRetryAt) { this.nextRetryAt = nextRetryAt; }
+    public @Nullable Instant getLastAttemptAt() { return lastAttemptAt; }
+    public void setLastAttemptAt(@Nullable Instant lastAttemptAt) { this.lastAttemptAt = lastAttemptAt; }
+    public @Nullable Instant getNextRetryAt() { return nextRetryAt; }
+    public void setNextRetryAt(@Nullable Instant nextRetryAt) { this.nextRetryAt = nextRetryAt; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-    public Instant getClaimedAt() { return claimedAt; }
-    public void setClaimedAt(Instant claimedAt) { this.claimedAt = claimedAt; }
-    public String getClaimedBy() { return claimedBy; }
-    public void setClaimedBy(String claimedBy) { this.claimedBy = claimedBy; }
-    public String getClaimToken() { return claimToken; }
-    public void setClaimToken(String claimToken) { this.claimToken = claimToken; }
+    public @Nullable Instant getClaimedAt() { return claimedAt; }
+    public void setClaimedAt(@Nullable Instant claimedAt) { this.claimedAt = claimedAt; }
+    public @Nullable String getClaimedBy() { return claimedBy; }
+    public void setClaimedBy(@Nullable String claimedBy) { this.claimedBy = claimedBy; }
+    public @Nullable String getClaimToken() { return claimToken; }
+    public void setClaimToken(@Nullable String claimToken) { this.claimToken = claimToken; }
 }

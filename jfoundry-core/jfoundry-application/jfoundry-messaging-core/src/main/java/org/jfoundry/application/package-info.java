@@ -6,4 +6,5 @@
  * subpackages within the same application ring.
  */
 @org.jmolecules.architecture.onion.simplified.ApplicationRing
+@org.jspecify.annotations.NullMarked
 package org.jfoundry.application;

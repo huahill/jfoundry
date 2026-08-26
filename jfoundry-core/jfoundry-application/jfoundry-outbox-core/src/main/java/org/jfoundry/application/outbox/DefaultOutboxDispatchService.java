@@ -7,6 +7,7 @@ import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionPropagation;
 import org.jfoundry.application.transaction.TransactionRunner;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
     private final int maxRetries;
     private final BackoffStrategy backoff;
     private final String claimerId;
-    private final TransactionRunner transactionRunner;
+    private final @Nullable TransactionRunner transactionRunner;
 
     public DefaultOutboxDispatchService(OutboxMessageStore repository,
                                         MessageSender messageSender,
@@ -40,7 +41,7 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
     /// Message delivery deliberately remains outside those transactions.
     public DefaultOutboxDispatchService(OutboxMessageStore repository,
                                         MessageSender messageSender,
-                                        TransactionRunner transactionRunner,
+                                        @Nullable TransactionRunner transactionRunner,
                                         int maxRetries,
                                         BackoffStrategy backoff,
                                         String claimerId) {
@@ -62,26 +63,27 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
     }
 
     private void dispatchMessage(OutboxMessage message) {
+        @Nullable String claimToken = message.getClaimToken();
         try {
             SendResult result = messageSender.send(new OutboundMessage(
                     message.getTopic(), message.getPayloadKey(), message.getPayloadJson(), message.getPropagation()));
             if (result.success()) {
                 inNewTransaction(() -> {
-                    repository.markAsPublished(message.getEventId(), message.getClaimToken());
+                    repository.markAsPublished(message.getEventId(), claimToken);
                     return null;
                 });
             } else {
-                markAsFailed(message, result.errorMessage());
+                markAsFailed(message, claimToken, result.errorMessage());
             }
         } catch (RuntimeException e) {
             log.warn("dispatch message {} failed with exception: {}", message.getEventId(), e.getMessage());
-            markAsFailed(message, e.getMessage());
+            markAsFailed(message, claimToken, e.getMessage());
         }
     }
 
-    private void markAsFailed(OutboxMessage message, String errorMessage) {
+    private void markAsFailed(OutboxMessage message, @Nullable String claimToken, @Nullable String errorMessage) {
         inNewTransaction(() -> {
-            repository.markAsFailed(message.getEventId(), message.getClaimToken(),
+            repository.markAsFailed(message.getEventId(), claimToken,
                     errorMessage, maxRetries, backoff);
             return null;
         });

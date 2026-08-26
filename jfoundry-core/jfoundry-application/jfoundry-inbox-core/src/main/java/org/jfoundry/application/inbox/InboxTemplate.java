@@ -4,6 +4,7 @@ import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionPropagation;
 import org.jfoundry.application.transaction.TransactionRunner;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -16,7 +17,7 @@ public final class InboxTemplate implements InboxMessageProcessor {
     private static final Duration DEFAULT_LEASE_DURATION = Duration.ofMinutes(5);
 
     private final InboxMessageStore store;
-    private final TransactionRunner transactionRunner;
+    private final @Nullable TransactionRunner transactionRunner;
     private final Clock clock;
     private final Duration leaseDuration;
 
@@ -24,11 +25,11 @@ public final class InboxTemplate implements InboxMessageProcessor {
         this(store, null, Clock.systemUTC(), DEFAULT_LEASE_DURATION);
     }
 
-    public InboxTemplate(InboxMessageStore store, TransactionRunner transactionRunner) {
+    public InboxTemplate(InboxMessageStore store, @Nullable TransactionRunner transactionRunner) {
         this(store, transactionRunner, Clock.systemUTC(), DEFAULT_LEASE_DURATION);
     }
 
-    public InboxTemplate(InboxMessageStore store, TransactionRunner transactionRunner, Clock clock,
+    public InboxTemplate(InboxMessageStore store, @Nullable TransactionRunner transactionRunner, Clock clock,
                          Duration leaseDuration) {
         this.store = Objects.requireNonNull(store, "store must not be null");
         this.transactionRunner = transactionRunner;
@@ -50,10 +51,11 @@ public final class InboxTemplate implements InboxMessageProcessor {
         if (!claim.acquired()) {
             return claim.executionResult();
         }
+        String claimToken = Objects.requireNonNull(claim.claimToken(), "acquired claim must have a token");
         try {
             return inNewTransaction(() -> {
                 handler.handle();
-                if (!store.markProcessed(messageId, consumerName, claim.claimToken(), now)) {
+                if (!store.markProcessed(messageId, consumerName, claimToken, now)) {
                     throw new IllegalStateException("Inbox processing ownership was lost");
                 }
                 return InboxExecutionResult.PROCESSED;
@@ -61,7 +63,7 @@ public final class InboxTemplate implements InboxMessageProcessor {
         } catch (RuntimeException exception) {
             try {
                 inNewTransaction(() -> store.markFailed(
-                        messageId, consumerName, claim.claimToken(), exception.getMessage(), now));
+                        messageId, consumerName, claimToken, exception.getMessage(), now));
             } catch (RuntimeException recordingException) {
                 exception.addSuppressed(recordingException);
             }

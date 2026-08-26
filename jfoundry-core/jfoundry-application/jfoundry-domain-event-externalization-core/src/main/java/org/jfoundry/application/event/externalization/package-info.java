@@ -10,4 +10,5 @@
  * Jackson serializers consume these contracts; they do not redefine the externalization rules.
  */
 @org.jmolecules.architecture.onion.simplified.ApplicationRing
+@org.jspecify.annotations.NullMarked
 package org.jfoundry.application.event.externalization;

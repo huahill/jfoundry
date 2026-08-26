@@ -1,5 +1,7 @@
 package org.jfoundry.application.event.externalization;
 
+import org.jspecify.annotations.Nullable;
+
 import java.lang.reflect.Method;
 
 final class PropertyPathReader {
@@ -17,8 +19,8 @@ final class PropertyPathReader {
         return path;
     }
 
-    static Object read(Object root, String path) throws ReflectiveOperationException {
-        Object current = root;
+    static @Nullable Object read(Object root, String path) throws ReflectiveOperationException {
+        @Nullable Object current = root;
         for (String segment : normalize(path).split("\\.")) {
             if (segment.isBlank()) {
                 throw new NoSuchMethodException("empty property segment in path " + path);
@@ -31,7 +33,7 @@ final class PropertyPathReader {
         return current;
     }
 
-    private static Object readProperty(Object target, String property) throws ReflectiveOperationException {
+    private static @Nullable Object readProperty(Object target, String property) throws ReflectiveOperationException {
         Class<?> type = target.getClass();
         String suffix = Character.toUpperCase(property.charAt(0)) + property.substring(1);
         try {
@@ -45,7 +47,7 @@ final class PropertyPathReader {
         }
     }
 
-    private static Object invoke(Method method, Object target) throws ReflectiveOperationException {
+    private static @Nullable Object invoke(Method method, Object target) throws ReflectiveOperationException {
         if (!method.canAccess(target)) {
             method.setAccessible(true);
         }

@@ -1,10 +1,12 @@
 package org.jfoundry.application.event.externalization;
 
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.event.types.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,13 +24,13 @@ public class AggregateRoutingResolver {
             return Optional.empty();
         }
         try {
-            Object aggregateId = PropertyPathReader.read(event, metadata.idPath());
+            Object aggregateId = PropertyPathReader.read(event, Objects.requireNonNull(metadata.idPath()));
             if (aggregateId == null) {
                 return Optional.empty();
             }
-            Long aggregateVersion = resolveVersion(event, metadata.versionPath());
+            @Nullable Long aggregateVersion = resolveVersion(event, metadata.versionPath());
             return Optional.of(new AggregateRoutingMetadata(
-                    metadata.aggregateType(), aggregateId.toString(), aggregateVersion));
+                    Objects.requireNonNull(metadata.aggregateType()), aggregateId.toString(), aggregateVersion));
         } catch (Exception e) {
             log.warn("Failed to resolve @AggregateRouting property path for event {}; aggregate metadata is empty. Cause: {}",
                     eventType.getName(), e.getMessage());
@@ -37,12 +39,12 @@ public class AggregateRoutingResolver {
     }
 
     private ResolvedMetadata computeMetadata(Class<?> eventType) {
-        AggregateRouting routing = eventType.getAnnotation(AggregateRouting.class);
+        @Nullable AggregateRouting routing = eventType.getAnnotation(AggregateRouting.class);
         if (routing == null) {
             return new ResolvedMetadata(false, null, null, null);
         }
         String aggregateType = routing.type().isEmpty() ? eventType.getSimpleName() : routing.type();
-        String versionPath = routing.version().isEmpty() ? null : PropertyPathReader.normalize(routing.version());
+        @Nullable String versionPath = routing.version().isEmpty() ? null : PropertyPathReader.normalize(routing.version());
         return new ResolvedMetadata(
                 true,
                 aggregateType,
@@ -50,11 +52,12 @@ public class AggregateRoutingResolver {
                 versionPath);
     }
 
-    private Long resolveVersion(DomainEvent event, String versionPath) throws ReflectiveOperationException {
+    private @Nullable Long resolveVersion(DomainEvent event, @Nullable String versionPath)
+            throws ReflectiveOperationException {
         if (versionPath == null) {
             return null;
         }
-        Object value = PropertyPathReader.read(event, versionPath);
+        @Nullable Object value = PropertyPathReader.read(event, versionPath);
         if (value == null) {
             return null;
         }
@@ -64,6 +67,7 @@ public class AggregateRoutingResolver {
         return Long.valueOf(value.toString());
     }
 
-    private record ResolvedMetadata(boolean annotated, String aggregateType, String idPath, String versionPath) {
+    private record ResolvedMetadata(boolean annotated, @Nullable String aggregateType,
+                                    @Nullable String idPath, @Nullable String versionPath) {
     }
 }

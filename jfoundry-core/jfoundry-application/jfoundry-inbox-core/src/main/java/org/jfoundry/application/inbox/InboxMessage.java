@@ -1,18 +1,22 @@
 package org.jfoundry.application.inbox;
 
+import org.jspecify.annotations.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+
 import java.time.Instant;
 
+@NullUnmarked
 public class InboxMessage {
 
     private String messageId;
     private String consumerName;
     private InboxMessageStatus status;
-    private Instant processedAt;
+    private @Nullable Instant processedAt;
     private Instant createdAt;
     private Instant updatedAt;
-    private Instant claimedAt;
-    private String claimToken;
-    private String errorMessage;
+    private @Nullable Instant claimedAt;
+    private @Nullable String claimToken;
+    private @Nullable String errorMessage;
 
     public static InboxMessage processed(String messageId, String consumerName) {
         Instant now = Instant.now();
@@ -43,16 +47,16 @@ public class InboxMessage {
     public void setConsumerName(String consumerName) { this.consumerName = consumerName; }
     public InboxMessageStatus getStatus() { return status; }
     public void setStatus(InboxMessageStatus status) { this.status = status; }
-    public Instant getProcessedAt() { return processedAt; }
-    public void setProcessedAt(Instant processedAt) { this.processedAt = processedAt; }
+    public @Nullable Instant getProcessedAt() { return processedAt; }
+    public void setProcessedAt(@Nullable Instant processedAt) { this.processedAt = processedAt; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-    public Instant getClaimedAt() { return claimedAt; }
-    public void setClaimedAt(Instant claimedAt) { this.claimedAt = claimedAt; }
-    public String getClaimToken() { return claimToken; }
-    public void setClaimToken(String claimToken) { this.claimToken = claimToken; }
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
+    public @Nullable Instant getClaimedAt() { return claimedAt; }
+    public void setClaimedAt(@Nullable Instant claimedAt) { this.claimedAt = claimedAt; }
+    public @Nullable String getClaimToken() { return claimToken; }
+    public void setClaimToken(@Nullable String claimToken) { this.claimToken = claimToken; }
+    public @Nullable String getErrorMessage() { return errorMessage; }
+    public void setErrorMessage(@Nullable String errorMessage) { this.errorMessage = errorMessage; }
 }
