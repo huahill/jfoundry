@@ -24,13 +24,15 @@ class WebRestClientAutoConfigurationTest {
                     WebRestClientAutoConfiguration.class));
 
     @Test
-    void usesBasicLoggingByDefault() {
+    void disablesLoggingByDefault() {
         contextRunner.run(context -> {
             assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLoggingLevel())
-                    .isEqualTo(HttpLoggingLevel.BASIC);
-            assertThat(configuredInterceptor(context)).extracting(interceptor ->
-                    ReflectionTestUtils.getField(interceptor, "level"))
-                    .isEqualTo(HttpLoggingLevel.BASIC);
+                    .isEqualTo(HttpLoggingLevel.NONE);
+            RestClient.Builder builder = RestClient.builder();
+            context.getBean(RestClientCustomizer.class).customize(builder);
+            AtomicReference<List<ClientHttpRequestInterceptor>> interceptors = new AtomicReference<>();
+            builder.requestInterceptors(value -> interceptors.set(List.copyOf(value)));
+            assertThat(interceptors).hasValue(List.of());
         });
     }
 

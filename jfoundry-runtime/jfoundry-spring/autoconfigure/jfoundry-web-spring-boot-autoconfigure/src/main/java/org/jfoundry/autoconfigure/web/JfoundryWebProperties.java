@@ -17,7 +17,7 @@ public class JfoundryWebProperties {
     /// Outbound `RestClient` properties.
     public static class RestClient {
 
-        private HttpLoggingLevel loggingLevel = HttpLoggingLevel.BASIC;
+        private HttpLoggingLevel loggingLevel = HttpLoggingLevel.NONE;
 
         /// Returns the detail recorded for outbound `RestClient` HTTP logs.
         public HttpLoggingLevel getLoggingLevel() {

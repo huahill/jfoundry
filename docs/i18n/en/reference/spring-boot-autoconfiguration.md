@@ -38,8 +38,8 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | Enables Spring `ApplicationEventPublisher` dispatch when the Spring event adapter is present. |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | Enables Outbox-backed domain event dispatch when a `DomainEventOutboxRecorder` bean exists. |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
-| `jfoundry.web.rest-client.logging-level` | `BASIC` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
-| `jfoundry.web.mvc.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled levels require the Filter logger at `DEBUG`. |
+| `jfoundry.web.rest-client.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
+| `jfoundry.web.mvc.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled events are emitted at `INFO`. |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |
@@ -106,7 +106,7 @@ bean into the default recorder. Applications normally provide these mappings wit
   `tools.jackson.databind.ObjectMapper`; the Outbox starter inherits this capability through messaging.
   JFoundry does not support Spring Boot's Jackson 2 compatibility module.
 - Distributed lock support is explicit. The default Spring Boot starter does not pull Redisson.
-- Inbound and outbound HTTP logging are independent. Both emit only at `DEBUG`, remove URI queries,
+- Inbound and outbound HTTP logging are independent. Both emit categorized events at `INFO`, remove URI queries,
   redact credentials, cookies, tokens, secrets, and API keys, and cap `FULL` JSON body capture at 8 KiB.
   Client duration ends at response headers; Servlet duration ends at synchronous or async terminal
   completion. Neither is an end-to-end client latency measurement or a business audit event.

@@ -44,7 +44,7 @@ class HttpLoggingResourceTest {
         this.messages.clear();
         this.logger = Logger.getLogger(HttpLoggingProvider.class.getName());
         this.previousLevel = this.logger.getLevel();
-        this.logger.setLevel(Level.FINE);
+        this.logger.setLevel(Level.INFO);
         this.handler = new Handler() {
             private final SimpleFormatter formatter = new SimpleFormatter();
 
@@ -61,7 +61,7 @@ class HttpLoggingResourceTest {
             public void close() {
             }
         };
-        this.handler.setLevel(Level.FINE);
+        this.handler.setLevel(Level.INFO);
         this.logger.addHandler(this.handler);
     }
 
@@ -94,10 +94,13 @@ class HttpLoggingResourceTest {
 
         assertEquals("Ada", response.get("name"));
         assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client request:")));
+        assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client request headers:")));
         assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client request body:")));
         assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client response:")
-                && message.contains("status=200")));
-        assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client response body:")));
+                && message.contains("method=POST") && message.contains("status=200")));
+        assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client response headers:")));
+        assertTrue(this.messages.stream().anyMatch(message -> message.startsWith("HTTP client response body:")
+                && message.contains("method=POST") && message.contains("status=200")));
         assertNoSecrets();
     }
 
@@ -105,8 +108,12 @@ class HttpLoggingResourceTest {
         var requests = this.messages.stream().filter(message -> message.startsWith("HTTP server request:")).toList();
         assertEquals(1, requests.size());
         assertTrue(requests.getFirst().contains("method=POST"));
-        assertTrue(requests.getFirst().contains("Authorization=[<redacted>]"));
         assertFalse(requests.getFirst().contains("access_token"));
+
+        var requestHeaders = this.messages.stream()
+                .filter(message -> message.startsWith("HTTP server request headers:")).toList();
+        assertEquals(1, requestHeaders.size());
+        assertTrue(requestHeaders.getFirst().contains("Authorization=[<redacted>]"));
 
         var requestBodies = this.messages.stream()
                 .filter(message -> message.startsWith("HTTP server request body:")).toList();
@@ -116,12 +123,20 @@ class HttpLoggingResourceTest {
 
         var responses = this.messages.stream().filter(message -> message.startsWith("HTTP server response:")).toList();
         assertEquals(1, responses.size());
+        assertTrue(responses.getFirst().contains("method=POST"));
         assertTrue(responses.getFirst().contains("status=200"));
         assertTrue(responses.getFirst().contains("durationMs="));
+
+        var responseHeaders = this.messages.stream()
+                .filter(message -> message.startsWith("HTTP server response headers:")).toList();
+        assertEquals(1, responseHeaders.size());
+        assertTrue(responseHeaders.getFirst().contains("status=200"));
 
         var responseBodies = this.messages.stream()
                 .filter(message -> message.startsWith("HTTP server response body:")).toList();
         assertEquals(1, responseBodies.size());
+        assertTrue(responseBodies.getFirst().contains("method=POST"));
+        assertTrue(responseBodies.getFirst().contains("status=200"));
         assertTrue(responseBodies.getFirst().contains("\"password\":\"<redacted>\""));
         assertNoSecrets();
     }

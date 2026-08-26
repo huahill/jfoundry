@@ -90,28 +90,39 @@ class HttpLoggingResourceTest {
 
         assertThat(response).containsEntry("name", "Ada").containsEntry("password", "response-secret");
         assertThat(this.messages).anyMatch(message -> message.startsWith("HTTP client request:"))
+                .anyMatch(message -> message.startsWith("HTTP client request headers:"))
                 .anyMatch(message -> message.startsWith("HTTP client request body:"))
-                .anyMatch(message -> message.startsWith("HTTP client response:") && message.contains("status=200"))
-                .anyMatch(message -> message.startsWith("HTTP client response body:"));
+                .anyMatch(message -> message.startsWith("HTTP client response:")
+                        && message.contains("method=POST") && message.contains("status=200"))
+                .anyMatch(message -> message.startsWith("HTTP client response headers:"))
+                .anyMatch(message -> message.startsWith("HTTP client response body:")
+                        && message.contains("method=POST") && message.contains("status=200"));
         assertNoSecrets();
     }
 
     private void assertServerLogs() {
         assertThat(this.messages.stream().filter(message -> message.startsWith("HTTP server request:")).toList())
                 .singleElement().satisfies(message -> {
-                    assertThat(message).contains("method=POST", "uri=" + this.baseUri + "jfoundry/http-logging",
-                            "Authorization=[<redacted>]");
+                    assertThat(message).contains("method=POST", "uri=" + this.baseUri + "jfoundry/http-logging");
                     assertThat(message).doesNotContain("access_token");
                 });
+        assertThat(this.messages.stream()
+                .filter(message -> message.startsWith("HTTP server request headers:")).toList())
+                .singleElement().satisfies(message -> assertThat(message).contains("Authorization=[<redacted>]"));
         assertThat(this.messages.stream().filter(message -> message.startsWith("HTTP server request body:")).toList())
                 .singleElement().satisfies(message -> assertThat(message)
                         .contains("\"name\":\"Ada\"", "\"password\":\"<redacted>\""));
         assertThat(this.messages.stream().filter(message -> message.startsWith("HTTP server response:")).toList())
                 .singleElement().satisfies(message -> assertThat(message)
-                        .contains("status=200", "durationMs="));
+                        .contains("method=POST", "uri=" + this.baseUri + "jfoundry/http-logging",
+                                "status=200", "durationMs="));
+        assertThat(this.messages.stream()
+                .filter(message -> message.startsWith("HTTP server response headers:")).toList())
+                .singleElement().satisfies(message -> assertThat(message).contains("status=200", "headers="));
         assertThat(this.messages.stream().filter(message -> message.startsWith("HTTP server response body:")).toList())
                 .singleElement().satisfies(message -> assertThat(message)
-                        .contains("\"name\":\"Ada\"", "\"password\":\"<redacted>\""));
+                        .contains("method=POST", "status=200", "\"name\":\"Ada\"",
+                                "\"password\":\"<redacted>\""));
         assertNoSecrets();
     }
 
@@ -127,7 +138,7 @@ class HttpLoggingResourceTest {
             return Map.of(
                     "jfoundry.web.quarkus.logging-level", "FULL",
                     "jfoundry.web.rest-client.logging-level", "FULL",
-                    "quarkus.log.category.\"org.jfoundry.http.quarkus.HttpLoggingProvider\".level", "DEBUG");
+                    "quarkus.log.category.\"org.jfoundry.http.quarkus.HttpLoggingProvider\".level", "INFO");
         }
     }
 }

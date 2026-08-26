@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(classes = NativeSmokeApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
                 "jfoundry.web.mvc.logging-level=BASIC",
-                "logging.level.org.jfoundry.web.spring.filter.HttpLoggingFilter=DEBUG"
+                "logging.level.org.jfoundry.web.spring.filter.HttpLoggingFilter=INFO"
         })
 class HttpLoggingWebMvcIntegrationTest {
 
@@ -42,7 +42,7 @@ class HttpLoggingWebMvcIntegrationTest {
     @BeforeEach
     void captureLogs() {
         logger = (Logger) LoggerFactory.getLogger(HttpLoggingFilter.class);
-        logger.setLevel(Level.DEBUG);
+        logger.setLevel(Level.INFO);
         logs = new ListAppender<>();
         logs.start();
         logger.addAppender(logs);
