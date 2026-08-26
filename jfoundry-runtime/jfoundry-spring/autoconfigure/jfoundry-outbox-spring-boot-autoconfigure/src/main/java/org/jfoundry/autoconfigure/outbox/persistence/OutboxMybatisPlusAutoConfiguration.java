@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ImportRuntimeHints;
 
 /// Default MyBatis-Plus bean auto-configuration:
 /// <ul>
@@ -43,6 +44,7 @@ import org.springframework.context.annotation.Bean;
         sqlSessionFactoryRef = "sqlSessionFactory")
 @ConditionalOnClass({MybatisPlusInterceptor.class, MapperScan.class, MybatisPlusOutboxMessageStore.class})
 @EnableConfigurationProperties(JfoundryOutboxProperties.class)
+@ImportRuntimeHints(MybatisPlusOutboxNativeRuntimeHints.class)
 public class OutboxMybatisPlusAutoConfiguration {
 
     @Bean

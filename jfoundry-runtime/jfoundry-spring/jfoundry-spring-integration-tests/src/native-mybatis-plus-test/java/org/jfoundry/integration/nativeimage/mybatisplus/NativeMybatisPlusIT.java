@@ -55,6 +55,7 @@ class NativeMybatisPlusIT {
                     "\"value\":\"updated\"");
             assertThat(exerciseTechnicalStores(port)).contains(
                     "\"outboxClaimed\":true",
+                    "\"outboxCleaned\":true",
                     "\"inboxCompleted\":true");
         } finally {
             stop(application);
