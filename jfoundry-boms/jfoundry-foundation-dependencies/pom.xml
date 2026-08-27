@@ -77,7 +77,7 @@
     <mqttv3.version>1.2.5</mqttv3.version>
     <rabbitmq-amqp-client.version>5.35.0</rabbitmq-amqp-client.version>
     <redisson.version>4.7.0</redisson.version>
-    <rocketmq-client.version>5.5.0</rocketmq-client.version>
+    <rocketmq-client.version>5.5.1</rocketmq-client.version>
 
     <!-- Runtime utilities -->
     <javassist.version>3.33.0-GA</javassist.version>
