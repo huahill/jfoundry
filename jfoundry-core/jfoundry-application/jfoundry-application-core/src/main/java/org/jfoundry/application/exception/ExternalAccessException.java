@@ -1,5 +1,7 @@
 package org.jfoundry.application.exception;
 
+import org.jspecify.annotations.Nullable;
+
 import java.io.Serial;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,7 +12,7 @@ public class ExternalAccessException extends ApplicationException {
     @Serial
     private static final long serialVersionUID = 2547502648268602446L;
 
-    private final String publicDetail;
+    private final @Nullable String publicDetail;
 
     public ExternalAccessException(String message) {
         super(message);

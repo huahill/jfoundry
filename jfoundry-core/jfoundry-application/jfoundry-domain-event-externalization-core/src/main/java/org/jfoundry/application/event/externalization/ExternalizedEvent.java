@@ -1,5 +1,7 @@
 package org.jfoundry.application.event.externalization;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Objects;
 
 /// Transport-neutral description of a versioned integration message.
@@ -15,10 +17,10 @@ public record ExternalizedEvent(
         String topic,
         String payloadType,
         Object payload,
-        String payloadKey,
-        String aggregateType,
-        String aggregateId,
-        Long aggregateVersion) {
+        @Nullable String payloadKey,
+        @Nullable String aggregateType,
+        @Nullable String aggregateId,
+        @Nullable Long aggregateVersion) {
 
     public ExternalizedEvent {
         requireNonBlank(topic, "topic");
@@ -44,7 +46,7 @@ public record ExternalizedEvent(
         }
     }
 
-    private static void requireOptionalNonBlank(String value, String name) {
+    private static void requireOptionalNonBlank(@Nullable String value, String name) {
         if (value != null && value.isBlank()) {
             throw new IllegalArgumentException(name + " must not be blank when set");
         }

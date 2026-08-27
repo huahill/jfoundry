@@ -1,5 +1,7 @@
 package org.jfoundry.application.inbox;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Duration;
 import java.time.Instant;
 
@@ -10,5 +12,6 @@ public interface InboxMessageStore {
 
     boolean markProcessed(String messageId, String consumerName, String claimToken, Instant now);
 
-    boolean markFailed(String messageId, String consumerName, String claimToken, String errorMessage, Instant now);
+    boolean markFailed(String messageId, String consumerName, String claimToken,
+                       @Nullable String errorMessage, Instant now);
 }

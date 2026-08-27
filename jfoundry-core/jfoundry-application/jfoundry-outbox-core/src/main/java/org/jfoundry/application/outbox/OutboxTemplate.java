@@ -1,6 +1,7 @@
 package org.jfoundry.application.outbox;
 
 import org.jfoundry.application.messaging.PayloadSerializer;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -58,7 +59,7 @@ public final class OutboxTemplate implements OutboxRecorder {
         }
     }
 
-    private static void requireText(String value, String name) {
+    private static void requireText(@Nullable String value, String name) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(name + " must not be blank");
         }

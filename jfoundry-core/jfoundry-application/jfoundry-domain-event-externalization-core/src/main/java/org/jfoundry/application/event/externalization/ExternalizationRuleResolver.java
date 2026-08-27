@@ -1,11 +1,13 @@
 package org.jfoundry.application.event.externalization;
 
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.event.annotation.Externalized;
 import org.jmolecules.event.types.DomainEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,13 +34,13 @@ public class ExternalizationRuleResolver {
             }
             return Optional.empty();
         }
-        String payloadKey = evaluateKey(event, metadata.keyPath());
-        return Optional.of(new ExternalizationRule(metadata.topic(), payloadKey));
+        @Nullable String payloadKey = evaluateKey(event, metadata.keyPath());
+        return Optional.of(new ExternalizationRule(Objects.requireNonNull(metadata.topic()), payloadKey));
     }
 
     private ResolvedMetadata computeMetadata(Class<?> eventType) {
-        MessageRouting routing = eventType.getAnnotation(MessageRouting.class);
-        Externalized externalized = eventType.getAnnotation(Externalized.class);
+        @Nullable MessageRouting routing = eventType.getAnnotation(MessageRouting.class);
+        @Nullable Externalized externalized = eventType.getAnnotation(Externalized.class);
         boolean hasExternalized = externalized != null;
         boolean hasRouting = routing != null;
 
@@ -59,19 +61,19 @@ public class ExternalizationRuleResolver {
             topic = externalizedValue;
         }
 
-        String keyPath = null;
+        @Nullable String keyPath = null;
         if (hasRouting && !routing.key().isEmpty()) {
             keyPath = PropertyPathReader.normalize(routing.key());
         }
         return new ResolvedMetadata(true, false, topic, keyPath);
     }
 
-    private String evaluateKey(DomainEvent event, String keyPath) {
+    private @Nullable String evaluateKey(DomainEvent event, @Nullable String keyPath) {
         if (keyPath == null) {
             return null;
         }
         try {
-            Object value = PropertyPathReader.read(event, keyPath);
+            @Nullable Object value = PropertyPathReader.read(event, keyPath);
             return value == null ? null : value.toString();
         } catch (Exception e) {
             log.warn("Failed to resolve @MessageRouting.key property path for event {}; payloadKey falls back to null. Cause: {}",
@@ -81,6 +83,6 @@ public class ExternalizationRuleResolver {
     }
 
     private record ResolvedMetadata(boolean externalized, boolean routingOnly,
-                                     String topic, String keyPath) {
+                                    @Nullable String topic, @Nullable String keyPath) {
     }
 }

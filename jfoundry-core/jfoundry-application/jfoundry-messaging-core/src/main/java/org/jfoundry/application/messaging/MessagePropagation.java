@@ -1,5 +1,7 @@
 package org.jfoundry.application.messaging;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,7 +51,7 @@ public final class MessagePropagation {
 
         Map<String, String> validated = new LinkedHashMap<>();
         for (String key : ALLOWED_KEYS) {
-            String value = entries.get(key);
+            @Nullable String value = entries.get(key);
             if (value != null) {
                 validated.put(key, value);
             }
@@ -63,7 +65,7 @@ public final class MessagePropagation {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         return object instanceof MessagePropagation other && entries.equals(other.entries);
     }
 

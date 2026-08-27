@@ -1,5 +1,6 @@
 package org.jfoundry.domain.repository;
 
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 import org.jmolecules.ddd.types.Repository;
@@ -38,7 +39,7 @@ public interface AggregateRepository<T extends AggregateRoot<T, ID>, ID extends 
     ///
     /// @param id identifier
     /// @return aggregate root, or null when it does not exist
-    T findById(ID id);
+    @Nullable T findById(ID id);
 
     /// Adds a new aggregate to the aggregate set.
     /// <p>

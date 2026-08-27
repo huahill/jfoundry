@@ -8,4 +8,5 @@
  * threading, transactions, and transport concerns to outer adapters.
  */
 @org.jmolecules.architecture.onion.simplified.ApplicationRing
+@org.jspecify.annotations.NullMarked
 package org.jfoundry.application.event;

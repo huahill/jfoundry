@@ -1,5 +1,7 @@
 package org.jfoundry.application.outbox;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -28,14 +30,14 @@ public interface OutboxMessageStore {
 
     void markAsPublished(String eventId);
 
-    default void markAsPublished(String eventId, String claimToken) {
+    default void markAsPublished(String eventId, @Nullable String claimToken) {
         markAsPublished(eventId);
     }
 
-    void markAsFailed(String eventId, String errorMessage, int maxRetries, BackoffStrategy backoff);
+    void markAsFailed(String eventId, @Nullable String errorMessage, int maxRetries, BackoffStrategy backoff);
 
-    default void markAsFailed(String eventId, String claimToken,
-                              String errorMessage, int maxRetries, BackoffStrategy backoff) {
+    default void markAsFailed(String eventId, @Nullable String claimToken,
+                              @Nullable String errorMessage, int maxRetries, BackoffStrategy backoff) {
         markAsFailed(eventId, errorMessage, maxRetries, backoff);
     }
 

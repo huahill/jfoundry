@@ -1,5 +1,7 @@
 package org.jfoundry.application.transaction;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,9 +37,9 @@ public record TransactionOptions(
 
     public static final class Builder {
 
-        private String name;
+        private @Nullable String name;
         private boolean readOnly;
-        private Duration timeout;
+        private @Nullable Duration timeout;
         private TransactionPropagation propagation = TransactionPropagation.REQUIRED;
 
         private Builder() {

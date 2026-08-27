@@ -12,4 +12,5 @@
  * adapters can serialize and deliver.
  */
 @org.jmolecules.architecture.onion.simplified.ApplicationRing
+@org.jspecify.annotations.NullMarked
 package org.jfoundry.application.messaging;
