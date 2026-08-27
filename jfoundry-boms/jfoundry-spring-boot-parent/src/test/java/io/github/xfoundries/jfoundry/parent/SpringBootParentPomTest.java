@@ -144,7 +144,7 @@ class SpringBootParentPomTest {
         String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
 
         assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
-        assertThat(bomVersion).isEqualTo("3.38.3");
+        assertThat(bomVersion).isEqualTo("3.39.1");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
     }

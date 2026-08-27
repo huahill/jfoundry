@@ -8,7 +8,7 @@
 | Runtime Java | 25 |
 | Spring Boot-only line | Spring Boot 4.1.x |
 | Spring Cloud line | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
-| Quarkus | 3.38.3 |
+| Quarkus | 3.39.1 |
 | Helidon MP | 4.5.3 |
 | Maven release tool | 4.0.0-rc-6 (experimental) |
 | Maven 3.9 | Consumer compatibility check |
@@ -21,7 +21,7 @@
 | Spring Cloud line Spring Boot | 4.0.7 |
 | Spring Cloud line Spring Cloud | 2025.1.2 |
 | Spring Cloud line Spring Cloud Alibaba | 2025.1.0.0 |
-| Quarkus | 3.38.3 |
+| Quarkus | 3.39.1 |
 | Helidon MP | 4.5.3 |
 | MyBatis-Plus | 3.5.17 |
 | JSpecify | 1.0.1 |
