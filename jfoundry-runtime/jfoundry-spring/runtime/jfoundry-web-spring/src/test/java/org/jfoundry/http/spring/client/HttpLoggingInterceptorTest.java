@@ -64,7 +64,7 @@ class HttpLoggingInterceptorTest {
     @BeforeEach
     void captureLogs() {
         logger = (Logger) LoggerFactory.getLogger(HttpLoggingInterceptor.class);
-        logger.setLevel(Level.DEBUG);
+        logger.setLevel(Level.INFO);
         logs = new ListAppender<>();
         logs.start();
         logger.addAppender(logs);
@@ -87,7 +87,8 @@ class HttpLoggingInterceptorTest {
         assertThat(actual).isSameAs(response);
         assertThat(messages()).containsExactly(
                 "HTTP client request: method=GET, uri=https://downstream.test/orders/42",
-                "HTTP client response: status=200 OK, durationMs=24");
+                "HTTP client response: method=GET, uri=https://downstream.test/orders/42, status=200, durationMs=24");
+        assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(response.bodyAccesses()).isZero();
     }
 
@@ -106,7 +107,7 @@ class HttpLoggingInterceptorTest {
     }
 
     @Test
-    void noneAndDisabledDebugDoNotQueryClockOrWrapBodies() throws IOException {
+    void noneAndDisabledInfoDoNotQueryClockOrWrapBodies() throws IOException {
         var clockQueries = new AtomicInteger();
         LongSupplier clock = () -> {
             clockQueries.incrementAndGet();
@@ -138,8 +139,13 @@ class HttpLoggingInterceptorTest {
         assertThat(actual).isNotSameAs(response);
         assertThat(response.bodyAccesses()).isEqualTo(1);
         assertThat(messages()).noneMatch(message -> message.contains("hidden"))
-                .anyMatch(message -> message.contains("\"password\":\"<redacted>\""))
-                .anyMatch(message -> message.contains("\"token\":\"<redacted>\""));
+                .anyMatch(message -> message.startsWith("HTTP client request body:")
+                        && message.contains("\"password\":\"<redacted>\""))
+                .anyMatch(message -> message.startsWith("HTTP client response body:")
+                        && message.contains("method=GET")
+                        && message.contains("uri=https://downstream.test/orders/42")
+                        && message.contains("status=404")
+                        && message.contains("\"token\":\"<redacted>\""));
     }
 
     @Test
@@ -157,6 +163,21 @@ class HttpLoggingInterceptorTest {
     }
 
     @Test
+    void fullLoggingDescribesAnUnconsumedSuccessfulBodyWithoutReadingIt() throws IOException {
+        var response = new TrackingResponse(HttpStatus.OK, "{\"result\":\"accepted\"}");
+        response.headers().setContentType(MediaType.APPLICATION_JSON);
+        var interceptor = new HttpLoggingInterceptor(HttpLoggingLevel.FULL, () -> true,
+                nanos(0, 1_000_000));
+
+        var actual = interceptor.intercept(REQUEST, new byte[0], (request, body) -> response);
+        actual.close();
+
+        assertThat(response.bodyAccesses()).isZero();
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP client response body:")
+                && message.contains("status=200") && message.contains("body=<not fully consumed>"));
+    }
+
+    @Test
     void responseMetadataLoggingFailureDoesNotReplaceTheResponse() throws IOException {
         var response = new TrackingResponse(HttpStatus.OK, "accepted") {
             @Override
@@ -168,7 +189,43 @@ class HttpLoggingInterceptorTest {
                 nanos(0, 1_000_000));
 
         assertThat(interceptor.intercept(REQUEST, new byte[0], (request, body) -> response)).isSameAs(response);
-        assertThat(messages()).last().isEqualTo("HTTP client response metadata could not be read for logging");
+        assertThat(messages()).last().isEqualTo(
+                "HTTP client response metadata could not be read for logging: method=GET, "
+                        + "uri=https://downstream.test/orders/42");
+    }
+
+    @Test
+    void requestMetadataLoggingFailureDoesNotPreventExecution() throws IOException {
+        var request = new HttpRequest() {
+            @Override
+            public HttpMethod getMethod() {
+                throw new IllegalStateException("method unavailable");
+            }
+
+            @Override
+            public URI getURI() {
+                throw new IllegalStateException("URI unavailable");
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return HttpHeaders.EMPTY;
+            }
+
+            @Override
+            public Map<String, Object> getAttributes() {
+                return Map.of();
+            }
+        };
+        var response = new TrackingResponse(HttpStatus.OK, "accepted");
+        var interceptor = new HttpLoggingInterceptor(HttpLoggingLevel.BASIC, () -> true,
+                nanos(0, 1_000_000));
+
+        assertThat(interceptor.intercept(request, new byte[0], (actualRequest, body) -> response))
+                .isSameAs(response);
+        assertThat(messages()).containsExactly(
+                "HTTP client request: method=<unavailable>, uri=<unavailable>",
+                "HTTP client response: method=<unavailable>, uri=<unavailable>, status=200, durationMs=1");
     }
 
     private List<String> messages() {

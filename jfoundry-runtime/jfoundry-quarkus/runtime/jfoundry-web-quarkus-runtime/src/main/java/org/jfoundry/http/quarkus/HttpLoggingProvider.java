@@ -28,11 +28,11 @@ public final class HttpLoggingProvider extends AbstractJaxRsHttpLoggingProvider 
 
     /// Creates a provider that reads the current MicroProfile configuration for each request.
     public HttpLoggingProvider() {
-        this(LOG::isDebugEnabled, System::nanoTime);
+        this(LOG::isInfoEnabled, System::nanoTime);
     }
 
-    HttpLoggingProvider(BooleanSupplier debugEnabled, LongSupplier nanoTime) {
-        super(SERVER_LOGGING_LEVEL, debugEnabled,
-                (message, arguments) -> LOG.debug(MessageFormat.format(message, arguments)), nanoTime);
+    HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        super(SERVER_LOGGING_LEVEL, infoEnabled, nanoTime,
+                (message, arguments) -> LOG.info(MessageFormat.format(message, arguments)));
     }
 }

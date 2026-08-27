@@ -319,11 +319,11 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 ## HTTP 诊断日志
 
 `jfoundry-web-quarkus-runtime` 会注册 Quarkus REST 请求/响应 filter 与 reader/writer interceptor。
-入站日志通过 `jfoundry.web.quarkus.logging-level` 配置，默认值为 `NONE`。选择 `BASIC`、`HEADERS`
-或 `FULL` 时，还需为 `org.jfoundry.http.quarkus.HttpLoggingProvider` category 开启 `DEBUG`。
+入站日志通过 `jfoundry.web.quarkus.logging-level` 配置，默认值为 `NONE`。启用后的事件通过
+`org.jfoundry.http.quarkus.HttpLoggingProvider` category 以 `INFO` 输出。
 
 应用选择 Quarkus MicroProfile REST Client 扩展后，JFoundry 还会把 provider 自动注册到每个 REST Client
-builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `BASIC`；JFoundry 不会自行引入
+builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`；JFoundry 不会自行引入
 REST Client 实现。该适配器不支持 Spring `WebClient`。
 
 所有 URI 都会移除 query、user info 与 fragment。敏感 header 和嵌套 JSON 字段以不区分大小写的方式脱敏，
