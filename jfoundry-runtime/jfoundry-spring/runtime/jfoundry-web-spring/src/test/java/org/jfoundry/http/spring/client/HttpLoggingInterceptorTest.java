@@ -87,7 +87,7 @@ class HttpLoggingInterceptorTest {
         assertThat(actual).isSameAs(response);
         assertThat(messages()).containsExactly(
                 "HTTP client request: method=GET, uri=https://downstream.test/orders/42",
-                "HTTP client response: method=GET, uri=https://downstream.test/orders/42, status=200, durationMs=24");
+                "HTTP client response: method=GET, uri=https://downstream.test/orders/42, status=200, duration=24ms");
         assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(response.bodyAccesses()).isZero();
     }
@@ -103,7 +103,7 @@ class HttpLoggingInterceptorTest {
         })).isSameAs(failure);
         assertThat(messages()).last().isEqualTo(
                 "HTTP client request failed: method=GET, uri=https://downstream.test/orders/42, "
-                        + "exception=java.io.IOException, durationMs=7");
+                        + "exception=java.io.IOException, duration=7ms");
     }
 
     @Test
@@ -225,7 +225,7 @@ class HttpLoggingInterceptorTest {
                 .isSameAs(response);
         assertThat(messages()).containsExactly(
                 "HTTP client request: method=<unavailable>, uri=<unavailable>",
-                "HTTP client response: method=<unavailable>, uri=<unavailable>, status=200, durationMs=1");
+                "HTTP client response: method=<unavailable>, uri=<unavailable>, status=200, duration=1ms");
     }
 
     private List<String> messages() {

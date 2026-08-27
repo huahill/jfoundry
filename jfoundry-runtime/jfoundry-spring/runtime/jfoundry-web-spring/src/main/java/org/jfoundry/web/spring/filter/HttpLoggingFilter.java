@@ -168,7 +168,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             logRequestBody();
             var status = this.response.getStatus();
             safely(() -> LOG.info(
-                    "HTTP server response: method={}, uri={}, status={}, completion={}, durationMs={}",
+                    "HTTP server response: method={}, uri={}, status={}, completion={}, duration={}ms",
                     this.method, this.uri, status, completion, elapsedMillis()));
             if (this.level.includesHeaders()) {
                 safely(() -> LOG.info("HTTP server response headers: method={}, uri={}, status={}, headers={}",
@@ -189,7 +189,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             }
             logRequestBody();
             safely(() -> LOG.info(
-                    "HTTP server request failed: method={}, uri={}, completion={}, exception={}, durationMs={}",
+                    "HTTP server request failed: method={}, uri={}, completion={}, exception={}, duration={}ms",
                     this.method, this.uri, completion, exception.getClass().getName(), elapsedMillis()));
         }
 
@@ -200,7 +200,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 }
                 logRequestBody();
                 safely(() -> LOG.info(
-                        "HTTP server request failed: method={}, uri={}, completion={}, durationMs={}",
+                        "HTTP server request failed: method={}, uri={}, completion={}, duration={}ms",
                         this.method, this.uri, completion, elapsedMillis()));
             } else {
                 logFailure(exception, completion);

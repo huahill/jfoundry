@@ -24,7 +24,7 @@ import org.springframework.http.client.ClientHttpResponse;
 ///
 /// Logging is inactive unless this type's logger is enabled at `INFO`. `BASIC` and `HEADERS` never access or
 /// wrap bodies. `FULL` captures size-limited JSON bodies and may read an unconsumed error response on close.
-/// `durationMs` ends when response headers are available and excludes response-body consumption and decoding.
+/// The `duration` field ends when response headers are available and excludes response-body consumption and decoding.
 public final class HttpLoggingInterceptor implements ClientHttpRequestInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingInterceptor.class);
@@ -62,7 +62,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             return this.level.includesBodies()
                     ? new LoggingClientHttpResponse(response, method, uri, status) : response;
         } catch (IOException | RuntimeException exception) {
-            safely(() -> LOG.info("HTTP client request failed: method={}, uri={}, exception={}, durationMs={}",
+            safely(() -> LOG.info("HTTP client request failed: method={}, uri={}, exception={}, duration={}ms",
                     method, uri,
                     exception.getClass().getName(), elapsedMillis(startedAt)));
             throw exception;
@@ -97,7 +97,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         }
     }
 
-    private Integer logResponseSafely(ClientHttpResponse response, String method, String uri, long durationMs) {
+    private Integer logResponseSafely(ClientHttpResponse response, String method, String uri, long durationMillis) {
         int status;
         try {
             status = response.getStatusCode().value();
@@ -107,8 +107,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
                     method, uri));
             return null;
         }
-        safely(() -> LOG.info("HTTP client response: method={}, uri={}, status={}, durationMs={}",
-                method, uri, status, durationMs));
+        safely(() -> LOG.info("HTTP client response: method={}, uri={}, status={}, duration={}ms",
+                method, uri, status, durationMillis));
         if (this.level.includesHeaders()) {
             safely(() -> LOG.info("HTTP client response headers: method={}, uri={}, status={}, headers={}",
                     method, uri, status, HttpLoggingSupport.describeHeaders(response.getHeaders())));
