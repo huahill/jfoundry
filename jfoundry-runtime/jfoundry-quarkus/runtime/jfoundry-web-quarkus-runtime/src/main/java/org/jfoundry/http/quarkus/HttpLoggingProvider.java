@@ -4,7 +4,7 @@ import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.ext.Provider;
-import org.jfoundry.http.jaxrs.AbstractJaxRsHttpLoggingProvider;
+import org.jfoundry.http.jaxrs.AbstractJaxRsServerHttpLoggingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +16,10 @@ import java.util.function.LongSupplier;
 @Provider
 @PreMatching
 @Priority(Priorities.USER - 200)
-public final class HttpLoggingProvider extends AbstractJaxRsHttpLoggingProvider {
+public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingProvider {
 
     /// Configuration key for inbound Quarkus REST logging.
     public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.quarkus.logging-level";
-
-    /// Configuration key for outbound MicroProfile REST Client logging.
-    public static final String CLIENT_LOGGING_LEVEL = AbstractJaxRsHttpLoggingProvider.CLIENT_LOGGING_LEVEL;
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingProvider.class);
 

@@ -5,7 +5,8 @@
 outside the domain, application, and infrastructure modules.
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
-`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, and `jfoundry-web-jaxrs` implementations.
+`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
+`jfoundry-restclient-jaxrs` implementations.
 Quarkus-owned runtime classes remain the public CDI/provider entry points, while deployment modules
 retain Arc registration, augmentation, RESTEasy Reactive integration, and Native Image behavior.
 Applications select the Quarkus runtime modules rather than assembling these shared implementation modules.
@@ -64,15 +65,16 @@ artifact automatically.
 | `jfoundry-inbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka or RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` or `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
+| `jfoundry-restclient-spring-boot-starter` | `jfoundry-restclient-quarkus-runtime` |
 
 ## Supported Scope
 
 Quarkus is not a Spring starter translation layer. Its explicit composition currently covers CDI/JTA
 transactions, local CDI domain-event delivery, JPA aggregate persistence, JPA Outbox and Inbox
 stores, Outbox dispatch and maintenance, Kafka and RabbitMQ delivery, RFC 9457 Problem Details, and
-safe inbound and MicroProfile REST Client diagnostic logging. The generic
-`jfoundry-web-quarkus-runtime` extension owns the Quarkus REST boundary without moving Web lifecycle
-APIs into the core.
+safe inbound and MicroProfile REST Client diagnostic logging. `jfoundry-web-quarkus-runtime` owns
+the inbound Quarkus REST boundary, while `jfoundry-restclient-quarkus-runtime` owns outbound REST
+Client registration without moving HTTP lifecycle APIs into the core.
 
 MyBatis-Plus aggregate persistence, RocketMQ delivery, Redisson distributed locks, and JobRunr
 assembly are not supported Quarkus compositions today. Do not add the framework-neutral adapters or
@@ -321,7 +323,7 @@ does not provide a dispatcher, scheduler, serializer, automatic event externaliz
 ## Problem Details (RFC 9457)
 
 Add `jfoundry-web-quarkus-runtime` when a Quarkus REST application needs the shared RFC 9457 error
-contract. The same extension also provides the HTTP diagnostic logging described below. The
+contract. The extension also provides the inbound HTTP diagnostic logging described below. The
 runtime-neutral contract and the dependency choices for all
 supported runtimes are in [Web](../capabilities/web.md):
 
@@ -370,10 +372,10 @@ authorization can render its own `401` or `403` descriptor with the public
 interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging-level`; it defaults to
 `NONE`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
 
-When the application selects a Quarkus MicroProfile REST Client extension, JFoundry also registers
-the provider with every REST Client builder. Outbound logging uses
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. It does not add a REST Client
-implementation by itself. Spring `WebClient` is not supported by this adapter.
+Add `jfoundry-restclient-quarkus-runtime` for outbound logging. It includes the Quarkus MicroProfile
+REST Client extension and registers the provider with every REST Client builder. Outbound logging
+uses `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring `WebClient` is not
+supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are
 redacted case-insensitively, and `FULL` retains at most 8 KiB. Client duration ends when response

@@ -5,7 +5,7 @@
 infrastructure 模块之外。
 
 其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
-`jfoundry-domain-event-jta` 和 `jfoundry-web-jaxrs` 实现。Quarkus 自有运行时类仍是公开的 CDI/provider
+`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。Quarkus 自有运行时类仍是公开的 CDI/provider
 入口，部署模块继续负责 Arc 注册、增强、RESTEasy Reactive 集成与原生镜像行为。应用应选择 Quarkus
 运行时模块，而不是自行组合这些共享实现模块。
 
@@ -60,13 +60,15 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 | `jfoundry-inbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka 或 RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
+| `jfoundry-restclient-spring-boot-starter` | `jfoundry-restclient-quarkus-runtime` |
 
 ## 已支持范围
 
 Quarkus 不是 Spring starter 的翻译层。当前显式依赖组合覆盖 CDI/JTA 事务、本地 CDI 领域事件投递、JPA
 聚合持久化、JPA Outbox 和 Inbox 存储、Outbox 派发与维护、Kafka 和 RabbitMQ 投递、RFC 9457 Problem Details，
-以及安全的入站与 MicroProfile REST Client 诊断日志。通用的 `jfoundry-web-quarkus-runtime` 扩展负责
-Quarkus REST 边界，但不会将 Web 生命周期 API 移入核心。
+以及安全的入站与 MicroProfile REST Client 诊断日志。`jfoundry-web-quarkus-runtime` 负责入站
+Quarkus REST 边界，`jfoundry-restclient-quarkus-runtime` 负责出站 REST Client 注册，且都不会将 HTTP
+生命周期 API 移入核心。
 
 当前并不支持 MyBatis-Plus 聚合持久化、RocketMQ 投递、Redisson 分布式锁或 JobRunr 的 Quarkus 组合。不要以
 运行时无关适配器或 Spring 启动器替代；只有当项目自行拥有该集成时，才选择自定义应用适配器。
@@ -279,8 +281,8 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 
 ## Problem Details（RFC 9457）
 
-Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-quarkus-runtime`。该扩展以更宽泛的
-Quarkus Web 边界命名，同一扩展还提供下文所述的 HTTP 诊断日志。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)：
+Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-quarkus-runtime`。该扩展还提供
+下文所述的入站 HTTP 诊断日志。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)：
 
 ```xml
 <dependency>
@@ -322,9 +324,9 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 入站日志通过 `jfoundry.web.quarkus.logging-level` 配置，默认值为 `NONE`。启用后的事件通过
 `org.jfoundry.http.quarkus.HttpLoggingProvider` category 以 `INFO` 输出。
 
-应用选择 Quarkus MicroProfile REST Client 扩展后，JFoundry 还会把 provider 自动注册到每个 REST Client
-builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`；JFoundry 不会自行引入
-REST Client 实现。该适配器不支持 Spring `WebClient`。
+出站日志需要添加 `jfoundry-restclient-quarkus-runtime`。它会引入 Quarkus MicroProfile REST Client
+扩展，并把 provider 自动注册到每个 REST Client builder。出站日志使用
+`jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。该适配器不支持 Spring `WebClient`。
 
 所有 URI 都会移除 query、user info 与 fragment。敏感 header 和嵌套 JSON 字段以不区分大小写的方式脱敏，
 `FULL` 最多保留 8 KiB。客户端时长在响应 header 到达时结束，响应 body 日志在消费或关闭后出现。Jakarta REST

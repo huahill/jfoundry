@@ -34,6 +34,21 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 - `jfoundry-runtime/jfoundry-helidon/runtime`: Helidon MP CDI, JTA, JAX-RS, scheduling, and JPA runtime behavior.
 - `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`: Helidon MP consumer and Native Image integration verification.
 
+### Runtime Capability Naming And Decomposition
+
+- Name inbound HTTP server capabilities `web` and outbound HTTP client capabilities `restclient`.
+- Spring uses `jfoundry-http-spring` for shared HTTP support, `jfoundry-webmvc-spring` for inbound
+  Spring MVC behavior, and `jfoundry-restclient-spring` for outbound `RestClient` behavior.
+- Quarkus capability extensions use matching `jfoundry-<capability>-quarkus-runtime` and
+  `jfoundry-<capability>-quarkus-deployment` artifacts.
+- Helidon capability adapters use `jfoundry-<capability>-helidon` without a `-runtime` suffix; Helidon
+  does not have a Quarkus-style deployment artifact.
+- `jfoundry-quarkus-runtime` and `jfoundry-helidon-runtime` currently combine transaction, local
+  domain-event, and aggregate-persistence-context integration. Treat them as retained entry points,
+  not templates for new modules. Their intended decomposition is capability-specific Quarkus
+  runtime/deployment pairs and capability-specific Helidon artifacts without `-runtime`, matching
+  Spring's capability separation.
+
 Runtime-specific middleware, Testcontainers, database/broker compatibility, and profile-driven checks belong
 in the affected runtime's direct `jfoundry-<runtime>-integration-tests` module. Framework-neutral tests belong
 beside the core or infrastructure implementation they verify.

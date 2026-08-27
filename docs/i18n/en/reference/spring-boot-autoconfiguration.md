@@ -86,7 +86,7 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC application and handler class are present; no existing JFoundry handler. It runs before Spring Boot Web MVC auto-configuration, causing Boot's generic problem-details handler to back off. |
 | `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`, `JfoundryWebMvcProperties` | Servlet application and Filter APIs are present; no application `HttpLoggingFilter` or matching registration exists. `NONE` creates a disabled registration; enabled levels cover request, async, and error dispatches at `HIGHEST_PRECEDENCE + 20`. |
-| `WebRestClientAutoConfiguration` | `RestClientCustomizer`, `JfoundryWebProperties` | Spring Boot RestClient classes and `jfoundry-web-spring` are present; the customizer applies the configured logging level to Boot-managed builders. |
+| `WebRestClientAutoConfiguration` | `RestClientCustomizer`, `JfoundryWebProperties` | Spring Boot RestClient classes and `jfoundry-restclient-spring` are present; the customizer applies the configured logging level to Boot-managed builders. |
 
 ## Notes
 

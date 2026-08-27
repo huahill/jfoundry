@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.WebTarget;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.jfoundry.http.helidon.HttpLoggingProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,7 +41,7 @@ class HttpLoggingResourceTest {
     @BeforeEach
     void captureLogs() {
         this.messages.clear();
-        this.logger = Logger.getLogger(HttpLoggingProvider.class.getName());
+        this.logger = Logger.getLogger("org.jfoundry.http.helidon");
         this.previousLevel = this.logger.getLevel();
         this.logger.setLevel(Level.INFO);
         this.handler = new Handler() {

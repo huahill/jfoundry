@@ -37,7 +37,8 @@
         <module>runtime/jfoundry-transaction-spring</module>
         <module>runtime/jfoundry-lock-spring</module>
         <module>runtime/jfoundry-observability-spring</module>
-        <module>runtime/jfoundry-web-spring</module>
+        <module>runtime/jfoundry-http-spring</module>
+        <module>runtime/jfoundry-restclient-spring</module>
         <module>runtime/jfoundry-webmvc-spring</module>
         <module>autoconfigure/jfoundry-jpa-spring-boot-support</module>
         <module>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</module>
@@ -50,7 +51,7 @@
         <module>autoconfigure/jfoundry-persistence-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</module>
         <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
-        <module>autoconfigure/jfoundry-web-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-restclient-spring-boot-autoconfigure</module>
         <module>jfoundry-spring-integration-tests</module>
         <module>starters/jfoundry-spring-boot-starter</module>
         <module>starters/jfoundry-transaction-spring-boot-starter</module>

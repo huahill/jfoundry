@@ -15,7 +15,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
 | 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-domain-event-externalization-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-inbox-core` |
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
-| 共享 Jakarta 适配器 | `jfoundry-web-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
+| 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring 集成测试 | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
@@ -23,6 +23,20 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | Quarkus 集成测试 | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
 | Helidon MP 运行时集成 | `jfoundry-runtime/jfoundry-helidon/runtime/*` |
 | Helidon 集成测试 | `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests` |
+
+## 运行时能力命名
+
+入站 HTTP 服务端适配器使用 `web`，出站 HTTP 客户端适配器使用 `restclient`。Quarkus extension 保留
+`-runtime` 与 `-deployment` 后缀，因为两者构成真实的 Quarkus extension 配对。Helidon 没有对应的
+deployment 构件，因此能力构件使用不带 `-runtime` 的 `jfoundry-<capability>-helidon`。
+
+Spring 将共用的 HTTP 日志策略适配放在 `jfoundry-http-spring`，将入站 Spring MVC 行为放在
+`jfoundry-webmvc-spring`，将出站 `RestClient` 行为放在 `jfoundry-restclient-spring`。对应的
+Spring Boot 自动配置模块与启动器仍按能力划分。
+
+现有 `jfoundry-quarkus-runtime` 与 `jfoundry-helidon-runtime` 当前同时包含事务、本地领域事件和聚合持久化
+上下文集成。它们仍是当前入口，但不作为新增能力的命名模板。后续拆分应为 Quarkus 建立按能力划分的
+runtime/deployment 配对，并为 Helidon 建立不带 `-runtime` 的能力构件，与 Spring 已有的能力拆分保持一致。
 
 ## 放置规则
 

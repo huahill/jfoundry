@@ -9,14 +9,14 @@ for Spring, Quarkus, and Helidon applications.
 
 | Need | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
-| RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Inbound HTTP diagnostic logging | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Outbound HTTP diagnostic logging | `jfoundry-restclient-spring-boot-starter` or `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` with MicroProfile REST Client | `jfoundry-web-helidon-runtime` with MicroProfile REST Client |
+| RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
+| Inbound HTTP diagnostic logging | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
+| Outbound HTTP diagnostic logging | `jfoundry-restclient-spring-boot-starter` or `jfoundry-restclient-spring` | `jfoundry-restclient-quarkus-runtime` | `jfoundry-restclient-helidon` |
 
-`jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
+`jfoundry-restclient-spring` requires an application-provided Spring Web API. A Spring Boot application
 can add `jfoundry-restclient-spring-boot-starter`, which supplies the Spring Boot `RestClient` integration.
-Quarkus and Helidon applications select their runtime's MicroProfile REST Client implementation;
-the JFoundry runtime module then registers its logging provider automatically.
+The Quarkus and Helidon REST client modules include their runtime's MicroProfile REST Client
+implementation and register the JFoundry logging provider automatically.
 
 ## Problem Details (RFC 9457)
 
@@ -30,7 +30,7 @@ HTTP response at the runtime boundary; domain and application code do not select
 |---|---|---|
 | Spring Boot | `jfoundry-webmvc-spring-boot-starter` | Spring MVC |
 | Quarkus | `jfoundry-web-quarkus-runtime` | Quarkus REST with Jackson |
-| Helidon MP | `jfoundry-web-helidon-runtime` | JAX-RS |
+| Helidon MP | `jfoundry-web-helidon` | JAX-RS |
 
 The entry points include the runtime-neutral `jfoundry-web` module. Applications
 normally add only the entry point shown above. Import the core and matching runtime BOMs first as
@@ -142,7 +142,7 @@ responsible for selecting the JSON provider used to deserialize request bodies.
 
 ## HTTP Integration And Diagnostic Logging
 
-`jfoundry-web-spring` provides opt-in outbound `RestClient` support. Configure only the builder owned
+`jfoundry-restclient-spring` provides opt-in outbound `RestClient` support. Configure only the builder owned
 by the integration with `RestClientSupport.configure(builder)`, then execute that call through
 `RestClientSupport.execute(...)`. A non-success response becomes an `HttpResponseException` containing
 only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
@@ -164,7 +164,7 @@ available or execution fails. It excludes response-body consumption and decoding
 end-to-end latency.
 
 The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFilter`. Quarkus and
-Helidon register equivalent JAX-RS providers through their Web runtime modules. Inbound logging is
+Helidon register equivalent JAX-RS providers through their Web modules. Inbound logging is
 disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, or `FULL` to enable it:
 
 | Runtime | Inbound property | Default |

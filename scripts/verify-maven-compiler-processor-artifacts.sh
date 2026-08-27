@@ -71,8 +71,8 @@ verify_spring_metadata \
     'jfoundry-domain-event-spring-boot-autoconfigure' \
     'jfoundry.domain.event'
 verify_spring_metadata \
-    'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-web-spring-boot-autoconfigure' \
-    'jfoundry-web-spring-boot-autoconfigure' \
+    'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-restclient-spring-boot-autoconfigure' \
+    'jfoundry-restclient-spring-boot-autoconfigure' \
     'jfoundry.web.rest-client.logging-level'
 verify_spring_metadata \
     'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure' \
@@ -83,6 +83,10 @@ verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-quarkus-deployment' \
     'jfoundry-quarkus-deployment' \
     'org.jfoundry.quarkus.deployment.QuarkusProcessor'
+verify_quarkus_build_steps \
+    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-restclient-quarkus-deployment' \
+    'jfoundry-restclient-quarkus-deployment' \
+    'org.jfoundry.quarkus.restclient.deployment.RestClientHttpLoggingProcessor'
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-inbox-jpa-quarkus-deployment' \
     'jfoundry-inbox-jpa-quarkus-deployment' \
