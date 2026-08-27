@@ -22,7 +22,7 @@ import org.springframework.http.client.ClientHttpResponse;
 
 /// Records outbound Spring HTTP execution-chain activity at the configured level.
 ///
-/// Logging is inactive unless this type's logger is enabled at `DEBUG`. `BASIC` and `HEADERS` never access or
+/// Logging is inactive unless this type's logger is enabled at `INFO`. `BASIC` and `HEADERS` never access or
 /// wrap bodies. `FULL` captures size-limited JSON bodies and may read an unconsumed error response on close.
 /// `durationMs` ends when response headers are available and excludes response-body consumption and decoding.
 public final class HttpLoggingInterceptor implements ClientHttpRequestInterceptor {
@@ -31,72 +31,89 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private final HttpLoggingLevel level;
 
-    private final BooleanSupplier debugEnabled;
+    private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
     /// Creates an interceptor with the requested logging detail.
     public HttpLoggingInterceptor(HttpLoggingLevel level) {
-        this(level, LOG::isDebugEnabled, System::nanoTime);
+        this(level, LOG::isInfoEnabled, System::nanoTime);
     }
 
-    HttpLoggingInterceptor(HttpLoggingLevel level, BooleanSupplier debugEnabled, LongSupplier nanoTime) {
+    HttpLoggingInterceptor(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
-        this.debugEnabled = Objects.requireNonNull(debugEnabled, "debugEnabled must not be null");
+        this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
             throws IOException {
-        if (this.level == HttpLoggingLevel.NONE || !this.debugEnabled.getAsBoolean()) {
+        if (this.level == HttpLoggingLevel.NONE || !this.infoEnabled.getAsBoolean()) {
             return execution.execute(request, body);
         }
-        safely(() -> logRequest(request, body));
+        var method = requestMethod(request);
+        var uri = requestUri(request);
+        logRequest(request, body, method, uri);
         var startedAt = this.nanoTime.getAsLong();
         try {
             var response = execution.execute(request, body);
-            logResponseSafely(response, elapsedMillis(startedAt));
-            return this.level.includesBodies() ? new LoggingClientHttpResponse(response) : response;
+            var status = logResponseSafely(response, method, uri, elapsedMillis(startedAt));
+            return this.level.includesBodies()
+                    ? new LoggingClientHttpResponse(response, method, uri, status) : response;
         } catch (IOException | RuntimeException exception) {
-            safely(() -> LOG.debug("HTTP client request failed: method={}, uri={}, exception={}, durationMs={}",
-                    request.getMethod(), HttpLoggingSupport.withoutQuery(request.getURI()),
+            safely(() -> LOG.info("HTTP client request failed: method={}, uri={}, exception={}, durationMs={}",
+                    method, uri,
                     exception.getClass().getName(), elapsedMillis(startedAt)));
             throw exception;
         }
     }
 
-    private void logRequest(HttpRequest request, byte[] body) {
-        if (this.level.includesBodies()) {
-            LOG.debug("HTTP client request: method={}, uri={}, headers={}, body={}", request.getMethod(),
-                    HttpLoggingSupport.withoutQuery(request.getURI()),
-                    HttpLoggingSupport.describeHeaders(request.getHeaders()),
-                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false));
-        } else if (this.level.includesHeaders()) {
-            LOG.debug("HTTP client request: method={}, uri={}, headers={}", request.getMethod(),
-                    HttpLoggingSupport.withoutQuery(request.getURI()),
-                    HttpLoggingSupport.describeHeaders(request.getHeaders()));
-        } else {
-            LOG.debug("HTTP client request: method={}, uri={}", request.getMethod(),
-                    HttpLoggingSupport.withoutQuery(request.getURI()));
-        }
-    }
-
-    private void logResponse(ClientHttpResponse response, long durationMs) throws IOException {
+    private void logRequest(HttpRequest request, byte[] body, String method, String uri) {
+        safely(() -> LOG.info("HTTP client request: method={}, uri={}", method, uri));
         if (this.level.includesHeaders()) {
-            LOG.debug("HTTP client response: status={}, headers={}, durationMs={}", response.getStatusCode(),
-                    HttpLoggingSupport.describeHeaders(response.getHeaders()), durationMs);
-        } else {
-            LOG.debug("HTTP client response: status={}, durationMs={}", response.getStatusCode(), durationMs);
+            safely(() -> LOG.info("HTTP client request headers: method={}, uri={}, headers={}", method, uri,
+                    HttpLoggingSupport.describeHeaders(request.getHeaders())));
+        }
+        if (this.level.includesBodies()) {
+            safely(() -> LOG.info("HTTP client request body: method={}, uri={}, body={}", method, uri,
+                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)));
         }
     }
 
-    private void logResponseSafely(ClientHttpResponse response, long durationMs) {
+    private static String requestMethod(HttpRequest request) {
         try {
-            logResponse(response, durationMs);
-        } catch (IOException | RuntimeException exception) {
-            safely(() -> LOG.debug("HTTP client response metadata could not be read for logging"));
+            return request.getMethod().name();
+        } catch (RuntimeException exception) {
+            return "<unavailable>";
         }
+    }
+
+    private static String requestUri(HttpRequest request) {
+        try {
+            return HttpLoggingSupport.withoutQuery(request.getURI()).toString();
+        } catch (RuntimeException exception) {
+            return "<unavailable>";
+        }
+    }
+
+    private Integer logResponseSafely(ClientHttpResponse response, String method, String uri, long durationMs) {
+        int status;
+        try {
+            status = response.getStatusCode().value();
+        } catch (IOException | RuntimeException exception) {
+            safely(() -> LOG.info(
+                    "HTTP client response metadata could not be read for logging: method={}, uri={}",
+                    method, uri));
+            return null;
+        }
+        safely(() -> LOG.info("HTTP client response: method={}, uri={}, status={}, durationMs={}",
+                method, uri, status, durationMs));
+        if (this.level.includesHeaders()) {
+            safely(() -> LOG.info("HTTP client response headers: method={}, uri={}, status={}, headers={}",
+                    method, uri, status, HttpLoggingSupport.describeHeaders(response.getHeaders())));
+        }
+        return status;
     }
 
     private long elapsedMillis(long startedAt) {
@@ -107,10 +124,19 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private final ClientHttpResponse delegate;
 
+        private final String method;
+
+        private final String uri;
+
+        private final Integer status;
+
         private BodyLoggingInputStream body;
 
-        private LoggingClientHttpResponse(ClientHttpResponse delegate) {
+        private LoggingClientHttpResponse(ClientHttpResponse delegate, String method, String uri, Integer status) {
             this.delegate = delegate;
+            this.method = method;
+            this.uri = uri;
+            this.status = status;
         }
 
         @Override
@@ -126,7 +152,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         @Override
         public InputStream getBody() throws IOException {
             if (this.body == null) {
-                this.body = new BodyLoggingInputStream(this.delegate.getBody(), this.delegate.getHeaders());
+                this.body = new BodyLoggingInputStream(this.delegate.getBody(), this.delegate.getHeaders(),
+                        this.method, this.uri, this.status);
             }
             return this.body;
         }
@@ -141,6 +168,11 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             logUnconsumedErrorBody();
             if (this.body != null) {
                 this.body.logBody();
+            } else {
+                safely(() -> LOG.info("HTTP client response body: method={}, uri={}, status={}, body={}",
+                        this.method, this.uri, responseStatus(this.status),
+                        HttpLoggingSupport.describeBody(this.delegate.getHeaders().getContentType(),
+                                new byte[0], false, false)));
             }
             this.delegate.close();
         }
@@ -148,11 +180,14 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private void logUnconsumedErrorBody() {
             try {
                 if (this.body == null && this.delegate.getStatusCode().isError()) {
-                    this.body = new BodyLoggingInputStream(this.delegate.getBody(), this.delegate.getHeaders());
+                    this.body = new BodyLoggingInputStream(this.delegate.getBody(), this.delegate.getHeaders(),
+                            this.method, this.uri, this.status);
                     this.body.readNBytes(HttpLoggingSupport.MAX_BODY_BYTES + 1);
                 }
             } catch (IOException | RuntimeException exception) {
-                safely(() -> LOG.debug("HTTP client response body could not be read for logging"));
+                safely(() -> LOG.info(
+                        "HTTP client response body could not be read for logging: method={}, uri={}, status={}",
+                        this.method, this.uri, responseStatus(this.status)));
             }
         }
     }
@@ -160,6 +195,12 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
     private static final class BodyLoggingInputStream extends FilterInputStream {
 
         private final HttpHeaders headers;
+
+        private final String method;
+
+        private final String uri;
+
+        private final Integer status;
 
         private final ByteArrayOutputStream captured = new ByteArrayOutputStream();
 
@@ -173,9 +214,13 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private int capturedAtMark = -1;
 
-        private BodyLoggingInputStream(InputStream delegate, HttpHeaders headers) {
+        private BodyLoggingInputStream(InputStream delegate, HttpHeaders headers, String method, String uri,
+                Integer status) {
             super(delegate);
             this.headers = headers;
+            this.method = method;
+            this.uri = uri;
+            this.status = status;
         }
 
         @Override
@@ -261,10 +306,15 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
                 return;
             }
             this.logged = true;
-            safely(() -> LOG.debug("HTTP client response body: {}", HttpLoggingSupport.describeBody(
-                    this.headers.getContentType(), this.captured.toByteArray(),
-                    this.complete && !this.skipped, this.truncated)));
+            safely(() -> LOG.info("HTTP client response body: method={}, uri={}, status={}, body={}",
+                    this.method, this.uri, responseStatus(this.status),
+                    HttpLoggingSupport.describeBody(this.headers.getContentType(), this.captured.toByteArray(),
+                            this.complete && !this.skipped, this.truncated)));
         }
+    }
+
+    private static Object responseStatus(Integer status) {
+        return status != null ? status : "<unavailable>";
     }
 
     private static void safely(Runnable logging) {

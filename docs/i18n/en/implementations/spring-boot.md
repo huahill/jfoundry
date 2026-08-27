@@ -208,7 +208,7 @@ locations have no forwarding aliases.
 
 Spring Boot applications can use `jfoundry-web-spring-boot-starter` and set
 `jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
-`BASIC`. Applications that create a builder directly with `RestClient.builder()` must select the level
+`NONE`. Applications that create a builder directly with `RestClient.builder()` must select the level
 with `RestClientSupport.configure(builder, HttpLoggingLevel)`. Outbound `durationMs` uses a monotonic
 clock from execution-chain entry until response headers arrive or execution fails. Response-body
 consumption and decoding occur outside that boundary.
@@ -223,8 +223,8 @@ default when forwarding, tracing, or security topology requires another order.
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
 complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at
 most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
-directions log only at `DEBUG`, always remove URI queries, redact sensitive headers and nested JSON
-fields, and omit unsafe body representations. These logs supplement rather than replace Micrometer
+directions emit categorized request, headers, body, and response events at `INFO`, always remove URI queries,
+redact sensitive headers and nested JSON fields, and omit unsafe body representations. These logs supplement rather than replace Micrometer
 metrics/traces and application-owned business audit events.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that

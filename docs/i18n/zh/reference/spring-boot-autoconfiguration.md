@@ -36,8 +36,8 @@
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | 当 Spring 事件适配器存在时，开启 Spring `ApplicationEventPublisher` 派发。 |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | 当存在 `DomainEventOutboxRecorder` Bean 时，开启 Outbox 领域事件派发。 |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
-| `jfoundry.web.rest-client.logging-level` | `BASIC` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
-| `jfoundry.web.mvc.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用的级别仍要求 Filter logger 开启 `DEBUG`。 |
+| `jfoundry.web.rest-client.logging-level` | `NONE` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
+| `jfoundry.web.mvc.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用后的事件以 `INFO` 输出。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
@@ -100,7 +100,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   `tools.jackson.databind.ObjectMapper`；Outbox 启动器通过消息启动器继承该能力。JFoundry 不支持
   Spring Boot 的 Jackson 2 兼容模块。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
-- 入站与出站 HTTP 日志相互独立。两者都只在 `DEBUG` 输出，移除 URI query，脱敏凭证、cookie、token、
+- 入站与出站 HTTP 日志相互独立。两者都以 `INFO` 分类输出事件，移除 URI query，脱敏凭证、cookie、token、
   secret 与 API key，并将 `FULL` JSON body 捕获限制为 8 KiB。客户端时长在响应 header 到达时结束；Servlet
   时长在同步或异步终态完成时结束。两者都不是端到端客户端延迟，也不是业务审计事件。
 - 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.mode` 是构建期的结构化配置。必须将

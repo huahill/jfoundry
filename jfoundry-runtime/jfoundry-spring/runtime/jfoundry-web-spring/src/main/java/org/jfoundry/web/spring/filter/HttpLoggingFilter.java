@@ -40,7 +40,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 /// Records inbound Servlet HTTP activity without delaying or replacing application I/O.
 ///
-/// Logging is inactive unless this type's logger is enabled at `DEBUG`. `FULL` uses tee wrappers that forward
+/// Logging is inactive unless this type's logger is enabled at `INFO`. `FULL` uses tee wrappers that forward
 /// bytes immediately and retain no more than 8 KiB. Synchronous duration ends when the filter chain returns;
 /// asynchronous duration ends on terminal complete, error, or timeout and does not measure client receipt.
 public final class HttpLoggingFilter extends OncePerRequestFilter {
@@ -51,18 +51,18 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private final HttpLoggingLevel level;
 
-    private final BooleanSupplier debugEnabled;
+    private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
     /// Creates a filter with the requested logging detail.
     public HttpLoggingFilter(HttpLoggingLevel level) {
-        this(level, LOG::isDebugEnabled, System::nanoTime);
+        this(level, LOG::isInfoEnabled, System::nanoTime);
     }
 
-    HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier debugEnabled, LongSupplier nanoTime) {
+    HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
-        this.debugEnabled = Objects.requireNonNull(debugEnabled, "debugEnabled must not be null");
+        this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
 
@@ -85,7 +85,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
-        if (this.level == HttpLoggingLevel.NONE || !this.debugEnabled.getAsBoolean()) {
+        if (this.level == HttpLoggingLevel.NONE || !this.infoEnabled.getAsBoolean()) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -103,7 +103,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 ? new CapturingResponse(response, state.responseBody) : response;
         try {
             filterChain.doFilter(filteredRequest, filteredResponse);
-        } catch (IOException | ServletException | RuntimeException | Error exception) {
+        } catch (IOException | ServletException | RuntimeException exception) {
             state.logFailure(exception, "failed");
             throw exception;
         }
@@ -153,17 +153,11 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
         }
 
         private void logRequest(HttpServletRequest request) {
-            safely(() -> {
-                if (this.level.includesBodies()) {
-                    LOG.debug("HTTP server request: method={}, uri={}, headers={}", this.method, this.uri,
-                            HttpLoggingSupport.describeHeaders(requestHeaders(request)));
-                } else if (this.level.includesHeaders()) {
-                    LOG.debug("HTTP server request: method={}, uri={}, headers={}", this.method, this.uri,
-                            HttpLoggingSupport.describeHeaders(requestHeaders(request)));
-                } else {
-                    LOG.debug("HTTP server request: method={}, uri={}", this.method, this.uri);
-                }
-            });
+            safely(() -> LOG.info("HTTP server request: method={}, uri={}", this.method, this.uri));
+            if (this.level.includesHeaders()) {
+                safely(() -> LOG.info("HTTP server request headers: method={}, uri={}, headers={}",
+                        this.method, this.uri, HttpLoggingSupport.describeHeaders(requestHeaders(request))));
+            }
         }
 
         private void logResponse(String completion) {
@@ -171,33 +165,30 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 return;
             }
             this.responseBody.markComplete();
-            safely(() -> {
-                if (this.level.includesBodies()) {
-                    LOG.debug("HTTP server response: method={}, uri={}, status={}, completion={}, headers={}, "
-                                    + "requestBody={}, responseBody={}, durationMs={}",
-                            this.method, this.uri, this.response.getStatus(), completion,
-                            HttpLoggingSupport.describeHeaders(responseHeaders(this.response)),
-                            HttpLoggingSupport.describeBody(this.requestContentType,
-                                    this.requestBody.bytes(), this.requestBody.complete(), this.requestBody.truncated()),
-                            HttpLoggingSupport.describeBody(this.response.getContentType(),
-                                    this.responseBody.bytes(), this.responseBody.complete(), this.responseBody.truncated()),
-                            elapsedMillis());
-                } else if (this.level.includesHeaders()) {
-                    LOG.debug("HTTP server response: method={}, uri={}, status={}, completion={}, headers={}, durationMs={}",
-                            this.method, this.uri, this.response.getStatus(), completion,
-                            HttpLoggingSupport.describeHeaders(responseHeaders(this.response)), elapsedMillis());
-                } else {
-                    LOG.debug("HTTP server response: method={}, uri={}, status={}, completion={}, durationMs={}",
-                            this.method, this.uri, this.response.getStatus(), completion, elapsedMillis());
-                }
-            });
+            logRequestBody();
+            var status = this.response.getStatus();
+            safely(() -> LOG.info(
+                    "HTTP server response: method={}, uri={}, status={}, completion={}, durationMs={}",
+                    this.method, this.uri, status, completion, elapsedMillis()));
+            if (this.level.includesHeaders()) {
+                safely(() -> LOG.info("HTTP server response headers: method={}, uri={}, status={}, headers={}",
+                        this.method, this.uri, status,
+                        HttpLoggingSupport.describeHeaders(responseHeaders(this.response))));
+            }
+            if (this.level.includesBodies()) {
+                safely(() -> LOG.info("HTTP server response body: method={}, uri={}, status={}, body={}",
+                        this.method, this.uri, status,
+                        HttpLoggingSupport.describeBody(this.response.getContentType(),
+                                this.responseBody.bytes(), this.responseBody.complete(), this.responseBody.truncated())));
+            }
         }
 
         private void logFailure(Throwable exception, String completion) {
             if (!this.terminal.compareAndSet(false, true)) {
                 return;
             }
-            safely(() -> LOG.debug(
+            logRequestBody();
+            safely(() -> LOG.info(
                     "HTTP server request failed: method={}, uri={}, completion={}, exception={}, durationMs={}",
                     this.method, this.uri, completion, exception.getClass().getName(), elapsedMillis()));
         }
@@ -207,11 +198,20 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 if (!this.terminal.compareAndSet(false, true)) {
                     return;
                 }
-                safely(() -> LOG.debug(
+                logRequestBody();
+                safely(() -> LOG.info(
                         "HTTP server request failed: method={}, uri={}, completion={}, durationMs={}",
                         this.method, this.uri, completion, elapsedMillis()));
             } else {
                 logFailure(exception, completion);
+            }
+        }
+
+        private void logRequestBody() {
+            if (this.level.includesBodies()) {
+                safely(() -> LOG.info("HTTP server request body: method={}, uri={}, body={}",
+                        this.method, this.uri, HttpLoggingSupport.describeBody(this.requestContentType,
+                                this.requestBody.bytes(), this.requestBody.complete(), this.requestBody.truncated())));
             }
         }
 
