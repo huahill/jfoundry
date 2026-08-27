@@ -11,10 +11,10 @@ for Spring, Quarkus, and Helidon applications.
 |---|---|---|---|
 | RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
 | Inbound HTTP diagnostic logging | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| Outbound HTTP diagnostic logging | `jfoundry-web-spring-boot-starter` or `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` with MicroProfile REST Client | `jfoundry-web-helidon-runtime` with MicroProfile REST Client |
+| Outbound HTTP diagnostic logging | `jfoundry-restclient-spring-boot-starter` or `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` with MicroProfile REST Client | `jfoundry-web-helidon-runtime` with MicroProfile REST Client |
 
 `jfoundry-web-spring` requires an application-provided Spring Web API. A Spring Boot application
-can add `jfoundry-web-spring-boot-starter`, which supplies the Spring Boot `RestClient` integration.
+can add `jfoundry-restclient-spring-boot-starter`, which supplies the Spring Boot `RestClient` integration.
 Quarkus and Helidon applications select their runtime's MicroProfile REST Client implementation;
 the JFoundry runtime module then registers its logging provider automatically.
 

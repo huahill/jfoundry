@@ -70,7 +70,7 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 | MyBatis-Plus 聚合持久化 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 仅业务聚合持久化，不含 Outbox/Inbox 存储。 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
 | RFC 9457 Web MVC 错误响应 | `jfoundry-webmvc-spring-boot-starter` | 仅 HTTP 入站适配。 |
-| 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-web-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
+| 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-restclient-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
 | JSON 序列化契约 | `jfoundry-messaging-spring-boot-starter` | 提供 Spring 消息集成和默认 Jackson `PayloadSerializer`，不提供真实发送器。 |
 | Kafka、RabbitMQ 或 RocketMQ 投递 | 对应 `jfoundry-messaging-*-spring-boot-starter` | 显式选择具体消息代理传输方式。 |
 | Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供记录、外部化、恢复、清理和内置定时派发触发。手工组合时直接添加；内置存储与 JobRunr 启动器会传递引入它。 |
@@ -142,7 +142,7 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 `org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
 `org.jfoundry.web.spring` 位置不提供转发别名。
 
-Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并通过
+Spring Boot 应用可以使用 `jfoundry-restclient-spring-boot-starter`，并通过
 `jfoundry.web.rest-client.logging-level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `NONE`。
 直接通过 `RestClient.builder()` 创建 builder 时，仍需使用
 `RestClientSupport.configure(builder, HttpLoggingLevel)`。出站 `duration` 字段以 `duration=30ms` 形式输出，并使用

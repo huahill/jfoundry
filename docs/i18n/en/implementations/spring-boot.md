@@ -83,7 +83,7 @@ database, delivery, scheduling, and distributed-lock choices.
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
-| Outbound `RestClient` support and configurable HTTP logging | `jfoundry-web-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
+| Outbound `RestClient` support and configurable HTTP logging | `jfoundry-restclient-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
 | JSON serialization contract | `jfoundry-messaging-spring-boot-starter` | Adds Spring messaging integration and the default Jackson `PayloadSerializer`, but no real sender. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |
 | Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds recording, externalization, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
@@ -206,7 +206,7 @@ become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLe
 the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
 locations have no forwarding aliases.
 
-Spring Boot applications can use `jfoundry-web-spring-boot-starter` and set
+Spring Boot applications can use `jfoundry-restclient-spring-boot-starter` and set
 `jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
 `NONE`. Applications that create a builder directly with `RestClient.builder()` must select the level
 with `RestClientSupport.configure(builder, HttpLoggingLevel)`. The outbound `duration` field uses an `ms` suffix,

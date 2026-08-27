@@ -431,7 +431,7 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-web-spring-boot-starter</artifactId>
+        <artifactId>jfoundry-restclient-spring-boot-starter</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

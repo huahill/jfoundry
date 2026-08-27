@@ -13,7 +13,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
 | `jfoundry-domain-event-spring-boot-starter` | Domain event dispatch and Spring application event publishing | Outbox persistence or broker delivery |
-| `jfoundry-web-spring-boot-starter` | Outbound Spring `RestClient` support and configurable HTTP logging | Inbound Web MVC ProblemDetail handling |
+| `jfoundry-restclient-spring-boot-starter` | Outbound Spring `RestClient` support and configurable HTTP logging | Inbound Web MVC ProblemDetail handling |
 | `jfoundry-messaging-spring-boot-starter` | Messaging SPI, Jackson payload serializer, and Spring messaging runtime | Any `MessageSender` or broker client |
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` adapter, selected after Boot creates `KafkaOperations` | Outbox store |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` adapter | Outbox store |

@@ -128,6 +128,7 @@ Capability starters:
 - `jfoundry-inbox-mybatis-plus-spring-boot-starter`: MyBatis-Plus Inbox store.
 - `jfoundry-persistence-mybatis-plus-spring-boot-starter`: Spring Boot runtime assembly for business MyBatis-Plus persistence, not Outbox/Inbox stores.
 - `jfoundry-persistence-jpa-spring-boot-starter`: explicit Spring Boot runtime assembly for business Jakarta Persistence adapters.
+- `jfoundry-restclient-spring-boot-starter`: outbound Spring `RestClient` support and HTTP logging.
 - `jfoundry-webmvc-spring-boot-starter`: Web MVC ProblemDetail support.
 
 ## Before Changing A Starter
