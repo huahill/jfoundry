@@ -32,10 +32,10 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Spring Boot conditions/properties/wiring | A capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure` |
 | Spring runtime or middleware integration verification | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Portable JAX-RS or JTA implementation shared by Jakarta runtimes | `jfoundry-runtime/jfoundry-jakarta` |
-| Quarkus runtime extension behavior | `jfoundry-runtime/jfoundry-quarkus/runtime` |
-| Quarkus build-time processor or Native Image registration | `jfoundry-runtime/jfoundry-quarkus/deployment` |
+| Quarkus runtime extension behavior | Matching capability module under `jfoundry-runtime/jfoundry-quarkus/runtime` |
+| Quarkus build-time processor or Native Image registration | Matching capability module under `jfoundry-runtime/jfoundry-quarkus/deployment` |
 | Quarkus consumer, middleware, or Native Image integration verification | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
-| Helidon MP CDI, JTA, JAX-RS, scheduling, or JPA runtime behavior | `jfoundry-runtime/jfoundry-helidon/runtime` |
+| Helidon MP CDI, JTA, JAX-RS, scheduling, or JPA runtime behavior | Direct capability modules under `jfoundry-runtime/jfoundry-helidon` |
 | Helidon MP consumer, middleware, or Native Image integration verification | `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests` |
 | User dependency entry point | A direct Domain, Application, architecture-style, or framework-neutral adapter dependency; use `jfoundry-runtime/jfoundry-spring/starters` for Spring Boot assembly |
 | Framework-neutral unit or adapter verification | Next to the core or infrastructure implementation under test |
@@ -52,13 +52,18 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 - If the code uses Spring transaction synchronization, `ApplicationEventPublisher`, scheduling, MVC APIs, or bean lifecycle, put it under `jfoundry-runtime/jfoundry-spring/runtime`.
 - If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in the matching capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - If a test verifies middleware behavior through Spring's runtime wiring or Testcontainers, put it under `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`.
-- If the code uses Quarkus build steps, augmentation APIs, or Native Image build items, put it under `jfoundry-runtime/jfoundry-quarkus/deployment`; otherwise put Quarkus CDI runtime behavior under `jfoundry-runtime/jfoundry-quarkus/runtime`.
+- If the code uses Quarkus build steps, augmentation APIs, or Native Image build items, put it in the matching
+  capability module under `jfoundry-runtime/jfoundry-quarkus/deployment`; otherwise put Quarkus CDI runtime
+  behavior in the matching capability module under `jfoundry-runtime/jfoundry-quarkus/runtime`.
 - If JAX-RS or JTA implementation code is semantically identical across Jakarta-based runtimes, put the
   portable implementation under `jfoundry-runtime/jfoundry-jakarta`; keep CDI registration, provider discovery,
   configuration ownership, runtime logging bridges, build-time processing, and Native Image integration in the
   concrete runtime modules.
 - If a test verifies Quarkus runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`.
-- If the code uses Helidon MP CDI lifecycle, Jakarta transactions, JAX-RS, scheduling, or Helidon JPA integration, put it under `jfoundry-runtime/jfoundry-helidon/runtime`. Keep Helidon Native consumer checks under `jfoundry-helidon/jfoundry-helidon-integration-tests`; do not create a Quarkus-style deployment module without an upstream Helidon build-time extension model.
+- If the code uses Helidon MP CDI lifecycle, Jakarta transactions, JAX-RS, scheduling, or Helidon JPA
+  integration, put it in a direct capability module under `jfoundry-runtime/jfoundry-helidon`. Keep Helidon
+  Native consumer checks under `jfoundry-helidon/jfoundry-helidon-integration-tests`; do not introduce
+  intermediate `runtime` or `deployment` source directories without an upstream Helidon build-time extension model.
 - If a test verifies Helidon runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`.
 - If an auto-configuration condition depends on a bean created by another auto-configuration, declare the ordering explicitly and test the real upstream auto-configuration chain instead of only pre-registering the bean in a context runner.
 - If the code only selects dependencies for users, put it in a starter POM.

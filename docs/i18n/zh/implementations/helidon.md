@@ -44,12 +44,12 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 | CDI 事务 | `jfoundry-transaction-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
 | 本地领域事件派发 | `jfoundry-domain-event-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
 | 聚合持久化上下文与技术审计 | `jfoundry-persistence-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
-| JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
+| JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
 | RFC 9457 JAX-RS 响应与入站日志 | `jfoundry-web-helidon` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
 | 出站 REST Client 日志 | `jfoundry-restclient-helidon` | 已包含 Helidon MicroProfile REST Client |
-| Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon-runtime` | `OutboxMessageStore` 与真实 `MessageSender` |
-| JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
-| JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
+| Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon` | `OutboxMessageStore` 与真实 `MessageSender` |
+| JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon` | JPA 能力与应用迁移 |
+| JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon` | JPA 能力与应用迁移 |
 
 任何能力模块都不会隐式引入 JPA、Outbox、Inbox、数据库或消息代理客户端。
 
@@ -66,14 +66,14 @@ Transactions 没有可移植的事务名称和只读语义，因此会拒绝这�
 ## JPA、Outbox 与 Inbox
 
 `jfoundry-persistence-helidon` 提供事务绑定的聚合持久化上下文和可替换的 UTC 技术审计默认实现。
-`jfoundry-persistence-jpa-helidon-runtime` 还会将已识别的 Hibernate 连接和查询超时失败转换为
+`jfoundry-persistence-jpa-helidon` 还会将已识别的 Hibernate 连接和查询超时失败转换为
 `ExternalAccessException`。`EntityManager` 由 Helidon 应用提供。
 
 JPA Outbox 与 Inbox 能力复用运行时无关的 JPA 存储，不会创建 SQL 表。应用必须将发布的 Outbox 和
 Inbox SQL 模板复制到自己的迁移流程。Inbox 领取策略支持 PostgreSQL 与 MySQL；其它数据库需要
 由应用提供 `JpaInboxClaimStrategy` Bean。
 
-`jfoundry-outbox-helidon-runtime` 提供按需启用的调度。只有在提供存储和消息代理发送器后才启用
+`jfoundry-outbox-helidon` 提供按需启用的调度。只有在提供存储和消息代理发送器后才启用
 定时派发：
 
 ```properties

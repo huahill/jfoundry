@@ -25,7 +25,15 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-runtime</artifactId>
+            <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-quarkus-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-persistence-quarkus-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
@@ -67,7 +75,21 @@
         <!-- Keep parallel reactors from augmenting the test application before local deployment modules are built. -->
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-deployment</artifactId>
+            <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-persistence-quarkus-deployment</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
             <scope>test</scope>

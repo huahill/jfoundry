@@ -12,7 +12,8 @@
 
 JPA 业务运行时装配使用 `jfoundry-persistence-jpa-spring-boot-starter`。它不会引入 Outbox 或 Inbox 存储。
 
-Quarkus 环境中，加入 `jfoundry-quarkus-runtime`、`jfoundry-persistence-jpa`、
+Quarkus 环境中，加入 `jfoundry-transaction-quarkus-runtime`、`jfoundry-persistence-quarkus-runtime`、
+`jfoundry-persistence-jpa`、
 `jfoundry-persistence-jpa-quarkus-runtime`、Quarkus Hibernate ORM 和所选数据源扩展即可。由 CDI 管理的
 `JpaAggregateRepository` 会从 jfoundry Quarkus 扩展获得事务作用域内的
 `AggregatePersistenceContext`。应使用 `TransactionRunner` 作为事务边界，业务代码无需创建或设置该上下文。
@@ -20,7 +21,7 @@ JPA Quarkus capability 会翻译已知 Hibernate 可用性失败，应用可以�
 `PersistenceFailureTranslator` 覆盖它。
 运行时装配要求见 [Quarkus](quarkus.md)。
 
-Helidon MP 环境中，加入 `jfoundry-persistence-jpa-helidon-runtime`，再配置应用自己的 Helidon CDI
+Helidon MP 环境中，加入 `jfoundry-persistence-jpa-helidon`，再配置应用自己的 Helidon CDI
 JPA/Hibernate 集成、数据源和持久化单元。该构件会引入 `jfoundry-persistence-jpa` 与
 `jfoundry-persistence-helidon`；后者提供事务绑定的持久化上下文，Helidon JPA 构件则补充已识别的
 Hibernate 可用性失败转换。
@@ -54,10 +55,10 @@ Quarkus 的 JPA Inbox 存储加入 `jfoundry-inbox-jpa-quarkus-runtime`。它会
 此项仅为存储装配，不会加入派发器、调度器、序列化器、自动事件外部化或启动器。依赖配置和原生镜像
 验证见 [Quarkus](quarkus.md)。
 
-Helidon MP 中，加入 `jfoundry-outbox-jpa-helidon-runtime` 可暴露 JPA `OutboxMessageStore`；加入
-`jfoundry-inbox-jpa-helidon-runtime` 可暴露 `JpaInboxClaimStrategy`、`InboxMessageStore` 和
+Helidon MP 中，加入 `jfoundry-outbox-jpa-helidon` 可暴露 JPA `OutboxMessageStore`；加入
+`jfoundry-inbox-jpa-helidon` 可暴露 `JpaInboxClaimStrategy`、`InboxMessageStore` 和
 `InboxTemplate`。两者都要求应用提供 JPA 集成和迁移。若要启用定时派发和自动事件外部化，还需单独加入
-`jfoundry-outbox-helidon-runtime`。CDI 替代实现的替换规则与原生镜像范围见 [Helidon MP](helidon.md)。
+`jfoundry-outbox-helidon`。CDI 替代实现的替换规则与原生镜像范围见 [Helidon MP](helidon.md)。
 
 实体注册不等于 schema 管理。将匹配的 Outbox 或 Inbox SQL 模板复制到应用自己的迁移流程并在那里维护；不要依赖 Hibernate schema 自动生成功能创建或演进 jfoundry 表。
 

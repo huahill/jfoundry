@@ -283,7 +283,7 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-persistence-jpa-helidon-runtime</artifactId>
+        <artifactId>jfoundry-persistence-jpa-helidon</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -296,17 +296,37 @@
         <artifactId>jfoundry-web-helidon</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-helidon-runtime</artifactId><version>${project.version}</version></dependency>
-      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-jpa-helidon-runtime</artifactId><version>${project.version}</version></dependency>
-      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-inbox-jpa-helidon-runtime</artifactId><version>${project.version}</version></dependency>
+      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-helidon</artifactId><version>${project.version}</version></dependency>
+      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
+      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-inbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-quarkus-runtime</artifactId>
+        <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-quarkus-deployment</artifactId>
+        <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-persistence-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-persistence-quarkus-deployment</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

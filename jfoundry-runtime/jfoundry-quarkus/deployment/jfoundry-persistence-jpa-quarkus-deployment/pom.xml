@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-deployment</artifactId>
+            <artifactId>jfoundry-persistence-quarkus-deployment</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

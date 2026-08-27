@@ -34,7 +34,9 @@
     </dependencyManagement>
 
     <modules>
-        <module>runtime/jfoundry-quarkus-runtime</module>
+        <module>runtime/jfoundry-transaction-quarkus-runtime</module>
+        <module>runtime/jfoundry-domain-event-quarkus-runtime</module>
+        <module>runtime/jfoundry-persistence-quarkus-runtime</module>
         <module>runtime/jfoundry-restclient-quarkus-runtime</module>
         <module>runtime/jfoundry-web-quarkus-runtime</module>
         <module>runtime/jfoundry-outbox-quarkus-runtime</module>
@@ -43,7 +45,9 @@
         <module>runtime/jfoundry-outbox-jpa-quarkus-runtime</module>
         <module>runtime/jfoundry-inbox-jpa-quarkus-runtime</module>
         <module>runtime/jfoundry-persistence-jpa-quarkus-runtime</module>
-        <module>deployment/jfoundry-quarkus-deployment</module>
+        <module>deployment/jfoundry-transaction-quarkus-deployment</module>
+        <module>deployment/jfoundry-domain-event-quarkus-deployment</module>
+        <module>deployment/jfoundry-persistence-quarkus-deployment</module>
         <module>deployment/jfoundry-restclient-quarkus-deployment</module>
         <module>deployment/jfoundry-web-quarkus-deployment</module>
         <module>deployment/jfoundry-outbox-quarkus-deployment</module>

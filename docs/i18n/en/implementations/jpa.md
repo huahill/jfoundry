@@ -22,7 +22,8 @@ root update is reported as `ConflictException` at repository flush.
 Use `jfoundry-persistence-jpa-spring-boot-starter` for JPA business runtime assembly. It does not add Outbox or
 Inbox stores.
 
-For Quarkus, add `jfoundry-quarkus-runtime`, `jfoundry-persistence-jpa`,
+For Quarkus, add `jfoundry-transaction-quarkus-runtime`, `jfoundry-persistence-quarkus-runtime`,
+`jfoundry-persistence-jpa`,
 `jfoundry-persistence-jpa-quarkus-runtime`, Quarkus Hibernate ORM, and the selected datasource
 extension. A CDI-managed `JpaAggregateRepository` receives its
 transaction-scoped `AggregatePersistenceContext` from the jfoundry Quarkus extension. Use
@@ -31,7 +32,7 @@ The JPA Quarkus capability translates known Hibernate availability failures and 
 an application CDI `PersistenceFailureTranslator`.
 See [Quarkus](quarkus.md) for the runtime assembly requirements.
 
-For Helidon MP, add `jfoundry-persistence-jpa-helidon-runtime`, then configure the application's
+For Helidon MP, add `jfoundry-persistence-jpa-helidon`, then configure the application's
 Helidon CDI JPA/Hibernate integration, datasource, and persistence unit. This artifact brings in
 `jfoundry-persistence-jpa` and `jfoundry-persistence-helidon`; the latter supplies the
 transaction-bound persistence context, while the Helidon JPA artifact adds the recognized Hibernate
@@ -78,10 +79,10 @@ precedence. This is storage assembly only: it does not add a dispatcher, schedul
 automatic event externalization, or a starter. See [Quarkus](quarkus.md) for dependency setup and
 native-image verification.
 
-For Helidon MP, add `jfoundry-outbox-jpa-helidon-runtime` to expose the JPA
-`OutboxMessageStore`, and add `jfoundry-inbox-jpa-helidon-runtime` to expose
+For Helidon MP, add `jfoundry-outbox-jpa-helidon` to expose the JPA
+`OutboxMessageStore`, and add `jfoundry-inbox-jpa-helidon` to expose
 `JpaInboxClaimStrategy`, `InboxMessageStore`, and `InboxTemplate`. Both require the application's
-JPA integration and migrations. Add `jfoundry-outbox-helidon-runtime` separately for opt-in
+JPA integration and migrations. Add `jfoundry-outbox-helidon` separately for opt-in
 scheduled dispatch and automatic externalization. See [Helidon MP](helidon.md) for the CDI
 alternative replacement rule and native-image scope.
 

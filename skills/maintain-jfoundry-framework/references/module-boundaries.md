@@ -31,7 +31,9 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 - `jfoundry-runtime/jfoundry-quarkus/runtime`: Quarkus runtime extension artifacts and CDI behavior.
 - `jfoundry-runtime/jfoundry-quarkus/deployment`: Quarkus build-time processors and Native Image registration.
 - `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`: Quarkus consumer and Native Image integration verification.
-- `jfoundry-runtime/jfoundry-helidon/runtime`: Helidon MP CDI, JTA, JAX-RS, scheduling, and JPA runtime behavior.
+- `jfoundry-runtime/jfoundry-helidon/jfoundry-*-helidon`: direct capability modules for Helidon MP CDI,
+  JTA, JAX-RS, scheduling, and JPA runtime behavior; Helidon has no intermediate `runtime` or `deployment`
+  source directory.
 - `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`: Helidon MP consumer and Native Image integration verification.
 
 ### Runtime Capability Naming And Decomposition
@@ -45,9 +47,9 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
   does not have a Quarkus-style deployment artifact.
 - Helidon transaction, local domain-event, and aggregate-persistence-context integration is split into
   `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon`.
-- `jfoundry-quarkus-runtime` still combines those capabilities. Treat it as a retained entry point,
-  not a template for new modules; its intended decomposition is capability-specific Quarkus
-  runtime/deployment pairs.
+- Quarkus transaction, local domain-event, and aggregate-persistence-context integration uses the matching
+  `jfoundry-transaction-quarkus-*`, `jfoundry-domain-event-quarkus-*`, and
+  `jfoundry-persistence-quarkus-*` runtime/deployment pairs.
 
 Runtime-specific middleware, Testcontainers, database/broker compatibility, and profile-driven checks belong
 in the affected runtime's direct `jfoundry-<runtime>-integration-tests` module. Framework-neutral tests belong

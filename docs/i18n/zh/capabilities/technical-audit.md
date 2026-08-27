@@ -17,7 +17,7 @@
 `AuditStamping` Bean 会分别覆盖默认值。安全集成通常只需提供 `AuditActorProvider`；认证仍由它自己负责，
 并将当前 principal 映射为稳定的操作者标识。
 
-`jfoundry-quarkus-runtime` 与 `jfoundry-persistence-helidon` 通过 CDI 提供相同的 UTC 默认值。存在且仅存在一个
+`jfoundry-persistence-quarkus-runtime` 与 `jfoundry-persistence-helidon` 通过 CDI 提供相同的 UTC 默认值。存在且仅存在一个
 应用 `AuditActorProvider` 时会使用它。Quarkus 应用可用 CDI Bean 替换默认 `AuditStamping`。Helidon 使用优先级
 为 `1` 的已启用 CDI alternative；应用若要替换整个服务，必须声明优先级更高的已启用 `@Alternative`。这两个运行时
 目前都没有 JFoundry MyBatis-Plus 集成。

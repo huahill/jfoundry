@@ -1,8 +1,9 @@
 # Quarkus Runtime Integration
 
-`jfoundry-quarkus-runtime` is a Quarkus extension that exposes the framework-neutral
-`TransactionRunner` as a CDI bean. It keeps Quarkus, CDI, Jakarta Transactions, and GraalVM types
-outside the domain, application, and infrastructure modules.
+JFoundry's Quarkus integration is a set of capability-specific extensions. The base application
+capabilities are `jfoundry-transaction-quarkus-runtime`, `jfoundry-domain-event-quarkus-runtime`,
+and `jfoundry-persistence-quarkus-runtime`. They keep Quarkus, CDI, Jakarta Transactions, and
+GraalVM types outside the domain, application, and infrastructure modules.
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
 `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
@@ -14,7 +15,7 @@ Applications select the Quarkus runtime modules rather than assembling these sha
 ## Dependency Setup
 
 Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
-runtime extension. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
+required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
 it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
 
@@ -41,12 +42,12 @@ runtime extension descriptor; applications must not add it directly.
 <dependencies>
     <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-quarkus-runtime</artifactId>
+        <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
     </dependency>
 </dependencies>
 ```
 
-The extension brings Quarkus Arc and Narayana JTA as runtime dependencies. It registers one
+The transaction extension brings Quarkus Arc and Narayana JTA as runtime dependencies. It registers one
 application-scoped `QuarkusTransactionRunner`, which can be injected through the framework-neutral
 `TransactionRunner` contract.
 
@@ -58,9 +59,9 @@ artifact automatically.
 
 | Spring Boot capability | Quarkus dependency composition |
 |---|---|
-| Spring Boot runtime baseline | `jfoundry-quarkus-runtime` |
-| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
-| `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
+| `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
+| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
+| `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`, `jfoundry-persistence-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-outbox-jpa-quarkus-runtime` and `jfoundry-outbox-quarkus-runtime` when dispatching is required |
 | `jfoundry-inbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka or RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` or `jfoundry-messaging-rabbitmq-quarkus-runtime` |
@@ -104,7 +105,7 @@ name or read-only transaction setting, so this adapter rejects `TransactionOptio
 
 ## Domain Event Dispatch
 
-The base runtime extension also provides the application-service event boundary. For every CDI bean
+The `jfoundry-domain-event-quarkus-runtime` extension provides the application-service event boundary. For every CDI bean
 annotated with framework-neutral `@ApplicationService`, Quarkus adds a runtime-only interceptor
 binding during augmentation. On the outermost successful invocation, the interceptor drains events
 from aggregates registered through `DomainEventContext` and sends them to every CDI
@@ -137,9 +138,11 @@ broker client, or automatic event externalization.
 
 ## JPA Aggregate Persistence
 
-To use `JpaAggregateRepository`, add `jfoundry-persistence-jpa`,
+To use `JpaAggregateRepository`, add `jfoundry-transaction-quarkus-runtime`,
+`jfoundry-persistence-quarkus-runtime`, `jfoundry-persistence-jpa`,
 `jfoundry-persistence-jpa-quarkus-runtime`, and the Quarkus Hibernate ORM and datasource extensions
-selected by the application. The JPA capability translates known Hibernate connection and query-timeout
+selected by the application. The persistence extension supplies the transaction-bound aggregate
+context and auditing defaults. The JPA capability translates known Hibernate connection and query-timeout
 failures into `ExternalAccessException`; applications may replace its CDI `PersistenceFailureTranslator`.
 A repository subclass must be a CDI bean and
 receive `EntityManager` through its constructor. The jfoundry extension discovers CDI beans that
@@ -164,8 +167,7 @@ described below when an application needs a JPA-backed Outbox store.
 
 ## JPA Outbox Storage
 
-Add `jfoundry-outbox-jpa-quarkus-runtime` alongside the base runtime extension and Quarkus Hibernate
-ORM:
+Add `jfoundry-outbox-jpa-quarkus-runtime` alongside Quarkus Hibernate ORM:
 
 ```xml
 <dependency>
@@ -298,8 +300,8 @@ explicit `MessageSender` adapter and enable the dispatcher separately when deliv
 
 ## JPA Inbox Storage
 
-Add `jfoundry-inbox-jpa-quarkus-runtime` alongside the base runtime extension and Quarkus Hibernate
-ORM:
+Add `jfoundry-inbox-jpa-quarkus-runtime` alongside `jfoundry-transaction-quarkus-runtime` and
+Quarkus Hibernate ORM:
 
 ```xml
 <dependency>

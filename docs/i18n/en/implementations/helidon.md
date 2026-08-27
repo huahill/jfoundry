@@ -47,12 +47,12 @@ Then select only the capabilities the application needs:
 | CDI transactions | `jfoundry-transaction-helidon` | Helidon MP server and JTA CDI integration |
 | Local domain-event dispatch | `jfoundry-domain-event-helidon` | Helidon MP server and JTA CDI integration |
 | Aggregate persistence context and technical audit | `jfoundry-persistence-helidon` | Helidon MP server and JTA CDI integration |
-| JPA aggregate persistence | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate integration, datasource, and persistence unit |
+| JPA aggregate persistence | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate integration, datasource, and persistence unit |
 | RFC 9457 JAX-RS responses and inbound logging | `jfoundry-web-helidon` | Helidon MP server; Bean Validation for request-validation mapping |
 | Outbound REST Client logging | `jfoundry-restclient-helidon` | Included Helidon MicroProfile REST Client |
-| Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon-runtime` | an `OutboxMessageStore` and a real `MessageSender` |
-| JPA Outbox store | `jfoundry-outbox-jpa-helidon-runtime` | JPA capability and application migration |
-| JPA Inbox store | `jfoundry-inbox-jpa-helidon-runtime` | JPA capability and application migration |
+| Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon` | an `OutboxMessageStore` and a real `MessageSender` |
+| JPA Outbox store | `jfoundry-outbox-jpa-helidon` | JPA capability and application migration |
+| JPA Inbox store | `jfoundry-inbox-jpa-helidon` | JPA capability and application migration |
 
 No capability module implicitly adds JPA, Outbox, Inbox, a database, or a broker client.
 
@@ -72,7 +72,7 @@ fails. The boundary is synchronous; it does not support reactive return types.
 ## JPA, Outbox, And Inbox
 
 `jfoundry-persistence-helidon` supplies the transaction-bound aggregate persistence context and the
-replaceable UTC technical-audit default. `jfoundry-persistence-jpa-helidon-runtime` adds recognized
+replaceable UTC technical-audit default. `jfoundry-persistence-jpa-helidon` adds recognized
 Hibernate connection and query-timeout failure translation to `ExternalAccessException`. Its
 `EntityManager` is supplied by the Helidon application.
 
@@ -81,7 +81,7 @@ tables: copy the published Outbox and Inbox SQL templates into the application's
 Inbox claim strategies support PostgreSQL and MySQL; another database requires an application
 `JpaInboxClaimStrategy` bean.
 
-`jfoundry-outbox-helidon-runtime` provides opt-in scheduling. Enable scheduled dispatch only after
+`jfoundry-outbox-helidon` provides opt-in scheduling. Enable scheduled dispatch only after
 providing both the store and broker sender:
 
 ```properties

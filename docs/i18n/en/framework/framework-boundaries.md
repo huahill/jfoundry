@@ -30,7 +30,7 @@ it does not own CDI registration or a container lifecycle. Spring uses `runtime/
 | Spring integration tests | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus runtime integration | `jfoundry-runtime/jfoundry-quarkus/runtime/*`, `deployment/*` |
 | Quarkus integration tests | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
-| Helidon MP runtime integration | `jfoundry-runtime/jfoundry-helidon/runtime/*` |
+| Helidon MP runtime integration | Direct `jfoundry-runtime/jfoundry-helidon/jfoundry-*-helidon` capability modules |
 | Helidon integration tests | `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests` |
 
 ## Runtime Capability Naming
@@ -45,10 +45,11 @@ behavior in `jfoundry-webmvc-spring`, and outbound `RestClient` behavior in
 `jfoundry-restclient-spring`. The matching Spring Boot auto-configuration and starter modules remain
 capability-specific.
 
-Helidon transaction, local domain-event, and aggregate-persistence-context integration is split into
-`jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon`.
-The aggregate `jfoundry-quarkus-runtime` remains a current entry point, not a naming template for new
-capabilities. A later Quarkus decomposition should create capability-specific runtime/deployment pairs.
+Transaction, local domain-event, and aggregate-persistence-context integration is capability-specific
+in both Jakarta runtimes. Quarkus uses matching `jfoundry-transaction-quarkus-*`,
+`jfoundry-domain-event-quarkus-*`, and `jfoundry-persistence-quarkus-*` runtime/deployment pairs.
+Helidon uses `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and
+`jfoundry-persistence-helidon` without deployment artifacts.
 
 ## Placement Rules
 
@@ -65,11 +66,11 @@ capabilities. A later Quarkus decomposition should create capability-specific ru
 - Quarkus runtime and Native Image verification belongs in
   `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`. Future Quarkus
   middleware or Testcontainers verification belongs in the same module.
-- Helidon CDI lifecycle, JTA, JAX-RS, scheduling, and JPA integration belong under
-  `jfoundry-runtime/jfoundry-helidon/runtime`; current Native Image verification belongs in
+- Helidon CDI lifecycle, JTA, JAX-RS, scheduling, and JPA integration belong in direct capability modules under
+  `jfoundry-runtime/jfoundry-helidon`; current Native Image verification belongs in
   `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`. Future Helidon middleware
-  or Testcontainers verification belongs in the same module. Helidon has no
-  JFoundry deployment module or starter layer.
+  or Testcontainers verification belongs in the same module. Helidon has no intermediate `runtime`
+  directory, JFoundry deployment module, or starter layer.
 - Consume Domain, Application, architecture-style, and framework-neutral adapter modules directly.
   Runtime-specific starters are dependency entry points only and must not contain runtime behavior.
 - Framework-neutral database, serializer, and scheduler adapters belong under

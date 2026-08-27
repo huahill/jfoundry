@@ -24,7 +24,12 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-deployment</artifactId>
+            <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

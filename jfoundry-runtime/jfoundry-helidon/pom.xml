@@ -48,15 +48,15 @@
     </build>
 
     <modules>
-        <module>runtime/jfoundry-transaction-helidon</module>
-        <module>runtime/jfoundry-domain-event-helidon</module>
-        <module>runtime/jfoundry-persistence-helidon</module>
-        <module>runtime/jfoundry-persistence-jpa-helidon-runtime</module>
-        <module>runtime/jfoundry-web-helidon</module>
-        <module>runtime/jfoundry-restclient-helidon</module>
-        <module>runtime/jfoundry-outbox-helidon-runtime</module>
-        <module>runtime/jfoundry-outbox-jpa-helidon-runtime</module>
-        <module>runtime/jfoundry-inbox-jpa-helidon-runtime</module>
+        <module>jfoundry-transaction-helidon</module>
+        <module>jfoundry-domain-event-helidon</module>
+        <module>jfoundry-persistence-helidon</module>
+        <module>jfoundry-persistence-jpa-helidon</module>
+        <module>jfoundry-web-helidon</module>
+        <module>jfoundry-restclient-helidon</module>
+        <module>jfoundry-outbox-helidon</module>
+        <module>jfoundry-outbox-jpa-helidon</module>
+        <module>jfoundry-inbox-jpa-helidon</module>
         <module>jfoundry-helidon-integration-tests</module>
     </modules>
 </project>

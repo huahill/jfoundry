@@ -21,7 +21,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | Spring 集成测试 | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
 | Quarkus 运行时集成 | `jfoundry-runtime/jfoundry-quarkus/runtime/*`、`deployment/*` |
 | Quarkus 集成测试 | `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests` |
-| Helidon MP 运行时集成 | `jfoundry-runtime/jfoundry-helidon/runtime/*` |
+| Helidon MP 运行时集成 | `jfoundry-runtime/jfoundry-helidon` 下直接按能力划分的 `jfoundry-*-helidon` 模块 |
 | Helidon 集成测试 | `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests` |
 
 ## 运行时能力命名
@@ -34,9 +34,10 @@ Spring 将共用的 HTTP 日志策略适配放在 `jfoundry-http-spring`，将�
 `jfoundry-webmvc-spring`，将出站 `RestClient` 行为放在 `jfoundry-restclient-spring`。对应的
 Spring Boot 自动配置模块与启动器仍按能力划分。
 
-Helidon 的事务、本地领域事件与聚合持久化上下文集成已经拆分为 `jfoundry-transaction-helidon`、
-`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon`。综合的 `jfoundry-quarkus-runtime`
-仍是当前入口，但不作为新增能力的命名模板；后续 Quarkus 拆分应建立按能力划分的 runtime/deployment 配对。
+两个 Jakarta 运行时都按能力划分事务、本地领域事件与聚合持久化上下文集成。Quarkus 使用相互匹配的
+`jfoundry-transaction-quarkus-*`、`jfoundry-domain-event-quarkus-*` 与
+`jfoundry-persistence-quarkus-*` runtime/deployment 配对；Helidon 使用没有 deployment 构件的
+`jfoundry-transaction-helidon`、`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon`。
 
 ## 放置规则
 
@@ -47,7 +48,7 @@ Helidon 的事务、本地领域事件与聚合持久化上下文集成已经拆
   `jfoundry-runtime/jfoundry-jakarta`。这些模块不注册 CDI Bean 或 provider；具体运行时仍负责发现、生命周期、
   配置项、日志桥、构建期处理与原生镜像集成。
 - Quarkus 运行时和原生镜像验证位于 `jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests`；未来的 Quarkus 中间件或 Testcontainers 验证也位于该模块。
-- Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime/jfoundry-helidon/runtime`；当前原生镜像验证位于 `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`，未来的 Helidon 中间件或 Testcontainers 验证也位于该模块。Helidon 没有 JFoundry 部署模块或启动器层。
+- Helidon CDI 生命周期、JTA、JAX-RS、调度和 JPA 集成位于 `jfoundry-runtime/jfoundry-helidon` 下直接按能力划分的模块；当前原生镜像验证位于 `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`，未来的 Helidon 中间件或 Testcontainers 验证也位于该模块。Helidon 没有中间 `runtime` 目录、JFoundry 部署模块或启动器层。
 - 使用方应直接依赖领域、应用、架构风格和框架无关适配器模块。运行时专属启动器只是依赖入口，
   不得承载运行时行为。
 - 运行时无关的数据库、序列化器和调度适配器位于 `jfoundry-core/jfoundry-infrastructure`。
