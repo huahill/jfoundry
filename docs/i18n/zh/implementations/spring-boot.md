@@ -145,8 +145,8 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 Spring Boot 应用可以使用 `jfoundry-web-spring-boot-starter`，并通过
 `jfoundry.web.rest-client.logging-level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `NONE`。
 直接通过 `RestClient.builder()` 创建 builder 时，仍需使用
-`RestClientSupport.configure(builder, HttpLoggingLevel)`。出站 `durationMs` 使用单调时钟，从进入执行链开始，
-到响应 header 到达或执行失败时结束；响应 body 消费与解码不在该边界内。
+`RestClientSupport.configure(builder, HttpLoggingLevel)`。出站 `duration` 字段以 `duration=30ms` 形式输出，并使用
+单调时钟从进入执行链开始计时，到响应 header 到达或执行失败时结束；响应 body 消费与解码不在该边界内。
 
 `jfoundry-webmvc-spring-boot-starter` 会为 Servlet 应用自动配置 `HttpLoggingFilter`。
 `jfoundry.web.mvc.logging-level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后的注册覆盖

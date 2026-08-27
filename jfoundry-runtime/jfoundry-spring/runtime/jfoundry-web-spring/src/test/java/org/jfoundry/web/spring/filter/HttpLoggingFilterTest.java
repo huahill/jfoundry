@@ -95,7 +95,7 @@ class HttpLoggingFilterTest {
         assertThat(messages()).containsExactly(
                 "HTTP server request: method=POST, uri=https://service.test/orders",
                 "HTTP server response: method=POST, uri=https://service.test/orders, status=201, "
-                        + "completion=complete, durationMs=25");
+                        + "completion=complete, duration=25ms");
         assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(messages()).noneMatch(message -> message.contains("access_token"));
     }
@@ -244,7 +244,7 @@ class HttpLoggingFilterTest {
         assertThat(messages()).containsExactly(
                 "HTTP server request: method=POST, uri=https://service.test/orders",
                 "HTTP server request failed: method=POST, uri=https://service.test/orders, completion=failed, "
-                        + "exception=jakarta.servlet.ServletException, durationMs=4");
+                        + "exception=jakarta.servlet.ServletException, duration=4ms");
     }
 
     @Test
@@ -261,7 +261,7 @@ class HttpLoggingFilterTest {
         assertThat(messages()).containsExactly(
                 "HTTP server request: method=POST, uri=https://service.test/orders",
                 "HTTP server response: method=POST, uri=https://service.test/orders, status=200, "
-                        + "completion=async-complete, durationMs=32");
+                        + "completion=async-complete, duration=32ms");
     }
 
     @Test
@@ -283,7 +283,7 @@ class HttpLoggingFilterTest {
         assertThat(messages()).hasSize(2);
         assertThat(messages().getLast()).contains("completion=async-error")
                 .contains("exception=java.lang.IllegalStateException")
-                .contains("durationMs=3");
+                .contains("duration=3ms");
     }
 
     private List<String> messages() {

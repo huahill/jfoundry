@@ -127,7 +127,7 @@ API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 位于 `org
 
 出站日志默认使用 `NONE`。应用可通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择四种级别；
 Spring Boot 管理的 builder 使用同样默认值为 `NONE` 的
-`jfoundry.web.rest-client.logging-level`。客户端 `durationMs` 从调用
+`jfoundry.web.rest-client.logging-level`。客户端 `duration` 字段以 `duration=30ms` 形式输出，计时从调用
 `ClientHttpRequestExecution.execute(...)` 前开始，到响应 header 可用或执行失败时结束，不包含响应 body
 消费与解码，也不是端到端延迟。
 
@@ -146,14 +146,14 @@ Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
 Spring `WebClient`，响应式调用不属于此契约。
 
 所有运行时都以 `INFO` 输出 HTTP 交换事件，`NONE` 会将其关闭。`BASIC` 分别记录 request 与 response 事件，
-包含移除 query 后的 method/URI、状态和 `durationMs`，且不创建 body 包装器。`HEADERS` 额外记录独立的 request
+包含移除 query 后的 method/URI、状态和带 `ms` 后缀的 `duration` 字段，且不创建 body 包装器。`HEADERS` 额外记录独立的 request
 header 与 response header 事件，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
 API key。`FULL` 再额外记录独立的 request body 与 response body 事件；JSON body 会执行嵌套字段脱敏，最多
 保留 8 KiB，非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
 改变 HTTP 处理。
 
-入站 `durationMs` 在同步完成或运行时的终态响应阶段结束，不表示调用方已经收到全部流式字节。客户端
-`durationMs` 在响应 header 可用时结束，不包含后续 body 消费与解码。Jakarta REST 客户端过滤器没有可移植的
+入站 `duration` 的计时在同步完成或运行时的终态响应阶段结束，不表示调用方已经收到全部流式字节。客户端
+`duration` 的计时在响应 header 可用时结束，不包含后续 body 消费与解码。Jakarta REST 客户端过滤器没有可移植的
 传输失败回调，因此 Quarkus 与 Helidon 不依赖运行时私有 hook 来伪造 Spring 专属的传输失败事件。响应 body
 日志只会在 body 被消费或关闭后出现。
 

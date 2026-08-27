@@ -115,7 +115,7 @@ class HttpLoggingResourceTest {
         assertThat(this.messages.stream().filter(message -> message.startsWith("HTTP server response:")).toList())
                 .singleElement().satisfies(message -> assertThat(message)
                         .contains("method=POST", "uri=" + this.baseUri + "jfoundry/http-logging",
-                                "status=200", "durationMs="));
+                                "status=200", "duration=").endsWith("ms"));
         assertThat(this.messages.stream()
                 .filter(message -> message.startsWith("HTTP server response headers:")).toList())
                 .singleElement().satisfies(message -> assertThat(message).contains("status=200", "headers="));

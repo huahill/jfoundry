@@ -125,7 +125,7 @@ class HttpLoggingResourceTest {
         assertEquals(1, responses.size());
         assertTrue(responses.getFirst().contains("method=POST"));
         assertTrue(responses.getFirst().contains("status=200"));
-        assertTrue(responses.getFirst().contains("durationMs="));
+        assertTrue(responses.getFirst().matches(".*duration=\\d+ms.*"));
 
         var responseHeaders = this.messages.stream()
                 .filter(message -> message.startsWith("HTTP server response headers:")).toList();

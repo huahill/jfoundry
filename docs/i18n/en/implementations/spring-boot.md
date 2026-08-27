@@ -209,8 +209,9 @@ locations have no forwarding aliases.
 Spring Boot applications can use `jfoundry-web-spring-boot-starter` and set
 `jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
 `NONE`. Applications that create a builder directly with `RestClient.builder()` must select the level
-with `RestClientSupport.configure(builder, HttpLoggingLevel)`. Outbound `durationMs` uses a monotonic
-clock from execution-chain entry until response headers arrive or execution fails. Response-body
+with `RestClientSupport.configure(builder, HttpLoggingLevel)`. The outbound `duration` field uses an `ms` suffix,
+such as `duration=30ms`, and a monotonic clock from execution-chain entry until response headers arrive or execution
+fails. Response-body
 consumption and decoding occur outside that boundary.
 
 `jfoundry-webmvc-spring-boot-starter` auto-configures `HttpLoggingFilter` for Servlet applications.

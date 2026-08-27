@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         })
 class HttpLoggingWebMvcIntegrationTest {
 
-    private static final Pattern DURATION = Pattern.compile(".*durationMs=(\\d+).*");
+    private static final Pattern DURATION = Pattern.compile(".*duration=(\\d+)ms.*");
 
     @LocalServerPort
     private int port;
@@ -95,7 +95,7 @@ class HttpLoggingWebMvcIntegrationTest {
     private List<String> terminalLogs(String path) {
         return logs.list.stream()
                 .map(ILoggingEvent::getFormattedMessage)
-                .filter(message -> message.contains(path) && message.contains("durationMs="))
+                .filter(message -> message.contains(path) && message.contains("duration="))
                 .toList();
     }
 

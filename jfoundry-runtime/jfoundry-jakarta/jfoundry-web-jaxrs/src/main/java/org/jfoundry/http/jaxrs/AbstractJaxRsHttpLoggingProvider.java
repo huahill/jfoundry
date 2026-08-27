@@ -115,7 +115,7 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         if (state == null) {
             return;
         }
-        safely(() -> info("HTTP server response: method={0}, uri={1}, status={2}, durationMs={3}",
+        safely(() -> info("HTTP server response: method={0}, uri={1}, status={2}, duration={3}ms",
                 state.method(), state.uri(), response.getStatus(), elapsedMillis(state.startedAt())));
         if (state.level().includesHeaders()) {
             safely(() -> info("HTTP server response headers: method={0}, uri={1}, status={2}, headers={3}",
@@ -167,7 +167,7 @@ public abstract class AbstractJaxRsHttpLoggingProvider implements ContainerReque
         if (state == null) {
             return;
         }
-        safely(() -> info("HTTP client response: method={0}, uri={1}, status={2}, durationMs={3}",
+        safely(() -> info("HTTP client response: method={0}, uri={1}, status={2}, duration={3}ms",
                 state.method(), state.uri(), response.getStatus(), elapsedMillis(state.startedAt())));
         if (state.level().includesHeaders()) {
             safely(() -> info("HTTP client response headers: method={0}, uri={1}, status={2}, headers={3}",

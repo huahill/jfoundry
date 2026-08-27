@@ -157,8 +157,9 @@ remains in `org.jfoundry.web.spring`.
 
 Outbound logging defaults to `NONE`. Applications can select all four levels through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use
-`jfoundry.web.rest-client.logging-level`, also defaulting to `NONE`. The client `durationMs` starts
-immediately before `ClientHttpRequestExecution.execute(...)` and ends when response headers are
+`jfoundry.web.rest-client.logging-level`, also defaulting to `NONE`. The client `duration` field, emitted with an
+`ms` suffix such as `duration=30ms`, starts immediately before `ClientHttpRequestExecution.execute(...)` and ends
+when response headers are
 available or execution fails. It excludes response-body consumption and decoding and is not
 end-to-end latency.
 
@@ -178,15 +179,16 @@ the level for a manual builder through `RestClientSupport.configure(builder, Htt
 JFoundry does not currently integrate Spring `WebClient`; reactive calls are outside this contract.
 
 All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records separate request and
-response events with query-free method/URI, status, and `durationMs` without body wrappers. `HEADERS` adds
+response events with query-free method/URI, status, and a `duration` field with an `ms` suffix without body wrappers.
+`HEADERS` adds
 separate request-header and response-header events after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
 nested-field redaction as separate request-body and response-body events and retains at most 8 KiB; non-JSON,
 malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
 
-Inbound `durationMs` ends at synchronous completion or the runtime's terminal response phase; it does
-not measure when the caller receives all streamed bytes. Client `durationMs` ends when response headers
+Inbound `duration` timing ends at synchronous completion or the runtime's terminal response phase; it does
+not measure when the caller receives all streamed bytes. Client `duration` timing ends when response headers
 are available and excludes later response-body consumption and decoding. Jakarta REST client filters
 have no portable transport-failure callback, so Quarkus and Helidon cannot emit the Spring-specific
 transport-failure event without relying on runtime-private hooks. Response-body logs appear only after
