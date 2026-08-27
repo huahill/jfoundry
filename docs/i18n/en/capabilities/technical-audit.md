@@ -21,7 +21,7 @@ Spring Boot provides a UTC `Clock`, an empty `AuditActorProvider`, and an `Audit
 only `AuditActorProvider`; it owns authentication and maps its current principal to a stable actor
 identifier.
 
-`jfoundry-quarkus-runtime` and `jfoundry-persistence-helidon` provide the same UTC default through CDI.
+`jfoundry-persistence-quarkus-runtime` and `jfoundry-persistence-helidon` provide the same UTC default through CDI.
 An application `AuditActorProvider` is used when exactly one is available. Quarkus applications can
 replace the default `AuditStamping` with a CDI bean. Helidon uses an enabled CDI alternative at
 priority `1`; an application replacing the complete service must declare an enabled

@@ -80,9 +80,17 @@ verify_spring_metadata \
     'jfoundry.web.mvc.logging-level'
 
 verify_quarkus_build_steps \
-    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-quarkus-deployment' \
-    'jfoundry-quarkus-deployment' \
-    'org.jfoundry.quarkus.deployment.QuarkusProcessor'
+    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-transaction-quarkus-deployment' \
+    'jfoundry-transaction-quarkus-deployment' \
+    'org.jfoundry.quarkus.transaction.deployment.TransactionProcessor'
+verify_quarkus_build_steps \
+    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-domain-event-quarkus-deployment' \
+    'jfoundry-domain-event-quarkus-deployment' \
+    'org.jfoundry.quarkus.domain.event.deployment.DomainEventProcessor'
+verify_quarkus_build_steps \
+    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-persistence-quarkus-deployment' \
+    'jfoundry-persistence-quarkus-deployment' \
+    'org.jfoundry.quarkus.persistence.deployment.PersistenceProcessor'
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-restclient-quarkus-deployment' \
     'jfoundry-restclient-quarkus-deployment' \

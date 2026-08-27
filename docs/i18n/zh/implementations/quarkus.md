@@ -1,8 +1,9 @@
 # Quarkus 运行时集成
 
-`jfoundry-quarkus-runtime` 是一个 Quarkus 扩展，将运行时无关的 `TransactionRunner` 暴露为 CDI Bean。
-它使 Quarkus、CDI、Jakarta Transactions 与 GraalVM 类型始终位于 domain、application 和
-infrastructure 模块之外。
+JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能力分别位于
+`jfoundry-transaction-quarkus-runtime`、`jfoundry-domain-event-quarkus-runtime` 与
+`jfoundry-persistence-quarkus-runtime`。它们使 Quarkus、CDI、Jakarta Transactions 与 GraalVM
+类型始终位于 domain、application 和 infrastructure 模块之外。
 
 其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
 `jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。Quarkus 自有运行时类仍是公开的 CDI/provider
@@ -11,7 +12,7 @@ infrastructure 模块之外。
 
 ## 依赖配置
 
-依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加运行时扩展。
+依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加所需的能力扩展。
 `jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
@@ -38,12 +39,12 @@ infrastructure 模块之外。
 <dependencies>
     <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-quarkus-runtime</artifactId>
+        <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
     </dependency>
 </dependencies>
 ```
 
-该扩展在运行时引入 Quarkus Arc 与 Narayana JTA，并注册一个 application scope 的
+事务扩展在运行时引入 Quarkus Arc 与 Narayana JTA，并注册一个 application scope 的
 `QuarkusTransactionRunner`，应用可通过运行时无关的 `TransactionRunner` 契约注入它。
 
 ## Spring Boot 与 Quarkus 的依赖组合
@@ -53,9 +54,9 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 
 | Spring Boot 能力 | Quarkus 依赖组合 |
 |---|---|
-| Spring Boot 运行时基线 | `jfoundry-quarkus-runtime` |
-| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-quarkus-runtime` |
-| `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
+| `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
+| `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
+| `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`、`jfoundry-persistence-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-outbox-jpa-quarkus-runtime`；需要派发时再加 `jfoundry-outbox-quarkus-runtime` |
 | `jfoundry-inbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka 或 RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` |
@@ -95,7 +96,7 @@ Jakarta Transactions 没有可移植的事务名称或只读事务设置，因�
 
 ## 领域事件分发
 
-基础运行时扩展还提供应用服务的事件边界。对于所有标注运行时无关 `@ApplicationService` 的 CDI Bean，
+`jfoundry-domain-event-quarkus-runtime` 扩展提供应用服务的事件边界。对于所有标注运行时无关 `@ApplicationService` 的 CDI Bean，
 Quarkus 会在增强阶段加入仅限运行时的拦截器绑定。最外层调用成功后，拦截器会
 从通过 `DomainEventContext` 注册的聚合中提取事件，并交给每个 CDI `DomainEventDispatcher`。
 嵌套应用服务调用共享同一个作用域，因此只会在最外层边界分发一次；若异常从该边界逸出，待分发事件会被丢弃。
@@ -123,9 +124,10 @@ Mutiny 返回类型；它只提供进程内领域事件编排，不会引入 Out
 
 ## JPA 聚合持久化
 
-使用 `JpaAggregateRepository` 时，除 `jfoundry-persistence-jpa` 外，还需加入
-`jfoundry-persistence-jpa-quarkus-runtime`、应用所选的 Quarkus Hibernate ORM 与数据源扩展。JPA 能力
-会将已知的 Hibernate 连接与查询超时失败翻译为 `ExternalAccessException`；应用可替换 CDI
+使用 `JpaAggregateRepository` 时，需加入 `jfoundry-transaction-quarkus-runtime`、
+`jfoundry-persistence-quarkus-runtime`、`jfoundry-persistence-jpa`、
+`jfoundry-persistence-jpa-quarkus-runtime`、应用所选的 Quarkus Hibernate ORM 与数据源扩展。持久化扩展
+提供事务绑定的聚合上下文与审计默认值。JPA 能力会将已知的 Hibernate 连接与查询超时失败翻译为 `ExternalAccessException`；应用可替换 CDI
 `PersistenceFailureTranslator`。仓储子类必须是 CDI Bean，并通过构造器接收 `EntityManager`。
 jfoundry 扩展会发现实现 `AggregatePersistenceContextAware` 的 CDI Bean，并自动注入绑定到 JTA
 事务的持久化上下文。应用也可以声明自己的 CDI `AggregatePersistenceContext` Bean 覆盖此默认实现。
@@ -146,7 +148,7 @@ transactionRunner.run(() -> {
 
 ## JPA Outbox 存储
 
-除基础运行时扩展和 Quarkus Hibernate ORM 外，加入 `jfoundry-outbox-jpa-quarkus-runtime`：
+除 Quarkus Hibernate ORM 外，加入 `jfoundry-outbox-jpa-quarkus-runtime`：
 
 ```xml
 <dependency>
@@ -261,7 +263,8 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 
 ## JPA Inbox 存储
 
-除基础运行时扩展和 Quarkus Hibernate ORM 外，加入 `jfoundry-inbox-jpa-quarkus-runtime`：
+除 `jfoundry-transaction-quarkus-runtime` 和 Quarkus Hibernate ORM 外，加入
+`jfoundry-inbox-jpa-quarkus-runtime`：
 
 ```xml
 <dependency>

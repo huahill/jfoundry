@@ -19,10 +19,6 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-jpa</artifactId>
         </dependency>
         <dependency>

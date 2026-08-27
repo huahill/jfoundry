@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-quarkus-runtime</artifactId>
+            <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

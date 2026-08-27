@@ -9,11 +9,11 @@
 | 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [接入指南](../integration/getting-started.md) |
 | 应用服务 | 用例需要清晰的应用边界；仅在需要时添加 CQRS、事务或领域事件模块。 | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [接入指南](../integration/getting-started.md) |
 | 可执行架构规则 | 项目需要可复用的 ArchUnit 检查来约束 Hexagonal 或 Onion 边界。 | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | [ArchUnit 架构规则](../framework/archunit-rules.md) |
-| 应用事务 | 用例需要运行时事务边界。 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-quarkus-runtime` | `jfoundry-transaction-helidon` | [应用事务](application-transactions.md) |
-| 聚合持久化 | 聚合需要 JPA 或 MyBatis-Plus 持久化，同时不把 Repository 变为通用查询接口。 | `jfoundry-persistence-jpa-spring-boot-starter` 或 `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon-runtime` | [聚合持久化](aggregate-persistence.md) |
+| 应用事务 | 用例需要运行时事务边界。 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` | `jfoundry-transaction-helidon` | [应用事务](application-transactions.md) |
+| 聚合持久化 | 聚合需要 JPA 或 MyBatis-Plus 持久化，同时不把 Repository 变为通用查询接口。 | `jfoundry-persistence-jpa-spring-boot-starter` 或 `jfoundry-persistence-mybatis-plus-spring-boot-starter` | `jfoundry-persistence-jpa-quarkus-runtime` | `jfoundry-persistence-jpa-helidon` | [聚合持久化](aggregate-persistence.md) |
 | Web 与 REST Client | HTTP API 需要 RFC 9457 问题响应或安全的入站/出站诊断日志。 | `jfoundry-webmvc-spring-boot-starter` 或 `jfoundry-restclient-spring-boot-starter` | `jfoundry-web-quarkus-runtime` 或 `jfoundry-restclient-quarkus-runtime` | `jfoundry-web-helidon` 或 `jfoundry-restclient-helidon` | [Web](web.md) |
 | 直接消息投递 | 应用需要发布到消息代理，但不需要可靠的 Outbox 记录。 | `jfoundry-messaging-spring-boot-starter` 加一个消息代理启动器 | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` | 暂未提供 | [消息传输](message-delivery.md) |
-| 可靠消息 | 消息必须事务性记录、延后派发或被幂等处理。 | Outbox 能力加显式选择的存储与发送器，或 Inbox 能力加存储 | `jfoundry-outbox-quarkus-runtime` 或 `jfoundry-inbox-jpa-quarkus-runtime` | `jfoundry-outbox-helidon-runtime` 或 `jfoundry-inbox-jpa-helidon-runtime` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
+| 可靠消息 | 消息必须事务性记录、延后派发或被幂等处理。 | Outbox 能力加显式选择的存储与发送器，或 Inbox 能力加存储 | `jfoundry-outbox-quarkus-runtime` 或 `jfoundry-inbox-jpa-quarkus-runtime` | `jfoundry-outbox-helidon` 或 `jfoundry-inbox-jpa-helidon` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
 | 分布式锁 | 数据库约束与幂等仍不足时，用例需要跨实例协调。 | `jfoundry-lock-redisson-spring-boot-starter` | 暂未提供 | 暂未提供 | [分布式锁](distributed-locks.md) |
 | 可观测性 | 框架操作需要受限维度的指标与追踪，且不能暴露业务标识。 | `jfoundry-observability-spring-boot-starter` | `jfoundry-observability-otel` | `jfoundry-observability-otel` | [可观测性](observability.md) |
 
