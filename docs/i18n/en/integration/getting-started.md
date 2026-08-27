@@ -100,7 +100,7 @@ BOM, and dependency composition.
 |---|---|---|
 | Spring Boot | Select the required Spring Boot capability starter; the shared baseline is usually transitive | [Spring Boot Runtime Assembly](../implementations/spring-boot.md) |
 | Quarkus | `jfoundry-quarkus-runtime` | [Quarkus Runtime Integration](../implementations/quarkus.md) |
-| Helidon MP | `jfoundry-helidon-runtime` | [Helidon MP Runtime Integration](../implementations/helidon.md) |
+| Helidon MP | Select `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon` by capability | [Helidon MP Runtime Integration](../implementations/helidon.md) |
 
 Runtime entry points assemble capabilities; they do not belong in domain or application code.
 

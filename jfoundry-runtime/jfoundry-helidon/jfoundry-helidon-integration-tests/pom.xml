@@ -7,7 +7,9 @@
   <description>JVM and Native Image verification for JFoundry Helidon MP runtime integration.</description>
   <properties><skipITs>true</skipITs><mainClass>io.helidon.microprofile.cdi.Main</mainClass><jfoundry.test.groups/><jfoundry.excluded.test.groups>middleware-integration</jfoundry.excluded.test.groups></properties>
   <dependencies>
-    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-helidon-runtime</artifactId></dependency>
+    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-transaction-helidon</artifactId></dependency>
+    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-helidon</artifactId></dependency>
+    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-persistence-helidon</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web-helidon</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-restclient-helidon</artifactId><scope>test</scope></dependency>
     <dependency><groupId>io.helidon.microprofile.server</groupId><artifactId>helidon-microprofile-server</artifactId></dependency>

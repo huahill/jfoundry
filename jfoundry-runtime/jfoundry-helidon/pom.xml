@@ -48,7 +48,9 @@
     </build>
 
     <modules>
-        <module>runtime/jfoundry-helidon-runtime</module>
+        <module>runtime/jfoundry-transaction-helidon</module>
+        <module>runtime/jfoundry-domain-event-helidon</module>
+        <module>runtime/jfoundry-persistence-helidon</module>
         <module>runtime/jfoundry-persistence-jpa-helidon-runtime</module>
         <module>runtime/jfoundry-web-helidon</module>
         <module>runtime/jfoundry-restclient-helidon</module>

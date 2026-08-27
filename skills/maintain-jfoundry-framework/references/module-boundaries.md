@@ -43,11 +43,11 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
   `jfoundry-<capability>-quarkus-deployment` artifacts.
 - Helidon capability adapters use `jfoundry-<capability>-helidon` without a `-runtime` suffix; Helidon
   does not have a Quarkus-style deployment artifact.
-- `jfoundry-quarkus-runtime` and `jfoundry-helidon-runtime` currently combine transaction, local
-  domain-event, and aggregate-persistence-context integration. Treat them as retained entry points,
-  not templates for new modules. Their intended decomposition is capability-specific Quarkus
-  runtime/deployment pairs and capability-specific Helidon artifacts without `-runtime`, matching
-  Spring's capability separation.
+- Helidon transaction, local domain-event, and aggregate-persistence-context integration is split into
+  `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon`.
+- `jfoundry-quarkus-runtime` still combines those capabilities. Treat it as a retained entry point,
+  not a template for new modules; its intended decomposition is capability-specific Quarkus
+  runtime/deployment pairs.
 
 Runtime-specific middleware, Testcontainers, database/broker compatibility, and profile-driven checks belong
 in the affected runtime's direct `jfoundry-<runtime>-integration-tests` module. Framework-neutral tests belong

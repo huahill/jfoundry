@@ -34,9 +34,9 @@ Spring 将共用的 HTTP 日志策略适配放在 `jfoundry-http-spring`，将�
 `jfoundry-webmvc-spring`，将出站 `RestClient` 行为放在 `jfoundry-restclient-spring`。对应的
 Spring Boot 自动配置模块与启动器仍按能力划分。
 
-现有 `jfoundry-quarkus-runtime` 与 `jfoundry-helidon-runtime` 当前同时包含事务、本地领域事件和聚合持久化
-上下文集成。它们仍是当前入口，但不作为新增能力的命名模板。后续拆分应为 Quarkus 建立按能力划分的
-runtime/deployment 配对，并为 Helidon 建立不带 `-runtime` 的能力构件，与 Spring 已有的能力拆分保持一致。
+Helidon 的事务、本地领域事件与聚合持久化上下文集成已经拆分为 `jfoundry-transaction-helidon`、
+`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon`。综合的 `jfoundry-quarkus-runtime`
+仍是当前入口，但不作为新增能力的命名模板；后续 Quarkus 拆分应建立按能力划分的 runtime/deployment 配对。
 
 ## 放置规则
 

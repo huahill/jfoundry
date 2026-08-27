@@ -9,7 +9,7 @@
     <name>jfoundry-persistence-jpa-helidon-runtime</name>
     <description>Helidon MP runtime assembly for JFoundry JPA persistence.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-helidon-runtime</artifactId></dependency>
+        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-persistence-helidon</artifactId></dependency>
         <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-persistence-jpa</artifactId></dependency>
         <dependency><groupId>io.helidon.integrations.cdi</groupId><artifactId>helidon-integrations-cdi-jpa</artifactId><scope>runtime</scope></dependency>
         <dependency><groupId>io.helidon.integrations.cdi</groupId><artifactId>helidon-integrations-cdi-hibernate</artifactId><scope>runtime</scope></dependency>

@@ -45,11 +45,10 @@ behavior in `jfoundry-webmvc-spring`, and outbound `RestClient` behavior in
 `jfoundry-restclient-spring`. The matching Spring Boot auto-configuration and starter modules remain
 capability-specific.
 
-The existing `jfoundry-quarkus-runtime` and `jfoundry-helidon-runtime` artifacts currently combine
-transaction, local domain-event, and aggregate-persistence-context integration. They are retained as
-current entry points but are not naming templates for new capabilities. A later decomposition should
-create capability-specific Quarkus runtime/deployment pairs and capability-specific Helidon artifacts
-without `-runtime`, matching Spring's existing capability separation.
+Helidon transaction, local domain-event, and aggregate-persistence-context integration is split into
+`jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon`.
+The aggregate `jfoundry-quarkus-runtime` remains a current entry point, not a naming template for new
+capabilities. A later Quarkus decomposition should create capability-specific runtime/deployment pairs.
 
 ## Placement Rules
 
