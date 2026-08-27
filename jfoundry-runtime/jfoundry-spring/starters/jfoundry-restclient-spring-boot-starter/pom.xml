@@ -9,8 +9,8 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>jfoundry-web-spring-boot-starter</artifactId>
-    <name>jfoundry-web-spring-boot-starter</name>
+    <artifactId>jfoundry-restclient-spring-boot-starter</artifactId>
+    <name>jfoundry-restclient-spring-boot-starter</name>
     <description>Spring Boot starter for jfoundry outbound RestClient support and HTTP logging.</description>
 
     <dependencies>

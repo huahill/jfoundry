@@ -71,6 +71,6 @@
         <module>starters/jfoundry-inbox-jpa-spring-boot-starter</module>
         <module>starters/jfoundry-persistence-mybatis-plus-spring-boot-starter</module>
         <module>starters/jfoundry-persistence-jpa-spring-boot-starter</module>
-        <module>starters/jfoundry-web-spring-boot-starter</module>
+        <module>starters/jfoundry-restclient-spring-boot-starter</module>
     </modules>
 </project>

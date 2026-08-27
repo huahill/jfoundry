@@ -8,10 +8,10 @@
 |---|---|---|---|
 | 为 HTTP API 提供 RFC 9457 Problem Details | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
 | 入站 HTTP 诊断日志 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| 出站 HTTP 诊断日志 | `jfoundry-web-spring-boot-starter` 或 `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` 配合 MicroProfile REST Client | `jfoundry-web-helidon-runtime` 配合 MicroProfile REST Client |
+| 出站 HTTP 诊断日志 | `jfoundry-restclient-spring-boot-starter` 或 `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` 配合 MicroProfile REST Client | `jfoundry-web-helidon-runtime` 配合 MicroProfile REST Client |
 
 `jfoundry-web-spring` 要求应用自行提供 Spring Web API。Spring Boot 应用可以加入
-`jfoundry-web-spring-boot-starter`，它提供 Spring Boot `RestClient` 集成以及
+`jfoundry-restclient-spring-boot-starter`，它提供 Spring Boot `RestClient` 集成以及
 `RestClient` 集成。Quarkus 与 Helidon 应用需要选择对应运行时的 MicroProfile REST Client 实现；
 JFoundry 运行时模块随后会自动注册日志 provider。
 
