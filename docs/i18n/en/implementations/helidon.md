@@ -5,7 +5,8 @@ portable CDI/Jakarta runtime integration, not a Spring Boot starter and not a Qu
 Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and application code.
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
-`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, and `jfoundry-web-jaxrs` implementations.
+`jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
+`jfoundry-restclient-jaxrs` implementations.
 Helidon-owned runtime classes remain the public CDI/provider entry points and retain portable-extension,
 service-loading, scheduling, logging, and Native Image behavior. Applications select the Helidon runtime
 modules rather than assembling these shared implementation modules.
@@ -45,7 +46,8 @@ Then select only the capabilities the application needs:
 |---|---|---|
 | CDI transactions and local domain events | `jfoundry-helidon-runtime` | Helidon MP server and JTA CDI integration |
 | JPA aggregate persistence | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate integration, datasource, and persistence unit |
-| RFC 9457 JAX-RS responses | `jfoundry-web-helidon-runtime` | Helidon MP server; Bean Validation for request-validation mapping |
+| RFC 9457 JAX-RS responses and inbound logging | `jfoundry-web-helidon` | Helidon MP server; Bean Validation for request-validation mapping |
+| Outbound REST Client logging | `jfoundry-restclient-helidon` | Included Helidon MicroProfile REST Client |
 | Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon-runtime` | an `OutboxMessageStore` and a real `MessageSender` |
 | JPA Outbox store | `jfoundry-outbox-jpa-helidon-runtime` | JPA capability and application migration |
 | JPA Inbox store | `jfoundry-inbox-jpa-helidon-runtime` | JPA capability and application migration |
@@ -95,7 +97,7 @@ alternative.
 
 ## Web Integration
 
-`jfoundry-web-helidon-runtime` maps JFoundry application and domain exceptions to RFC 9457
+`jfoundry-web-helidon` maps JFoundry application and domain exceptions to RFC 9457
 `application/problem+json` JAX-RS responses. It keeps Helidon's ordinary handling for unknown
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
 general JAX-RS error policy. The runtime-neutral contract and the dependency choices for all
@@ -112,14 +114,14 @@ violations and validation failures from internal CDI services are rethrown so He
 server-error handling. Applications that accept JSON request bodies must also select a Jersey JSON
 provider, such as `jersey-media-json-binding` for JSON-B.
 
-The same runtime module registers a JAX-RS request/response filter and reader/writer interceptors for
+The same Web module registers a JAX-RS request/response filter and reader/writer interceptors for
 diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging-level`, defaulting to `NONE`.
 Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 
-When the application selects `helidon-microprofile-rest-client`, JFoundry automatically registers its
-provider with every MicroProfile REST Client builder. Outbound logging uses
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`; the Web runtime does not add the
-client implementation itself. This integration is verified on the JVM. Helidon 4.5.3's REST Client
+`jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
+the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
+`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. This integration is verified on the JVM.
+Helidon 4.5.3's REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.
 

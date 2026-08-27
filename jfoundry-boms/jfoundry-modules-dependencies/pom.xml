@@ -194,7 +194,12 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-web-spring</artifactId>
+        <artifactId>jfoundry-http-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-restclient-spring</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -217,6 +222,16 @@
         <artifactId>jfoundry-jakarta</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-http-jaxrs</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-restclient-jaxrs</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
@@ -263,7 +278,12 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-web-helidon-runtime</artifactId>
+        <artifactId>jfoundry-restclient-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-web-helidon</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-helidon-runtime</artifactId><version>${project.version}</version></dependency>
@@ -277,6 +297,16 @@
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-restclient-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-restclient-quarkus-deployment</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -396,7 +426,7 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-web-spring-boot-autoconfigure</artifactId>
+        <artifactId>jfoundry-restclient-spring-boot-autoconfigure</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

@@ -108,9 +108,9 @@ support works.
 Helidon MP 4.5.3 REST Client is also JVM-only in the current acceptance matrix. Adding
 `helidon-microprofile-rest-client` to the GraalVM Community 25.0.4 image classpath fails during
 initialization because Helidon's `RestClientSubstitution.ReflectionUtilSubstitution` contains an
-unannotated substitution method. JFoundry keeps that implementation in JVM integration-test scope;
-the Web runtime exposes only the optional MicroProfile REST Client SPI and the Native CDI/Web server
-smoke does not claim Native REST Client support.
+unannotated substitution method. JFoundry keeps `jfoundry-restclient-helidon` in JVM integration-test
+scope; the Native CDI/Web server smoke excludes the REST Client capability and does not claim Native
+REST Client support.
 
 ## Release Gates
 

@@ -14,7 +14,6 @@ import io.quarkus.test.junit.QuarkusTestProfile;
 import io.quarkus.test.junit.TestProfile;
 import io.restassured.http.ContentType;
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
-import org.jfoundry.http.quarkus.HttpLoggingProvider;
 import org.jboss.logmanager.Logger;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +38,7 @@ class HttpLoggingResourceTest {
     @BeforeEach
     void captureLogs() {
         this.messages.clear();
-        this.logger = Logger.getLogger(HttpLoggingProvider.class.getName());
+        this.logger = Logger.getLogger("org.jfoundry.http.quarkus");
         this.handler = new Handler() {
             private final SimpleFormatter formatter = new SimpleFormatter();
 
@@ -138,7 +137,7 @@ class HttpLoggingResourceTest {
             return Map.of(
                     "jfoundry.web.quarkus.logging-level", "FULL",
                     "jfoundry.web.rest-client.logging-level", "FULL",
-                    "quarkus.log.category.\"org.jfoundry.http.quarkus.HttpLoggingProvider\".level", "INFO");
+                    "quarkus.log.category.\"org.jfoundry.http.quarkus\".level", "INFO");
         }
     }
 }

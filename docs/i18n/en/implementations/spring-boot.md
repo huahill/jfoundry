@@ -197,7 +197,7 @@ payloads. Spring MVC derives this shared contract from `MethodArgumentNotValidEx
 and Helidon derive the same external representation from their runtime-specific request-validation
 exceptions, as described in their implementation guides.
 
-`jfoundry-web-spring` is the opt-in Spring Web integration for outbound `RestClient` calls. Configure
+`jfoundry-restclient-spring` is the opt-in Spring integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures

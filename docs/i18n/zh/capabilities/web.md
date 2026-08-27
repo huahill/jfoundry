@@ -6,14 +6,14 @@
 
 | 需求 | Spring Boot | Quarkus | Helidon MP |
 |---|---|---|---|
-| 为 HTTP API 提供 RFC 9457 Problem Details | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| 入站 HTTP 诊断日志 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon-runtime` |
-| 出站 HTTP 诊断日志 | `jfoundry-restclient-spring-boot-starter` 或 `jfoundry-web-spring` | `jfoundry-web-quarkus-runtime` 配合 MicroProfile REST Client | `jfoundry-web-helidon-runtime` 配合 MicroProfile REST Client |
+| 为 HTTP API 提供 RFC 9457 Problem Details | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
+| 入站 HTTP 诊断日志 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
+| 出站 HTTP 诊断日志 | `jfoundry-restclient-spring-boot-starter` 或 `jfoundry-restclient-spring` | `jfoundry-restclient-quarkus-runtime` | `jfoundry-restclient-helidon` |
 
-`jfoundry-web-spring` 要求应用自行提供 Spring Web API。Spring Boot 应用可以加入
+`jfoundry-restclient-spring` 要求应用自行提供 Spring Web API。Spring Boot 应用可以加入
 `jfoundry-restclient-spring-boot-starter`，它提供 Spring Boot `RestClient` 集成以及
-`RestClient` 集成。Quarkus 与 Helidon 应用需要选择对应运行时的 MicroProfile REST Client 实现；
-JFoundry 运行时模块随后会自动注册日志 provider。
+`RestClient` 集成。Quarkus 与 Helidon 的 REST Client 模块会引入对应运行时的 MicroProfile REST Client
+实现，并自动注册 JFoundry 日志 provider。
 
 ## Problem Details（RFC 9457）
 
@@ -25,7 +25,7 @@ JFoundry 运行时模块随后会自动注册日志 provider。
 |---|---|---|
 | Spring Boot | `jfoundry-webmvc-spring-boot-starter` | Spring MVC |
 | Quarkus | `jfoundry-web-quarkus-runtime` | 带 Jackson 的 Quarkus REST |
-| Helidon MP | `jfoundry-web-helidon-runtime` | JAX-RS |
+| Helidon MP | `jfoundry-web-helidon` | JAX-RS |
 
 这些入口都会引入运行时无关的 `jfoundry-web` 模块。应用通常只添加上表所列的入口。先按[接入指南](../integration/getting-started.md)导入核心 BOM 与对应运行时 BOM。
 
@@ -115,7 +115,7 @@ Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须�
 
 ## HTTP 集成与诊断日志
 
-`jfoundry-web-spring` 为选定的出站 `RestClient` 调用提供显式集成。只对该集成拥有的 builder 使用
+`jfoundry-restclient-spring` 为选定的出站 `RestClient` 调用提供显式集成。只对该集成拥有的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行调用。非成功响应会转换为
 只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。

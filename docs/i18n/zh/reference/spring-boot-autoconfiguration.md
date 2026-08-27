@@ -83,7 +83,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC 应用且处理器类存在；没有已有 JFoundry 处理器。它先于 Spring Boot Web MVC 自动配置运行，使 Boot 的通用问题详情处理器回退。 |
 | `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`、`JfoundryWebMvcProperties` | Servlet 应用与 Filter API 存在，且应用未提供 `HttpLoggingFilter` 或对应注册。`NONE` 创建 disabled registration；启用后以 `HIGHEST_PRECEDENCE + 20` 覆盖 request、async、error 派发。 |
-| `WebRestClientAutoConfiguration` | `RestClientCustomizer`、`JfoundryWebProperties` | Spring Boot `RestClient` 类和 `jfoundry-web-spring` 存在；customizer 将配置的日志级别应用到 Boot 管理的 builder。 |
+| `WebRestClientAutoConfiguration` | `RestClientCustomizer`、`JfoundryWebProperties` | Spring Boot `RestClient` 类和 `jfoundry-restclient-spring` 存在；customizer 将配置的日志级别应用到 Boot 管理的 builder。 |
 
 ## 说明
 

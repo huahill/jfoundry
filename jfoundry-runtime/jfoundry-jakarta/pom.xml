@@ -18,6 +18,8 @@
     <description>Shared Jakarta runtime adapters for JFoundry.</description>
 
     <modules>
+        <module>jfoundry-http-jaxrs</module>
+        <module>jfoundry-restclient-jaxrs</module>
         <module>jfoundry-web-jaxrs</module>
         <module>jfoundry-transaction-jta</module>
         <module>jfoundry-domain-event-jta</module>

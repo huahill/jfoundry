@@ -50,7 +50,8 @@
     <modules>
         <module>runtime/jfoundry-helidon-runtime</module>
         <module>runtime/jfoundry-persistence-jpa-helidon-runtime</module>
-        <module>runtime/jfoundry-web-helidon-runtime</module>
+        <module>runtime/jfoundry-web-helidon</module>
+        <module>runtime/jfoundry-restclient-helidon</module>
         <module>runtime/jfoundry-outbox-helidon-runtime</module>
         <module>runtime/jfoundry-outbox-jpa-helidon-runtime</module>
         <module>runtime/jfoundry-inbox-jpa-helidon-runtime</module>

@@ -5,7 +5,7 @@ CDI/Jakarta 运行时集成，不是 Spring Boot 启动器，也不是 Quarkus �
 JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
-`jfoundry-domain-event-jta` 和 `jfoundry-web-jaxrs` 实现。Helidon 自有运行时类仍是公开的 CDI/provider
+`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。Helidon 自有运行时类仍是公开的 CDI/provider
 入口，并保留 portable extension、服务加载、调度、日志与原生镜像行为。应用应选择 Helidon 运行时模块，
 而不是自行组合这些共享实现模块。
 
@@ -43,7 +43,8 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 |---|---|---|
 | CDI 事务与本地领域事件 | `jfoundry-helidon-runtime` | Helidon MP 服务器与 JTA CDI 集成 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
-| RFC 9457 JAX-RS 响应 | `jfoundry-web-helidon-runtime` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
+| RFC 9457 JAX-RS 响应与入站日志 | `jfoundry-web-helidon` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
+| 出站 REST Client 日志 | `jfoundry-restclient-helidon` | 已包含 Helidon MicroProfile REST Client |
 | Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon-runtime` | `OutboxMessageStore` 与真实 `MessageSender` |
 | JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
 | JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
@@ -86,7 +87,7 @@ jfoundry.outbox.dispatcher.enabled=true
 
 ## Web 集成
 
-`jfoundry-web-helidon-runtime` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
+`jfoundry-web-helidon` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
 适配器不替代应用通用的 JAX-RS 错误策略。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)。
 
@@ -99,13 +100,13 @@ JSON 标量、数组和对象类型。
 违反以及内部 CDI 服务的校验失败会继续抛出，由 Helidon 保留服务端错误处理。接受 JSON 请求体的应用还必须
 选择 Jersey JSON provider，例如用于 JSON-B 的 `jersey-media-json-binding`。
 
-同一运行时模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
+同一 Web 模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
 `jfoundry.web.helidon.logging-level`，默认值为 `NONE`。启用后的事件通过
 `org.jfoundry.http.helidon.HttpLoggingProvider` 以 `INFO` 输出。
 
-应用选择 `helidon-microprofile-rest-client` 后，JFoundry 会把 provider 自动注册到每个 MicroProfile REST Client
-builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`；Web 运行时本身不会引入
-客户端实现。该集成已通过 JVM 验证。Helidon 4.5.3 的 REST Client 原生镜像 substitution 与当前 GraalVM 25
+`jfoundry-restclient-helidon` 会引入 `helidon-microprofile-rest-client`，并把 JFoundry provider 自动注册到每个
+MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。
+该集成已通过 JVM 验证。Helidon 4.5.3 的 REST Client 原生镜像 substitution 与当前 GraalVM 25
 基线不兼容，因此原生 REST Client 日志暂不属于发布支持声明。当前不支持 Spring `WebClient`。
 
 日志不会包含 URI query、user info 或 fragment。敏感 header 与嵌套 JSON 字段会以不区分大小写的方式脱敏，

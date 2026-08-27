@@ -134,7 +134,7 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 `MethodArgumentNotValidException` 与 `HandlerMethodValidationException` 生成该共享契约；返回值校验仍作为
 服务端失败处理。Quarkus 与 Helidon 则从各自运行时的请求校验异常生成相同的外部表示，具体见对应的实现指南。
 
-`jfoundry-web-spring` 为出站 `RestClient` 调用提供显式 Spring Web 集成。只对拥有该集成的 builder 使用
+`jfoundry-restclient-spring` 为出站 `RestClient` 调用提供显式 Spring 集成。只对拥有该集成的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
 只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
 `HttpRequestException`。`HttpLoggingLevel` 从 `org.jfoundry.http` 导入，Spring 日志支持从
