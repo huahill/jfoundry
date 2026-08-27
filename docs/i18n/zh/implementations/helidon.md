@@ -41,7 +41,9 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 | 能力 | JFoundry 构件 | 应用提供的 Helidon 能力 |
 |---|---|---|
-| CDI 事务与本地领域事件 | `jfoundry-helidon-runtime` | Helidon MP 服务器与 JTA CDI 集成 |
+| CDI 事务 | `jfoundry-transaction-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
+| 本地领域事件派发 | `jfoundry-domain-event-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
+| 聚合持久化上下文与技术审计 | `jfoundry-persistence-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
 | RFC 9457 JAX-RS 响应与入站日志 | `jfoundry-web-helidon` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
 | 出站 REST Client 日志 | `jfoundry-restclient-helidon` | 已包含 Helidon MicroProfile REST Client |
@@ -49,21 +51,22 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 | JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
 | JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon-runtime` | JPA 能力与应用迁移 |
 
-通用运行时不会隐式引入 JPA、Outbox、Inbox、数据库或消息代理客户端。
+任何能力模块都不会隐式引入 JPA、Outbox、Inbox、数据库或消息代理客户端。
 
 ## 事务与领域事件
 
-`jfoundry-helidon-runtime` 通过可移植 CDI 暴露 `TransactionRunner`，并将六种
+`jfoundry-transaction-helidon` 通过可移植 CDI 暴露 `TransactionRunner`，并将六种
 `TransactionPropagation` 映射到 Jakarta Transactions。它支持由自身创建事务的超时；Jakarta
 Transactions 没有可移植的事务名称和只读语义，因此会拒绝这两类选项，而不是静默忽略。
 
-运行时同时向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。对于在活跃 JTA 事务中注册的
+`jfoundry-domain-event-helidon` 会向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。对于在活跃 JTA 事务中注册的
 事件，它会在 `beforeCompletion` 阶段记录 Outbox，并仅在成功提交后通知普通 CDI 派发器。事务外的事件仍在
 最外层应用服务成功完成后派发；该调用失败时则丢弃事件。此边界仅支持同步调用，不支持 reactive 返回类型。
 
 ## JPA、Outbox 与 Inbox
 
-JPA 聚合能力提供事务绑定的聚合持久化上下文，并将已识别的 Hibernate 连接和查询超时失败转换为
+`jfoundry-persistence-helidon` 提供事务绑定的聚合持久化上下文和可替换的 UTC 技术审计默认实现。
+`jfoundry-persistence-jpa-helidon-runtime` 还会将已识别的 Hibernate 连接和查询超时失败转换为
 `ExternalAccessException`。`EntityManager` 由 Helidon 应用提供。
 
 JPA Outbox 与 Inbox 能力复用运行时无关的 JPA 存储，不会创建 SQL 表。应用必须将发布的 Outbox 和

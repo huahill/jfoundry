@@ -31,11 +31,11 @@ The JPA Quarkus capability translates known Hibernate availability failures and 
 an application CDI `PersistenceFailureTranslator`.
 See [Quarkus](quarkus.md) for the runtime assembly requirements.
 
-For Helidon MP, add `jfoundry-helidon-runtime`, `jfoundry-persistence-jpa`, and
-`jfoundry-persistence-jpa-helidon-runtime`, then configure the application's Helidon CDI
-JPA/Hibernate integration, datasource, and persistence unit. The Helidon runtime supplies the
-transaction-bound persistence context and the same recognized Hibernate availability-failure
-translation. See [Helidon MP](helidon.md) for its explicit dependency composition and Native Image
+For Helidon MP, add `jfoundry-persistence-jpa-helidon-runtime`, then configure the application's
+Helidon CDI JPA/Hibernate integration, datasource, and persistence unit. This artifact brings in
+`jfoundry-persistence-jpa` and `jfoundry-persistence-helidon`; the latter supplies the
+transaction-bound persistence context, while the Helidon JPA artifact adds the recognized Hibernate
+availability-failure translation. See [Helidon MP](helidon.md) for its explicit dependency composition and Native Image
 limitations.
 
 ### Direct JPA Or Hibernate Assembly

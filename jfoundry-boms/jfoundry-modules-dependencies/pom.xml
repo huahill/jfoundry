@@ -268,7 +268,17 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-helidon-runtime</artifactId>
+        <artifactId>jfoundry-transaction-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-persistence-helidon</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

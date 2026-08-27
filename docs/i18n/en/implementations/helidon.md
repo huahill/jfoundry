@@ -44,7 +44,9 @@ Then select only the capabilities the application needs:
 
 | Capability | JFoundry artifact | Application-provided Helidon capability |
 |---|---|---|
-| CDI transactions and local domain events | `jfoundry-helidon-runtime` | Helidon MP server and JTA CDI integration |
+| CDI transactions | `jfoundry-transaction-helidon` | Helidon MP server and JTA CDI integration |
+| Local domain-event dispatch | `jfoundry-domain-event-helidon` | Helidon MP server and JTA CDI integration |
+| Aggregate persistence context and technical audit | `jfoundry-persistence-helidon` | Helidon MP server and JTA CDI integration |
 | JPA aggregate persistence | `jfoundry-persistence-jpa-helidon-runtime` | CDI JPA/Hibernate integration, datasource, and persistence unit |
 | RFC 9457 JAX-RS responses and inbound logging | `jfoundry-web-helidon` | Helidon MP server; Bean Validation for request-validation mapping |
 | Outbound REST Client logging | `jfoundry-restclient-helidon` | Included Helidon MicroProfile REST Client |
@@ -52,16 +54,16 @@ Then select only the capabilities the application needs:
 | JPA Outbox store | `jfoundry-outbox-jpa-helidon-runtime` | JPA capability and application migration |
 | JPA Inbox store | `jfoundry-inbox-jpa-helidon-runtime` | JPA capability and application migration |
 
-The generic runtime does not implicitly add JPA, Outbox, Inbox, a database, or a broker client.
+No capability module implicitly adds JPA, Outbox, Inbox, a database, or a broker client.
 
 ## Transactions And Domain Events
 
-`jfoundry-helidon-runtime` exposes `TransactionRunner` through portable CDI and maps all six
+`jfoundry-transaction-helidon` exposes `TransactionRunner` through portable CDI and maps all six
 `TransactionPropagation` modes to Jakarta Transactions. Timeout is supported for transactions it
 creates. Transaction name and read-only options have no portable Jakarta Transactions equivalent and
 are rejected rather than ignored.
 
-The runtime also adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
+`jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
 registered in an active JTA transaction, it records the Outbox path in `beforeCompletion` and notifies
 ordinary CDI dispatchers only after a successful commit. Outside a transaction, it dispatches after
 the outermost successful application-service invocation and discards events when that invocation
@@ -69,8 +71,9 @@ fails. The boundary is synchronous; it does not support reactive return types.
 
 ## JPA, Outbox, And Inbox
 
-The JPA aggregate capability supplies a transaction-bound aggregate persistence context and translates
-recognized Hibernate connection and query-timeout failures to `ExternalAccessException`. Its
+`jfoundry-persistence-helidon` supplies the transaction-bound aggregate persistence context and the
+replaceable UTC technical-audit default. `jfoundry-persistence-jpa-helidon-runtime` adds recognized
+Hibernate connection and query-timeout failure translation to `ExternalAccessException`. Its
 `EntityManager` is supplied by the Helidon application.
 
 The JPA Outbox and Inbox capabilities reuse the framework-neutral JPA stores. They do not create SQL

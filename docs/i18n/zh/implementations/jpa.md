@@ -20,9 +20,10 @@ JPA Quarkus capability 会翻译已知 Hibernate 可用性失败，应用可以�
 `PersistenceFailureTranslator` 覆盖它。
 运行时装配要求见 [Quarkus](quarkus.md)。
 
-Helidon MP 环境中，加入 `jfoundry-helidon-runtime`、`jfoundry-persistence-jpa` 与
-`jfoundry-persistence-jpa-helidon-runtime`，再配置应用自己的 Helidon CDI JPA/Hibernate 集成、数据源和
-持久化单元。Helidon 运行时提供事务绑定的持久化上下文，并采用相同的已识别 Hibernate 可用性失败转换。
+Helidon MP 环境中，加入 `jfoundry-persistence-jpa-helidon-runtime`，再配置应用自己的 Helidon CDI
+JPA/Hibernate 集成、数据源和持久化单元。该构件会引入 `jfoundry-persistence-jpa` 与
+`jfoundry-persistence-helidon`；后者提供事务绑定的持久化上下文，Helidon JPA 构件则补充已识别的
+Hibernate 可用性失败转换。
 显式依赖组合和原生镜像限制见 [Helidon MP](helidon.md)。
 
 ### 直接装配 JPA 或 Hibernate
