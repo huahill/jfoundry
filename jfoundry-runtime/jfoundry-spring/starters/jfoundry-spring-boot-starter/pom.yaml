@@ -7,10 +7,10 @@ parent:
 
 artifactId: jfoundry-spring-boot-starter
 name: jfoundry-spring-boot-starter
-description: >-
+description: |-
   Minimal Spring Boot baseline for jfoundry capability starters.
-  Transaction, messaging, Outbox, Inbox, lock, persistence, and web capabilities are
-  provided by dedicated starter modules.
+          Transaction, messaging, Outbox, Inbox, lock, persistence, and web capabilities are
+          provided by dedicated starter modules.
 
 properties:
   mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
