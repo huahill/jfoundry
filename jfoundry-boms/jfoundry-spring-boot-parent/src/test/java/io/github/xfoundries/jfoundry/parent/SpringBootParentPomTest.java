@@ -3,11 +3,16 @@ package io.github.xfoundries.jfoundry.parent;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.yaml.snakeyaml.Yaml;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,9 +39,7 @@ class SpringBootParentPomTest {
 
     @Test
     void frameworkBuildParentDoesNotImportARuntimeBom() throws Exception {
-        Document document = document(Path.of("..", "..", "pom.xml"));
-
-        assertThat(importedBoms(document)).containsExactly(
+        assertThat(importedBoms(descriptor(Path.of("..", "..")))).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"));
     }
 
@@ -50,25 +53,23 @@ class SpringBootParentPomTest {
     @Test
     void independentPublishedPomsUseVersionAppropriateScmTags() throws Exception {
         List<Path> pomPaths = List.of(
-                Path.of("pom.xml"),
-                Path.of("..", "..", "pom.xml"),
+                descriptor(Path.of(".")),
+                descriptor(Path.of("..", "..")),
                 Path.of("..", "jfoundry-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
-        String reactorVersion = childText(
-                document(Path.of("..", "..", "pom.xml")).getDocumentElement(), "version");
+                descriptor(Path.of("..", "jfoundry-helidon-dependencies")));
+        String reactorVersion = projectVersion(descriptor(Path.of("..", "..")));
         String expectedLiteralTag = expectedLiteralScmTag(reactorVersion);
 
         for (Path pomPath : pomPaths) {
-            Document document = document(pomPath);
-            assertThat(childText(document.getDocumentElement(), "version"))
+            assertThat(projectVersion(pomPath))
                     .as("project version for %s", pomPath)
                     .isEqualTo(reactorVersion);
-            assertThat(childText(child(document.getDocumentElement(), "scm"), "tag"))
+            assertThat(scmTag(pomPath))
                     .as("SCM tag for %s", pomPath)
                     .isIn("v${project.version}", expectedLiteralTag);
         }
@@ -150,9 +151,10 @@ class SpringBootParentPomTest {
     @Test
     void helidonRuntimeBuildUsesTheConsumerBomAsItsPlatformVersionSource() throws Exception {
         Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon", "pom.xml"));
-        Document bom = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+        Path bom = descriptor(Path.of("..", "jfoundry-helidon-dependencies"));
 
         assertThat(property(runtime, "helidon.version")).isNull();
+        assertThat(property(bom, "helidon.version")).isEqualTo("4.5.3");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
         assertThat(importedBoms(bom)).containsExactly(
@@ -187,6 +189,45 @@ class SpringBootParentPomTest {
         return factory.newDocumentBuilder().parse(path.toFile());
     }
 
+    private Map<String, Object> yamlDocument(Path path) throws IOException {
+        try (Reader reader = Files.newBufferedReader(path)) {
+            return new Yaml().load(reader);
+        }
+    }
+
+    private Path descriptor(Path directory) {
+        Path yaml = directory.resolve("pom.yaml");
+        return Files.exists(yaml) ? yaml : directory.resolve("pom.xml");
+    }
+
+    private String projectVersion(Path path) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return value(yamlDocument(path), "version");
+        }
+        return childText(document(path).getDocumentElement(), "version");
+    }
+
+    private String scmTag(Path path) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return value(mapping(yamlDocument(path), "scm"), "tag");
+        }
+        return childText(child(document(path).getDocumentElement(), "scm"), "tag");
+    }
+
+    private String property(Path path, String name) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return value(mapping(yamlDocument(path), "properties"), name);
+        }
+        return childText(child(document(path).getDocumentElement(), "properties"), name);
+    }
+
+    private List<Coordinate> importedBoms(Path path) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return importedBoms(yamlDocument(path));
+        }
+        return importedBoms(document(path));
+    }
+
     private List<Coordinate> importedBoms(Document document) {
         Element project = document.getDocumentElement();
         Element management = child(project, "dependencyManagement");
@@ -204,11 +245,46 @@ class SpringBootParentPomTest {
         return imports;
     }
 
+    private List<Coordinate> importedBoms(Map<String, Object> document) {
+        Map<String, Object> management = mapping(document, "dependencyManagement");
+        if (management == null) {
+            return List.of();
+        }
+        List<Coordinate> imports = new ArrayList<>();
+        for (Map<String, Object> dependency : mappings(management, "dependencies")) {
+            if ("import".equals(value(dependency, "scope"))) {
+                imports.add(coordinate(dependency));
+            }
+        }
+        return imports;
+    }
+
     private Coordinate coordinate(Element element) {
         return new Coordinate(
                 childText(element, "groupId"),
                 childText(element, "artifactId"),
                 childText(element, "version"));
+    }
+
+    private Coordinate coordinate(Map<String, Object> element) {
+        return new Coordinate(
+                value(element, "groupId"),
+                value(element, "artifactId"),
+                value(element, "version"));
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> mapping(Map<String, Object> parent, String name) {
+        return (Map<String, Object>) parent.get(name);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> mappings(Map<String, Object> parent, String name) {
+        return (List<Map<String, Object>>) parent.get(name);
+    }
+
+    private String value(Map<String, Object> parent, String name) {
+        return parent.get(name).toString();
     }
 
     private boolean managesDependency(Document document, String groupId, String artifactId) {
