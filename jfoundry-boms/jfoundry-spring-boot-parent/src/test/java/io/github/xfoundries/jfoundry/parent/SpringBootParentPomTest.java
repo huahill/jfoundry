@@ -3,7 +3,6 @@ package io.github.xfoundries.jfoundry.parent;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.yaml.snakeyaml.Yaml;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.IOException;
@@ -35,6 +34,13 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+    }
+
+    @Test
+    void publishedParentDoesNotExposeItsYamlTestParser() throws Exception {
+        Document parent = document(Path.of("pom.xml"));
+
+        assertThat(dependency(parent, "org.yaml", "snakeyaml")).isNull();
     }
 
     @Test
@@ -189,9 +195,12 @@ class SpringBootParentPomTest {
         return factory.newDocumentBuilder().parse(path.toFile());
     }
 
-    private Map<String, Object> yamlDocument(Path path) throws IOException {
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> yamlDocument(Path path) throws ReflectiveOperationException, IOException {
         try (Reader reader = Files.newBufferedReader(path)) {
-            return new Yaml().load(reader);
+            Class<?> yamlType = Class.forName("org.yaml.snakeyaml.Yaml");
+            Object yaml = yamlType.getConstructor().newInstance();
+            return (Map<String, Object>) yamlType.getMethod("load", Reader.class).invoke(yaml, reader);
         }
     }
 
