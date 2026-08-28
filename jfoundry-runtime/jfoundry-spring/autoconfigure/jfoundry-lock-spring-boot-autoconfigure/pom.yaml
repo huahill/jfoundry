@@ -1,0 +1,32 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-lock-spring-boot-autoconfigure
+name: jfoundry-lock-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry distributed locks."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-redisson
+  - groupId: org.redisson
+    artifactId: redisson
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework
+    artifactId: spring-aop
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-aspectj
+    scope: test

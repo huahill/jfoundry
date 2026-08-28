@@ -1,0 +1,46 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-spring
+name: jfoundry-outbox-spring
+description: "Spring runtime adapters for Transactional Outbox: domain-event externalization, scheduled dispatching, and retry backoff."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.springframework
+    artifactId: spring-context
+    scope: provided
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-tx
+    scope: provided
+    optional: "true"
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.awaitility
+    artifactId: awaitility
+    scope: test

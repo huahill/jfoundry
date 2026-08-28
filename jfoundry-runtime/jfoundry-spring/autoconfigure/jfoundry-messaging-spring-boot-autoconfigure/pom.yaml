@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-messaging-spring-boot-autoconfigure
+name: jfoundry-messaging-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry broker MessageSender adapters."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework.kafka
+    artifactId: spring-kafka
+    optional: "true"
+  - groupId: org.springframework.amqp
+    artifactId: spring-rabbit
+    optional: "true"
+  - groupId: org.apache.rocketmq
+    artifactId: rocketmq-client
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-kafka
+    scope: test

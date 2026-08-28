@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a Java 25 multi-module Maven project for a jMolecules-based, runtime-neutral DDD framework. Top-level groups are declared in `pom.xml`: `jfoundry-core` contains domain, architecture, application, and infrastructure modules; `jfoundry-runtime` contains Spring, Quarkus, and Helidon; `jfoundry-dependencies` provides release dependency management. Production code uses standard Maven paths such as `src/main/java`; tests live under `src/test/java`; module resources live under `src/main/resources` or `src/test/resources`. SQL files shipped by jfoundry are copyable templates, not auto-run migrations. Documentation is organized by language under `docs/i18n/en/` and `docs/i18n/zh/`, with the default English overview in `README.md` and the Chinese overview in `README_ZH.md`.
+This is a Java 25 multi-module Maven project for a jMolecules-based, runtime-neutral DDD framework. Top-level groups are declared in `pom.yaml`: `jfoundry-core` contains domain, architecture, application, and infrastructure modules; `jfoundry-runtime` contains Spring, Quarkus, and Helidon; `jfoundry-dependencies` provides release dependency management. Production code uses standard Maven paths such as `src/main/java`; tests live under `src/test/java`; module resources live under `src/main/resources` or `src/test/resources`. SQL files shipped by jfoundry are copyable templates, not auto-run migrations. Documentation is organized by language under `docs/i18n/en/` and `docs/i18n/zh/`, with the default English overview in `README.md` and the Chinese overview in `README_ZH.md`.
 
 ## Build, Test, and Development Commands
 
@@ -57,7 +57,7 @@ As an open-source framework, source-level artifacts must be friendly to the wide
 
 Tests use JUnit Jupiter, Spring Boot test support where needed, and ArchUnit for architecture rules. Add focused tests near the module being changed, especially for outbox state transitions, auto-configuration conditions, persistence behavior, and architecture constraints.
 
-Mockito's Java agent is opt-in per module. The root POM keeps the common Surefire/Failsafe `argLine` template with an empty `mockito.javaagent.argLine`; only modules whose tests directly use Mockito or whose test framework loads Mockito should override it with `-javaagent:${org.mockito:mockito-core:jar}` and have a test dependency that resolves `mockito-core`.
+Mockito's Java agent is opt-in per module. The root `pom.yaml` keeps the common Surefire/Failsafe `argLine` template with an empty `mockito.javaagent.argLine`; only modules whose tests directly use Mockito or whose test framework loads Mockito should override it with `-javaagent:${org.mockito:mockito-core:jar}` and have a test dependency that resolves `mockito-core`.
 
 For changes involving build logic, dependency management, test infrastructure, CI workflows, Maven plugin configuration, Java baseline compatibility, or runtime compatibility, run `scripts/verify-ci-matrix.sh` before committing or pushing when Java 25 is available. If Java 25 is unavailable, do not claim release-baseline verification.
 

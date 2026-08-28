@@ -59,14 +59,6 @@ jobs:
           git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
       - name: Verify complete CI
         run: gh run view 1 --json jobs
-      - name: Verify Maven 4 Central readiness
-        env:
-          MAVEN_CENTRAL_MAVEN4_READY: ${{ vars.MAVEN_CENTRAL_MAVEN4_READY }}
-        run: |
-          wrapper_version="4.0.0"
-          test "${MAVEN_CENTRAL_MAVEN4_READY}" = "true"
-          test "${wrapper_version}" = "4.0.0"
-          echo "Maven 4 final"
       - run: ./mvnw -B -Prelease -DskipTests verify
       - name: Verify Maven Central Consumer POMs
         run: |
@@ -102,24 +94,49 @@ assert_rejects "${safe_workflow}"
 complete_workflow="${temp_dir}/complete-release.yml"
 cp "${safe_workflow}" "${complete_workflow}"
 cat >> "${complete_workflow}" <<'YAML'
-      - name: Verify Maven 4 Central readiness
+      - name: Install Apache Maven 3 for Central publication
+        id: maven_3
         env:
-          MAVEN_CENTRAL_MAVEN4_READY: ${{ vars.MAVEN_CENTRAL_MAVEN4_READY }}
+          MAVEN_3_VERSION: 3.9.16
+          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
         run: |
-          wrapper_version="4.0.0"
-          test "${MAVEN_CENTRAL_MAVEN4_READY}" = "true"
-          test "${wrapper_version}" = "4.0.0"
-          echo "Maven 4 final"
-      - name: Stage Maven Central deployment
+          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
+          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
+      - name: Prepare Maven 3 publication tree
         run: |
-          ./mvnw -B -T 1 -Prelease -DskipTests deploy \
-            | tee "${GITHUB_WORKSPACE}/central-deploy.log"
+          publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"
+          bash scripts/generate-maven3-publication-tree.sh "${publication_tree}"
+          echo "PUBLICATION_EVIDENCE_ROOT=${publication_tree}" >> "${GITHUB_ENV}"
+      - name: Publish Maven Central deployment
+        if: steps.central_publication.outputs.already_published != 'true'
+        run: |
+          publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"
+          (
+            cd "${publication_tree}"
+            "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy \
+              "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment" \
+              | tee "${GITHUB_WORKSPACE}/central-deploy.log"
+          )
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then
             echo "Central Publishing did not report a deploymentId." >&2
             exit 1
           fi
+      - name: Rebuild existing release evidence with Maven 3
+        if: steps.central_publication.outputs.already_published == 'true'
+        run: |
+          publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"
+          (
+            cd "${publication_tree}"
+            "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests verify
+          )
       - name: Check Maven Central publication
+        id: central_publication
         run: |
           central_status="$(
             curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head \
@@ -145,11 +162,14 @@ cat >> "${complete_workflow}" <<'YAML'
         run: echo release-evidence/central-deployment.txt
       - name: Assemble release evidence
         run: |
+          artifact_root="${PUBLICATION_EVIDENCE_ROOT}"
           mkdir -p release-evidence/artifacts release-evidence/consumer-poms release-evidence/signatures release-evidence/sboms
-          find . -path '*/target/*.asc' -type f
-          find . -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*'
+          find "${artifact_root}" -path '*/target/*.asc' -type f
+          find "${artifact_root}" -path '*/target/*.jar' -type f ! -path '*/target/project-local-repo/*'
+          find "${artifact_root}" -path '*/target/bom.*' -type f ! -path '*/target/project-local-repo/*'
           cp central-deploy.log release-evidence/central-deploy.log
           printf 'source_commit=%s\n' "$GITHUB_SHA" > release-evidence/release-metadata.txt
+          echo "artifact_evidence_root=${artifact_root}" >> release-evidence/release-metadata.txt
       - name: Archive release evidence
         run: tar -czf release-evidence.tar.gz release-evidence
       - name: Attest release artifact provenance
@@ -174,14 +194,58 @@ cat >> "${complete_workflow}" <<'YAML'
 YAML
 assert_accepts "${complete_workflow}"
 
+missing_publication_evidence_root_workflow="${temp_dir}/missing-publication-evidence-root-release.yml"
+grep -v 'PUBLICATION_EVIDENCE_ROOT' "${complete_workflow}" > "${missing_publication_evidence_root_workflow}"
+assert_rejects "${missing_publication_evidence_root_workflow}"
+
+workspace_only_evidence_workflow="${temp_dir}/workspace-only-evidence-release.yml"
+sed 's/artifact_root="${PUBLICATION_EVIDENCE_ROOT}"/artifact_root="${GITHUB_WORKSPACE}"/' \
+    "${complete_workflow}" > "${workspace_only_evidence_workflow}"
+assert_rejects "${workspace_only_evidence_workflow}"
+
+missing_maven3_publication_tree_workflow="${temp_dir}/missing-maven3-publication-tree-release.yml"
+grep -v 'publication_tree=\|generate-maven3-publication-tree.sh\|cd "${publication_tree}"' \
+    "${complete_workflow}" > "${missing_maven3_publication_tree_workflow}"
+assert_rejects "${missing_maven3_publication_tree_workflow}"
+
+conditional_maven3_install_workflow="${temp_dir}/conditional-maven3-install-release.yml"
+awk '{ print; if ($0 ~ /id: maven_3/) print "        if: steps.central_publication.outputs.already_published != '\''true'\''" }' \
+    "${complete_workflow}" > "${conditional_maven3_install_workflow}"
+assert_rejects "${conditional_maven3_install_workflow}"
+
+conditional_publication_tree_workflow="${temp_dir}/conditional-publication-tree-release.yml"
+awk '{ print; if ($0 ~ /name: Prepare Maven 3 publication tree/) print "        if: steps.central_publication.outputs.already_published != '\''true'\''" }' \
+    "${complete_workflow}" > "${conditional_publication_tree_workflow}"
+assert_rejects "${conditional_publication_tree_workflow}"
+
+missing_existing_release_rebuild_workflow="${temp_dir}/missing-existing-release-rebuild-release.yml"
+sed '/name: Rebuild existing release evidence with Maven 3/,/^[[:space:]]*- name:/ { /name: Rebuild existing release evidence with Maven 3/d; /already_published == '\''true'\''/d; /publication_tree=/d; /cd "${publication_tree}"/d; /steps.maven_3.outputs.executable.*verify/d; }' \
+    "${complete_workflow}" > "${missing_existing_release_rebuild_workflow}"
+assert_rejects "${missing_existing_release_rebuild_workflow}"
+
+publish_outside_publication_tree_workflow="${temp_dir}/publish-outside-publication-tree-release.yml"
+sed '/name: Publish Maven Central deployment/,/name: Rebuild existing release evidence with Maven 3/ s/cd "${publication_tree}"/cd "${GITHUB_WORKSPACE}"/' \
+    "${complete_workflow}" > "${publish_outside_publication_tree_workflow}"
+assert_rejects "${publish_outside_publication_tree_workflow}"
+
+rebuild_outside_publication_tree_workflow="${temp_dir}/rebuild-outside-publication-tree-release.yml"
+sed '/name: Rebuild existing release evidence with Maven 3/,/name: Check Maven Central publication/ s/cd "${publication_tree}"/cd "${GITHUB_WORKSPACE}"/' \
+    "${complete_workflow}" > "${rebuild_outside_publication_tree_workflow}"
+assert_rejects "${rebuild_outside_publication_tree_workflow}"
+
+overridden_publication_evidence_root_workflow="${temp_dir}/overridden-publication-evidence-root-release.yml"
+awk '{ print; if ($0 ~ /artifact_root="\$\{PUBLICATION_EVIDENCE_ROOT\}"/) print "          artifact_root=\"${GITHUB_WORKSPACE}\"" }' \
+    "${complete_workflow}" > "${overridden_publication_evidence_root_workflow}"
+assert_rejects "${overridden_publication_evidence_root_workflow}"
+
 non_main_workflow_source_workflow="${temp_dir}/non-main-workflow-source-release.yml"
 grep -v 'test "${GITHUB_REF}" = "refs/heads/main"' "${complete_workflow}" > "${non_main_workflow_source_workflow}"
 assert_rejects "${non_main_workflow_source_workflow}"
 
-maven3_publish_workflow="${temp_dir}/maven3-publish-release.yml"
-sed 's#./mvnw -B -T 1 -Prelease -DskipTests deploy#mvn -B -T 1 -Prelease -DskipTests deploy#' \
-    "${complete_workflow}" > "${maven3_publish_workflow}"
-assert_rejects "${maven3_publish_workflow}"
+maven4_direct_publish_workflow="${temp_dir}/maven4-direct-publish-release.yml"
+sed 's#"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy#./mvnw -B -Prelease -DskipTests verify org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish#' \
+    "${complete_workflow}" > "${maven4_direct_publish_workflow}"
+assert_rejects "${maven4_direct_publish_workflow}"
 
 missing_project_local_repository_exclusion_workflow="${temp_dir}/missing-project-local-repository-exclusion-release.yml"
 grep -v "project-local-repo" "${complete_workflow}" > "${missing_project_local_repository_exclusion_workflow}"

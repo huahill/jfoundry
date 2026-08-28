@@ -1,0 +1,51 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-domain-event-quarkus-runtime
+name: jfoundry-domain-event-quarkus-runtime
+description: "Quarkus runtime adapter for JFoundry local domain events."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-jta
+  - groupId: io.quarkus
+    artifactId: quarkus-arc
+  - groupId: io.quarkus
+    artifactId: quarkus-narayana-jta
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-runtime
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: io.quarkus
+    artifactId: quarkus-junit
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-maven-plugin
+      version: ${quarkus.version}
+      extensions: "true"
+      configuration:
+        skipSourceGeneration: ${skipTests}
+      executions:
+        -
+          goals:
+            - generate-code-tests
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-domain-event-quarkus-deployment:${project.version}"

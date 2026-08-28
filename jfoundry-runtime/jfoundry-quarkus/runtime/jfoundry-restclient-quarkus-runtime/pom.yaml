@@ -1,0 +1,34 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-restclient-quarkus-runtime
+name: jfoundry-restclient-quarkus-runtime
+description: "Quarkus runtime integration for JFoundry REST client logging."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-jaxrs
+  - groupId: io.quarkus
+    artifactId: quarkus-rest-client
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-restclient-quarkus-deployment:${project.version}"

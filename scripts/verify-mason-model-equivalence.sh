@@ -12,8 +12,33 @@ normalize_model() {
     xsltproc "${normalizer_xslt}" "${source_file}" |
         xmllint --xpath '/*' - |
         xmllint --c14n - |
-        sed 's#<relativePath>../../pom.yaml</relativePath>#<relativePath>../../pom.xml</relativePath>#' \
+        sed -E 's#(<relativePath>[^<]*)pom\.yaml(</relativePath>)#\1pom.xml\2#g' \
             > "${destination_file}"
+}
+
+report_first_difference() {
+    local baseline_file="$1"
+    local candidate_file="$2"
+    local difference_offset
+    local context_start
+
+    difference_offset="$(cmp -l "${baseline_file}" "${candidate_file}" 2>/dev/null | awk 'NR == 1 { print $1; exit }' || true)"
+    if [[ -z "${difference_offset}" ]]; then
+        difference_offset="$(wc -c < "${baseline_file}" | tr -d ' ')"
+    fi
+    context_start=$((difference_offset > 240 ? difference_offset - 240 : 0))
+
+    echo "First normalized model difference at byte ${difference_offset}." >&2
+    for model_side in baseline candidate; do
+        local model_file="${baseline_file}"
+        if [[ "${model_side}" == "candidate" ]]; then
+            model_file="${candidate_file}"
+        fi
+        echo "${model_side} context:" >&2
+        dd if="${model_file}" bs=1 skip="${context_start}" count=480 2>/dev/null |
+            fold -w 120 >&2
+        echo >&2
+    done
 }
 
 compare_models() {
@@ -29,7 +54,8 @@ compare_models() {
     normalize_model "${baseline_file}" "${baseline_normalized}"
     normalize_model "${candidate_file}" "${candidate_normalized}"
 
-    if ! diff -u "${baseline_normalized}" "${candidate_normalized}"; then
+    if ! cmp -s "${baseline_normalized}" "${candidate_normalized}"; then
+        report_first_difference "${baseline_normalized}" "${candidate_normalized}"
         rm -rf "${comparison_root}"
         echo "Maven model difference: ${baseline_file} != ${candidate_file}" >&2
         return 1
@@ -59,13 +85,6 @@ model_root="${temporary_root}/models"
 mkdir -p "${workspace}" "${model_root}/baseline" "${model_root}/candidate"
 trap 'rm -rf "${temporary_root}"' EXIT
 
-projects=(
-    "root:pom.xml:pom.yaml"
-    "domain:jfoundry-core/jfoundry-domain/pom.xml:jfoundry-core/jfoundry-domain/pom.yaml"
-    "starter:jfoundry-runtime/jfoundry-spring/starters/jfoundry-spring-boot-starter/pom.xml:jfoundry-runtime/jfoundry-spring/starters/jfoundry-spring-boot-starter/pom.yaml"
-    "helidon-bom:jfoundry-boms/jfoundry-helidon-dependencies/pom.xml:jfoundry-boms/jfoundry-helidon-dependencies/pom.yaml"
-)
-
 clear_workspace() {
     find "${workspace}" -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +
 }
@@ -92,40 +111,40 @@ extract_worktree() {
 
 generate_models() {
     local side="$1"
-    local path_field="$2"
-    local entry label xml_path yaml_path project_path output_file log_file
+    local output_file="${model_root}/${side}/reactor.xml"
+    local log_file="${model_root}/${side}/reactor.log"
 
-    for entry in "${projects[@]}"; do
-        IFS=: read -r label xml_path yaml_path <<< "${entry}"
-        if [[ "${path_field}" == "xml" ]]; then
-            project_path="${xml_path}"
-        else
-            project_path="${yaml_path}"
-        fi
-        output_file="${model_root}/${side}/${label}.xml"
-        log_file="${model_root}/${side}/${label}.log"
-        if ! (cd "${workspace}" && ./mvnw -q -N -f "${project_path}" \
-            help:effective-pom "-Doutput=${output_file}") > "${log_file}" 2>&1; then
-            cat "${log_file}" >&2
-            echo "Failed to generate ${side} effective model for ${label}." >&2
-            exit 1
-        fi
-    done
+    if ! (cd "${workspace}" && ./mvnw -q help:effective-pom \
+        "-Doutput=${output_file}") > "${log_file}" 2>&1; then
+        cat "${log_file}" >&2
+        echo "Failed to generate ${side} aggregate effective model." >&2
+        exit 1
+    fi
 }
 
 extract_ref "${baseline_ref}"
-generate_models "baseline" "xml"
+generate_models "baseline"
 if [[ "${candidate_ref}" == "WORKTREE" ]]; then
     extract_worktree
 else
     extract_ref "${candidate_ref}"
 fi
-generate_models "candidate" "yaml"
+generate_models "candidate"
 
-for entry in "${projects[@]}"; do
-    IFS=: read -r label _ _ <<< "${entry}"
-    compare_models "${model_root}/baseline/${label}.xml" "${model_root}/candidate/${label}.xml"
-    echo "Equivalent Maven model: ${label}"
-done
+baseline_count="$(xmllint --xpath \
+    'count(/*[local-name()="projects"]/*[local-name()="project"])' \
+    "${model_root}/baseline/reactor.xml")"
+candidate_count="$(xmllint --xpath \
+    'count(/*[local-name()="projects"]/*[local-name()="project"])' \
+    "${model_root}/candidate/reactor.xml")"
+if [[ "${baseline_count}" == "0" || "${baseline_count}" != "${candidate_count}" ]]; then
+    echo "Maven reactor project count differs: baseline=${baseline_count}, candidate=${candidate_count}" >&2
+    exit 1
+fi
 
+compare_models \
+    "${model_root}/baseline/reactor.xml" \
+    "${model_root}/candidate/reactor.xml"
+
+echo "Equivalent Maven models: ${candidate_count} reactor projects"
 echo "Mason model equivalence verification passed: ${baseline_ref} == ${candidate_ref}"

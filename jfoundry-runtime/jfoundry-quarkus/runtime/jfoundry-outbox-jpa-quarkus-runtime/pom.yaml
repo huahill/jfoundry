@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-jpa-quarkus-runtime
+name: jfoundry-outbox-jpa-quarkus-runtime
+description: "Quarkus runtime assembly for the jfoundry JPA Outbox store."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jpa
+  - groupId: io.quarkus
+    artifactId: quarkus-arc
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-orm
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-outbox-jpa-quarkus-deployment:${project.version}"

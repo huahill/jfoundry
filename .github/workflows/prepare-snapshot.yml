@@ -89,11 +89,11 @@ jobs:
           fi
 
           git switch --create "${BRANCH}"
-          ruby scripts/set-maven-reactor-version.rb . "${NEXT_VERSION}"
+          ruby --disable-gems scripts/set-mason-reactor-version.rb . "${NEXT_VERSION}"
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add pom.xml jfoundry-boms jfoundry-core jfoundry-runtime
+          git add pom.yaml jfoundry-boms jfoundry-core jfoundry-runtime
           git commit -m "build: prepare ${NEXT_VERSION} development version"
           git push --set-upstream origin "${BRANCH}"
           gh pr create --repo "${GITHUB_REPOSITORY}" --base main --head "${BRANCH}" \

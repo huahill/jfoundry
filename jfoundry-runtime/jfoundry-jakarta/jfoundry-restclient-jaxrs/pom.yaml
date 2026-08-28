@@ -1,0 +1,15 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-jakarta
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-restclient-jaxrs
+name: jfoundry-restclient-jaxrs
+description: "Shared outbound JAX-RS REST client adapter for Jakarta-based JFoundry runtimes."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-http-jaxrs
+  - groupId: jakarta.ws.rs
+    artifactId: jakarta.ws.rs-api
+    scope: provided

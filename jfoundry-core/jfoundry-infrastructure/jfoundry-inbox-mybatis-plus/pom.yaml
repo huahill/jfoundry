@@ -1,0 +1,18 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-inbox-mybatis-plus
+name: jfoundry-inbox-mybatis-plus
+description: "MyBatis-Plus InboxMessageStore adapter for jfoundry inbox."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-core
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-annotation

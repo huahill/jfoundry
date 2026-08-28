@@ -1,0 +1,40 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-messaging-rabbitmq-quarkus-runtime
+name: jfoundry-messaging-rabbitmq-quarkus-runtime
+description: "Quarkus RabbitMQ adapter for the jfoundry MessageSender SPI."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.quarkus
+    artifactId: quarkus-arc
+  - groupId: io.quarkus
+    artifactId: quarkus-vertx
+  - groupId: io.vertx
+    artifactId: vertx-rabbitmq-client
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-messaging-rabbitmq-quarkus-deployment:${project.version}"

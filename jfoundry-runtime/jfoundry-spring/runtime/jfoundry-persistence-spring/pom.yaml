@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-persistence-spring
+name: jfoundry-persistence-spring
+description: "Spring failure translation and transaction-bound state for jfoundry persistence."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.springframework
+    artifactId: spring-tx
+    scope: provided
+    optional: "true"
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.springframework
+    artifactId: spring-jdbc
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    version: 2.4.240
+    scope: test

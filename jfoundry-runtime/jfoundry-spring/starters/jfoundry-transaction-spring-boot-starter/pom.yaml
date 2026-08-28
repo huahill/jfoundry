@@ -1,0 +1,20 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-transaction-spring-boot-starter
+name: jfoundry-transaction-spring-boot-starter
+description: "Spring Boot starter for jfoundry application transaction boundaries."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring-boot-autoconfigure
+  - groupId: org.springframework
+    artifactId: spring-tx

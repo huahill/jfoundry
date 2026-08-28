@@ -1,0 +1,16 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-jakarta
+packaging: pom
+name: jfoundry-jakarta
+description: "Shared Jakarta runtime adapters for JFoundry."
+modules:
+  - jfoundry-http-jaxrs
+  - jfoundry-restclient-jaxrs
+  - jfoundry-web-jaxrs
+  - jfoundry-transaction-jta
+  - jfoundry-domain-event-jta

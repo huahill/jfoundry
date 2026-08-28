@@ -1,0 +1,34 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-messaging-spring
+name: jfoundry-messaging-spring
+description: "Spring runtime adapters for MessageSender implementations."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.springframework.kafka
+    artifactId: spring-kafka
+    optional: "true"
+  - groupId: org.springframework.amqp
+    artifactId: spring-rabbit
+    optional: "true"
+  - groupId: org.apache.rocketmq
+    artifactId: rocketmq-client
+    optional: "true"
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test

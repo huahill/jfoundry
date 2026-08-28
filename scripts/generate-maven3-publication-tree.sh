@@ -70,48 +70,37 @@ for entry in "${classpath_entries[@]:1}"; do
 done
 
 converter_classpath="$(IFS=:; echo "${classpath_entries[*]}")"
-converted_projects=(
-    "."
-    "jfoundry-core/jfoundry-domain"
-    "jfoundry-runtime/jfoundry-spring/starters/jfoundry-spring-boot-starter"
-    "jfoundry-boms/jfoundry-helidon-dependencies"
-)
-
-for project in "${converted_projects[@]}"; do
-    if [[ "${project}" == "." ]]; then
-        project_directory="${destination}"
-    else
-        project_directory="${destination}/${project}"
-    fi
+converted_count=0
+while IFS= read -r yaml_pom; do
+    project_directory="$(dirname "${yaml_pom}")"
     java --class-path "${converter_classpath}" "${converter_source}" \
         "${project_directory}/pom.yaml" "${project_directory}/pom.xml"
-done
-
-xml_parent_paths=(
-    "jfoundry-core/jfoundry-domain/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-core/jfoundry-application/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-core/jfoundry-architecture/jfoundry-architecture-test/pom.xml:../../../pom.yaml:../../../pom.xml"
-    "jfoundry-core/jfoundry-architecture/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-core/jfoundry-infrastructure/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-helidon/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-jakarta/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-quarkus/pom.xml:../../pom.yaml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-spring/pom.xml:../../pom.yaml:../../pom.xml"
+    converted_count=$((converted_count + 1))
+done < <(
+    find "${destination}" -type f -name pom.yaml \
+        -not -path '*/target/*' \
+        -not -path '*/graphify-out/*' \
+        -print | LC_ALL=C sort
 )
 
-for entry in "${xml_parent_paths[@]}"; do
-    IFS=: read -r pom yaml_path xml_path <<< "${entry}"
+while IFS= read -r xml_pom; do
     sed -i.bak \
-        "s#<relativePath>${yaml_path}</relativePath>#<relativePath>${xml_path}</relativePath>#" \
-        "${destination}/${pom}"
-    rm "${destination}/${pom}.bak"
-done
+        -E 's#(<relativePath>[^<]*)pom\.yaml(</relativePath>)#\1pom.xml\2#g' \
+        "${xml_pom}"
+    rm "${xml_pom}.bak"
+done < <(
+    find "${destination}" -type f -name pom.xml \
+        -not -path '*/target/*' \
+        -print | LC_ALL=C sort
+)
 
-rm \
-    "${destination}/pom.yaml" \
-    "${destination}/jfoundry-core/jfoundry-domain/pom.yaml" \
-    "${destination}/jfoundry-runtime/jfoundry-spring/starters/jfoundry-spring-boot-starter/pom.yaml" \
-    "${destination}/jfoundry-boms/jfoundry-helidon-dependencies/pom.yaml" \
-    "${destination}/.mvn/extensions.xml"
+while IFS= read -r yaml_pom; do
+    rm "${yaml_pom}"
+done < <(
+    find "${destination}" -type f -name pom.yaml \
+        -not -path '*/target/*' \
+        -print | LC_ALL=C sort
+)
+rm "${destination}/.mvn/extensions.xml"
 
-echo "Generated Maven 3 publication tree: ${destination}"
+echo "Generated Maven 3 publication tree from ${converted_count} Mason YAML POMs: ${destination}"

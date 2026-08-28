@@ -1,0 +1,109 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-spring-boot-autoconfigure
+name: jfoundry-outbox-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry transactional Outbox."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-jpa-spring-boot-support
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring-boot-autoconfigure
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-jackson
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-mybatis-plus
+    optional: "true"
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jpa
+    optional: "true"
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring
+    optional: "true"
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jobrunr
+    optional: "true"
+  - groupId: org.jobrunr
+    artifactId: jobrunr
+    scope: provided
+    optional: "true"
+  - groupId: tools.jackson.core
+    artifactId: jackson-databind
+    optional: "true"
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-jackson3
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework
+    artifactId: spring-orm
+    optional: "true"
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot4-starter
+    scope: provided
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-configuration-processor
+    optional: "true"
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-jackson
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-jdbc
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-data-jpa
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-web
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    version: 2.4.240
+    scope: test
+  - groupId: org.awaitility
+    artifactId: awaitility
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-spring-boot-autoconfigure
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-spring-boot-autoconfigure
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-mybatis-plus
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa
+    scope: test

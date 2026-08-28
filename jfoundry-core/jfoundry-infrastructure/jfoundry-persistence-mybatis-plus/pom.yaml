@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-persistence-mybatis-plus
+name: jfoundry-persistence-mybatis-plus
+description: "MyBatis-Plus adapter for business AggregateRoot repositories.\n        Pure persistence — no messaging/Outbox concerns;\n        Outbox MP implementation lives in jfoundry-outbox-mybatis-plus."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-annotation
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-core
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-extension
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-architecture-test
+    version: ${project.version}
+    scope: test

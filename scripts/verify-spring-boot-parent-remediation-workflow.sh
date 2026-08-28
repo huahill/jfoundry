@@ -3,15 +3,9 @@
 set -euo pipefail
 
 workflow_file="${1:-.github/workflows/publish-spring-boot-parent-1.0.0.yml}"
-parent_pom_file="jfoundry-boms/jfoundry-spring-boot-parent/pom.xml"
 
 if [[ ! -f "${workflow_file}" ]]; then
     echo "Spring Boot parent remediation workflow does not exist: ${workflow_file}" >&2
-    exit 1
-fi
-
-if [[ ! -f "${parent_pom_file}" ]]; then
-    echo "Spring Boot parent POM does not exist: ${parent_pom_file}" >&2
     exit 1
 fi
 
@@ -44,27 +38,38 @@ require_text 'require_central_status "jfoundry-dependencies" "200"'
 require_text 'require_central_status "jfoundry-spring-dependencies" "200"'
 require_text "404)"
 require_text "200)"
-require_text '-f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml -Prelease'
-require_text '          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \'
-require_text "central-deploy.log"
+require_text "MAVEN_3_VERSION: 3.9.16"
+require_text "MAVEN_3_SHA512:"
+require_text "HISTORICAL_SOURCE_COMMIT: 3eb6c53833fcbca26a4107c0d6aec6d4afde1a77"
+require_text "HISTORICAL_POM_REPOSITORY_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml"
+require_text "HISTORICAL_POM_SHA256: 1856dbb984e2a9985c9a0f1ae3fd777a6c736142f3a085cf33696422a870598f"
+require_text 'REMEDIATION_EVIDENCE_ROOT: ${{ runner.temp }}/jfoundry-parent-remediation-source'
+require_text 'PARENT_POM_PATH: ${{ runner.temp }}/jfoundry-parent-remediation-source/pom.xml'
+require_text 'git merge-base --is-ancestor "${HISTORICAL_SOURCE_COMMIT}" HEAD'
+require_text 'git show "${HISTORICAL_SOURCE_COMMIT}:${HISTORICAL_POM_REPOSITORY_PATH}" > "${PARENT_POM_PATH}"'
+require_text '"${HISTORICAL_POM_SHA256}" "${PARENT_POM_PATH}" | sha256sum --check --status'
+require_text 'expected_coordinate = ["io.github.xfoundries", "jfoundry-spring-boot-parent", expected_version]'
+require_text '"jfoundry-dependencies", "${project.version}", "pom", "import"'
+require_text '"jfoundry-spring-dependencies", "${project.version}", "pom", "import"'
+require_text 'value.call(project.elements["scm"], "tag") == "v#{expected_version}"'
+require_text '"${{ steps.maven_3.outputs.executable }}" -B -f "${PARENT_POM_PATH}"'
+require_text "jfoundry-parent-remediation-deployment"
 require_text "deploymentId: ([[:alnum:]-]+)"
 require_text "central-deploy.log"
 require_text "actions/upload-artifact"
 require_text "actions/attest-build-provenance"
 require_text "subject-path: remediation-evidence.tar.gz"
-require_text 'git tag -fa "v${PARENT_VERSION}"'
+require_text 'find "${REMEDIATION_EVIDENCE_ROOT}" -name '\''*.asc'\'' -type f'
+require_text 'historical_source_commit=${HISTORICAL_SOURCE_COMMIT}'
+require_text 'historical_pom_sha256=${HISTORICAL_POM_SHA256}'
+require_text 'git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${HISTORICAL_SOURCE_COMMIT}"'
 require_text 'git push origin "refs/tags/v${PARENT_VERSION}" --force'
 require_text 'gh release delete "v${PARENT_VERSION}" --yes'
 require_text 'gh release create "v${PARENT_VERSION}" --verify-tag'
 require_text "- name: Rewrite v1.0.0 GitHub tag and Release"
 require_text "        if: success()"
-if ! grep -Fq -- "<tag>v1.0.0</tag>" "${parent_pom_file}"; then
-    echo "Spring Boot parent POM must identify v1.0.0 as its SCM tag." >&2
-    exit 1
-fi
-
-forbid_text "MAVEN_3_VERSION"
-forbid_text "MAVEN_3_SHA512"
-forbid_text "steps.maven_3"
-
+forbid_text 'PARENT_POM_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.yaml'
+forbid_text 'bash scripts/generate-maven3-publication-tree.sh'
+forbid_text './mvnw -B -f "${PARENT_POM_PATH}"'
+forbid_text 'git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${GITHUB_SHA}"'
 echo "Spring Boot parent remediation workflow verification passed: ${workflow_file}"

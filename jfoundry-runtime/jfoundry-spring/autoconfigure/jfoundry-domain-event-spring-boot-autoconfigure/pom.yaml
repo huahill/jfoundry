@@ -1,0 +1,40 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-domain-event-spring-boot-autoconfigure
+name: jfoundry-domain-event-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry domain event dispatch."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+    optional: "true"
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-configuration-processor
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-aop
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-tx
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-aspectj
+    scope: test

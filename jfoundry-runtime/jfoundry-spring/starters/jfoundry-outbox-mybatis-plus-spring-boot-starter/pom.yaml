@@ -1,0 +1,36 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-mybatis-plus-spring-boot-starter
+name: jfoundry-outbox-mybatis-plus-spring-boot-starter
+description: "Spring Boot starter for the MyBatis-Plus OutboxMessageStore adapter."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring-boot-starter
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot4-starter
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-jsqlparser
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-mybatis-plus
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

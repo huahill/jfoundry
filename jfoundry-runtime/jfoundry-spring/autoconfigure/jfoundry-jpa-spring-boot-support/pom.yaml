@@ -1,0 +1,14 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-jpa-spring-boot-support
+name: jfoundry-jpa-spring-boot-support
+description: "Internal Spring Boot JPA support shared by jfoundry capability auto-configurations."
+dependencies:
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-persistence

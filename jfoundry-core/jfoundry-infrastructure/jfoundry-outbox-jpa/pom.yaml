@@ -1,0 +1,29 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-outbox-jpa
+name: jfoundry-outbox-jpa
+description: "Jakarta Persistence adapter for the jfoundry OutboxMessageStore."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: jakarta.persistence
+    artifactId: jakarta.persistence-api
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.hibernate.orm
+    artifactId: hibernate-core
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    scope: test
+  - groupId: org.slf4j
+    artifactId: slf4j-simple
+    scope: test

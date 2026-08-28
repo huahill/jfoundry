@@ -1,0 +1,47 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-lock-redisson-spring-boot-starter
+name: jfoundry-lock-redisson-spring-boot-starter
+description: "Spring Boot starter for jfoundry distributed locks backed by Redisson."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-redisson
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-spring-boot-autoconfigure
+  - groupId: org.redisson
+    artifactId: redisson-spring-boot-starter
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-aspectj
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

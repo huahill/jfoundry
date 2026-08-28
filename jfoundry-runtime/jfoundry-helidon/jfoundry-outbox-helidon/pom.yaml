@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-outbox-helidon
+name: jfoundry-outbox-helidon
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-jackson
+  - groupId: tools.jackson.core
+    artifactId: jackson-databind
+  - groupId: io.helidon.scheduling
+    artifactId: helidon-scheduling
+  - groupId: io.helidon.microprofile.scheduling
+    artifactId: helidon-microprofile-scheduling
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

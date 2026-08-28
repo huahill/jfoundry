@@ -1,0 +1,38 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-helidon
+packaging: pom
+name: jfoundry-helidon
+description: "Helidon MP runtime integration for jfoundry framework-neutral contracts."
+dependencyManagement:
+  dependencies:
+    - groupId: io.github.xfoundries
+      artifactId: jfoundry-helidon-dependencies
+      version: ${project.version}
+      type: pom
+      scope: import
+build:
+  plugins:
+    - groupId: io.smallrye
+      artifactId: jandex-maven-plugin
+      version: 3.6.0
+      executions:
+        -
+          goals:
+            - jandex
+          phase: process-classes
+modules:
+  - jfoundry-transaction-helidon
+  - jfoundry-domain-event-helidon
+  - jfoundry-persistence-helidon
+  - jfoundry-persistence-jpa-helidon
+  - jfoundry-web-helidon
+  - jfoundry-restclient-helidon
+  - jfoundry-outbox-helidon
+  - jfoundry-outbox-jpa-helidon
+  - jfoundry-inbox-jpa-helidon
+  - jfoundry-helidon-integration-tests

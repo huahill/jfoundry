@@ -1,0 +1,42 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-spring-boot-starter
+name: jfoundry-outbox-spring-boot-starter
+description: "Spring Boot starter for transactional outbox core, Spring transaction synchronization,\n        scheduled dispatching, recovery, and cleanup jobs."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring-boot-autoconfigure
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

@@ -1,0 +1,23 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-infrastructure
+name: jfoundry-infrastructure
+description: "Technical adapters for persistence, messaging brokers, outbox stores, and inbox stores."
+packaging: pom
+modules:
+  - jfoundry-web
+  - jfoundry-persistence-core
+  - jfoundry-persistence-jpa
+  - jfoundry-messaging-jackson
+  - jfoundry-observability-otel
+  - jfoundry-lock-redisson
+  - jfoundry-inbox-mybatis-plus
+  - jfoundry-inbox-jpa
+  - jfoundry-persistence-mybatis-plus
+  - jfoundry-outbox-mybatis-plus
+  - jfoundry-outbox-jpa
+  - jfoundry-outbox-jobrunr

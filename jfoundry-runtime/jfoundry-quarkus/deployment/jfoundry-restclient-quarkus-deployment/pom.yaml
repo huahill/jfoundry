@@ -1,0 +1,35 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-restclient-quarkus-deployment
+name: jfoundry-restclient-quarkus-deployment
+description: "Quarkus build-time integration for JFoundry REST client logging."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-quarkus-runtime
+    version: ${project.version}
+  - groupId: io.quarkus
+    artifactId: quarkus-rest-client-deployment
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+      configuration:
+        annotationProcessorPaths:
+          path:
+            groupId: io.quarkus
+            artifactId: quarkus-extension-processor
+            version: ${quarkus.version}
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"

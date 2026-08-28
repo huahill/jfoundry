@@ -1,0 +1,31 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-outbox-jobrunr
+name: "jfoundry-outbox-jobrunr (Optional)"
+description: "Optional technology adapter providing a JobRunr-based Outbox Dispatcher.\n        Framework-specific auto-configuration lives in jfoundry-autoconfigure."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.jobrunr
+    artifactId: jobrunr
+    scope: provided
+  # Test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test

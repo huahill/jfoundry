@@ -1,0 +1,31 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-persistence-jpa-helidon
+name: jfoundry-persistence-jpa-helidon
+description: "Helidon MP runtime assembly for JFoundry JPA persistence."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa
+  - groupId: io.helidon.integrations.cdi
+    artifactId: helidon-integrations-cdi-jpa
+    scope: runtime
+  - groupId: io.helidon.integrations.cdi
+    artifactId: helidon-integrations-cdi-hibernate
+    scope: runtime
+  - groupId: jakarta.persistence
+    artifactId: jakarta.persistence-api
+    scope: provided
+  - groupId: org.hibernate.orm
+    artifactId: hibernate-core
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

@@ -1,0 +1,20 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-application
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-inbox-core
+name: jfoundry-inbox-core
+description: "Application Inbox message model, store contract, and idempotent execution template."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

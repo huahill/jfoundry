@@ -1,0 +1,38 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-transaction-spring-boot-autoconfigure
+name: jfoundry-transaction-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry application transaction boundaries."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework
+    artifactId: spring-tx
+    optional: "true"
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-jdbc
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    version: 2.4.240
+    scope: test

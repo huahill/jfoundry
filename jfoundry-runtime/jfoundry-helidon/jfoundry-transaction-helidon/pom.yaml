@@ -1,0 +1,25 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-transaction-helidon
+name: jfoundry-transaction-helidon
+description: "Helidon MP CDI adapter for JFoundry application transaction boundaries."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-jta
+  - groupId: io.helidon.microprofile.cdi
+    artifactId: helidon-microprofile-cdi
+  - groupId: jakarta.transaction
+    artifactId: jakarta.transaction-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

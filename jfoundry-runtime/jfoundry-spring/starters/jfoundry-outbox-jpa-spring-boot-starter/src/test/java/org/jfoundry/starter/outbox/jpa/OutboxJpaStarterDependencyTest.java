@@ -6,10 +6,12 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +25,7 @@ class OutboxJpaStarterDependencyTest {
 
     @Test
     void declaresTheExplicitJPAOutboxCapabilityDependencies() throws Exception {
-        Map<String, DependencyDeclaration> dependencies = dependencyDeclarations(Path.of("pom.xml"));
+        Map<String, DependencyDeclaration> dependencies = dependencyDeclarations(descriptor(Path.of(".")));
 
         assertCompileNonOptional(dependencies,
                 "jfoundry-outbox-spring-boot-starter",
@@ -33,7 +35,7 @@ class OutboxJpaStarterDependencyTest {
 
     @Test
     void businessJpaStarterDoesNotIncludeReliableMessagingStores() throws Exception {
-        assertThat(dependencyDeclarations(Path.of("..", "jfoundry-persistence-jpa-spring-boot-starter", "pom.xml")))
+        assertThat(dependencyDeclarations(descriptor(Path.of("..", "jfoundry-persistence-jpa-spring-boot-starter"))))
                 .doesNotContainKeys("jfoundry-outbox-jpa", "jfoundry-inbox-jpa");
     }
 
@@ -100,6 +102,18 @@ class OutboxJpaStarterDependencyTest {
     }
 
     private Map<String, DependencyDeclaration> dependencyDeclarations(Path pom) throws Exception {
+        if (pom.getFileName().toString().endsWith(".yaml")) {
+            Map<String, DependencyDeclaration> declarations = new LinkedHashMap<>();
+            for (Map<String, Object> dependency : mappings(yamlDocument(pom), "dependencies")) {
+                String artifactId = value(dependency, "artifactId", null);
+                declarations.put(artifactId, new DependencyDeclaration(
+                        artifactId,
+                        value(dependency, "scope", "compile"),
+                        Boolean.parseBoolean(value(dependency, "optional", "false"))));
+            }
+            return declarations;
+        }
+
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         Document document = factory.newDocumentBuilder().parse(pom.toFile());
@@ -114,6 +128,30 @@ class OutboxJpaStarterDependencyTest {
                     Boolean.parseBoolean(childText(dependency, "optional", "false"))));
         }
         return declarations;
+    }
+
+    private Path descriptor(Path directory) {
+        Path yaml = directory.resolve("pom.yaml");
+        return Files.exists(yaml) ? yaml : directory.resolve("pom.xml");
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> yamlDocument(Path path) throws Exception {
+        try (Reader reader = Files.newBufferedReader(path)) {
+            Class<?> yamlType = Class.forName("org.yaml.snakeyaml.Yaml");
+            Object yaml = yamlType.getConstructor().newInstance();
+            return (Map<String, Object>) yamlType.getMethod("load", Reader.class).invoke(yaml, reader);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> mappings(Map<String, Object> parent, String name) {
+        return (List<Map<String, Object>>) parent.get(name);
+    }
+
+    private String value(Map<String, Object> parent, String name, String defaultValue) {
+        Object value = parent.get(name);
+        return value == null ? defaultValue : value.toString();
     }
 
     private String childText(Element element, String name) {

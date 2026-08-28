@@ -1,0 +1,41 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-web-quarkus-runtime
+name: jfoundry-web-quarkus-runtime
+description: "Quarkus REST runtime integration for jfoundry web adapters."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web-jaxrs
+  - groupId: io.quarkus
+    artifactId: quarkus-rest-jackson
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-validator
+    optional: "true"
+  - groupId: jakarta.json
+    artifactId: jakarta.json-api
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-web-quarkus-deployment:${project.version}"

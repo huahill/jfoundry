@@ -1,0 +1,23 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-persistence-helidon
+name: jfoundry-persistence-helidon
+description: "Helidon MP CDI adapter for transaction-bound aggregate persistence state and technical audit."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: io.helidon.microprofile.cdi
+    artifactId: helidon-microprofile-cdi
+  - groupId: jakarta.transaction
+    artifactId: jakarta.transaction-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

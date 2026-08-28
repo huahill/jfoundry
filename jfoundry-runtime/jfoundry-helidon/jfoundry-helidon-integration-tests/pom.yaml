@@ -1,0 +1,107 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-helidon-integration-tests
+name: jfoundry-helidon-integration-tests
+description: "JVM and Native Image verification for JFoundry Helidon MP runtime integration."
+properties:
+  skipITs: "true"
+  mainClass: io.helidon.microprofile.cdi.Main
+  jfoundry.test.groups: ""
+  jfoundry.excluded.test.groups: middleware-integration
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web-helidon
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-helidon
+    scope: test
+  - groupId: io.helidon.microprofile.server
+    artifactId: helidon-microprofile-server
+  - groupId: io.helidon.microprofile.bean-validation
+    artifactId: helidon-microprofile-bean-validation
+  - groupId: org.glassfish.jersey.media
+    artifactId: jersey-media-json-binding
+  - groupId: io.helidon.integrations.cdi
+    artifactId: helidon-integrations-cdi-jta-weld
+    scope: runtime
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: io.helidon.microprofile.testing
+    artifactId: helidon-microprofile-testing-junit5
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: postgresql
+    scope: test
+  - groupId: org.postgresql
+    artifactId: postgresql
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-surefire-plugin
+      configuration:
+        groups: ${jfoundry.test.groups}
+        excludedGroups: ${jfoundry.excluded.test.groups}
+profiles:
+  - id: jvm-integration
+    properties:
+      skipITs: "false"
+      jfoundry.test.groups: middleware-integration
+      jfoundry.excluded.test.groups: ""
+    dependencies:
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-jpa-helidon
+    build:
+      testResources:
+        - directory: src/jvm-integration/resources
+      plugins:
+        - groupId: org.codehaus.mojo
+          artifactId: build-helper-maven-plugin
+          version: 3.6.1
+          executions:
+            - id: add-jvm-integration-sources
+              phase: generate-sources
+              goals:
+                - add-source
+              configuration:
+                sources:
+                  - src/jvm-integration/java
+            - id: add-jvm-integration-test-sources
+              phase: generate-test-sources
+              goals:
+                - add-test-source
+              configuration:
+                sources:
+                  - src/jvm-integration/test/java
+  - id: native-image
+    dependencies:
+      - groupId: io.helidon.integrations.graal
+        artifactId: helidon-mp-graal-native-image-extension
+    build:
+      plugins:
+        - groupId: org.graalvm.buildtools
+          artifactId: native-maven-plugin
+          version: 1.1.10
+          configuration:
+            buildArgs:
+              - "--initialize-at-build-time=com.fasterxml.classmate,com.sun.el.ExpressionFactoryImpl,jakarta.el,jakarta.transaction.Transactional,jakarta.transaction.Transactional$TxType,jakarta.validation,java.lang.annotation.Annotation"
+              - "--initialize-at-build-time=org.hibernate.validator"
+              - "--initialize-at-build-time=org.jfoundry.helidon.integration"
+              - "--initialize-at-run-time=io.helidon.microprofile.cdi.ContainerInstanceHolder"
+          executions:
+            - id: resource-config
+              goals:
+                - generateResourceConfig
+            - id: build-native-image
+              goals:
+                - compile-no-fork

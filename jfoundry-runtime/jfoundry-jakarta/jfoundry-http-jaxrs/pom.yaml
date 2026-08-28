@@ -1,0 +1,30 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-jakarta
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-http-jaxrs
+name: jfoundry-http-jaxrs
+description: "Shared JAX-RS HTTP logging mechanics for Jakarta-based JFoundry runtimes."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web
+  - groupId: jakarta.ws.rs
+    artifactId: jakarta.ws.rs-api
+    scope: provided
+  - groupId: jakarta.json
+    artifactId: jakarta.json-api
+    scope: provided
+  - groupId: org.eclipse.microprofile.config
+    artifactId: microprofile-config-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.eclipse.parsson
+    artifactId: parsson
+    scope: test

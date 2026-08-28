@@ -1,0 +1,35 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-persistence-jpa
+name: jfoundry-persistence-jpa
+description: "Jakarta Persistence adapter for single-entity-graph aggregate repositories."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: jakarta.persistence
+    artifactId: jakarta.persistence-api
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test
+  - groupId: org.hibernate.orm
+    artifactId: hibernate-core
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    scope: test

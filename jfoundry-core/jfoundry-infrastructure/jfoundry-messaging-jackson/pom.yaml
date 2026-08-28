@@ -1,0 +1,22 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-messaging-jackson
+name: jfoundry-messaging-jackson
+description: "Jackson PayloadSerializer adapter for jfoundry messaging."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: tools.jackson.core
+    artifactId: jackson-databind
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

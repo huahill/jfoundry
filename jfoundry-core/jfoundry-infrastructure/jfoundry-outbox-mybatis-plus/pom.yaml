@@ -1,0 +1,38 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-outbox-mybatis-plus
+name: jfoundry-outbox-mybatis-plus
+description: "MyBatis-Plus Outbox persistence adapter: OutboxData (table DO),\n        OutboxMapper, MybatisPlusOutboxMessageStore implementing jfoundry-outbox-core SPI.\n        Depends only on jfoundry-outbox-core + MyBatis-Plus — does NOT pull in\n        jfoundry-persistence-core / business Repository infrastructure."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-core
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-extension
+  # mybatis-plus-jsqlparser is required by PaginationInnerInterceptor.
+  # MybatisPlusOutboxMessageStore.findDispatchable expresses "take the first N rows"
+  # through selectPage, and PaginationInnerInterceptor translates that paging request
+  # into database-specific SQL.
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-jsqlparser
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.mockito
+    artifactId: mockito-core
+    scope: test

@@ -2,33 +2,40 @@
 
 ## Decision
 
-The four-project Mason YAML proof of concept is technically successful, but a
-repository-wide conversion remains deferred.
+The repository-wide Mason YAML proof of concept is technically successful. All
+122 reactor projects use `pom.yaml`, and the only source-tree `pom.xml` is the
+intentional Maven 3 consumer fixture under `jfoundry-spring-boot-parent`.
 
-Mason preserves the Maven model, Maven 4 lifecycle behavior, Maven 3 consumer
-compatibility, release metadata, and a deterministic Maven 3 publication path
-for the selected descriptors. Quarkus `3.39.1` tests also work with the YAML
-root when each module using `@QuarkusTest` runs
-`quarkus-maven-plugin:generate-code-tests` before Surefire. The complete
-122-project Java 25 matrix passes directly from the mixed XML/YAML source tree;
-no committed XML shadow POM is required.
+Mason preserves the effective Maven model, Maven 4 lifecycle behavior, Maven 3
+consumer compatibility, release metadata, runtime integration behavior, and a
+deterministic Maven 3 publication path. The complete Java 25 and runtime matrix
+was exercised from the YAML source tree. No generated XML shadow POM is
+committed.
 
-This is a build-source experiment. It does not change public Java APIs, runtime
-behavior, production dependency management, or the production Central
-publication workflow.
+This remains an experimental build-source conversion rather than an adoption
+decision. Production publication still needs a disposable Maven 3 tree, and
+IDE and dependency-update tooling have not received equivalent validation.
+This branch is non-mergeable POC evidence unless repository-wide Mason adoption
+is explicitly approved after the remaining risks are accepted.
 
-## Tested Scope
+## Source Layout
 
-| Project | Coverage |
-| --- | --- |
-| Root `jfoundry-parent` | Mixed 122-project reactor, module discovery, plugin management, release profiles, project metadata, and Maven inheritance attributes |
-| `jfoundry-domain` | A normal JAR with an inherited parent, managed dependencies, and tests |
-| `jfoundry-spring-boot-starter` | A nested starter, Enforcer execution, property expressions, and attached Javadocs |
-| `jfoundry-helidon-dependencies` | An independent published BOM with imported BOMs, release metadata, SCM inheritance attributes, signing, and Central configuration |
-
-The converted projects commit only `pom.yaml`. No XML shadow POM is retained.
 Mason is registered as `eu.maveniverse.maven.mason:mason:0.3.0` in
-`.mvn/extensions.xml`.
+`.mvn/extensions.xml`. Every reactor project commits only `pom.yaml`.
+
+The conversion is reproducible through:
+
+- `scripts/support/convert-xml-pom-to-mason-yaml.rb` for one descriptor;
+- `scripts/convert-mason-reactor.sh` for the complete reactor;
+- `scripts/verify-mason-poc.sh` for source-layout invariants;
+- `scripts/verify-mason-model-equivalence.sh` for aggregate effective-model
+  comparison.
+
+The source verifier recursively follows every `modules` declaration from the
+root, requires exactly 122 reachable YAML projects, and rejects missing or
+orphaned modules, XML shadow POMs, XML parent paths in YAML models, unsupported
+`@...` YAML keys, missing Mason registration, and any unexpected XML descriptor
+outside the explicit consumer fixture.
 
 ## Environment
 
@@ -36,25 +43,27 @@ Evidence was collected on 2026-08-28 with:
 
 - GraalVM Community `25.0.4`;
 - Apache Maven `4.0.0-rc-6` through the Maven Wrapper;
-- Apache Maven `3.9.16` for the publication bridge and consumer checks;
+- Apache Maven `3.9.16` for publication and consumer checks;
 - Maveniverse Mason `0.3.0`;
-- Sonatype Central Publishing Maven Plugin `0.11.0`.
+- Sonatype Central Publishing Maven Plugin `0.11.0`;
+- Docker Desktop `29.7.2` for the final Native Image checks.
 
-## Results
+## Model Fidelity
 
-### Mixed Maven 4 Reactor
+The aggregate effective models for all 122 projects were generated from the
+pre-conversion baseline and the YAML source tree, normalized, and compared
+canonically. They are equivalent after normalizing YAML/XML parent filenames
+and excluding the POC-only `mason-central-poc` profile from both trees.
 
-`./mvnw -B -DskipTests validate` recognized all 122 projects. Focused tests for
-`jfoundry-domain` and `jfoundry-spring-boot-starter` passed, including the
-starter's banned-dependency Enforcer rule.
+Maven model warnings were also compared once as recorded POC evidence. Both
+trees completed successfully with 1,834 warning lines, 1,659 reported model
+problems, and four reactor BOM warnings. After normalizing paths, line locations,
+and summaries, the warning multisets are identical. Mason changes source-location
+attribution but introduces no semantic model warning. The aggregate model verifier
+does not automate this warning-log comparison.
 
-Mason does not reinterpret an explicit XML parent path. Eight unconverted Core
-and Runtime aggregators therefore point directly to the root `pom.yaml`. The
-disposable Maven 3 tree reverses those paths and the generated
-`jfoundry-domain` parent path to `pom.xml`.
-
-Maven model attributes whose XML spelling starts with `@` are represented by
-their Maven field names in YAML. For example:
+Maven XML attributes whose names start with `@` use their Maven model field
+names in YAML. For example:
 
 ```yaml
 child.project.url.inherit.append.path: false
@@ -64,118 +73,141 @@ scm:
   child.scm.url.inherit.append.path: false
 ```
 
-### Quarkus Test Model Handoff
+### Mason 0.3.0 Configuration Limitation
 
-Quarkus tests should consume the application model already resolved by Maven
-rather than reconstruct the workspace in the forked Surefire JVM. The latter
+Mason maps a plain YAML sequence according to its inferred XML item name. That
+inference is incorrect for Maven Compiler's nonstandard
+`annotationProcessorPaths/path` shape: a plain sequence becomes
+`annotationProcessorPath`, which Maven Compiler does not accept.
+
+The 11 Quarkus deployment projects therefore use the explicit wrapper:
+
+```yaml
+annotationProcessorPaths:
+  path:
+    groupId: io.quarkus
+    artifactId: quarkus-extension-processor
+```
+
+The converter applies this shape deliberately and its fixture tests protect
+the mapping. Other plugin configurations must be reviewed for nonstandard XML
+collection item names before conversion.
+
+## Quarkus Model Handoff
+
+Quarkus tests consume the application model already resolved by Maven instead
+of reconstructing the workspace in the forked Surefire JVM. The forked JVM
 does not contain Maven's core-extension container, so its fallback
 `WorkspaceLoader` cannot apply Mason semantics to `pom.yaml`.
 
-The transaction, domain-event, and persistence Quarkus runtime modules therefore
-enable `quarkus-maven-plugin` and bind `generate-code-tests`. That goal
-serializes Maven's resolved application model for `@QuarkusTest`, keeping Mason
-responsible for interpreting the YAML source model. The plugin configuration
-maps `skipSourceGeneration` to `skipTests`, so package and publication commands
-that skip tests do not resolve Quarkus deployment artifacts before their reactor
-modules have been built. The source contract verifier guards the model-handoff
-configuration, while the Central no-upload PoC covers the publication behavior.
+Quarkus modules using `@QuarkusTest` bind
+`quarkus-maven-plugin:generate-code-tests`. The goal serializes Maven's resolved
+application model for the test runtime. `skipSourceGeneration` follows
+`skipTests`, preventing package and publication commands from resolving
+deployment artifacts before their reactor modules have been built.
 
 Quarkus issue [#56270](https://github.com/quarkusio/quarkus/issues/56270) records
-the diagnosis. Documentation pull request
-[#56271](https://github.com/quarkusio/quarkus/pull/56271) explains the same
-model-handoff requirement upstream. After applying the configuration,
-`JAVA_25_HOME=... scripts/verify-ci-matrix.sh` passed all 122 projects directly
-from the mixed XML/YAML tree on 2026-08-28.
+the diagnosis, and documentation pull request
+[#56271](https://github.com/quarkusio/quarkus/pull/56271) documents the required
+model handoff upstream.
 
-### Model Equivalence
-
-`BASE_REF=$(git merge-base origin/main HEAD)` followed by
-`scripts/verify-mason-model-equivalence.sh "$BASE_REF"` generated and
-canonically compared effective models for all four converted projects. Using
-the merge base keeps the long-lived PoC comparison independent of later release
-version changes on `origin/main`. The root, domain, starter, and Helidon BOM
-models were equivalent to the XML baseline.
-
-The comparison normalizes the domain parent filename and excludes only the
-dedicated `mason-central-poc` profile. Mutations to coordinates, dependencies,
-plugin goals, other profiles, and SCM inheritance attributes remain failures.
-
-### Maven 3 Publication Bridge
+## Maven 3 Publication Bridge
 
 `scripts/generate-maven3-publication-tree.sh` uses Mason's raw model parser and
-Maven 4's model writer to create XML descriptors in a disposable tree. The tree
-contains no `pom.yaml`, Mason extension registration, source-workspace absolute
-paths, or committed generated files.
+Maven 4's model writer to create XML descriptors in a disposable tree. The
+generated tree contains no `pom.yaml`, Mason extension registration,
+source-workspace absolute paths, or committed generated files.
 
 The full 122-project tree passed Maven `3.9.16` validation and a local
-file-repository `deploy`. This bridge is sufficient to keep the protected
-production release workflow on Maven 3.9.16 while YAML remains the committed
-source.
+file-repository `deploy`. The protected release workflow generates this tree
+before starting Maven 3 and collects signed artifact evidence from it. A new
+release runs Maven 3 `deploy`; a retry for an already-published immutable version
+runs Maven 3 `verify`, so both paths rebuild evidence from the same XML tree. The
+historical Spring Boot Parent remediation instead materializes the exact 1.0.0
+XML POM from an immutable commit and never converts the current reactor.
 
-### Consumer POM Compatibility
+This bridge keeps YAML as the committed source while Sonatype Central
+publication remains on Maven 3.9.16.
+
+## Release And Consumer Verification
 
 A clean Maven 4 installation into a new temporary local repository completed
-for all 122 projects. `scripts/verify-consumer-pom.sh` then verified the
-installed parent, flattened modules, starters, and BOMs. Maven 3.9.16 and Maven
-4.0.0-rc-6 both compiled the Boot BOM, Cloud BOM, and Spring parent consumer
-projects successfully.
+for all 122 projects. `scripts/verify-consumer-pom.sh` verified flattened child
+POMs, direct Spring BOM lines, the Spring Boot parent, and Cloud Alibaba
+versionless resolution. Maven 3.9.16 and Maven 4.0.0-rc-6 both compiled the
+consumer projects.
 
-Release metadata, release workflow security checks, and aggregate SBOM
-configuration also pass with the mixed XML/YAML source layout.
+Release metadata, aggregate SBOM checks, release workflow guards, and signed
+Central no-upload verification passed. The no-upload server received one
+authenticated multipart POST to `/api/v1/publisher/upload`; the signed bundle
+and checksums were verified locally, and no Sonatype endpoint was contacted.
 
-### Maven 4 Central Experiment
+This proves bundle construction and explicit Central goal binding. It does not
+prove that Sonatype's production service accepts a Maven 4-produced bundle or
+that Central plugin `0.11.0` supports a future Maven 4 final release.
 
-The `mason-central-poc` profile implements the workaround tracked by
-[MNG-8584](https://github.com/apache/maven/issues/10647):
+## Version Workflow
 
-- standard Maven deploy is skipped;
-- the Central plugin is not enabled as a Maven extension;
-- `central-publishing:publish` is explicitly bound to `deploy`;
-- signing uses a temporary GPG key;
-- the Central base URL must be an explicit IPv4 loopback URL;
-- real `CENTRAL_USERNAME` and `CENTRAL_PASSWORD` environment variables are
-  rejected.
+`versions-maven-plugin:versions:set` does not support the Mason YAML source
+model. Version `2.21.0` attempts to parse `pom.yaml` as XML and fails at the
+first character.
 
-The complete 122-project Maven 4 deploy lifecycle with tests skipped succeeded.
-The local capture server
-received one authenticated multipart POST to `/api/v1/publisher/upload` with
-11,711,796 request bytes. No Sonatype endpoint was contacted. The generated
-bundle contained representative parent, JAR, starter, and BOM POMs; binary,
-sources, and Javadoc JARs; GPG signatures; and SHA-256 checksums.
+The post-release workflow therefore uses
+`scripts/set-mason-reactor-version.rb`. It parses the YAML syntax tree, updates
+only the root/project versions, JFoundry parent versions, and
+`jfoundry.version`, and preserves comments, quoting, ordering, and
+`project.build.outputTimestamp`. The committed four-POM fixture covers those
+rules and rejection of an unclassified occurrence. A disposable full-reactor
+run updated 123 version references across all 122 POMs.
 
-This proves bundle construction and the explicit goal binding. It does not
-prove that Sonatype's production service accepts the bundle or that plugin
-`0.11.0` is supported on a future Maven 4 final release.
+## Runtime Matrix
+
+The following checks passed from the complete YAML source tree:
+
+- the full 122-project Java 25 matrix;
+- Spring middleware integration tests;
+- Quarkus and Helidon PostgreSQL middleware integration tests;
+- Spring base, MyBatis-Plus, and Redisson Native Image tests;
+- Quarkus Native Image generation and 17 native integration tests;
+- Helidon Native Image startup and HTTP probe.
+
+Spring JobRunr Native Image generation completed, but the executable exited
+during JobRunr database migration discovery. JobRunr `8.8.2` passes
+`resource:/resources` to GraalVM 25.0.4, which rejects it because a Native Image
+resource URI must include a root identifier. The same command on the
+pre-conversion XML baseline fails with the same exception and stack, so this is
+not a Mason regression. It remains a separate JobRunr/GraalVM compatibility
+failure.
 
 ## Remaining Risks
 
-- Apache Maven still tracks Central readiness in
+- Apache Maven tracks Central readiness in
   [MNG-8584](https://github.com/apache/maven/issues/10647). Maven 4 and the
   Sonatype Central Publishing Plugin are released independently.
 - The no-upload experiment uses a protocol-compatible loopback capture server,
   not a Sonatype staging or test tenant.
 - Production publication still requires the disposable Maven 3.9.16 bridge.
-- IDE import, navigation, refactoring, and Maven tool-window behavior for
-  `pom.yaml` have not been validated.
-- Mason `0.3.0` is an additional core build extension and a new release-time
-  dependency. A full conversion would enlarge the migration and maintenance
-  surface without improving produced artifacts.
+- IntelliJ IDEA import, navigation, refactoring, and Maven tool-window behavior
+  for the 122-project YAML tree have not been validated.
+- Dependabot's ability to discover and update Mason `pom.yaml` files has not
+  been established. The auto-merge scope recognizes YAML-only Maven changes,
+  but that does not prove Dependabot can produce those changes.
+- Mason `0.3.0` is an additional core build extension and release-time
+  dependency. Nonstandard plugin collection mappings require explicit review.
 
 ## Adoption Boundary
 
-Keep the production `.github/workflows/release.yml` on Maven 3.9.16. Do not
-merge the PoC conversion, convert the remaining POMs, or remove the Maven 3
-bridge until all of the following are true:
+Keep Central publication on Maven 3.9.16 and retain all model, Consumer POM,
+metadata, SBOM, and publication-tree gates. Do not treat this branch as a
+production migration until:
 
 1. Maven 4 Central publication is supported by Apache Maven and Sonatype for a
-   final Maven 4 release, or JFoundry validates the explicit publish path
-   against a Sonatype-provided safe test facility.
-2. IntelliJ IDEA and any other required developer tooling can import and edit
-   the mixed or fully converted reactor acceptably.
-3. The model-equivalence, Consumer POM, release metadata, SBOM, and publication
-   bridge checks remain mandatory gates.
-4. The maintenance benefit justifies converting and reviewing the remaining
-   118 descriptors.
+   final Maven 4 release, or the explicit publish path is validated against a
+   Sonatype-provided safe test facility.
+2. Required IDE workflows are acceptable for the complete YAML reactor.
+3. Dependabot or a replacement dependency-update workflow is proven against
+   Mason YAML.
+4. The additional extension and conversion maintenance cost is accepted.
 
-Until then, this branch is evidence that Mason YAML is viable for JFoundry, not
-a decision to make YAML the repository-wide build format.
+The full-reactor PoC demonstrates that Mason YAML is viable for JFoundry's
+build and release model. It does not by itself authorize production adoption.

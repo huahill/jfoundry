@@ -1,0 +1,31 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-domain-event-spring
+name: jfoundry-domain-event-spring
+description: "Spring runtime adapter for publishing jfoundry domain events as Spring application events."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.springframework
+    artifactId: spring-context
+    scope: provided
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-tx
+    scope: provided
+    optional: "true"
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test

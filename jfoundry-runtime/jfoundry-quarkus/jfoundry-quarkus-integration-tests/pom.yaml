@@ -1,0 +1,174 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-quarkus-integration-tests
+name: jfoundry-quarkus-integration-tests
+description: "JVM and native integration verification for the jfoundry Quarkus extension."
+properties:
+  skipITs: "true"
+  jfoundry.test.groups: ""
+  jfoundry.excluded.test.groups: middleware-integration
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-kafka-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-rabbitmq-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jpa-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa
+  # Keep parallel reactors from augmenting the test application before local deployment modules are built.
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-kafka-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-rabbitmq-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jpa-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa-quarkus-deployment
+    version: ${project.version}
+    type: pom
+    scope: test
+  - groupId: io.quarkus
+    artifactId: quarkus-rest
+  - groupId: io.quarkus
+    artifactId: quarkus-rest-client-jackson
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-validator
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-orm
+  - groupId: io.quarkus
+    artifactId: quarkus-jdbc-h2
+  - groupId: io.quarkus
+    artifactId: quarkus-jdbc-postgresql
+  - groupId: io.quarkus
+    artifactId: quarkus-junit
+    scope: test
+  - groupId: io.rest-assured
+    artifactId: rest-assured
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: postgresql
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-surefire-plugin
+      configuration:
+        groups: ${jfoundry.test.groups}
+        excludedGroups: ${jfoundry.excluded.test.groups}
+    - groupId: io.quarkus
+      artifactId: quarkus-maven-plugin
+      version: ${quarkus.version}
+      extensions: "true"
+      executions:
+        -
+          goals:
+            - build
+            - generate-code
+            - generate-code-tests
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-failsafe-plugin
+      executions:
+        -
+          goals:
+            - integration-test
+            - verify
+          configuration:
+            systemPropertyVariables:
+              native.image.path: ${project.build.directory}/${project.build.finalName}-runner
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-deploy-plugin
+      configuration:
+        skip: "true"
+profiles:
+  - id: jvm-integration
+    properties:
+      # PostgreSQL middleware verification runs as a tagged Quarkus test.
+      skipITs: "true"
+      jfoundry.test.groups: middleware-integration
+      jfoundry.excluded.test.groups: ""
+    build:
+      plugins:
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-surefire-plugin
+          configuration:
+            systemPropertyVariables:
+              quarkus.datasource.db-kind: postgresql
+  - id: native
+    properties:
+      quarkus.native.enabled: "true"
+      skipITs: "false"
+    build:
+      plugins:
+        - groupId: io.quarkus
+          artifactId: quarkus-maven-plugin
+          configuration:
+            systemProperties:
+              quarkus.datasource.db-kind: postgresql

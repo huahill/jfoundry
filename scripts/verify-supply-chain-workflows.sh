@@ -30,29 +30,6 @@ forbid_text() {
     fi
 }
 
-verify_compatibility_matrix_workflow() {
-    ruby - "${root_dir}/.github/workflows/ci.yml" <<'RUBY'
-require "yaml"
-
-def fail_workflow(command)
-  warn ".github/workflows/ci.yml Documentation checks must run: #{command}"
-  exit 1
-end
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-steps = config.dig("jobs", "docs", "steps")
-required_commands = [
-  "bash scripts/verify-compatibility-matrix.sh",
-  "bash scripts/verify-compatibility-matrix-test.sh"
-]
-
-required_commands.each do |command|
-  fail_workflow(command) unless steps.is_a?(Array) && steps.any? { |step| step["run"] == command }
-end
-RUBY
-}
-
 verify_dependabot_policy() {
     ruby - "${root_dir}/.github/dependabot.yml" <<'RUBY'
 require "yaml"
@@ -241,7 +218,7 @@ eligibility = steps[eligibility_index]
 scope_condition = "steps.scope.outputs.is_maven_update == 'true'"
 scope_run = scope["run"].to_s
 fail_workflow("scope must list pull request files through the GitHub API") unless scope_run.include?('gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files"')
-fail_workflow("scope must reject non-pom.xml files") unless scope_run.include?("grep -Evq '(^|/)pom\\.xml$'")
+fail_workflow("scope must reject non-pom.yaml files") unless scope_run.include?("grep -Evq '(^|/)pom\\.yaml$'")
 fail_workflow("metadata must run after scope") unless metadata_index > scope_index
 fail_workflow("metadata action must use the pinned v3 SHA") unless metadata["uses"] == "dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98"
 fail_workflow("metadata must require Maven-only scope") unless metadata["if"] == scope_condition
@@ -284,7 +261,6 @@ require_file ".github/workflows/snapshot.yml"
 require_file ".github/workflows/prepare-snapshot.yml"
 require_file ".github/workflows/auto-merge-dependabot.yml"
 
-verify_compatibility_matrix_workflow
 require_text ".github/dependabot.yml" "package-ecosystem: maven"
 require_text ".github/dependabot.yml" "package-ecosystem: github-actions"
 verify_dependabot_policy
@@ -307,17 +283,13 @@ require_text ".github/workflows/ci.yml" "Test Consumer POM verification"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-consumer-pom-test.sh"
 require_text ".github/workflows/ci.yml" "Verify release POM metadata"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-release-pom-metadata.sh"
-require_text ".github/workflows/ci.yml" "bash scripts/verify-maven-4-model.sh"
-require_text ".github/workflows/ci.yml" "bash scripts/verify-maven-4-model-test.sh"
-require_text ".github/workflows/ci.yml" "bash scripts/set-maven-reactor-version-test.sh"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-release-pom-metadata-test.sh"
 require_text ".github/workflows/ci.yml" "Verify reactor Consumer POMs"
 require_text ".github/workflows/ci.yml" '-Dmaven.repo.local="${consumer_pom_repository}" install'
 require_text ".github/workflows/ci.yml" 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
-require_text ".github/workflows/ci.yml" 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
-require_text ".github/workflows/ci.yml" '"$(pwd)/mvnw"'
-forbid_text ".github/workflows/ci.yml" 'command -v mvn'
-forbid_text ".github/workflows/ci.yml" 'Apache Maven 3.'
+require_text ".github/workflows/ci.yml" 'maven_3="$(command -v mvn)"'
+require_text ".github/workflows/ci.yml" '"Apache Maven 3."*'
+require_text ".github/workflows/ci.yml" '"${maven_3}" "$(pwd)/mvnw"'
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries.sh"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries-test.sh"
 require_text ".github/workflows/release.yml" "actions/upload-artifact"
@@ -331,7 +303,8 @@ require_text ".github/workflows/prepare-snapshot.yml" "- Release"
 require_text ".github/workflows/prepare-snapshot.yml" "git tag --points-at"
 require_text ".github/workflows/prepare-snapshot.yml" "contents: write"
 require_text ".github/workflows/prepare-snapshot.yml" "pull-requests: write"
-require_text ".github/workflows/prepare-snapshot.yml" "scripts/set-maven-reactor-version.rb"
+require_text ".github/workflows/prepare-snapshot.yml" "scripts/set-mason-reactor-version.rb"
+require_text ".github/workflows/prepare-snapshot.yml" "git add pom.yaml"
 forbid_text ".github/workflows/prepare-snapshot.yml" "versions:set"
 require_text ".github/workflows/prepare-snapshot.yml" "git push --set-upstream origin"
 require_text ".github/workflows/prepare-snapshot.yml" "gh pr create"

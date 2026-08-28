@@ -1,0 +1,34 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-messaging-kafka-spring-boot-starter
+name: jfoundry-messaging-kafka-spring-boot-starter
+description: "Spring Boot starter for the Kafka MessageSender adapter."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-kafka
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

@@ -1,0 +1,49 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-webmvc-spring
+name: jfoundry-webmvc-spring
+description: "Spring MVC runtime adapter for jfoundry ProblemDetail exception responses."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-http-spring
+  - groupId: org.springframework
+    artifactId: spring-webmvc
+    scope: provided
+    optional: "true"
+  - groupId: jakarta.servlet
+    artifactId: jakarta.servlet-api
+    scope: provided
+    optional: "true"
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+  - groupId: tools.jackson.core
+    artifactId: jackson-databind
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.springframework
+    artifactId: spring-test
+    scope: test
+  - groupId: org.springframework.security
+    artifactId: spring-security-core
+    scope: test
+  - groupId: jakarta.validation
+    artifactId: jakarta.validation-api
+    scope: test
+  - groupId: org.hibernate.validator
+    artifactId: hibernate-validator
+    scope: test
+  - groupId: ch.qos.logback
+    artifactId: logback-classic
+    scope: test

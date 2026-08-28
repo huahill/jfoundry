@@ -1,0 +1,22 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-restclient-spring-boot-autoconfigure
+name: jfoundry-restclient-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry outbound RestClient logging."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-spring
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-restclient
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-configuration-processor
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test

@@ -1,0 +1,24 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-http-spring
+name: jfoundry-http-spring
+description: "Shared Spring HTTP support for jfoundry client and server adapters."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web
+  - groupId: org.springframework
+    artifactId: spring-web
+    scope: provided
+    optional: "true"
+  - groupId: tools.jackson.core
+    artifactId: jackson-databind
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

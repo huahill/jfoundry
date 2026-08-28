@@ -1,0 +1,22 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure
+name: jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for JFoundry MyBatis-Plus persistence."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-mybatis-plus
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot4-starter
+    scope: test

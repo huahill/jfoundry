@@ -4,7 +4,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_VERSION="$(sed -nE 's@^[[:space:]]*<version>([^<]+)</version>@\1@p' "${REPO_ROOT}/pom.xml" | head -n 1)"
+PROJECT_VERSION="$(ruby --disable-gems -e 'require "yaml"; puts YAML.safe_load(File.read(ARGV.fetch(0)), aliases: true).fetch("version")' "${REPO_ROOT}/pom.yaml")"
 
 fail() {
     echo "$*" >&2

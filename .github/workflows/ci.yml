@@ -91,6 +91,9 @@ jobs:
       - name: Verify release workflow
         run: bash scripts/verify-release-workflow.sh
 
+      - name: Verify Spring Boot Parent remediation workflow
+        run: bash scripts/verify-spring-boot-parent-remediation-workflow.sh
+
       - name: Verify release POM metadata
         run: bash scripts/verify-release-pom-metadata.sh
 
@@ -112,6 +115,7 @@ jobs:
       - name: Test release governance verifiers
         run: |
           bash scripts/verify-release-workflow-test.sh
+          bash scripts/verify-spring-boot-parent-remediation-workflow-test.sh
           bash scripts/verify-release-sbom-test.sh
           bash scripts/verify-supply-chain-workflows-test.sh
           bash scripts/verify-workflow-paths-test.sh
@@ -156,6 +160,14 @@ jobs:
 
       - name: Test dependency boundary verifier
         run: bash scripts/verify-dependency-boundaries-test.sh
+
+      - name: Test Mason YAML build tooling
+        run: |
+          bash scripts/convert-mason-poms-test.sh
+          bash scripts/convert-mason-reactor-test.sh
+          bash scripts/set-mason-reactor-version-test.sh
+          bash scripts/verify-mason-poc-test.sh
+          bash scripts/verify-mason-poc.sh
 
       - name: Run tests
         run: ./mvnw -B test

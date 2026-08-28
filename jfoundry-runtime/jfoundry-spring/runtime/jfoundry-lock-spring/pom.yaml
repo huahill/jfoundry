@@ -1,0 +1,32 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-lock-spring
+name: jfoundry-lock-spring
+description: "Spring runtime adapter for jfoundry distributed lock annotations."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.springframework
+    artifactId: spring-aop
+    scope: provided
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-core
+    scope: provided
+    optional: "true"
+  - groupId: org.springframework
+    artifactId: spring-expression
+    scope: provided
+    optional: "true"
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

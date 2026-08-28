@@ -1,0 +1,25 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-application
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-domain-event-externalization-core
+name: jfoundry-domain-event-externalization-core
+description: "Application-layer domain event externalization contracts, metadata, and routing rules."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.jmolecules
+    artifactId: jmolecules-events
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

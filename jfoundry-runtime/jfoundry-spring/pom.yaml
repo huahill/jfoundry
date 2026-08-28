@@ -1,0 +1,61 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-spring
+name: jfoundry-spring
+description: "Spring runtime integration for jfoundry framework-neutral contracts. Spring Framework\n        adapters, Spring Boot auto-configuration, and Spring Boot starters are grouped by\n        responsibility."
+packaging: pom
+dependencyManagement:
+  dependencies:
+    - groupId: io.github.xfoundries
+      artifactId: jfoundry-spring-boot-dependencies
+      version: ${project.version}
+      type: pom
+      scope: import
+modules:
+  - runtime/jfoundry-domain-event-spring
+  - runtime/jfoundry-persistence-spring
+  - runtime/jfoundry-messaging-spring
+  - runtime/jfoundry-outbox-spring
+  - runtime/jfoundry-transaction-spring
+  - runtime/jfoundry-lock-spring
+  - runtime/jfoundry-observability-spring
+  - runtime/jfoundry-http-spring
+  - runtime/jfoundry-restclient-spring
+  - runtime/jfoundry-webmvc-spring
+  - autoconfigure/jfoundry-jpa-spring-boot-support
+  - autoconfigure/jfoundry-transaction-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-lock-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-messaging-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-observability-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-outbox-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-inbox-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-persistence-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure
+  - autoconfigure/jfoundry-restclient-spring-boot-autoconfigure
+  - jfoundry-spring-integration-tests
+  - starters/jfoundry-spring-boot-starter
+  - starters/jfoundry-transaction-spring-boot-starter
+  - starters/jfoundry-observability-spring-boot-starter
+  - starters/jfoundry-webmvc-spring-boot-starter
+  - starters/jfoundry-domain-event-spring-boot-starter
+  - starters/jfoundry-messaging-spring-boot-starter
+  - starters/jfoundry-messaging-kafka-spring-boot-starter
+  - starters/jfoundry-messaging-rocketmq-spring-boot-starter
+  - starters/jfoundry-messaging-rabbitmq-spring-boot-starter
+  - starters/jfoundry-lock-redisson-spring-boot-starter
+  - starters/jfoundry-outbox-spring-boot-starter
+  - starters/jfoundry-outbox-mybatis-plus-spring-boot-starter
+  - starters/jfoundry-outbox-jpa-spring-boot-starter
+  - starters/jfoundry-outbox-jobrunr-spring-boot-starter
+  - starters/jfoundry-inbox-spring-boot-starter
+  - starters/jfoundry-inbox-mybatis-plus-spring-boot-starter
+  - starters/jfoundry-inbox-jpa-spring-boot-starter
+  - starters/jfoundry-persistence-mybatis-plus-spring-boot-starter
+  - starters/jfoundry-persistence-jpa-spring-boot-starter
+  - starters/jfoundry-restclient-spring-boot-starter

@@ -1,0 +1,37 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-inbox-jpa-spring-boot-starter
+name: jfoundry-inbox-jpa-spring-boot-starter
+description: "Spring Boot starter for the Jakarta Persistence InboxMessageStore adapter."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-data-jpa
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

@@ -51,7 +51,7 @@ consistency means equal observable logging behavior, configuration, and redactio
 
 ## Java Platform Baseline
 
-Treat the root POM's `maven.compiler.release` as the source of truth for Java language and JDK API choices. Before adding or modifying Java code:
+Treat the root `pom.yaml` model's `maven.compiler.release` as the source of truth for Java language and JDK API choices. Before adding or modifying Java code:
 
 1. Read the configured release and use APIs that are stable in that release; do not introduce preview features into framework code without an explicit project decision.
 2. Prefer a stable, semantically better API available in the target release over a legacy alternative retained only by habit. For example, use `ScopedValue` for dynamically scoped contextual state when lexical binding is the intended model.
@@ -92,7 +92,7 @@ Prefer current repository documents and code over memory:
 - `../../docs/i18n/en/modeling/repository-vs-read-contracts.md`
 - `docs/release/compatibility.md`
 - `AGENTS.md` for repository-wide language, SQL template, and project skill policy
-- top-level `pom.xml` and module POMs
+- top-level `pom.yaml` and module POMs
 - nearby tests in the module being changed
 
 ## Output Discipline

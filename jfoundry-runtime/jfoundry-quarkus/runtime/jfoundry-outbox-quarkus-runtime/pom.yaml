@@ -1,0 +1,43 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-outbox-quarkus-runtime
+name: jfoundry-outbox-quarkus-runtime
+description: "Quarkus runtime assembly for the jfoundry Outbox dispatcher."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-jackson
+  - groupId: io.quarkus
+    artifactId: quarkus-arc
+  - groupId: io.quarkus
+    artifactId: quarkus-scheduler
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-outbox-quarkus-deployment:${project.version}"

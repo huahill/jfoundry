@@ -1,0 +1,29 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-domain-event-helidon
+name: jfoundry-domain-event-helidon
+description: "Helidon MP CDI adapter for local JFoundry domain-event dispatch."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-jta
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain
+  - groupId: io.helidon.microprofile.cdi
+    artifactId: helidon-microprofile-cdi
+  - groupId: jakarta.transaction
+    artifactId: jakarta.transaction-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

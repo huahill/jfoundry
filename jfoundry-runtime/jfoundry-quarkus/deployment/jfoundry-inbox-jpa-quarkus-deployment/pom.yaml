@@ -1,0 +1,52 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-inbox-jpa-quarkus-deployment
+name: jfoundry-inbox-jpa-quarkus-deployment
+description: "Quarkus build-time registration for the jfoundry JPA Inbox store."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa-quarkus-runtime
+    version: ${project.version}
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-deployment
+    version: ${project.version}
+  - groupId: io.quarkus
+    artifactId: quarkus-arc-deployment
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-orm-deployment
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+      configuration:
+        annotationProcessorPaths:
+          path:
+            groupId: io.quarkus
+            artifactId: quarkus-extension-processor
+            version: ${quarkus.version}
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

@@ -1,0 +1,15 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-architecture
+packaging: pom
+name: jfoundry-architecture
+description: "Aggregate module for JFoundry architecture style stereotypes"
+modules:
+  - jfoundry-hexagonal
+  - jfoundry-onion
+  - jfoundry-cqrs
+  - jfoundry-architecture-test

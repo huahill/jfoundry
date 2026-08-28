@@ -1,0 +1,23 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-persistence-core
+name: jfoundry-persistence-core
+description: "DDD aggregate persistence support: storage-neutral repository lifecycle,\n        AggregateData, and DataMapper contracts. Concrete adapters extend this\n        module without pulling in runtime or messaging concerns."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

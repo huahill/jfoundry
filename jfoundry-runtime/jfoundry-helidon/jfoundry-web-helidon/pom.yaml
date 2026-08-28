@@ -1,0 +1,33 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-helidon
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-web-helidon
+name: jfoundry-web-helidon
+description: "Helidon MP JAX-RS runtime integration for JFoundry web adapters."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-web-jaxrs
+  - groupId: io.helidon.microprofile.server
+    artifactId: helidon-microprofile-server
+  - groupId: jakarta.ws.rs
+    artifactId: jakarta.ws.rs-api
+    scope: provided
+  - groupId: jakarta.json
+    artifactId: jakarta.json-api
+  - groupId: jakarta.validation
+    artifactId: jakarta.validation-api
+    scope: provided
+  - groupId: io.helidon.microprofile.bean-validation
+    artifactId: helidon-microprofile-bean-validation
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

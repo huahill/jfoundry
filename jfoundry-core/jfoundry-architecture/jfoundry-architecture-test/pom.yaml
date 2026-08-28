@@ -1,0 +1,38 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../../pom.yaml
+artifactId: jfoundry-architecture-test
+name: jfoundry-architecture-test
+description: "Reusable architecture test rules and fixtures for JFoundry-based applications."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain
+    scope: compile
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+    scope: compile
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-hexagonal
+    scope: compile
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-onion
+    scope: compile
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-cqrs
+    scope: compile
+  - groupId: com.tngtech.archunit
+    artifactId: archunit-junit5
+    scope: compile
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-archunit
+    scope: compile
+  - groupId: org.assertj
+    artifactId: assertj-core
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+    scope: test

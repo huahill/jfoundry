@@ -1,0 +1,30 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-infrastructure
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-observability-otel
+name: jfoundry-observability-otel
+description: "Optional OpenTelemetry API decorators for jfoundry framework operations."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-lock-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-core
+  - groupId: io.opentelemetry
+    artifactId: opentelemetry-api
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: io.opentelemetry
+    artifactId: opentelemetry-sdk
+    scope: test
+  - groupId: io.opentelemetry
+    artifactId: opentelemetry-sdk-testing
+    scope: test

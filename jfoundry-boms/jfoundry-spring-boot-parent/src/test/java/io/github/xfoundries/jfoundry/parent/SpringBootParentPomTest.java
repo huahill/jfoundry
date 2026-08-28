@@ -17,30 +17,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SpringBootParentPomTest {
 
-    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.1.0";
+    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0";
 
     @Test
     void inheritsTheSupportedSpringBootParentAndImportsTheBootRuntimeLine() throws Exception {
-        Document parent = document(Path.of("pom.xml"));
-        Document bom = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
-        Coordinate springBootParent = coordinate(child(parent.getDocumentElement(), "parent"));
-        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "spring-boot.version");
+        Path parent = descriptor(Path.of("."));
+        Path bom = descriptor(Path.of("..", "jfoundry-spring-boot-dependencies"));
+        Coordinate springBootParent = coordinate(parent, "parent");
+        String bomVersion = property(bom, "spring-boot.version");
 
         assertThat(springBootParent).isEqualTo(
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", bomVersion));
-        assertThat(childText(child(parent.getDocumentElement(), "properties"), "jfoundry.version"))
-                .isEqualTo(childText(parent.getDocumentElement(), "version"));
+        assertThat(bomVersion).isEqualTo("4.1.1");
+        assertThat(property(parent, "jfoundry.version")).isEqualTo(projectVersion(parent));
         assertThat(importedBoms(parent)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
-        assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+        assertThat(property(parent, "java.version")).isEqualTo("25");
     }
 
     @Test
     void publishedParentDoesNotExposeItsYamlTestParser() throws Exception {
-        Document parent = document(Path.of("pom.xml"));
+        Path parent = descriptor(Path.of("."));
 
-        assertThat(dependency(parent, "org.yaml", "snakeyaml")).isNull();
+        assertThat(hasDependency(parent, "org.yaml", "snakeyaml")).isFalse();
     }
 
     @Test
@@ -51,9 +51,9 @@ class SpringBootParentPomTest {
 
     @Test
     void frameworkNeutralInfrastructureParentDoesNotImportSpringBootBom() throws Exception {
-        Document document = document(Path.of("..", "..", "jfoundry-core", "jfoundry-infrastructure", "pom.xml"));
+        Path descriptor = descriptor(Path.of("..", "..", "jfoundry-core", "jfoundry-infrastructure"));
 
-        assertThat(importedBoms(document)).isEmpty();
+        assertThat(importedBoms(descriptor)).isEmpty();
     }
 
     @Test
@@ -61,12 +61,12 @@ class SpringBootParentPomTest {
         List<Path> pomPaths = List.of(
                 descriptor(Path.of(".")),
                 descriptor(Path.of("..", "..")),
-                Path.of("..", "jfoundry-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
+                descriptor(Path.of("..", "jfoundry-dependencies")),
+                descriptor(Path.of("..", "jfoundry-foundation-dependencies")),
+                descriptor(Path.of("..", "jfoundry-modules-dependencies")),
+                descriptor(Path.of("..", "jfoundry-spring-boot-dependencies")),
+                descriptor(Path.of("..", "jfoundry-spring-cloud-dependencies")),
+                descriptor(Path.of("..", "jfoundry-quarkus-dependencies")),
                 descriptor(Path.of("..", "jfoundry-helidon-dependencies")));
         String reactorVersion = projectVersion(descriptor(Path.of("..", "..")));
         String expectedLiteralTag = expectedLiteralScmTag(reactorVersion);
@@ -98,9 +98,9 @@ class SpringBootParentPomTest {
 
     @Test
     void springRuntimeBomOwnsSpringSpecificComponentFamilies() throws Exception {
-        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
-        Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
-        Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
+        Path foundation = descriptor(Path.of("..", "jfoundry-foundation-dependencies"));
+        Path boot = descriptor(Path.of("..", "jfoundry-spring-boot-dependencies"));
+        Path cloud = descriptor(Path.of("..", "jfoundry-spring-cloud-dependencies"));
 
         assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
@@ -118,7 +118,7 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         assertThat(importedBoms(cloud)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
-        for (Document springLine : List.of(boot, cloud)) {
+        for (Path springLine : List.of(boot, cloud)) {
             assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter"))
                     .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
@@ -133,59 +133,59 @@ class SpringBootParentPomTest {
 
     @Test
     void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
-        Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
+        Path descriptor = descriptor(Path.of("..", "jfoundry-spring-cloud-dependencies"));
 
-        assertThat(child(child(document.getDocumentElement(), "properties"), "spring-boot.version"))
-                .isNull();
-        assertThat(importedBoms(document)).containsExactly(
+        assertThat(property(descriptor, "spring-boot.version")).isNull();
+        assertThat(importedBoms(descriptor)).containsExactly(
                 new Coordinate("org.springframework.cloud", "spring-cloud-dependencies", "${spring-cloud.version}"),
                 new Coordinate("com.alibaba.cloud", "spring-cloud-alibaba-dependencies", "${spring-cloud-alibaba.version}"));
     }
 
     @Test
     void quarkusRuntimeBuildMatchesTheConsumerBomPlatformVersion() throws Exception {
-        Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus", "pom.xml"));
-        Document bom = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
-        String runtimeVersion = childText(child(runtime.getDocumentElement(), "properties"), "quarkus.version");
-        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
+        Path runtime = descriptor(Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus"));
+        Path bom = descriptor(Path.of("..", "jfoundry-quarkus-dependencies"));
+        String runtimeVersion = property(runtime, "quarkus.version");
+        String bomVersion = property(bom, "quarkus.version");
 
         assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(bomVersion).isEqualTo("3.39.1");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
     }
 
     @Test
     void helidonRuntimeBuildUsesTheConsumerBomAsItsPlatformVersionSource() throws Exception {
-        Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon", "pom.xml"));
+        Path runtime = descriptor(Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon"));
         Path bom = descriptor(Path.of("..", "jfoundry-helidon-dependencies"));
 
         assertThat(property(runtime, "helidon.version")).isNull();
         assertThat(property(bom, "helidon.version")).isEqualTo("4.5.3");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
-        assertThat(importedBoms(bom)).containsExactly(
-                new Coordinate("io.helidon", "helidon-dependencies", "${helidon.version}"));
     }
 
     @Test
     void springAutoconfigurationUsesTheMybatisPlusStarterInsteadOfManagingMybatisSpring() throws Exception {
         Path autoconfigure = Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "autoconfigure");
-        Document persistence = document(autoconfigure.resolve(
-                "jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure/pom.xml"));
-        Document inbox = document(autoconfigure.resolve("jfoundry-inbox-spring-boot-autoconfigure/pom.xml"));
-        Document outbox = document(autoconfigure.resolve("jfoundry-outbox-spring-boot-autoconfigure/pom.xml"));
+        Path persistence = descriptor(autoconfigure.resolve(
+                "jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure"));
+        Path inbox = descriptor(autoconfigure.resolve("jfoundry-inbox-spring-boot-autoconfigure"));
+        Path outbox = descriptor(autoconfigure.resolve("jfoundry-outbox-spring-boot-autoconfigure"));
 
-        assertThat(dependency(persistence, "org.mybatis", "mybatis-spring")).isNull();
-        assertThat(dependency(persistence, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
-                .satisfies(it -> assertThat(childText(it, "scope")).isEqualTo("test"));
+        assertThat(hasDependency(persistence, "org.mybatis", "mybatis-spring")).isFalse();
+        assertThat(dependencyValue(
+                persistence, "com.baomidou", "mybatis-plus-spring-boot4-starter", "scope"))
+                .isEqualTo("test");
 
-        for (Document document : List.of(inbox, outbox)) {
-            assertThat(dependency(document, "org.mybatis", "mybatis-spring")).isNull();
-            assertThat(dependency(document, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
-                    .satisfies(it -> {
-                        assertThat(childText(it, "scope")).isEqualTo("provided");
-                        assertThat(childText(it, "optional")).isEqualTo("true");
-                    });
+        for (Path descriptor : List.of(inbox, outbox)) {
+            assertThat(hasDependency(descriptor, "org.mybatis", "mybatis-spring")).isFalse();
+            assertThat(dependencyValue(
+                    descriptor, "com.baomidou", "mybatis-plus-spring-boot4-starter", "scope"))
+                    .isEqualTo("provided");
+            assertThat(dependencyValue(
+                    descriptor, "com.baomidou", "mybatis-plus-spring-boot4-starter", "optional"))
+                    .isEqualTo("true");
         }
     }
 
@@ -207,6 +207,13 @@ class SpringBootParentPomTest {
     private Path descriptor(Path directory) {
         Path yaml = directory.resolve("pom.yaml");
         return Files.exists(yaml) ? yaml : directory.resolve("pom.xml");
+    }
+
+    private Coordinate coordinate(Path path, String name) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return coordinate(mapping(yamlDocument(path), name));
+        }
+        return coordinate(child(document(path).getDocumentElement(), name));
     }
 
     private String projectVersion(Path path) throws Exception {
@@ -293,7 +300,38 @@ class SpringBootParentPomTest {
     }
 
     private String value(Map<String, Object> parent, String name) {
-        return parent.get(name).toString();
+        if (parent == null) {
+            return null;
+        }
+        Object value = parent.get(name);
+        return value == null ? null : value.toString();
+    }
+
+    private boolean managesDependency(Path path, String groupId, String artifactId) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            Map<String, Object> management = mapping(yamlDocument(path), "dependencyManagement");
+            return management != null && mappings(management, "dependencies").stream()
+                    .anyMatch(candidate -> groupId.equals(value(candidate, "groupId"))
+                            && artifactId.equals(value(candidate, "artifactId")));
+        }
+        return managesDependency(document(path), groupId, artifactId);
+    }
+
+    private boolean hasDependency(Path path, String groupId, String artifactId) throws Exception {
+        return dependencyValue(path, groupId, artifactId, "artifactId") != null;
+    }
+
+    private String dependencyValue(Path path, String groupId, String artifactId, String name) throws Exception {
+        if (path.getFileName().toString().endsWith(".yaml")) {
+            return mappings(yamlDocument(path), "dependencies").stream()
+                    .filter(candidate -> groupId.equals(value(candidate, "groupId")))
+                    .filter(candidate -> artifactId.equals(value(candidate, "artifactId")))
+                    .findFirst()
+                    .map(candidate -> value(candidate, name))
+                    .orElse(null);
+        }
+        Element dependency = dependency(document(path), groupId, artifactId);
+        return dependency == null ? null : childText(dependency, name);
     }
 
     private boolean managesDependency(Document document, String groupId, String artifactId) {

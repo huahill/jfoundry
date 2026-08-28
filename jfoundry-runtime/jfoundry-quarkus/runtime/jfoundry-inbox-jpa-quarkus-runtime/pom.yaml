@@ -1,0 +1,29 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-inbox-jpa-quarkus-runtime
+name: jfoundry-inbox-jpa-quarkus-runtime
+description: "Quarkus runtime assembly for the jfoundry JPA Inbox store."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-quarkus-runtime
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa
+  - groupId: io.quarkus
+    artifactId: quarkus-arc
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-orm
+build:
+  plugins:
+    - groupId: io.quarkus
+      artifactId: quarkus-extension-maven-plugin
+      version: ${quarkus.version}
+      executions:
+        - phase: compile
+          goals:
+            - extension-descriptor
+          configuration:
+            deployment: "${project.groupId}:jfoundry-inbox-jpa-quarkus-deployment:${project.version}"

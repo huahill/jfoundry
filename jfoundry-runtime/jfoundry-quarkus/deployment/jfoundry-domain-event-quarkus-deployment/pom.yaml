@@ -1,0 +1,51 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-domain-event-quarkus-deployment
+name: jfoundry-domain-event-quarkus-deployment
+description: "Quarkus build-time registration for JFoundry local domain events."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-quarkus-runtime
+    version: ${project.version}
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-application-core
+  - groupId: io.quarkus
+    artifactId: quarkus-arc-deployment
+  - groupId: io.quarkus
+    artifactId: quarkus-narayana-jta-deployment
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+      configuration:
+        annotationProcessorPaths:
+          path:
+            groupId: io.quarkus
+            artifactId: quarkus-extension-processor
+            version: ${quarkus.version}
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

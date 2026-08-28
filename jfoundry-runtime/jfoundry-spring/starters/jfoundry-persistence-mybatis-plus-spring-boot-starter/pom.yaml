@@ -1,0 +1,38 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-persistence-mybatis-plus-spring-boot-starter
+name: jfoundry-persistence-mybatis-plus-spring-boot-starter
+description: "Spring Boot starter for jfoundry business persistence with MyBatis-Plus.\n        Outbox and Inbox MyBatis-Plus stores are provided by their own feature starters."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring-boot-autoconfigure
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot4-starter
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

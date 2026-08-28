@@ -1,0 +1,478 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-spring-integration-tests
+name: jfoundry-spring-integration-tests
+description: "Spring runtime integration verification."
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-architecture-test
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-externalization-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-mybatis-plus
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-jackson
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-mybatis-plus
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-mybatis-plus
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jpa
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-jpa
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-jobrunr
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-webmvc-spring
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-webmvc-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-restclient-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring-boot-autoconfigure
+    scope: test
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-inbox-spring-boot-autoconfigure
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-outbox-spring-boot-autoconfigure
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring-boot-autoconfigure
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-web
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-jackson3
+    scope: test
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-spring
+    scope: test
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-data-jpa
+    scope: test
+  - groupId: com.h2database
+    artifactId: h2
+    scope: test
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-jsqlparser
+    scope: test
+  - groupId: com.baomidou
+    artifactId: mybatis-plus-spring-boot4-starter
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.junit.platform
+    artifactId: junit-platform-launcher
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+  - groupId: org.awaitility
+    artifactId: awaitility
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: mysql
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: postgresql
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: kafka
+    scope: test
+  - groupId: org.testcontainers
+    artifactId: rabbitmq
+    scope: test
+  - groupId: com.mysql
+    artifactId: mysql-connector-j
+    scope: test
+  - groupId: org.postgresql
+    artifactId: postgresql
+    scope: test
+  - groupId: org.springframework.kafka
+    artifactId: spring-kafka
+    scope: test
+  - groupId: org.springframework.amqp
+    artifactId: spring-rabbit
+    scope: test
+  - groupId: org.apache.rocketmq
+    artifactId: rocketmq-client
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-deploy-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-surefire-plugin
+      configuration:
+        excludes:
+          - "**/*IT.java"
+    - groupId: org.springframework.boot
+      artifactId: spring-boot-maven-plugin
+      version: 4.1.1
+    - groupId: org.graalvm.buildtools
+      artifactId: native-maven-plugin
+      version: 1.1.10
+      dependencies:
+        - groupId: org.apache.maven.shared
+          artifactId: maven-shared-utils
+          version: 3.4.2
+      extensions: "true"
+profiles:
+  - id: it
+    dependencies:
+      - groupId: org.springframework.boot
+        artifactId: spring-boot-starter-jdbc
+    build:
+      plugins:
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-failsafe-plugin
+          configuration:
+            includes:
+              - "**/*IT.java"
+          executions:
+            -
+              goals:
+                - integration-test
+                - verify
+  - id: native
+    build:
+      plugins:
+        - groupId: org.springframework.boot
+          artifactId: spring-boot-maven-plugin
+          executions:
+            - id: process-aot
+              goals:
+                - process-aot
+        - groupId: org.graalvm.buildtools
+          artifactId: native-maven-plugin
+          configuration:
+            classesDirectory: ${project.build.outputDirectory}
+          executions:
+            - id: add-reachability-metadata
+              goals:
+                - add-reachability-metadata
+            - id: build-native-image
+              goals:
+                - compile-no-fork
+  - id: native-mybatis-plus
+    dependencies:
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-domain
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-transaction-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-domain-event-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-domain-event-externalization-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-messaging-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-messaging-jackson
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-domain-event-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-messaging-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-transaction-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-spring-boot-autoconfigure
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-mybatis-plus
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-persistence-mybatis-plus-spring-boot-starter
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-mybatis-plus-spring-boot-starter
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-inbox-mybatis-plus-spring-boot-starter
+      - groupId: com.baomidou
+        artifactId: mybatis-plus-spring-boot4-starter
+      - groupId: com.baomidou
+        artifactId: mybatis-plus-jsqlparser
+      - groupId: com.baomidou
+        artifactId: mybatis-plus-spring-boot-native-image
+      - groupId: org.postgresql
+        artifactId: postgresql
+    build:
+      plugins:
+        - groupId: org.codehaus.mojo
+          artifactId: build-helper-maven-plugin
+          version: 3.6.1
+          executions:
+            - id: add-native-mybatis-plus-source
+              phase: generate-sources
+              goals:
+                - add-source
+              configuration:
+                sources:
+                  - src/native-mybatis-plus/java
+            - id: add-native-mybatis-plus-test-source
+              phase: generate-test-sources
+              goals:
+                - add-test-source
+              configuration:
+                sources:
+                  - src/native-mybatis-plus-test/java
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-failsafe-plugin
+          configuration:
+            includes:
+              - "**/NativeMybatisPlusIT.java"
+          executions:
+            -
+              goals:
+                - integration-test
+                - verify
+        - groupId: org.springframework.boot
+          artifactId: spring-boot-maven-plugin
+          configuration:
+            mainClass: org.jfoundry.integration.nativeimage.mybatisplus.NativeMybatisPlusApplication
+          executions:
+            - id: process-aot-mybatis-plus
+              goals:
+                - process-aot
+              configuration:
+                arguments:
+                  - "--spring.datasource.url=jdbc:postgresql://localhost:5432/jfoundry"
+                  - "--spring.datasource.username=jfoundry"
+                  - "--spring.datasource.password=jfoundry"
+                  - "--spring.datasource.driver-class-name=org.postgresql.Driver"
+        - groupId: org.graalvm.buildtools
+          artifactId: native-maven-plugin
+          configuration:
+            classesDirectory: ${project.build.outputDirectory}
+            imageName: jfoundry-spring-mybatis-plus-native
+          executions:
+            - id: add-mybatis-plus-reachability-metadata
+              goals:
+                - add-reachability-metadata
+            - id: build-mybatis-plus-native-image
+              goals:
+                - compile-no-fork
+  - id: native-redisson
+    dependencies:
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-lock-redisson-spring-boot-starter
+    build:
+      plugins:
+        - groupId: org.codehaus.mojo
+          artifactId: build-helper-maven-plugin
+          version: 3.6.1
+          executions:
+            - id: add-native-redisson-source
+              phase: generate-sources
+              goals:
+                - add-source
+              configuration:
+                sources:
+                  - src/native-redisson/java
+            - id: add-native-redisson-test-source
+              phase: generate-test-sources
+              goals:
+                - add-test-source
+              configuration:
+                sources:
+                  - src/native-redisson-test/java
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-failsafe-plugin
+          configuration:
+            includes:
+              - "**/NativeRedissonLockIT.java"
+          executions:
+            -
+              goals:
+                - integration-test
+                - verify
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-surefire-plugin
+          configuration:
+            skipTests: "true"
+        - groupId: org.springframework.boot
+          artifactId: spring-boot-maven-plugin
+          configuration:
+            mainClass: org.jfoundry.integration.nativeimage.redisson.NativeRedissonLockApplication
+          executions:
+            - id: process-aot-redisson
+              goals:
+                - process-aot
+        - groupId: org.graalvm.buildtools
+          artifactId: native-maven-plugin
+          configuration:
+            classesDirectory: ${project.build.outputDirectory}
+            imageName: jfoundry-spring-redisson-native
+          executions:
+            - id: add-redisson-reachability-metadata
+              goals:
+                - add-reachability-metadata
+            - id: build-redisson-native-image
+              goals:
+                - compile-no-fork
+  - id: native-jobrunr
+    dependencies:
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-messaging-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-transaction-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-transaction-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-messaging-jackson
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-domain-event-externalization-core
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-jpa
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-jobrunr
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-spring
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-spring-boot-autoconfigure
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-jobrunr-spring-boot-starter
+      - groupId: io.github.xfoundries
+        artifactId: jfoundry-outbox-jpa-spring-boot-starter
+      - groupId: org.springframework.boot
+        artifactId: spring-boot-starter-data-jpa
+      - groupId: org.postgresql
+        artifactId: postgresql
+    build:
+      plugins:
+        - groupId: org.codehaus.mojo
+          artifactId: build-helper-maven-plugin
+          version: 3.6.1
+          executions:
+            - id: add-native-jobrunr-source
+              phase: generate-sources
+              goals:
+                - add-source
+              configuration:
+                sources:
+                  - src/native-jobrunr/java
+            - id: add-native-jobrunr-test-source
+              phase: generate-test-sources
+              goals:
+                - add-test-source
+              configuration:
+                sources:
+                  - src/native-jobrunr-test/java
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-failsafe-plugin
+          configuration:
+            includes:
+              - "**/NativeJobRunrIT.java"
+          executions:
+            -
+              goals:
+                - integration-test
+                - verify
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-surefire-plugin
+          configuration:
+            skipTests: "true"
+        - groupId: org.springframework.boot
+          artifactId: spring-boot-maven-plugin
+          configuration:
+            mainClass: org.jfoundry.integration.nativeimage.jobrunr.NativeJobRunrApplication
+          executions:
+            - id: process-aot-jobrunr
+              goals:
+                - process-aot
+              configuration:
+                arguments:
+                  - "--jfoundry.outbox.dispatcher.mode=jobrunr"
+                  - "--jobrunr.background-job-server.enabled=true"
+        - groupId: org.graalvm.buildtools
+          artifactId: native-maven-plugin
+          configuration:
+            classesDirectory: ${project.build.outputDirectory}
+            imageName: jfoundry-spring-jobrunr-native
+          executions:
+            - id: add-jobrunr-reachability-metadata
+              goals:
+                - add-reachability-metadata
+            - id: build-jobrunr-native-image
+              goals:
+                - compile-no-fork

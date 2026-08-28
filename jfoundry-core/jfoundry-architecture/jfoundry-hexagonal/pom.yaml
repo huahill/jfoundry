@@ -1,0 +1,18 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-architecture
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-hexagonal
+name: jfoundry-hexagonal
+description: "Pure-Java hexagonal architecture stereotypes on jMolecules — zero Spring dependency"
+dependencies:
+  - groupId: org.jmolecules
+    artifactId: jmolecules-hexagonal-architecture
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

@@ -1,0 +1,36 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-quarkus
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-persistence-jpa-quarkus-deployment
+name: jfoundry-persistence-jpa-quarkus-deployment
+description: "Quarkus build-time registration for JFoundry JPA persistence failure translation."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-jpa-quarkus-runtime
+    version: ${project.version}
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-quarkus-deployment
+    version: ${project.version}
+  - groupId: io.quarkus
+    artifactId: quarkus-arc-deployment
+  - groupId: io.quarkus
+    artifactId: quarkus-hibernate-orm-deployment
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+      configuration:
+        annotationProcessorPaths:
+          path:
+            groupId: io.quarkus
+            artifactId: quarkus-extension-processor
+            version: ${quarkus.version}

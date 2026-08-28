@@ -1,0 +1,43 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-quarkus
+packaging: pom
+name: jfoundry-quarkus
+description: "Quarkus runtime integration for jfoundry framework-neutral contracts."
+properties:
+  quarkus.version: 3.39.1
+dependencyManagement:
+  dependencies:
+    - groupId: io.github.xfoundries
+      artifactId: jfoundry-quarkus-dependencies
+      version: ${project.version}
+      type: pom
+      scope: import
+modules:
+  - runtime/jfoundry-transaction-quarkus-runtime
+  - runtime/jfoundry-domain-event-quarkus-runtime
+  - runtime/jfoundry-persistence-quarkus-runtime
+  - runtime/jfoundry-restclient-quarkus-runtime
+  - runtime/jfoundry-web-quarkus-runtime
+  - runtime/jfoundry-outbox-quarkus-runtime
+  - runtime/jfoundry-messaging-kafka-quarkus-runtime
+  - runtime/jfoundry-messaging-rabbitmq-quarkus-runtime
+  - runtime/jfoundry-outbox-jpa-quarkus-runtime
+  - runtime/jfoundry-inbox-jpa-quarkus-runtime
+  - runtime/jfoundry-persistence-jpa-quarkus-runtime
+  - deployment/jfoundry-transaction-quarkus-deployment
+  - deployment/jfoundry-domain-event-quarkus-deployment
+  - deployment/jfoundry-persistence-quarkus-deployment
+  - deployment/jfoundry-restclient-quarkus-deployment
+  - deployment/jfoundry-web-quarkus-deployment
+  - deployment/jfoundry-outbox-quarkus-deployment
+  - deployment/jfoundry-messaging-kafka-quarkus-deployment
+  - deployment/jfoundry-messaging-rabbitmq-quarkus-deployment
+  - deployment/jfoundry-outbox-jpa-quarkus-deployment
+  - deployment/jfoundry-inbox-jpa-quarkus-deployment
+  - deployment/jfoundry-persistence-jpa-quarkus-deployment
+  - jfoundry-quarkus-integration-tests

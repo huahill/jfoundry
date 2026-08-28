@@ -1,0 +1,22 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-persistence-spring-boot-autoconfigure
+name: jfoundry-persistence-spring-boot-autoconfigure
+description: "Spring Boot auto-configuration for jfoundry persistence adapters."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-persistence-spring
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-autoconfigure
+  - groupId: org.springframework
+    artifactId: spring-tx
+    optional: "true"
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test

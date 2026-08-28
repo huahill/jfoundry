@@ -1,0 +1,21 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-jakarta
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-transaction-jta
+name: jfoundry-transaction-jta
+description: "Shared Jakarta Transactions adapter for JFoundry transaction contracts."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: jakarta.transaction
+    artifactId: jakarta.transaction-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test

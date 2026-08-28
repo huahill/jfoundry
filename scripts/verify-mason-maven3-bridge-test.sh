@@ -35,18 +35,19 @@ fi
 publication_tree="${temporary_root}/publication-tree"
 "${generator}" "${publication_tree}"
 
-converted_poms=(
-    "pom.xml"
-    "jfoundry-core/jfoundry-domain/pom.xml"
-    "jfoundry-runtime/jfoundry-spring/starters/jfoundry-spring-boot-starter/pom.xml"
-    "jfoundry-boms/jfoundry-helidon-dependencies/pom.xml"
-)
-for pom in "${converted_poms[@]}"; do
-    [[ -f "${publication_tree}/${pom}" ]] || {
-        echo "Generated XML POM does not exist: ${pom}" >&2
+while IFS= read -r yaml_pom; do
+    relative_pom="${yaml_pom#${repository_root}/}"
+    xml_pom="${relative_pom%yaml}xml"
+    [[ -f "${publication_tree}/${xml_pom}" ]] || {
+        echo "Generated XML POM does not exist: ${xml_pom}" >&2
         exit 1
     }
-done
+done < <(
+    find "${repository_root}" -type f -name pom.yaml \
+        -not -path '*/target/*' \
+        -not -path '*/graphify-out/*' \
+        -print | LC_ALL=C sort
+)
 
 if find "${publication_tree}" -name pom.yaml -print -quit | grep -q .; then
     echo "Publication tree still contains a Mason YAML POM." >&2
@@ -61,25 +62,11 @@ if rg -l -F "${repository_root}" "${publication_tree}" --glob 'pom.xml' | grep -
     exit 1
 fi
 
-xml_parent_paths=(
-    "jfoundry-core/jfoundry-domain/pom.xml:../../pom.xml"
-    "jfoundry-core/jfoundry-application/pom.xml:../../pom.xml"
-    "jfoundry-core/jfoundry-architecture/jfoundry-architecture-test/pom.xml:../../../pom.xml"
-    "jfoundry-core/jfoundry-architecture/pom.xml:../../pom.xml"
-    "jfoundry-core/jfoundry-infrastructure/pom.xml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-helidon/pom.xml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-jakarta/pom.xml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-quarkus/pom.xml:../../pom.xml"
-    "jfoundry-runtime/jfoundry-spring/pom.xml:../../pom.xml"
-)
-for entry in "${xml_parent_paths[@]}"; do
-    pom="${entry%%:*}"
-    relative_path="${entry#*:}"
-    grep -Fq "<relativePath>${relative_path}</relativePath>" "${publication_tree}/${pom}" || {
-        echo "Maven 3 parent path was not restored: ${pom}" >&2
-        exit 1
-    }
-done
+if rg -l '<relativePath>[^<]*pom\.yaml</relativePath>' \
+    "${publication_tree}" --glob 'pom.xml' | grep -q .; then
+    echo "Maven 3 publication tree retains a YAML parent path." >&2
+    exit 1
+fi
 
 (cd "${publication_tree}" && mvn -B -DskipTests validate)
 

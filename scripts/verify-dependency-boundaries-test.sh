@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CHECKER="${SCRIPT_DIR}/VerifyDependencyBoundaries.java"
+CHECKER="${SCRIPT_DIR}/verify-dependency-boundaries.sh"
 FIXTURE_ROOT="$(mktemp -d)"
 trap 'rm -rf "${FIXTURE_ROOT}"' EXIT
 
@@ -23,11 +23,25 @@ ${body}
 EOF
 }
 
+write_yaml_pom() {
+    local relative_path="$1"
+    local body="$2"
+    local pom="${FIXTURE_ROOT}/${relative_path}/pom.yaml"
+    mkdir -p "$(dirname "${pom}")"
+    {
+        printf '%s\n' \
+            'modelVersion: 4.0.0' \
+            'groupId: fixture' \
+            'artifactId: fixture'
+        printf '%s\n' "${body}"
+    } > "${pom}"
+}
+
 expect_rejected() {
     local name="$1"
     local expected_output="${2:-${name}}"
     local output
-    if output="$(java "${CHECKER}" "${FIXTURE_ROOT}" 2>&1)"; then
+    if output="$(bash "${CHECKER}" "${FIXTURE_ROOT}" 2>&1)"; then
         echo "Expected ${name} fixture to be rejected." >&2
         exit 1
     fi
@@ -41,12 +55,20 @@ expect_rejected() {
 expect_allowed() {
     local name="$1"
     local output
-    if ! output="$(java "${CHECKER}" "${FIXTURE_ROOT}" 2>&1)"; then
+    if ! output="$(bash "${CHECKER}" "${FIXTURE_ROOT}" 2>&1)"; then
         echo "Expected ${name} fixture to be allowed:" >&2
         echo "${output}" >&2
         exit 1
     fi
 }
+
+write_yaml_pom "jfoundry-core/jfoundry-infrastructure/invalid-spring-yaml" '
+dependencies:
+  - groupId: org.springframework.boot
+    artifactId: spring-boot'
+expect_rejected "invalid-spring-yaml"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-core/jfoundry-infrastructure/invalid-spring-yaml"
 
 write_pom "jfoundry-core/jfoundry-infrastructure/invalid-spring" '
     <dependencies>

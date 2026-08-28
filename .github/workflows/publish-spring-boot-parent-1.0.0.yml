@@ -24,7 +24,11 @@ jobs:
     environment: jfoundry
     env:
       PARENT_VERSION: 1.0.0
-      PARENT_POM_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
+      HISTORICAL_SOURCE_COMMIT: 3eb6c53833fcbca26a4107c0d6aec6d4afde1a77
+      HISTORICAL_POM_REPOSITORY_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
+      HISTORICAL_POM_SHA256: 1856dbb984e2a9985c9a0f1ae3fd777a6c736142f3a085cf33696422a870598f
+      REMEDIATION_EVIDENCE_ROOT: ${{ runner.temp }}/jfoundry-parent-remediation-source
+      PARENT_POM_PATH: ${{ runner.temp }}/jfoundry-parent-remediation-source/pom.xml
       CONFIRMATION: ${{ inputs.confirmation }}
     steps:
       - name: Verify remediation publication request
@@ -40,14 +44,38 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: Verify remediation source
+      - name: Materialize immutable historical Parent POM
         run: |
           set -euo pipefail
 
           test -z "$(git status --porcelain)"
-          test -f "${PARENT_POM_PATH}"
-          grep -Fq "<artifactId>jfoundry-spring-boot-parent</artifactId>" "${PARENT_POM_PATH}"
-          grep -Fq "<version>${PARENT_VERSION}</version>" "${PARENT_POM_PATH}"
+          git cat-file -e "${HISTORICAL_SOURCE_COMMIT}^{commit}"
+          git merge-base --is-ancestor "${HISTORICAL_SOURCE_COMMIT}" HEAD
+          rm -rf "${REMEDIATION_EVIDENCE_ROOT}"
+          mkdir -p "${REMEDIATION_EVIDENCE_ROOT}"
+          git show "${HISTORICAL_SOURCE_COMMIT}:${HISTORICAL_POM_REPOSITORY_PATH}" > "${PARENT_POM_PATH}"
+          printf '%s  %s\n' "${HISTORICAL_POM_SHA256}" "${PARENT_POM_PATH}" | sha256sum --check --status
+
+          ruby - "${PARENT_POM_PATH}" "${PARENT_VERSION}" <<'RUBY'
+          require "rexml/document"
+
+          path, expected_version = ARGV
+          project = REXML::Document.new(File.read(path)).root
+          value = ->(element, name) { element.elements[name]&.text.to_s.strip }
+          coordinate = [value.call(project, "groupId"), value.call(project, "artifactId"), value.call(project, "version")]
+          expected_coordinate = ["io.github.xfoundries", "jfoundry-spring-boot-parent", expected_version]
+          abort "Unexpected historical Parent coordinate: #{coordinate.join(':')}" unless coordinate == expected_coordinate
+
+          imports = project.elements.to_a("dependencyManagement/dependencies/dependency").map do |dependency|
+            [value.call(dependency, "groupId"), value.call(dependency, "artifactId"), value.call(dependency, "version"), value.call(dependency, "type"), value.call(dependency, "scope")]
+          end
+          expected_imports = [
+            ["io.github.xfoundries", "jfoundry-dependencies", "${project.version}", "pom", "import"],
+            ["io.github.xfoundries", "jfoundry-spring-dependencies", "${project.version}", "pom", "import"]
+          ]
+          abort "Unexpected historical Parent imports" unless imports == expected_imports
+          abort "Unexpected historical Parent SCM tag" unless value.call(project.elements["scm"], "tag") == "v#{expected_version}"
+          RUBY
 
       - name: Verify Maven Central preconditions
         run: |
@@ -84,14 +112,32 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg-passphrase: GPG_PASSPHRASE
 
-      - name: Verify signed Parent POM
+      - name: Install Apache Maven 3 for Central publication
+        id: maven_3
+        env:
+          MAVEN_3_VERSION: 3.9.16
+          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+        run: |
+          set -euo pipefail
+
+          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+
+          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
+          "${executable}" --version
+          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
+
+      - name: Verify signed historical Parent POM with Maven 3
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           set -euo pipefail
 
-          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml -Prelease -DskipTests verify \
-            -Dgpg.passphrase="${GPG_PASSPHRASE}"
+          "${{ steps.maven_3.outputs.executable }}" -B -f "${PARENT_POM_PATH}" \
+            -Prelease -DskipTests verify -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
       - name: Publish only the missing Parent POM
         env:
@@ -101,9 +147,10 @@ jobs:
         run: |
           set -euo pipefail
 
-          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
+          "${{ steps.maven_3.outputs.executable }}" -B -f "${PARENT_POM_PATH}" \
             -Prelease -DskipTests deploy \
-            -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
+            "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-parent-remediation-deployment" \
+            -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee "${GITHUB_WORKSPACE}/central-deploy.log"
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then
             echo "Central Publishing did not report a deploymentId." >&2
@@ -141,18 +188,23 @@ jobs:
           set -euo pipefail
 
           mkdir -p remediation-evidence/artifacts remediation-evidence/signatures
-          if [[ -d jfoundry-boms/jfoundry-spring-boot-parent/target ]]; then
-            find jfoundry-boms/jfoundry-spring-boot-parent/target -maxdepth 1 -name '*.pom' -type f \
-              -exec cp {} remediation-evidence/artifacts/ \;
-            find jfoundry-boms/jfoundry-spring-boot-parent/target -maxdepth 1 -name '*.asc' -type f \
-              -exec cp {} remediation-evidence/signatures/ \;
+          if [[ -f "${PARENT_POM_PATH}" ]]; then
+            cp "${PARENT_POM_PATH}" remediation-evidence/artifacts/jfoundry-spring-boot-parent-${PARENT_VERSION}.pom
           fi
+          if [[ -d "${REMEDIATION_EVIDENCE_ROOT}/target" ]]; then
+            find "${REMEDIATION_EVIDENCE_ROOT}/target" -maxdepth 1 -name '*.pom' -type f \
+              -exec cp {} remediation-evidence/artifacts/ \;
+          fi
+          find "${REMEDIATION_EVIDENCE_ROOT}" -name '*.asc' -type f \
+            -exec cp {} remediation-evidence/signatures/ \;
           if [[ -f central-deploy.log ]]; then
             cp central-deploy.log remediation-evidence/
           fi
           {
             echo "coordinate=io.github.xfoundries:jfoundry-spring-boot-parent:${PARENT_VERSION}"
-            echo "source_commit=$(git rev-parse HEAD)"
+            echo "historical_source_commit=${HISTORICAL_SOURCE_COMMIT}"
+            echo "historical_pom_sha256=${HISTORICAL_POM_SHA256}"
+            echo "workflow_source_commit=$(git rev-parse HEAD)"
             echo "workflow_url=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           } > remediation-evidence/release-metadata.txt
           find remediation-evidence -type f -print0 | sort -z | xargs -0 shasum -a 256 > remediation-evidence/SHA256SUMS
@@ -165,8 +217,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
-          git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${GITHUB_SHA}"
+          test "$(git rev-parse "${HISTORICAL_SOURCE_COMMIT}")" = "${HISTORICAL_SOURCE_COMMIT}"
+          git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${HISTORICAL_SOURCE_COMMIT}"
           git push origin "refs/tags/v${PARENT_VERSION}" --force
           if gh release view "v${PARENT_VERSION}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             gh release delete "v${PARENT_VERSION}" --yes --repo "${GITHUB_REPOSITORY}"

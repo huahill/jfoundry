@@ -1,0 +1,22 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-application
+name: jfoundry-application
+description: "Application-layer reliability contracts and services."
+packaging: pom
+dependencies:
+  - groupId: org.jspecify
+    artifactId: jspecify
+modules:
+  - jfoundry-application-core
+  - jfoundry-transaction-core
+  - jfoundry-lock-core
+  - jfoundry-domain-event-core
+  - jfoundry-domain-event-externalization-core
+  - jfoundry-messaging-core
+  - jfoundry-outbox-core
+  - jfoundry-inbox-core

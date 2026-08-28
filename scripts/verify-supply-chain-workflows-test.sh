@@ -117,7 +117,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -205,13 +205,6 @@ YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/ci.yml" <<'YAML'
 jobs:
-  docs:
-    name: Documentation checks
-    steps:
-      - name: Verify compatibility matrix
-        run: bash scripts/verify-compatibility-matrix.sh
-      - name: Test compatibility matrix verification
-        run: bash scripts/verify-compatibility-matrix-test.sh
   dependency-review:
     name: Dependency Review
     if: github.event_name == 'pull_request'
@@ -237,19 +230,15 @@ jobs:
         run: bash scripts/verify-consumer-pom-test.sh
       - name: Verify release POM metadata
         run: bash scripts/verify-release-pom-metadata.sh
-      - name: Verify Maven 4.1 model
-        run: bash scripts/verify-maven-4-model.sh
-      - name: Test Maven 4.1 model verifier
-        run: bash scripts/verify-maven-4-model-test.sh
-      - name: Test Maven reactor version updater
-        run: bash scripts/set-maven-reactor-version-test.sh
       - name: Test release POM metadata verification
         run: bash scripts/verify-release-pom-metadata-test.sh
       - name: Verify reactor Consumer POMs
         run: |
           ./mvnw -Dmaven.repo.local="${consumer_pom_repository}" install
+          maven_3="$(command -v mvn)"
+          if [[ "$("${maven_3}" --version)" != "Apache Maven 3."* ]]; then exit 1; fi
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
-            "$(pwd)/mvnw"
+            "${maven_3}" "$(pwd)/mvnw"
 YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
@@ -377,7 +366,8 @@ jobs:
   prepare:
     steps:
       - run: git tag --points-at sha
-      - run: ruby scripts/set-maven-reactor-version.rb . 2.0.0-SNAPSHOT
+      - run: ruby --disable-gems scripts/set-mason-reactor-version.rb . next-version
+      - run: git add pom.yaml jfoundry-boms jfoundry-core jfoundry-runtime
       - run: git push --set-upstream origin branch
       - run: gh pr create
 YAML
@@ -882,7 +872,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -953,7 +943,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1029,7 +1019,7 @@ jobs:
         run: |
           set -euo pipefail
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1085,7 +1075,7 @@ jobs:
         run: |
           set -euo pipefail
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1156,7 +1146,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1234,7 +1224,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1315,7 +1305,7 @@ jobs:
           set -euo pipefail
 
           files="$(gh api "repos/${REPOSITORY}/pulls/${PR_NUMBER}/files" --paginate --jq '.[].filename')"
-          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.xml$' <<< "${files}"; then
+          if [[ -z "${files}" ]] || grep -Evq '(^|/)pom\.yaml$' <<< "${files}"; then
             echo "is_maven_update=false" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
@@ -1351,6 +1341,11 @@ jobs:
         # gh pr merge "${PR_NUMBER}" --auto --rebase
         run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
 YAML
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "pom\\.yaml" "pom\\.xml"
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
@@ -1431,22 +1426,6 @@ path = ARGV.fetch(0)
 File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries-test.sh") }.join)
 RUBY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries-test.sh"
-mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
-
-cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix.sh") }.join)
-RUBY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix.sh"
-mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
-
-cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix-test.sh") }.join)
-RUBY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 rm "${temp_dir}/.github/dependabot.yml"

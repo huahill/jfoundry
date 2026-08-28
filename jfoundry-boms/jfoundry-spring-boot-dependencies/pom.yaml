@@ -1,0 +1,91 @@
+child.project.url.inherit.append.path: "false"
+modelVersion: 4.0.0
+groupId: io.github.xfoundries
+artifactId: jfoundry-spring-boot-dependencies
+version: 1.4.0-SNAPSHOT
+packaging: pom
+name: jfoundry-spring-boot-dependencies
+description: "Spring Boot platform dependency management BOM for jfoundry applications."
+url: ${jfoundry.release.url}
+licenses:
+  - name: "Apache License, Version 2.0"
+    url: "https://www.apache.org/licenses/LICENSE-2.0.txt"
+    distribution: repo
+developers:
+  - id: youngledo
+    name: youngledo
+scm:
+  child.scm.connection.inherit.append.path: "false"
+  child.scm.developerConnection.inherit.append.path: "false"
+  child.scm.url.inherit.append.path: "false"
+  connection: ${jfoundry.release.scm.connection}
+  developerConnection: ${jfoundry.release.scm.developerConnection}
+  url: ${jfoundry.release.scm.url}
+  tag: v1.3.0
+properties:
+  project.build.outputTimestamp: "2026-08-23T16:38:25Z"
+  jfoundry.release.url: "https://github.com/xfoundries/jfoundry"
+  jfoundry.release.scm.connection: "scm:git:https://github.com/xfoundries/jfoundry.git"
+  jfoundry.release.scm.developerConnection: "scm:git:https://github.com/xfoundries/jfoundry.git"
+  jfoundry.release.scm.url: "https://github.com/xfoundries/jfoundry"
+  maven-enforcer-plugin.version: 3.6.3
+  maven-gpg-plugin.version: 3.2.8
+  central-publishing-maven-plugin.version: 0.11.0
+  spring-boot.version: 4.1.1
+  jmolecules-integrations.version: 0.33.0
+  mybatis-plus.version: 3.5.17
+  jobrunr.version: 8.8.2
+  redisson.version: 4.7.0
+dependencyManagement:
+  dependencies:
+    # Spring Boot manages versions only; applications select starters explicitly.
+    - groupId: org.springframework.boot
+      artifactId: spring-boot-dependencies
+      version: ${spring-boot.version}
+      type: pom
+      scope: import
+    - groupId: org.jmolecules.integrations
+      artifactId: jmolecules-spring
+      version: ${jmolecules-integrations.version}
+    - groupId: com.baomidou
+      artifactId: mybatis-plus-spring-boot4-starter
+      version: ${mybatis-plus.version}
+    - groupId: com.baomidou
+      artifactId: mybatis-plus-spring-boot-native-image
+      version: ${mybatis-plus.version}
+    - groupId: org.jobrunr
+      artifactId: jobrunr-spring-boot-4-starter
+      version: ${jobrunr.version}
+    - groupId: org.redisson
+      artifactId: redisson-spring-boot-starter
+      version: ${redisson.version}
+profiles:
+  - id: release
+    build:
+      plugins:
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-enforcer-plugin
+          version: ${maven-enforcer-plugin.version}
+          executions:
+            - id: require-release-version
+              goals:
+                - enforce
+              configuration:
+                rules:
+                  requireReleaseVersion: {}
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-gpg-plugin
+          version: ${maven-gpg-plugin.version}
+          executions:
+            - id: sign-artifacts
+              phase: verify
+              goals:
+                - sign
+        - groupId: org.sonatype.central
+          artifactId: central-publishing-maven-plugin
+          version: ${central-publishing-maven-plugin.version}
+          extensions: "true"
+          configuration:
+            publishingServerId: jfoundry
+            autoPublish: "true"
+            waitUntil: PUBLISHED

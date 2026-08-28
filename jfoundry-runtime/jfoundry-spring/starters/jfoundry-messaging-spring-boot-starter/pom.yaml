@@ -1,0 +1,49 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+artifactId: jfoundry-messaging-spring-boot-starter
+name: jfoundry-messaging-spring-boot-starter
+description: "Spring Boot starter for jfoundry messaging transport contracts, Jackson payload serialization,\n        and the default logging MessageSender."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-spring-boot-starter
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-jackson
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-spring
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-json
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-jackson3
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-test
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

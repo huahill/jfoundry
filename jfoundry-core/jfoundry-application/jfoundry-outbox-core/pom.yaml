@@ -1,0 +1,27 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-application
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../pom.yaml
+artifactId: jfoundry-outbox-core
+name: jfoundry-outbox-core
+description: "Application Outbox message model, store contract, dispatcher service, status machine."
+dependencies:
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-transaction-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-domain-event-core
+  - groupId: io.github.xfoundries
+    artifactId: jfoundry-messaging-core
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.slf4j
+    artifactId: slf4j-api
+    scope: provided
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: org.assertj
+    artifactId: assertj-core
+    scope: test
