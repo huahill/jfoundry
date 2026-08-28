@@ -24,10 +24,10 @@ require_text() {
 
 extension_file=".mvn/extensions.xml"
 require_file "${extension_file}" "Mason extension configuration does not exist"
-require_text "${extension_file}" '<groupId>fr.jcgay.maven</groupId>' \
-    "Mason extension must use groupId fr.jcgay.maven"
-require_text "${extension_file}" '<artifactId>maven-mason</artifactId>' \
-    "Mason extension must use artifactId maven-mason"
+require_text "${extension_file}" '<groupId>eu.maveniverse.maven.mason</groupId>' \
+    "Mason extension must use groupId eu.maveniverse.maven.mason"
+require_text "${extension_file}" '<artifactId>mason</artifactId>' \
+    "Mason extension must use artifactId mason"
 require_text "${extension_file}" '<version>0.3.0</version>' \
     "Mason extension must use version 0.3.0"
 

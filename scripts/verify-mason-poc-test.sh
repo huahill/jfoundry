@@ -40,8 +40,8 @@ write_valid_fixture() {
     printf '%s\n' \
         '<extensions>' \
         '  <extension>' \
-        '    <groupId>fr.jcgay.maven</groupId>' \
-        '    <artifactId>maven-mason</artifactId>' \
+        '    <groupId>eu.maveniverse.maven.mason</groupId>' \
+        '    <artifactId>mason</artifactId>' \
         '    <version>0.3.0</version>' \
         '  </extension>' \
         '</extensions>' > "${root}/.mvn/extensions.xml"
