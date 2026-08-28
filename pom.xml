@@ -7,7 +7,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-parent</artifactId>
-    <version>1.4.0-SNAPSHOT</version>
+    <version>1.4.0</version>
     <packaging>pom</packaging>
 
     <name>jfoundry-parent</name>
@@ -40,7 +40,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.outputTimestamp>2026-08-23T16:38:25Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-08-28T08:08:36Z</project.build.outputTimestamp>
         <maven.compiler.release>25</maven.compiler.release>
 
         <jfoundry.release.url>https://github.com/xfoundries/jfoundry</jfoundry.release.url>
