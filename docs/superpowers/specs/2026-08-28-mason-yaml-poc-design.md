@@ -54,7 +54,10 @@ Mason is registered once in `.mvn/extensions.xml`. The source of truth for conve
 
 Maven 4.0.0-rc-6 starts from the root YAML descriptor and loads converted YAML children through Mason. Unconverted children continue to use `pom.xml`. Parent resolution and relative paths must work in both directions:
 
-- XML children must resolve the YAML root parent.
+- XML children that point directly at the YAML root must use an explicit
+  `pom.yaml` relative path. Mason does not reinterpret an explicit `pom.xml`
+  parent path, so the eight unconverted top-level aggregators under Core and
+  Runtime change only that path during the PoC.
 - YAML children must resolve XML intermediate parents where applicable.
 - Reactor selection with `-pl` and dependency closure with `-am` must remain unchanged.
 
@@ -82,6 +85,8 @@ Maven 3 cannot read Mason YAML. The fallback publication experiment therefore ge
 The generated POM set must:
 
 - cover the entire reactor selected for deployment, not only the four converted modules;
+- reverse the eight temporary `pom.yaml` parent paths back to `pom.xml` after
+  generating the root XML descriptor, so Maven 3 never resolves a YAML parent;
 - contain no machine-specific absolute paths;
 - preserve the source model rather than embedding a developer workstation's effective build directories;
 - pass existing release metadata and Consumer POM verification;
