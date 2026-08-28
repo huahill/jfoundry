@@ -88,6 +88,7 @@ for project in "${converted_projects[@]}"; do
 done
 
 xml_parent_paths=(
+    "jfoundry-core/jfoundry-domain/pom.xml:../../pom.yaml:../../pom.xml"
     "jfoundry-core/jfoundry-application/pom.xml:../../pom.yaml:../../pom.xml"
     "jfoundry-core/jfoundry-architecture/jfoundry-architecture-test/pom.xml:../../../pom.yaml:../../../pom.xml"
     "jfoundry-core/jfoundry-architecture/pom.xml:../../pom.yaml:../../pom.xml"

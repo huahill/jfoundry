@@ -62,6 +62,7 @@ if rg -l -F "${repository_root}" "${publication_tree}" --glob 'pom.xml' | grep -
 fi
 
 xml_parent_paths=(
+    "jfoundry-core/jfoundry-domain/pom.xml:../../pom.xml"
     "jfoundry-core/jfoundry-application/pom.xml:../../pom.xml"
     "jfoundry-core/jfoundry-architecture/jfoundry-architecture-test/pom.xml:../../../pom.xml"
     "jfoundry-core/jfoundry-architecture/pom.xml:../../pom.xml"
