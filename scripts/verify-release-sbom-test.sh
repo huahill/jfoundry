@@ -58,6 +58,6 @@ XML
 
 assert_rejects "${unsafe_pom}"
 assert_accepts "${safe_pom}"
-assert_accepts "${ROOT_DIR}/pom.xml"
+assert_accepts "${ROOT_DIR}/pom.yaml"
 
 echo "Release SBOM verification tests passed."

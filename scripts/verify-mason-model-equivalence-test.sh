@@ -19,6 +19,12 @@ write_model() {
     local plugin_goal="$3"
     local profile_id="$4"
     local scm_inherit="$5"
+    local extra_profile_id="${6:-}"
+    local extra_profile=""
+
+    if [[ -n "${extra_profile_id}" ]]; then
+        extra_profile="$(printf '\n    <profile><id>%s</id></profile>\n  ' "${extra_profile_id}")"
+    fi
 
     printf '%s\n' \
         '<project xmlns="http://maven.apache.org/POM/4.0.0" child.project.url.inherit.append.path="false">' \
@@ -29,7 +35,7 @@ write_model() {
         '  <build><plugins><plugin><groupId>example</groupId><artifactId>plugin</artifactId>' \
         "    <executions><execution><goals><goal>${plugin_goal}</goal></goals></execution></executions>" \
         '  </plugin></plugins></build>' \
-        "  <profiles><profile><id>${profile_id}</id></profile></profiles>" \
+        "  <profiles><profile><id>${profile_id}</id></profile>${extra_profile}</profiles>" \
         "  <scm child.scm.url.inherit.append.path=\"${scm_inherit}\"><url>https://example.invalid</url></scm>" \
         '</project>' > "${path}"
 }
@@ -53,6 +59,9 @@ expect_difference() {
 write_model "${fixture_root}/baseline.xml" "1.0" "verify" "release" "false"
 write_model "${fixture_root}/equivalent.xml" "1.0" "verify" "release" "false"
 "${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/equivalent.xml"
+
+write_model "${fixture_root}/poc-profile.xml" "1.0" "verify" "release" "false" "mason-central-poc"
+"${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/poc-profile.xml"
 
 write_model "${fixture_root}/dependency.xml" "2.0" "verify" "release" "false"
 expect_difference "dependency version" "${fixture_root}/dependency.xml"

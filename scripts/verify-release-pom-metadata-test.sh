@@ -40,12 +40,36 @@ XML
 XML
 }
 
+write_mixed_fixture() {
+    local directory="$1"
+    local version="$2"
+    local root_tag="$3"
+    local bom_tag="$4"
+
+    mkdir -p "${directory}/jfoundry-boms/example-dependencies"
+    printf '%s\n' \
+        "version: ${version}" \
+        'scm:' \
+        "  tag: ${root_tag}" \
+        > "${directory}/pom.yaml"
+    cat > "${directory}/jfoundry-boms/example-dependencies/pom.xml" <<XML
+<project>
+  <version>${version}</version>
+  <scm><tag>${bom_tag}</tag></scm>
+</project>
+XML
+}
+
 temp_dir="$(mktemp -d)"
 trap 'rm -rf "${temp_dir}"' EXIT
 
 stable_fixture="${temp_dir}/stable"
 write_fixture "${stable_fixture}" "1.3.0" 'v${project.version}' "v1.3.0"
 assert_accepts "${stable_fixture}"
+
+mixed_fixture="${temp_dir}/mixed"
+write_mixed_fixture "${mixed_fixture}" "1.3.0" 'v${project.version}' "v1.3.0"
+assert_accepts "${mixed_fixture}"
 
 stale_tag_fixture="${temp_dir}/stale-tag"
 write_fixture "${stale_tag_fixture}" "1.3.0" 'v${project.version}' "v1.2.0"

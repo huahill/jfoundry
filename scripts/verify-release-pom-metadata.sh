@@ -6,6 +6,7 @@ root_dir="${1:-.}"
 
 ruby - "${root_dir}" <<'RUBY'
 require "rexml/document"
+require "yaml"
 
 def fail_metadata(message)
   warn "Release POM metadata is invalid: #{message}"
@@ -21,20 +22,34 @@ def child_text(element, name)
 end
 
 root_dir = File.expand_path(ARGV.fetch(0))
-pom_paths = [File.join(root_dir, "pom.xml"), *Dir[File.join(root_dir, "jfoundry-boms", "*", "pom.xml")].sort]
-fail_metadata("root pom.xml does not exist") unless File.file?(pom_paths.first)
+root_pom = ["pom.yaml", "pom.xml"]
+  .map { |name| File.join(root_dir, name) }
+  .find { |path| File.file?(path) }
+fail_metadata("root pom.yaml or pom.xml does not exist") unless root_pom
+bom_poms = Dir[File.join(root_dir, "jfoundry-boms", "*", "{pom.yaml,pom.xml}")].sort
+pom_paths = [root_pom, *bom_poms]
 fail_metadata("no independent BOM or parent POMs were found under jfoundry-boms") if pom_paths.size == 1
 
 records = pom_paths.map do |path|
-  begin
-    project = REXML::Document.new(File.read(path)).root
-  rescue REXML::ParseException => error
-    fail_metadata("#{path.delete_prefix("#{root_dir}/")} is not valid XML: #{error.message.lines.first.strip}")
+  relative_path = path.delete_prefix("#{root_dir}/")
+  if File.extname(path) == ".yaml"
+    begin
+      project = YAML.safe_load(File.read(path), aliases: true)
+    rescue Psych::SyntaxError => error
+      fail_metadata("#{relative_path} is not valid YAML: #{error.message.lines.first.strip}")
+    end
+    version = project["version"].to_s.strip
+    scm_tag = project.dig("scm", "tag").to_s.strip
+  else
+    begin
+      project = REXML::Document.new(File.read(path)).root
+    rescue REXML::ParseException => error
+      fail_metadata("#{relative_path} is not valid XML: #{error.message.lines.first.strip}")
+    end
+    version = child_text(project, "version")
+    scm_tag = child_text(child(project, "scm"), "tag")
   end
 
-  relative_path = path.delete_prefix("#{root_dir}/")
-  version = child_text(project, "version")
-  scm_tag = child_text(child(project, "scm"), "tag")
   fail_metadata("#{relative_path} must declare a direct project version") if version.empty?
   fail_metadata("#{relative_path} must declare a direct scm/tag") if scm_tag.empty?
   [relative_path, version, scm_tag]

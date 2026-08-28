@@ -3,12 +3,14 @@
 set -euo pipefail
 
 repository_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+normalizer_xslt="${repository_root}/scripts/support/normalize-mason-model.xsl"
 
 normalize_model() {
     local source_file="$1"
     local destination_file="$2"
 
-    xmllint --xpath '/*' "${source_file}" |
+    xsltproc "${normalizer_xslt}" "${source_file}" |
+        xmllint --xpath '/*' - |
         xmllint --c14n - |
         sed 's#<relativePath>../../pom.yaml</relativePath>#<relativePath>../../pom.xml</relativePath>#' \
             > "${destination_file}"

@@ -3,11 +3,11 @@
 set -euo pipefail
 
 workflow_file="${1:-.github/workflows/release.yml}"
-pom_file="${2:-pom.xml}"
+pom_file="${2:-pom.yaml}"
 bom_pom_files=(
     "jfoundry-boms/jfoundry-dependencies/pom.xml"
     "jfoundry-boms/jfoundry-foundation-dependencies/pom.xml"
-    "jfoundry-boms/jfoundry-helidon-dependencies/pom.xml"
+    "jfoundry-boms/jfoundry-helidon-dependencies/pom.yaml"
     "jfoundry-boms/jfoundry-modules-dependencies/pom.xml"
     "jfoundry-boms/jfoundry-quarkus-dependencies/pom.xml"
     "jfoundry-boms/jfoundry-spring-boot-dependencies/pom.xml"
@@ -44,12 +44,45 @@ require_count() {
     fi
 }
 
-require_pom_text() {
-    local text="$1"
-    if ! grep -Fq -- "${text}" "${pom_file}"; then
-        echo "Release Maven configuration must contain: ${text}" >&2
-        exit 1
-    fi
+require_automatic_central_publication() {
+    local build_file="$1"
+
+    ruby - "${build_file}" <<'RUBY'
+require "rexml/document"
+require "yaml"
+
+path = ARGV.fetch(0)
+
+if File.extname(path) == ".yaml"
+  project = YAML.safe_load(File.read(path), aliases: true)
+  release = Array(project["profiles"]).find { |profile| profile["id"] == "release" }
+  plugins = Array(release&.dig("build", "plugins"))
+  central = plugins.find do |plugin|
+    plugin["groupId"] == "org.sonatype.central" &&
+      plugin["artifactId"] == "central-publishing-maven-plugin"
+  end
+  configuration = central&.fetch("configuration", nil)
+  valid = configuration&.fetch("autoPublish", nil) == true &&
+    configuration&.fetch("waitUntil", nil) == "PUBLISHED"
+else
+  project = REXML::Document.new(File.read(path)).root
+  release = project.elements.to_a("profiles/profile").find do |profile|
+    profile.elements["id"]&.text.to_s.strip == "release"
+  end
+  central = release&.elements&.to_a("build/plugins/plugin")&.find do |plugin|
+    plugin.elements["groupId"]&.text.to_s.strip == "org.sonatype.central" &&
+      plugin.elements["artifactId"]&.text.to_s.strip == "central-publishing-maven-plugin"
+  end
+  configuration = central&.elements&.[]("configuration")
+  valid = configuration&.elements&.[]("autoPublish")&.text.to_s.strip == "true" &&
+    configuration&.elements&.[]("waitUntil")&.text.to_s.strip == "PUBLISHED"
+end
+
+unless valid
+  warn "Release Maven configuration must publish automatically and wait until PUBLISHED: #{path}"
+  exit 1
+end
+RUBY
 }
 
 forbid_text() {
@@ -125,16 +158,13 @@ require_text "--prerelease"
 require_text "--latest=false"
 require_text "always()"
 
-require_pom_text "<autoPublish>true</autoPublish>"
-require_pom_text "<waitUntil>PUBLISHED</waitUntil>"
+require_automatic_central_publication "${pom_file}"
 for bom_pom_file in "${bom_pom_files[@]}"; do
     if [[ ! -f "${bom_pom_file}" ]]; then
         echo "Standalone BOM release Maven configuration does not exist: ${bom_pom_file}" >&2
         exit 1
     fi
-    pom_file="${bom_pom_file}"
-    require_pom_text "<autoPublish>true</autoPublish>"
-    require_pom_text "<waitUntil>PUBLISHED</waitUntil>"
+    require_automatic_central_publication "${bom_pom_file}"
 done
 
 immutable_source_line="$(grep -n -F "Verify immutable release source" "${workflow_file}" | head -n 1 | cut -d: -f1)"
