@@ -35,8 +35,10 @@ must not combine the Boot-only and Cloud runtime BOMs.
 ## Consumer Composition
 
 The complete 122-project Mason YAML proof of concept was verified on 2026-08-29 with Maven
-4.0.0-rc-6, Mason 0.3.0, and Java 25. See [Mason YAML Proof of Concept](mason-yaml-poc.md) for
-the conversion boundary, validation evidence, and remaining adoption risks.
+4.0.0-rc-6, Mason 0.3.0, and Java 25. Mason and Maven validation pass, while Quarkus's separate
+workspace loader remains XML-only and blocks the normal Java 25 test matrix. See
+[Mason YAML Proof of Concept](mason-yaml-poc.md) for the conversion boundary, validation evidence,
+and remaining adoption risks.
 
 Every business application imports `jfoundry-dependencies` and adds only the runtime BOM and
 capabilities it needs:
