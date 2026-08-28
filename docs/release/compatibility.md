@@ -28,11 +28,15 @@ must not combine the Boot-only and Cloud runtime BOMs.
 | Java compile target | 25 |
 | Runtime Java | 25 |
 | Native Image | GraalVM 25 |
-| Maven source descriptor model | 4.1.0 (Maven 4-only XML model) |
+| Maven source descriptor model | 4.1.0 (Maven 4-only YAML model through Mason) |
 | Maven wrapper and release tool | 4.0.0-rc-6 (Maven 4-only; publication blocked until final) |
 | Maven 3 source-build compatibility | Not supported |
 
 ## Consumer Composition
+
+The complete 122-project Mason YAML proof of concept was verified on 2026-08-29 with Maven
+4.0.0-rc-6, Mason 0.3.0, and Java 25. See [Mason YAML Proof of Concept](mason-yaml-poc.md) for
+the conversion boundary, validation evidence, and remaining adoption risks.
 
 Every business application imports `jfoundry-dependencies` and adds only the runtime BOM and
 capabilities it needs:
@@ -111,6 +115,7 @@ The authoritative verification definitions are in `.github/workflows/ci.yml`,
 - Spring, Quarkus, and Helidon middleware integration;
 - Spring, Quarkus, and Helidon Native Image consumer checks;
 - Maven 4 packaging, Consumer POM verification, and Maven 4.1 model/repository reachability checks;
+- Mason YAML source, reactor reachability, and model-handoff checks;
 - runtime BOM and supported-line consistency; exact versions are captured in CI logs and release
   evidence for each immutable commit or tag;
 - release metadata and supply-chain policy.
