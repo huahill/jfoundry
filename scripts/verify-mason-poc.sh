@@ -65,6 +65,24 @@ for entry in "${xml_parent_paths[@]}"; do
         "XML parent path must resolve the YAML root"
 done
 
+quarkus_test_modules=(
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-transaction-quarkus-runtime/pom.xml"
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-domain-event-quarkus-runtime/pom.xml"
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-persistence-quarkus-runtime/pom.xml"
+)
+
+for quarkus_pom in "${quarkus_test_modules[@]}"; do
+    require_file "${quarkus_pom}" "Quarkus test module POM does not exist"
+    require_text "${quarkus_pom}" '<artifactId>quarkus-maven-plugin</artifactId>' \
+        "Quarkus test module must configure the Quarkus Maven plugin"
+    require_text "${quarkus_pom}" '<extensions>true</extensions>' \
+        "Quarkus test module must enable the Quarkus Maven plugin extension"
+    require_text "${quarkus_pom}" '<goal>generate-code-tests</goal>' \
+        "Quarkus test module must generate the serialized application model"
+    require_text "${quarkus_pom}" '<skipSourceGeneration>${skipTests}</skipSourceGeneration>' \
+        "Quarkus test model generation must honor skipTests"
+done
+
 require_file ".mvn/wrapper/maven-wrapper.properties" "Maven Wrapper configuration does not exist"
 require_text ".mvn/wrapper/maven-wrapper.properties" "/apache-maven/4.0.0-rc-6/" \
     "Mason PoC requires Maven Wrapper 4.0.0-rc-6"

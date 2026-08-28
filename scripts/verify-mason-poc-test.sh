@@ -31,6 +31,12 @@ xml_parent_paths=(
     "jfoundry-runtime/jfoundry-spring/pom.xml:../../pom.yaml"
 )
 
+quarkus_test_modules=(
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-transaction-quarkus-runtime"
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-domain-event-quarkus-runtime"
+    "jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-persistence-quarkus-runtime"
+)
+
 write_valid_fixture() {
     local root="$1"
     local entry path relative_path
@@ -62,6 +68,24 @@ write_valid_fixture() {
         mkdir -p "$(dirname "${root}/${path}")"
         printf '<project><parent><relativePath>%s</relativePath></parent></project>\n' \
             "${relative_path}" > "${root}/${path}"
+    done
+
+    for path in "${quarkus_test_modules[@]}"; do
+        mkdir -p "${root}/${path}"
+        printf '%s\n' \
+            '<project><build><plugins><plugin>' \
+            '<groupId>io.quarkus</groupId>' \
+            '<artifactId>quarkus-maven-plugin</artifactId>' \
+            '<version>${quarkus.version}</version>' \
+            '<extensions>true</extensions>' \
+            '<configuration>' \
+            '<skipSourceGeneration>${skipTests}</skipSourceGeneration>' \
+            '</configuration>' \
+            '<executions><execution><goals>' \
+            '<goal>generate-code-tests</goal>' \
+            '</goals></execution></executions>' \
+            '</plugin></plugins></build></project>' \
+            > "${root}/${path}/pom.xml"
     done
 }
 
@@ -107,5 +131,21 @@ sed -i.bak 's#../../pom.yaml#../../pom.xml#' \
     "${wrong_parent}/jfoundry-core/jfoundry-application/pom.xml"
 rm "${wrong_parent}/jfoundry-core/jfoundry-application/pom.xml.bak"
 expect_failure "XML parent path must resolve the YAML root" "${wrong_parent}"
+
+missing_quarkus_test_model="${fixture_root}/missing-quarkus-test-model"
+write_valid_fixture "${missing_quarkus_test_model}"
+sed -i.bak '/<goal>generate-code-tests<\/goal>/d' \
+    "${missing_quarkus_test_model}/${quarkus_test_modules[0]}/pom.xml"
+rm "${missing_quarkus_test_model}/${quarkus_test_modules[0]}/pom.xml.bak"
+expect_failure "Quarkus test module must generate the serialized application model" \
+    "${missing_quarkus_test_model}"
+
+missing_quarkus_skip_tests="${fixture_root}/missing-quarkus-skip-tests"
+write_valid_fixture "${missing_quarkus_skip_tests}"
+sed -i.bak '/<skipSourceGeneration>${skipTests}<\/skipSourceGeneration>/d' \
+    "${missing_quarkus_skip_tests}/${quarkus_test_modules[0]}/pom.xml"
+rm "${missing_quarkus_skip_tests}/${quarkus_test_modules[0]}/pom.xml.bak"
+expect_failure "Quarkus test model generation must honor skipTests" \
+    "${missing_quarkus_skip_tests}"
 
 echo "Mason PoC verifier self-test passed."

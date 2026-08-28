@@ -2,22 +2,16 @@
 
 ## Decision
 
-The four-project Mason YAML proof of concept is not suitable for adoption in
-JFoundry today. Keep the repository POMs in XML.
+The four-project Mason YAML proof of concept is technically successful, but a
+repository-wide conversion remains deferred.
 
-Mason successfully preserves the Maven model, Maven 4 lifecycle behavior outside
-Quarkus's separate workspace loader, Maven 3 consumer compatibility, release
-metadata, and a deterministic Maven 3 publication path for the selected
-descriptors. However, Quarkus `3.39.1`
-implements its own workspace loader for `@QuarkusTest`. That loader bypasses
-Maven core extensions, assumes every workspace model is `pom.xml`, and parses it
-with Maven's XML reader. The Java 25 release-baseline test therefore fails when
-the Quarkus parent hierarchy reaches the YAML root.
-
-A generated XML tree passes the same complete test matrix, confirming that the
-failure is a Quarkus build-tool compatibility limitation rather than Maven model
-drift or a JFoundry runtime regression. A committed XML shadow would avoid the
-failure but would violate the PoC's single-source requirement.
+Mason preserves the Maven model, Maven 4 lifecycle behavior, Maven 3 consumer
+compatibility, release metadata, and a deterministic Maven 3 publication path
+for the selected descriptors. Quarkus `3.39.1` tests also work with the YAML
+root when each module using `@QuarkusTest` runs
+`quarkus-maven-plugin:generate-code-tests` before Surefire. The complete
+122-project Java 25 matrix passes directly from the mixed XML/YAML source tree;
+no committed XML shadow POM is required.
 
 This is a build-source experiment. It does not change public Java APIs, runtime
 behavior, production dependency management, or the production Central
@@ -70,38 +64,37 @@ scm:
   child.scm.url.inherit.append.path: false
 ```
 
-### Quarkus Workspace Limitation
+### Quarkus Test Model Handoff
 
-`JAVA_25_HOME=... scripts/verify-ci-matrix.sh` fails during Quarkus JUnit test
-discovery. The relevant error is:
+Quarkus tests should consume the application model already resolved by Maven
+rather than reconstruct the workspace in the forked Surefire JVM. The latter
+does not contain Maven's core-extension container, so its fallback
+`WorkspaceLoader` cannot apply Mason semantics to `pom.yaml`.
 
-```text
-Failed to load POM from .../pom.yaml
-```
+The transaction, domain-event, and persistence Quarkus runtime modules therefore
+enable `quarkus-maven-plugin` and bind `generate-code-tests`. That goal
+serializes Maven's resolved application model for `@QuarkusTest`, keeping Mason
+responsible for interpreting the YAML source model. The plugin configuration
+maps `skipSourceGeneration` to `skipTests`, so package and publication commands
+that skip tests do not resolve Quarkus deployment artifacts before their reactor
+modules have been built. The source contract verifier guards the model-handoff
+configuration, while the Central no-upload PoC covers the publication behavior.
 
-Quarkus `WorkspaceLoader` declares `POM_XML = "pom.xml"`, and `ModelUtils`
-reads workspace models with `MavenXpp3Reader`. Mason is a Maven core extension,
-so it is not involved in this separate Quarkus parsing path. Quarkus `main`
-retains the same XML-only implementation as of 2026-08-28.
-
-Quarkus issue [#52190](https://github.com/quarkusio/quarkus/issues/52190) tracks
-broader Maven 4 Model 4.1 support and remains open. Pull request
-[#52715](https://github.com/quarkusio/quarkus/pull/52715) prepared the internal
-model loader for Maven 4.1 but did not add Polyglot Maven or Mason model-reader
-support. GitHub searches found no Quarkus issue or pull request for `pom.yaml`.
-
-The publication-tree generator was then used to create a repository-external,
-XML-only copy from the same working tree. The complete 122-project Java 25
-matrix passed there, including the Quarkus runtime and integration tests. This
-control run isolates the descriptor parser as the cause but is not evidence
-that the YAML source tree passes normal CI.
+Quarkus issue [#56270](https://github.com/quarkusio/quarkus/issues/56270) records
+the diagnosis. Documentation pull request
+[#56271](https://github.com/quarkusio/quarkus/pull/56271) explains the same
+model-handoff requirement upstream. After applying the configuration,
+`JAVA_25_HOME=... scripts/verify-ci-matrix.sh` passed all 122 projects directly
+from the mixed XML/YAML tree on 2026-08-28.
 
 ### Model Equivalence
 
-`scripts/verify-mason-model-equivalence.sh origin/main WORKTREE` generated and
-canonically compared effective models for all four converted projects. The
-root, domain, starter, and Helidon BOM models were equivalent to the XML
-baseline.
+`BASE_REF=$(git merge-base origin/main HEAD)` followed by
+`scripts/verify-mason-model-equivalence.sh "$BASE_REF"` generated and
+canonically compared effective models for all four converted projects. Using
+the merge base keeps the long-lived PoC comparison independent of later release
+version changes on `origin/main`. The root, domain, starter, and Helidon BOM
+models were equivalent to the XML baseline.
 
 The comparison normalizes the domain parent filename and excludes only the
 dedicated `mason-central-poc` profile. Mutations to coordinates, dependencies,
@@ -156,9 +149,6 @@ prove that Sonatype's production service accepts the bundle or that plugin
 
 ## Remaining Risks
 
-- Quarkus workspace discovery is XML-only and prevents the normal Java 25 test
-  matrix from running against a YAML root. This is the immediate adoption
-  blocker for JFoundry.
 - Apache Maven still tracks Central readiness in
   [MNG-8584](https://github.com/apache/maven/issues/10647). Maven 4 and the
   Sonatype Central Publishing Plugin are released independently.
@@ -177,18 +167,15 @@ Keep the production `.github/workflows/release.yml` on Maven 3.9.16. Do not
 merge the PoC conversion, convert the remaining POMs, or remove the Maven 3
 bridge until all of the following are true:
 
-1. Quarkus workspace discovery can consume Maven models through Maven's model
-   reader or otherwise supports Mason YAML without a committed XML shadow POM.
-2. Maven 4 Central publication is supported by Apache Maven and Sonatype for a
+1. Maven 4 Central publication is supported by Apache Maven and Sonatype for a
    final Maven 4 release, or JFoundry validates the explicit publish path
    against a Sonatype-provided safe test facility.
-3. IntelliJ IDEA and any other required developer tooling can import and edit
+2. IntelliJ IDEA and any other required developer tooling can import and edit
    the mixed or fully converted reactor acceptably.
-4. The model-equivalence, Consumer POM, release metadata, SBOM, and publication
+3. The model-equivalence, Consumer POM, release metadata, SBOM, and publication
    bridge checks remain mandatory gates.
-5. The maintenance benefit justifies converting and reviewing the remaining
+4. The maintenance benefit justifies converting and reviewing the remaining
    118 descriptors.
 
-Until then, this branch records a useful but unsuccessful adoption experiment:
-Mason itself works for the selected Maven models, while JFoundry's required
-Quarkus toolchain does not.
+Until then, this branch is evidence that Mason YAML is viable for JFoundry, not
+a decision to make YAML the repository-wide build format.
