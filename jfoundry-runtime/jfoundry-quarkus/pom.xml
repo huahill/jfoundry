@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.1.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
-    <modelVersion>4.1.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <relativePath>../../pom.xml</relativePath>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-parent</artifactId>
+        <version>1.4.0-SNAPSHOT</version>
+        <relativePath>../../pom.yaml</relativePath>
     </parent>
 
     <artifactId>jfoundry-quarkus</artifactId>
@@ -30,29 +33,29 @@
         </dependencies>
     </dependencyManagement>
 
-    <subprojects>
-        <subproject>runtime/jfoundry-transaction-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-domain-event-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-persistence-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-restclient-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-web-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-outbox-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-messaging-kafka-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-messaging-rabbitmq-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-outbox-jpa-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-inbox-jpa-quarkus-runtime</subproject>
-        <subproject>runtime/jfoundry-persistence-jpa-quarkus-runtime</subproject>
-        <subproject>deployment/jfoundry-transaction-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-domain-event-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-persistence-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-restclient-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-web-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-outbox-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-messaging-kafka-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-messaging-rabbitmq-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-outbox-jpa-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-inbox-jpa-quarkus-deployment</subproject>
-        <subproject>deployment/jfoundry-persistence-jpa-quarkus-deployment</subproject>
-        <subproject>jfoundry-quarkus-integration-tests</subproject>
-    </subprojects>
+    <modules>
+        <module>runtime/jfoundry-transaction-quarkus-runtime</module>
+        <module>runtime/jfoundry-domain-event-quarkus-runtime</module>
+        <module>runtime/jfoundry-persistence-quarkus-runtime</module>
+        <module>runtime/jfoundry-restclient-quarkus-runtime</module>
+        <module>runtime/jfoundry-web-quarkus-runtime</module>
+        <module>runtime/jfoundry-outbox-quarkus-runtime</module>
+        <module>runtime/jfoundry-messaging-kafka-quarkus-runtime</module>
+        <module>runtime/jfoundry-messaging-rabbitmq-quarkus-runtime</module>
+        <module>runtime/jfoundry-outbox-jpa-quarkus-runtime</module>
+        <module>runtime/jfoundry-inbox-jpa-quarkus-runtime</module>
+        <module>runtime/jfoundry-persistence-jpa-quarkus-runtime</module>
+        <module>deployment/jfoundry-transaction-quarkus-deployment</module>
+        <module>deployment/jfoundry-domain-event-quarkus-deployment</module>
+        <module>deployment/jfoundry-persistence-quarkus-deployment</module>
+        <module>deployment/jfoundry-restclient-quarkus-deployment</module>
+        <module>deployment/jfoundry-web-quarkus-deployment</module>
+        <module>deployment/jfoundry-outbox-quarkus-deployment</module>
+        <module>deployment/jfoundry-messaging-kafka-quarkus-deployment</module>
+        <module>deployment/jfoundry-messaging-rabbitmq-quarkus-deployment</module>
+        <module>deployment/jfoundry-outbox-jpa-quarkus-deployment</module>
+        <module>deployment/jfoundry-inbox-jpa-quarkus-deployment</module>
+        <module>deployment/jfoundry-persistence-jpa-quarkus-deployment</module>
+        <module>jfoundry-quarkus-integration-tests</module>
+    </modules>
 </project>

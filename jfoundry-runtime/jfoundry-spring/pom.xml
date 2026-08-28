@@ -1,8 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
-    <modelVersion>4.1.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <relativePath>../../pom.xml</relativePath>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-parent</artifactId>
+        <version>1.4.0-SNAPSHOT</version>
+        <relativePath>../../pom.yaml</relativePath>
     </parent>
 
     <artifactId>jfoundry-spring</artifactId>
@@ -26,49 +29,49 @@
         </dependencies>
     </dependencyManagement>
 
-    <subprojects>
-        <subproject>runtime/jfoundry-domain-event-spring</subproject>
-        <subproject>runtime/jfoundry-persistence-spring</subproject>
-        <subproject>runtime/jfoundry-messaging-spring</subproject>
-        <subproject>runtime/jfoundry-outbox-spring</subproject>
-        <subproject>runtime/jfoundry-transaction-spring</subproject>
-        <subproject>runtime/jfoundry-lock-spring</subproject>
-        <subproject>runtime/jfoundry-observability-spring</subproject>
-        <subproject>runtime/jfoundry-http-spring</subproject>
-        <subproject>runtime/jfoundry-restclient-spring</subproject>
-        <subproject>runtime/jfoundry-webmvc-spring</subproject>
-        <subproject>autoconfigure/jfoundry-jpa-spring-boot-support</subproject>
-        <subproject>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-lock-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-messaging-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-observability-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-outbox-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-inbox-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-persistence-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</subproject>
-        <subproject>autoconfigure/jfoundry-restclient-spring-boot-autoconfigure</subproject>
-        <subproject>jfoundry-spring-integration-tests</subproject>
-        <subproject>starters/jfoundry-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-transaction-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-observability-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-webmvc-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-domain-event-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-messaging-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-messaging-kafka-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-messaging-rocketmq-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-messaging-rabbitmq-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-lock-redisson-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-outbox-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-outbox-mybatis-plus-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-outbox-jpa-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-outbox-jobrunr-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-inbox-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-inbox-mybatis-plus-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-inbox-jpa-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-persistence-mybatis-plus-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-persistence-jpa-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-restclient-spring-boot-starter</subproject>
-    </subprojects>
+    <modules>
+        <module>runtime/jfoundry-domain-event-spring</module>
+        <module>runtime/jfoundry-persistence-spring</module>
+        <module>runtime/jfoundry-messaging-spring</module>
+        <module>runtime/jfoundry-outbox-spring</module>
+        <module>runtime/jfoundry-transaction-spring</module>
+        <module>runtime/jfoundry-lock-spring</module>
+        <module>runtime/jfoundry-observability-spring</module>
+        <module>runtime/jfoundry-http-spring</module>
+        <module>runtime/jfoundry-restclient-spring</module>
+        <module>runtime/jfoundry-webmvc-spring</module>
+        <module>autoconfigure/jfoundry-jpa-spring-boot-support</module>
+        <module>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-lock-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-messaging-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-observability-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-outbox-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-inbox-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-persistence-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure</module>
+        <module>autoconfigure/jfoundry-restclient-spring-boot-autoconfigure</module>
+        <module>jfoundry-spring-integration-tests</module>
+        <module>starters/jfoundry-spring-boot-starter</module>
+        <module>starters/jfoundry-transaction-spring-boot-starter</module>
+        <module>starters/jfoundry-observability-spring-boot-starter</module>
+        <module>starters/jfoundry-webmvc-spring-boot-starter</module>
+        <module>starters/jfoundry-domain-event-spring-boot-starter</module>
+        <module>starters/jfoundry-messaging-spring-boot-starter</module>
+        <module>starters/jfoundry-messaging-kafka-spring-boot-starter</module>
+        <module>starters/jfoundry-messaging-rocketmq-spring-boot-starter</module>
+        <module>starters/jfoundry-messaging-rabbitmq-spring-boot-starter</module>
+        <module>starters/jfoundry-lock-redisson-spring-boot-starter</module>
+        <module>starters/jfoundry-outbox-spring-boot-starter</module>
+        <module>starters/jfoundry-outbox-mybatis-plus-spring-boot-starter</module>
+        <module>starters/jfoundry-outbox-jpa-spring-boot-starter</module>
+        <module>starters/jfoundry-outbox-jobrunr-spring-boot-starter</module>
+        <module>starters/jfoundry-inbox-spring-boot-starter</module>
+        <module>starters/jfoundry-inbox-mybatis-plus-spring-boot-starter</module>
+        <module>starters/jfoundry-inbox-jpa-spring-boot-starter</module>
+        <module>starters/jfoundry-persistence-mybatis-plus-spring-boot-starter</module>
+        <module>starters/jfoundry-persistence-jpa-spring-boot-starter</module>
+        <module>starters/jfoundry-restclient-spring-boot-starter</module>
+    </modules>
 </project>

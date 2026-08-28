@@ -1,0 +1,29 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-parent
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.yaml
+
+artifactId: jfoundry-domain
+packaging: jar
+
+name: jfoundry-domain
+dependencies:
+  - groupId: org.jspecify
+    artifactId: jspecify
+  - groupId: org.jmolecules
+    artifactId: jmolecules-ddd
+  - groupId: org.jmolecules
+    artifactId: jmolecules-events
+  - groupId: org.jmolecules
+    artifactId: jmolecules-onion-architecture
+  - groupId: org.jmolecules.integrations
+    artifactId: jmolecules-archunit
+    scope: test
+  - groupId: org.junit.jupiter
+    artifactId: junit-jupiter
+    scope: test
+  - groupId: com.tngtech.archunit
+    artifactId: archunit-junit5
+    scope: test

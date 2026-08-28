@@ -1,8 +1,11 @@
-<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
-    <modelVersion>4.1.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
-        <relativePath>../../pom.xml</relativePath>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-parent</artifactId>
+        <version>1.4.0-SNAPSHOT</version>
+        <relativePath>../../pom.yaml</relativePath>
     </parent>
 
     <artifactId>jfoundry-infrastructure</artifactId>
@@ -10,18 +13,18 @@
     <description>Technical adapters for persistence, messaging brokers, outbox stores, and inbox stores.</description>
     <packaging>pom</packaging>
 
-    <subprojects>
-        <subproject>jfoundry-web</subproject>
-        <subproject>jfoundry-persistence-core</subproject>
-        <subproject>jfoundry-persistence-jpa</subproject>
-        <subproject>jfoundry-messaging-jackson</subproject>
-        <subproject>jfoundry-observability-otel</subproject>
-        <subproject>jfoundry-lock-redisson</subproject>
-        <subproject>jfoundry-inbox-mybatis-plus</subproject>
-        <subproject>jfoundry-inbox-jpa</subproject>
-        <subproject>jfoundry-persistence-mybatis-plus</subproject>
-        <subproject>jfoundry-outbox-mybatis-plus</subproject>
-        <subproject>jfoundry-outbox-jpa</subproject>
-        <subproject>jfoundry-outbox-jobrunr</subproject>
-    </subprojects>
+    <modules>
+        <module>jfoundry-web</module>
+        <module>jfoundry-persistence-core</module>
+        <module>jfoundry-persistence-jpa</module>
+        <module>jfoundry-messaging-jackson</module>
+        <module>jfoundry-observability-otel</module>
+        <module>jfoundry-lock-redisson</module>
+        <module>jfoundry-inbox-mybatis-plus</module>
+        <module>jfoundry-inbox-jpa</module>
+        <module>jfoundry-persistence-mybatis-plus</module>
+        <module>jfoundry-outbox-mybatis-plus</module>
+        <module>jfoundry-outbox-jpa</module>
+        <module>jfoundry-outbox-jobrunr</module>
+    </modules>
 </project>

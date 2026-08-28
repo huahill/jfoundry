@@ -1,0 +1,64 @@
+modelVersion: 4.0.0
+parent:
+  groupId: io.github.xfoundries
+  artifactId: jfoundry-spring
+  version: 1.4.0-SNAPSHOT
+  relativePath: ../../pom.xml
+
+artifactId: jfoundry-spring-boot-starter
+name: jfoundry-spring-boot-starter
+description: >-
+  Minimal Spring Boot baseline for jfoundry capability starters.
+  Transaction, messaging, Outbox, Inbox, lock, persistence, and web capabilities are
+  provided by dedicated starter modules.
+
+properties:
+  mockito.javaagent.argLine: "-javaagent:${org.mockito:mockito-core:jar}"
+
+dependencies:
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter
+  - groupId: org.springframework.boot
+    artifactId: spring-boot-starter-test
+    scope: test
+
+build:
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-enforcer-plugin
+      executions:
+        - id: enforce-lightweight-default-starter
+          goals: [enforce]
+          configuration:
+            rules:
+              bannedDependencies:
+                searchTransitive: true
+                message: >-
+                  jfoundry-spring-boot-starter must stay lightweight. Use dedicated capability starters for distributed locks, Outbox, Inbox, MyBatis-Plus, brokers, or JobRunr.
+                excludes:
+                  - io.github.xfoundries:jfoundry-lock-*
+                  - io.github.xfoundries:jfoundry-outbox-*
+                  - io.github.xfoundries:jfoundry-inbox-*
+                  - io.github.xfoundries:jfoundry-persistence-mybatis-plus
+                  - io.github.xfoundries:jfoundry-outbox-jobrunr
+                  - com.baomidou:*
+                  - org.mybatis:*
+                  - org.springframework.kafka:*
+                  - org.springframework.amqp:*
+                  - org.apache.rocketmq:*
+                  - org.jobrunr:*
+                  - org.redisson:*
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+      configuration:
+        skip: true
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals: [jar]
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes: [README.md]

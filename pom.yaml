@@ -1,0 +1,206 @@
+modelVersion: 4.0.0
+child.project.url.inherit.append.path: false
+
+groupId: io.github.xfoundries
+artifactId: jfoundry-parent
+version: 1.4.0-SNAPSHOT
+packaging: pom
+
+name: jfoundry-parent
+description: jfoundry — production-grade DDD framework on jMolecules
+url: ${jfoundry.release.url}
+
+licenses:
+  - name: Apache License, Version 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.txt
+    distribution: repo
+
+developers:
+  - id: youngledo
+    name: youngledo
+
+scm:
+  child.scm.connection.inherit.append.path: false
+  child.scm.developerConnection.inherit.append.path: false
+  child.scm.url.inherit.append.path: false
+  connection: ${jfoundry.release.scm.connection}
+  developerConnection: ${jfoundry.release.scm.developerConnection}
+  url: ${jfoundry.release.scm.url}
+  tag: v${project.version}
+
+properties:
+  project.build.sourceEncoding: UTF-8
+  project.build.outputTimestamp: "2026-08-23T16:38:25Z"
+  maven.compiler.release: "25"
+  jfoundry.release.url: https://github.com/xfoundries/jfoundry
+  jfoundry.release.scm.connection: scm:git:https://github.com/xfoundries/jfoundry.git
+  jfoundry.release.scm.developerConnection: scm:git:https://github.com/xfoundries/jfoundry.git
+  jfoundry.release.scm.url: https://github.com/xfoundries/jfoundry
+  maven-compiler-plugin.version: 3.15.0
+  maven-resources-plugin.version: 3.5.0
+  maven-surefire-plugin.version: 3.5.6
+  maven-failsafe-plugin.version: 3.5.6
+  maven-deploy-plugin.version: 3.1.4
+  maven-jar-plugin.version: 3.5.1
+  maven-source-plugin.version: 3.4.0
+  maven-javadoc-plugin.version: 3.12.0
+  maven-dependency-plugin.version: 3.7.0
+  maven-enforcer-plugin.version: 3.6.3
+  maven-gpg-plugin.version: 3.2.8
+  central-publishing-maven-plugin.version: 0.11.0
+  cyclonedx-maven-plugin.version: 2.9.3
+  argLine: ""
+  mockito.javaagent.argLine: ""
+
+modules:
+  - jfoundry-boms/jfoundry-modules-dependencies
+  - jfoundry-boms/jfoundry-foundation-dependencies
+  - jfoundry-boms/jfoundry-spring-boot-dependencies
+  - jfoundry-boms/jfoundry-spring-cloud-dependencies
+  - jfoundry-boms/jfoundry-quarkus-dependencies
+  - jfoundry-boms/jfoundry-helidon-dependencies
+  - jfoundry-boms/jfoundry-dependencies
+  - jfoundry-boms/jfoundry-spring-boot-parent
+  - jfoundry-core/jfoundry-architecture
+  - jfoundry-core/jfoundry-domain
+  - jfoundry-core/jfoundry-application
+  - jfoundry-core/jfoundry-infrastructure
+  - jfoundry-runtime/jfoundry-jakarta
+  - jfoundry-runtime/jfoundry-spring
+  - jfoundry-runtime/jfoundry-quarkus
+  - jfoundry-runtime/jfoundry-helidon
+
+dependencyManagement:
+  dependencies:
+    # Internal build management for JFoundry modules; runtime BOMs belong to runtime boundaries.
+    - groupId: io.github.xfoundries
+      artifactId: jfoundry-dependencies
+      version: ${project.version}
+      type: pom
+      scope: import
+
+build:
+  pluginManagement:
+    plugins:
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-resources-plugin
+        version: ${maven-resources-plugin.version}
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-compiler-plugin
+        version: ${maven-compiler-plugin.version}
+        configuration:
+          release: ${maven.compiler.release}
+          parameters: true
+          proc: full
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-surefire-plugin
+        version: ${maven-surefire-plugin.version}
+        configuration:
+          argLine: "@{argLine} ${mockito.javaagent.argLine}"
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-failsafe-plugin
+        version: ${maven-failsafe-plugin.version}
+        configuration:
+          argLine: "@{argLine} ${mockito.javaagent.argLine}"
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-dependency-plugin
+        version: ${maven-dependency-plugin.version}
+        executions:
+          - id: resolve-test-agent-paths
+            goals: [properties]
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-deploy-plugin
+        version: ${maven-deploy-plugin.version}
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-jar-plugin
+        version: ${maven-jar-plugin.version}
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-source-plugin
+        version: ${maven-source-plugin.version}
+        configuration:
+          forceCreation: true
+          includePom: true
+        executions:
+          - id: attach-sources
+            goals: [jar-no-fork]
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-javadoc-plugin
+        version: ${maven-javadoc-plugin.version}
+        configuration:
+          doclint: none
+        executions:
+          - id: attach-javadocs
+            goals: [jar]
+      - groupId: org.apache.maven.plugins
+        artifactId: maven-enforcer-plugin
+        version: ${maven-enforcer-plugin.version}
+        executions:
+          - id: enforce-release-baseline
+            goals: [enforce]
+            configuration:
+              rules:
+                requireJavaVersion:
+                  version: "[21,)"
+                requireMavenVersion:
+                  version: "[3.9.0,)"
+                requireReleaseDeps:
+                  onlyWhenRelease: true
+  plugins:
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-enforcer-plugin
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-compiler-plugin
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-dependency-plugin
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-source-plugin
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-javadoc-plugin
+
+profiles:
+  - id: release
+    build:
+      plugins:
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-enforcer-plugin
+          version: ${maven-enforcer-plugin.version}
+          executions:
+            - id: require-release-version
+              goals: [enforce]
+              configuration:
+                rules:
+                  requireReleaseVersion: {}
+        - groupId: org.apache.maven.plugins
+          artifactId: maven-gpg-plugin
+          version: ${maven-gpg-plugin.version}
+          executions:
+            - id: sign-artifacts
+              phase: verify
+              goals: [sign]
+        - groupId: org.sonatype.central
+          artifactId: central-publishing-maven-plugin
+          version: ${central-publishing-maven-plugin.version}
+          extensions: true
+          configuration:
+            publishingServerId: jfoundry
+            autoPublish: true
+            waitUntil: PUBLISHED
+        - groupId: org.cyclonedx
+          artifactId: cyclonedx-maven-plugin
+          version: ${cyclonedx-maven-plugin.version}
+          inherited: false
+          executions:
+            - id: attach-aggregate-sbom
+              phase: package
+              goals: [makeAggregateBom]
+          configuration:
+            projectType: library
+            schemaVersion: "1.6"
+            includeBomSerialNumber: false
+            includeCompileScope: true
+            includeProvidedScope: true
+            includeRuntimeScope: true
+            includeSystemScope: true
+            includeTestScope: false
+            outputFormat: all
+            outputDirectory: ${project.build.directory}
