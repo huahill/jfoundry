@@ -2,15 +2,14 @@
 
 set -euo pipefail
 
-if (( $# < 2 || $# > 4 )); then
-    echo "Usage: $0 <repository> <version> [maven-3-bin] [maven-4-bin]" >&2
+if (( $# < 2 || $# > 3 )); then
+    echo "Usage: $0 <repository> <version> [maven-4-bin]" >&2
     exit 2
 fi
 
 repository="$1"
 version="$2"
-maven3_bin="${3:-}"
-maven4_bin="${4:-}"
+maven4_bin="${3:-}"
 group_path="io/github/xfoundries"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -174,17 +173,11 @@ if [[ -z "${spring_boot_version}" ]]; then
 fi
 verify_spring_parent "jfoundry-spring-boot-parent" "${spring_boot_version}" "jfoundry-spring-boot-dependencies"
 
-if [[ -n "${maven3_bin}" || -n "${maven4_bin}" ]]; then
-    if [[ -z "${maven3_bin}" || -z "${maven4_bin}" ]]; then
-        echo "Maven 3 and Maven 4 executables must be provided together." >&2
-        exit 2
+if [[ -n "${maven4_bin}" ]]; then
+    if [[ ! -x "${maven4_bin}" ]]; then
+        echo "Maven 4 executable does not exist or is not executable: ${maven4_bin}" >&2
+        exit 1
     fi
-    for maven_bin in "${maven3_bin}" "${maven4_bin}"; do
-        if [[ ! -x "${maven_bin}" ]]; then
-            echo "Maven executable does not exist or is not executable: ${maven_bin}" >&2
-            exit 1
-        fi
-    done
 
     temp_dir="$(mktemp -d)"
     trap 'rm -rf "${temp_dir}"' EXIT
@@ -301,11 +294,9 @@ XML
 </project>
 XML
 
-    for maven_bin in "${maven3_bin}" "${maven4_bin}"; do
-        "${maven_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-        "${maven_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-        "${maven_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-    done
+    "${maven4_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+    "${maven4_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+    "${maven4_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
 fi
 
 echo "Consumer POM verification passed: ${repository} (${version})"

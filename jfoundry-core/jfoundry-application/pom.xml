@@ -1,6 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
     <parent>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-parent</artifactId>
@@ -20,14 +20,14 @@
         </dependency>
     </dependencies>
 
-    <modules>
-        <module>jfoundry-application-core</module>
-        <module>jfoundry-transaction-core</module>
-        <module>jfoundry-lock-core</module>
-        <module>jfoundry-domain-event-core</module>
-        <module>jfoundry-domain-event-externalization-core</module>
-        <module>jfoundry-messaging-core</module>
-        <module>jfoundry-outbox-core</module>
-        <module>jfoundry-inbox-core</module>
-    </modules>
+    <subprojects>
+        <subproject>jfoundry-application-core</subproject>
+        <subproject>jfoundry-transaction-core</subproject>
+        <subproject>jfoundry-lock-core</subproject>
+        <subproject>jfoundry-domain-event-core</subproject>
+        <subproject>jfoundry-domain-event-externalization-core</subproject>
+        <subproject>jfoundry-messaging-core</subproject>
+        <subproject>jfoundry-outbox-core</subproject>
+        <subproject>jfoundry-inbox-core</subproject>
+    </subprojects>
 </project>

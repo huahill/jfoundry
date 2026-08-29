@@ -237,15 +237,19 @@ jobs:
         run: bash scripts/verify-consumer-pom-test.sh
       - name: Verify release POM metadata
         run: bash scripts/verify-release-pom-metadata.sh
+      - name: Verify Maven 4.1 model
+        run: bash scripts/verify-maven-4-model.sh
+      - name: Test Maven 4.1 model verifier
+        run: bash scripts/verify-maven-4-model-test.sh
+      - name: Test Maven reactor version updater
+        run: bash scripts/set-maven-reactor-version-test.sh
       - name: Test release POM metadata verification
         run: bash scripts/verify-release-pom-metadata-test.sh
       - name: Verify reactor Consumer POMs
         run: |
           ./mvnw -Dmaven.repo.local="${consumer_pom_repository}" install
-          maven_3="$(command -v mvn)"
-          if [[ "$("${maven_3}" --version)" != "Apache Maven 3."* ]]; then exit 1; fi
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
-            "${maven_3}" "$(pwd)/mvnw"
+            "$(pwd)/mvnw"
 YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
@@ -373,7 +377,7 @@ jobs:
   prepare:
     steps:
       - run: git tag --points-at sha
-      - run: ./mvnw versions:set
+      - run: ruby --disable-gems scripts/set-maven-reactor-version.rb . 2.0.0-SNAPSHOT
       - run: git push --set-upstream origin branch
       - run: gh pr create
 YAML

@@ -192,9 +192,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 ## 构建
 
 ```bash
-mvn validate
-mvn test
-mvn clean install
+./mvnw validate
+./mvnw test
+./mvnw clean install
 ```
 
 ## 许可证

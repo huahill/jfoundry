@@ -132,12 +132,12 @@ body 捕获上限为 8 KiB。客户端时长在响应 header 到达时结束，b
 ## 原生镜像状态
 
 Helidon 使用方已用 GraalVM 原生镜像构建，并验证 CDI 发现、应用启动和 Problem Details HTTP
-响应。使用 GraalVM 25、Maven 3.9 与仓库原生镜像配置档：
+响应。使用 GraalVM 25、仓库的 Maven 4 Wrapper 与原生镜像配置档：
 
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
+./mvnw -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

@@ -196,9 +196,9 @@ For the complete documentation structure, see the [Documentation Index](docs/i18
 ## Build
 
 ```bash
-mvn validate
-mvn test
-mvn clean install
+./mvnw validate
+./mvnw test
+./mvnw clean install
 ```
 
 ## License
