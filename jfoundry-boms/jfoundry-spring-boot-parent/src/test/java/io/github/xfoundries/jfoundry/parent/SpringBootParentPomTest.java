@@ -24,7 +24,6 @@ class SpringBootParentPomTest {
 
         assertThat(springBootParent).isEqualTo(
                 new Coordinate("org.springframework.boot", "spring-boot-starter-parent", bomVersion));
-        assertThat(bomVersion).isEqualTo("4.1.1");
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "jfoundry.version"))
                 .isEqualTo(childText(parent.getDocumentElement(), "version"));
         assertThat(importedBoms(parent)).containsExactly(
@@ -144,7 +143,6 @@ class SpringBootParentPomTest {
         String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
 
         assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
-        assertThat(bomVersion).isEqualTo("3.39.1");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
     }
@@ -155,10 +153,10 @@ class SpringBootParentPomTest {
         Document bom = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
 
         assertThat(property(runtime, "helidon.version")).isNull();
-        assertThat(childText(child(bom.getDocumentElement(), "properties"), "helidon.version"))
-                .isEqualTo("4.5.3");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
+        assertThat(importedBoms(bom)).containsExactly(
+                new Coordinate("io.helidon", "helidon-dependencies", "${helidon.version}"));
     }
 
     @Test

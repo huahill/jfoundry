@@ -205,6 +205,13 @@ YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/ci.yml" <<'YAML'
 jobs:
+  docs:
+    name: Documentation checks
+    steps:
+      - name: Verify compatibility matrix
+        run: bash scripts/verify-compatibility-matrix.sh
+      - name: Test compatibility matrix verification
+        run: bash scripts/verify-compatibility-matrix-test.sh
   dependency-review:
     name: Dependency Review
     if: github.event_name == 'pull_request'
@@ -1420,6 +1427,22 @@ path = ARGV.fetch(0)
 File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries-test.sh") }.join)
 RUBY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries-test.sh"
+mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
+
+cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
+ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
+path = ARGV.fetch(0)
+File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix.sh") }.join)
+RUBY
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix.sh"
+mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
+
+cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
+ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
+path = ARGV.fetch(0)
+File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix-test.sh") }.join)
+RUBY
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 rm "${temp_dir}/.github/dependabot.yml"
