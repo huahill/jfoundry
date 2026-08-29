@@ -178,6 +178,11 @@ if [[ -n "${maven4_bin}" ]]; then
         echo "Maven 4 executable does not exist or is not executable: ${maven4_bin}" >&2
         exit 1
     fi
+    maven4_details="$("${maven4_bin}" --version)"
+    if [[ "${maven4_details}" != "Apache Maven 4."* ]]; then
+        echo "Consumer POM verification requires Maven 4, but found: ${maven4_details}" >&2
+        exit 1
+    fi
 
     temp_dir="$(mktemp -d)"
     trap 'rm -rf "${temp_dir}"' EXIT

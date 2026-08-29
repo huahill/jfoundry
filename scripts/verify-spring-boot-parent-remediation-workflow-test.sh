@@ -25,8 +25,8 @@ assert_rejects_without "HISTORICAL_SOURCE_COMMIT:" "missing-historical-source-co
 assert_rejects_without "HISTORICAL_POM_SHA256:" "missing-historical-pom-sha256"
 assert_rejects_without 'git show "${HISTORICAL_SOURCE_COMMIT}:${HISTORICAL_POM_REPOSITORY_PATH}"' \
     "missing-historical-pom-materialization"
-assert_rejects_without '"${{ steps.maven_3.outputs.executable }}" -B -f "${PARENT_POM_PATH}"' \
-    "missing-maven3-verification"
+assert_rejects_without './mvnw -B -f "${PARENT_POM_PATH}"' \
+    "missing-maven4-verification"
 assert_rejects_without 'REMEDIATION_EVIDENCE_ROOT=' "missing-remediation-evidence-root-export"
 assert_rejects_without 'PARENT_POM_PATH=' "missing-parent-pom-path-export"
 

@@ -35,9 +35,9 @@ require_text "${extension_file}" '<version>0.3.0</version>' \
 require_file "pom.yaml" "Mason YAML root POM does not exist"
 
 fixture_pom="jfoundry-boms/jfoundry-spring-boot-parent/src/test/resources/single-parent-consumer/pom.xml"
-require_file "${fixture_pom}" "Maven 3 consumer fixture POM does not exist"
+require_file "${fixture_pom}" "XML consumer fixture POM does not exist"
 if [[ -e "${repository_root}/${fixture_pom%xml}yaml" ]]; then
-    fail "Maven 3 consumer fixture must remain XML: ${fixture_pom}"
+    fail "XML consumer fixture must remain XML: ${fixture_pom}"
 fi
 
 yaml_count=0
@@ -181,11 +181,15 @@ require_file ".mvn/wrapper/maven-wrapper.properties" "Maven Wrapper configuratio
 require_text ".mvn/wrapper/maven-wrapper.properties" "/apache-maven/4.0.0-rc-6/" \
     "Mason PoC requires Maven Wrapper 4.0.0-rc-6"
 require_file ".github/workflows/release.yml" "Production release workflow does not exist"
-require_text ".github/workflows/release.yml" "MAVEN_3_VERSION: 3.9.16" \
-    "Production Central publication must remain on Maven 3.9.16"
-require_text ".github/workflows/release.yml" 'bash scripts/generate-maven3-publication-tree.sh "${publication_tree}"' \
-    "Production Central publication must generate a Maven 3 XML tree"
-require_text ".github/workflows/release.yml" 'cd "${publication_tree}"' \
-    "Production Central publication must run from the Maven 3 XML tree"
+require_text ".github/workflows/release.yml" "Verify Maven 4 Central readiness" \
+    "Production Central publication must guard Maven 4 final and Central readiness"
+require_text ".github/workflows/release.yml" 'MAVEN_CENTRAL_MAVEN4_READY' \
+    "Production Central publication must require an explicit Maven 4 Central readiness flag"
+require_text ".github/workflows/release.yml" './mvnw -B -T 1 -Prelease -DskipTests deploy' \
+    "Production Central publication must use the Maven 4 wrapper directly"
+if grep -Fq -- 'MAVEN_3_VERSION' "${repository_root}/.github/workflows/release.yml" ||
+   grep -Fq -- 'generate-maven3-publication-tree.sh' "${repository_root}/.github/workflows/release.yml"; then
+    fail "Production release workflow must not contain Maven 3 publication compatibility"
+fi
 
 echo "Mason PoC source contract verification passed: ${reachable_yaml_count} reachable YAML reactor POMs."

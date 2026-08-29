@@ -128,6 +128,10 @@ SH
     fi
 }
 
+fake_maven4="${temp_dir}/maven4"
+printf '%s\n' '#!/usr/bin/env bash' 'if [[ "$1" == "--version" ]]; then echo "Apache Maven 4.0.0"; else exit 0; fi' > "${fake_maven4}"
+chmod +x "${fake_maven4}"
+
 write_parent() {
     local parent_artifact="$1"
     local boot_version="$2"
@@ -186,5 +190,17 @@ assert_rejects "a Spring Boot parent that imports the core BOM before the runtim
 write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 
 assert_accepts_without_xmllint
+if ! bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}" "${fake_maven4}"; then
+    echo "Expected Consumer POM verification to accept a Maven 4 executable." >&2
+    exit 1
+fi
+
+fake_maven3="${temp_dir}/maven3"
+printf '%s\n' '#!/usr/bin/env bash' 'echo "Apache Maven 3.9.16"' > "${fake_maven3}"
+chmod +x "${fake_maven3}"
+if bash "${VERIFY_SCRIPT}" "${fixture_repo}" "${fixture_version}" "${fake_maven3}" >/dev/null 2>&1; then
+    echo "Expected Consumer POM verification to reject a Maven 3 executable." >&2
+    exit 1
+fi
 
 echo "Consumer POM verification regression test passed."

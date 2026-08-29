@@ -11,4 +11,5 @@
     </xsl:template>
 
     <xsl:template match="*[local-name()='profile'][*[local-name()='id'] = 'mason-central-poc']"/>
+
 </xsl:stylesheet>

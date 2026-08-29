@@ -287,9 +287,10 @@ require_text ".github/workflows/ci.yml" "bash scripts/verify-release-pom-metadat
 require_text ".github/workflows/ci.yml" "Verify reactor Consumer POMs"
 require_text ".github/workflows/ci.yml" '-Dmaven.repo.local="${consumer_pom_repository}" install'
 require_text ".github/workflows/ci.yml" 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
-require_text ".github/workflows/ci.yml" 'maven_3="$(command -v mvn)"'
-require_text ".github/workflows/ci.yml" '"Apache Maven 3."*'
-require_text ".github/workflows/ci.yml" '"${maven_3}" "$(pwd)/mvnw"'
+require_text ".github/workflows/ci.yml" 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
+require_text ".github/workflows/ci.yml" '"$(pwd)/mvnw"'
+forbid_text ".github/workflows/ci.yml" 'command -v mvn'
+forbid_text ".github/workflows/ci.yml" 'Apache Maven 3.'
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries.sh"
 require_text ".github/workflows/ci.yml" "bash scripts/verify-dependency-boundaries-test.sh"
 require_text ".github/workflows/release.yml" "actions/upload-artifact"

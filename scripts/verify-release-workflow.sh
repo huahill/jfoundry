@@ -85,7 +85,7 @@ end
 RUBY
 }
 
-require_publication_evidence_flow() {
+require_maven4_publication_flow() {
     ruby - "${workflow_file}" <<'RUBY'
 require "yaml"
 
@@ -106,39 +106,20 @@ step = lambda do |name|
   value
 end
 
-install = step.call("Install Apache Maven 3 for Central publication")
-if install.key?("if")
-  warn "Maven 3 installation must run for new and already-published releases"
-  exit 1
-end
-
-prepare = step.call("Prepare Maven 3 publication tree")
-if prepare.key?("if")
-  warn "Maven 3 publication tree preparation must run for new and already-published releases"
-  exit 1
-end
-prepare_run = prepare.fetch("run", "")
-unless prepare_run.include?('bash scripts/generate-maven3-publication-tree.sh "${publication_tree}"') &&
-    prepare_run.include?('echo "PUBLICATION_EVIDENCE_ROOT=${publication_tree}" >> "${GITHUB_ENV}"')
-  warn "Maven 3 publication tree preparation must export the publication evidence root"
+readiness = step.call("Verify Maven 4 Central readiness")
+unless readiness.fetch("run", "").include?("MAVEN_CENTRAL_MAVEN4_READY") &&
+    readiness.fetch("run", "").include?("Maven 4 final")
+  warn "Release workflow must fail fast until Maven 4 final and Central readiness are confirmed"
   exit 1
 end
 
 publish = step.call("Publish Maven Central deployment")
 publish_run = publish.fetch("run", "")
 unless publish["if"] == "steps.central_publication.outputs.already_published != 'true'" &&
-    publish_run.include?('cd "${publication_tree}"') &&
-    publish_run.include?('"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy')
-  warn "New releases must deploy from the Maven 3 publication tree"
-  exit 1
-end
-
-rebuild = step.call("Rebuild existing release evidence with Maven 3")
-rebuild_run = rebuild.fetch("run", "")
-unless rebuild["if"] == "steps.central_publication.outputs.already_published == 'true'" &&
-    rebuild_run.include?('cd "${publication_tree}"') &&
-    rebuild_run.include?('"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests verify')
-  warn "Already-published releases must rebuild evidence from the Maven 3 publication tree"
+    publish_run.include?('./mvnw -B -T 1 -Prelease -DskipTests deploy') &&
+    !publish_run.include?("maven_3") &&
+    !publish_run.include?("publication_tree")
+  warn "New releases must deploy directly with the Maven 4 wrapper"
   exit 1
 end
 
@@ -146,8 +127,8 @@ evidence = step.call("Assemble release evidence")
 artifact_root_assignments = evidence.fetch("run", "").lines.map(&:strip).select do |line|
   line.start_with?("artifact_root=")
 end
-unless artifact_root_assignments == ['artifact_root="${PUBLICATION_EVIDENCE_ROOT}"']
-  warn "Release evidence must be collected exclusively from the Maven 3 publication tree"
+unless artifact_root_assignments == ['artifact_root="${GITHUB_WORKSPACE}"']
+  warn "Release evidence must be collected from the Maven 4 workspace build"
   exit 1
 end
 RUBY
@@ -178,18 +159,10 @@ require_text 'GH_TOKEN: ${{ github.token }}'
 require_text "-Prelease -DskipTests verify"
 require_text "Verify Maven Central Consumer POMs"
 require_text "verify-consumer-pom.sh"
-require_text "Install Apache Maven 3 for Central publication"
-require_text "Prepare Maven 3 publication tree"
-require_text "MAVEN_3_VERSION: 3.9.16"
-require_text "MAVEN_3_SHA512:"
-require_text 'publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"'
-require_text 'bash scripts/generate-maven3-publication-tree.sh "${publication_tree}"'
-require_text 'echo "PUBLICATION_EVIDENCE_ROOT=${publication_tree}" >> "${GITHUB_ENV}"'
-require_text 'cd "${publication_tree}"'
-require_text '"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy'
-require_text "Rebuild existing release evidence with Maven 3"
-require_text '"${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests verify'
-require_text '-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment'
+require_text "Verify Maven 4 Central readiness"
+require_text "MAVEN_CENTRAL_MAVEN4_READY"
+require_text "Maven 4 final"
+require_text './mvnw -B -T 1 -Prelease -DskipTests deploy'
 require_text 'tee "${GITHUB_WORKSPACE}/central-deploy.log"'
 require_text "deployment_id="
 require_text "deploymentId: ([[:alnum:]-]+)"
@@ -217,7 +190,7 @@ require_text "Central Publishing did not report a deploymentId."
 require_text "release-evidence/consumer-poms"
 require_text "release-evidence/signatures"
 require_text "release-metadata.txt"
-require_text 'artifact_root="${PUBLICATION_EVIDENCE_ROOT}"'
+require_text 'artifact_root="${GITHUB_WORKSPACE}"'
 require_text 'find "${artifact_root}" -path '\''*/target/*.jar'\'''
 require_text 'find "${artifact_root}" -path '\''*/target/*.asc'\'''
 require_text 'find "${artifact_root}" -path '\''*/target/bom.*'\'''
@@ -239,7 +212,7 @@ require_text "--latest=false"
 require_text "always()"
 
 require_automatic_central_publication "${pom_file}"
-require_publication_evidence_flow
+require_maven4_publication_flow
 for bom_pom_file in "${bom_pom_files[@]}"; do
     if [[ ! -f "${bom_pom_file}" ]]; then
         echo "Standalone BOM release Maven configuration does not exist: ${bom_pom_file}" >&2
@@ -268,6 +241,10 @@ fi
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
+forbid_text "MAVEN_3_VERSION"
+forbid_text "MAVEN_3_SHA512"
+forbid_text "generate-maven3-publication-tree.sh"
+forbid_text "PUBLICATION_EVIDENCE_ROOT"
 forbid_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish"
 forbid_text "./mvnw -B -Prelease -DskipTests verify \\"
 forbid_text "-DforceStdout | tail -n 1"

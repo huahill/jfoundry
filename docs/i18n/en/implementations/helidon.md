@@ -11,8 +11,7 @@ Helidon-owned runtime classes remain the public CDI/provider entry points and re
 service-loading, scheduling, logging, and Native Image behavior. Applications select the Helidon runtime
 modules rather than assembling these shared implementation modules.
 
-See the [compatibility matrix](../../../release/compatibility.md) for the supported platform line. The
-owning runtime BOM supplies the exact Helidon patch version used by each release.
+See the [compatibility matrix](../../../release/compatibility.md) for the exact platform version.
 
 ## Dependency Composition
 
@@ -125,7 +124,7 @@ Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
 `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. This integration is verified on the JVM.
-Helidon's supported 4.5.x REST Client
+Helidon 4.5.3's REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.
 
@@ -152,13 +151,13 @@ is opt-in so ordinary module tests do not require Docker:
 ## Native Image Status
 
 The Helidon consumer is built with GraalVM Native Image and has verified CDI discovery, application
-startup, and the Problem Details HTTP response. Use GraalVM 25 with the repository's Maven 4 wrapper
-and Native Image profile:
+startup, and the Problem Details HTTP response. Use GraalVM 25 with the repository's Maven 4 wrapper and
+Native Image profile:
 
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-./mvnw -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
+mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 

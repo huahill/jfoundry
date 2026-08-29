@@ -27,7 +27,7 @@ write_valid_fixture() {
     mkdir -p "${root}/.mvn/wrapper" "${root}/.github/workflows" "${root}/child" "${root}/jfoundry-boms/jfoundry-spring-boot-parent/src/test/resources/single-parent-consumer"
     printf '%s\n' '<extensions>' '  <extension>' '    <groupId>eu.maveniverse.maven.mason</groupId>' '    <artifactId>mason</artifactId>' '    <version>0.3.0</version>' '  </extension>' '</extensions>' > "${root}/.mvn/extensions.xml"
     printf '%s\n' 'wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.4/maven-wrapper-3.3.4.jar' 'distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/4.0.0-rc-6/apache-maven-4.0.0-rc-6-bin.zip' > "${root}/.mvn/wrapper/maven-wrapper.properties"
-    printf '%s\n' 'MAVEN_3_VERSION: 3.9.16' 'bash scripts/generate-maven3-publication-tree.sh "${publication_tree}"' 'cd "${publication_tree}"' > "${root}/.github/workflows/release.yml"
+    printf '%s\n' 'Verify Maven 4 Central readiness' 'MAVEN_CENTRAL_MAVEN4_READY: true' './mvnw -B -T 1 -Prelease -DskipTests deploy' > "${root}/.github/workflows/release.yml"
     printf '%s\n' \
         'modelVersion: 4.0.0' \
         'artifactId: root' \
@@ -149,10 +149,10 @@ sed -i.bak '/skipSourceGeneration/d' "${missing_quarkus_skip_tests}/${quarkus_te
 rm "${missing_quarkus_skip_tests}/${quarkus_test_modules[0]}/pom.yaml.bak"
 expect_failure "Quarkus test model generation must honor skipTests" "${missing_quarkus_skip_tests}"
 
-missing_publication_tree="${fixture_root}/missing-publication-tree"
-write_valid_fixture "${missing_publication_tree}"
-sed -i.bak '/generate-maven3-publication-tree/d' "${missing_publication_tree}/.github/workflows/release.yml"
-rm "${missing_publication_tree}/.github/workflows/release.yml.bak"
-expect_failure "Production Central publication must generate a Maven 3 XML tree" "${missing_publication_tree}"
+missing_readiness_guard="${fixture_root}/missing-readiness-guard"
+write_valid_fixture "${missing_readiness_guard}"
+sed -i.bak '/Verify Maven 4 Central readiness/d' "${missing_readiness_guard}/.github/workflows/release.yml"
+rm "${missing_readiness_guard}/.github/workflows/release.yml.bak"
+expect_failure "Production Central publication must guard Maven 4 final and Central readiness" "${missing_readiness_guard}"
 
 echo "Mason PoC verifier self-test passed."

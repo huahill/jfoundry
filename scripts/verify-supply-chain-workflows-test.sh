@@ -235,10 +235,8 @@ jobs:
       - name: Verify reactor Consumer POMs
         run: |
           ./mvnw -Dmaven.repo.local="${consumer_pom_repository}" install
-          maven_3="$(command -v mvn)"
-          if [[ "$("${maven_3}" --version)" != "Apache Maven 3."* ]]; then exit 1; fi
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
-            "${maven_3}" "$(pwd)/mvnw"
+            "$(pwd)/mvnw"
 YAML
 assert_rejects "${temp_dir}"
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'

@@ -21,11 +21,9 @@ write_model() {
     local scm_inherit="$5"
     local extra_profile_id="${6:-}"
     local extra_profile=""
-
     if [[ -n "${extra_profile_id}" ]]; then
         extra_profile="$(printf '\n    <profile><id>%s</id></profile>\n  ' "${extra_profile_id}")"
     fi
-
     printf '%s\n' \
         '<project xmlns="http://maven.apache.org/POM/4.0.0" child.project.url.inherit.append.path="false">' \
         '  <modelVersion>4.0.0</modelVersion>' \

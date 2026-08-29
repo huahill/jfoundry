@@ -10,9 +10,8 @@
 | Spring Cloud line | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
 | Quarkus | 3.39.1 |
 | Helidon MP | 4.5.3 |
-| Maven build and Consumer POM tool | 4.0.0-rc-6 (experimental) |
-| Maven Central publication tool | 3.9.16 |
-| Maven 3 consumer compatibility | 3.9.16 |
+| Maven build, Consumer POM, and publication tool | 4.0.0-rc-6 (Maven 4-only; publication blocked until final) |
+| Maven 3 source-build compatibility | Not supported |
 
 ## Dependency Baseline
 
@@ -72,7 +71,7 @@ dependency-management rules.
 
 ## Verification Evidence
 
-Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and Maven wrapper `3.9.16`. The current release-baseline evidence was recorded on 2026-07-24 with GraalVM Community `25.0.2` and Maven wrapper `3.9.16`. HTTP logging runtime verification was refreshed on 2026-08-25 with GraalVM Community `25.0.4` and Maven wrapper `4.0.0-rc-6`. Maven 4 Consumer POM release verification was added on 2026-08-01 and now runs with RC6; ordinary CI and the release workflow perform a clean Maven 4 install and verify the installed POMs with Maven 3.9 and Maven 4 before deployment. The complete 122-project Mason YAML proof of concept was verified on 2026-08-28 with GraalVM Community `25.0.4`, Maven `4.0.0-rc-6`, Maven `3.9.16`, Mason `0.3.0`, and Docker Desktop `29.7.2`; Quarkus tests consume Maven's resolved model through `generate-code-tests`. See [Mason YAML Proof of Concept](mason-yaml-poc.md).
+The complete 122-project Mason YAML proof of concept was verified on 2026-08-28 with GraalVM Community `25.0.4`, Maven `4.0.0-rc-6`, Mason `0.3.0`, and Docker Desktop `29.7.2`; Quarkus tests consume Maven's resolved model through `generate-code-tests`. See [Mason YAML Proof of Concept](mason-yaml-poc.md).
 
 | Gate | Command | Result |
 |------|---------|--------|
@@ -88,10 +87,9 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 | Release guard | `mvn -Prelease -DskipTests validate` | Expected fail fast on `Release builds require non-SNAPSHOT project versions.` |
 | Maven 4 validate | Maven `4.0.0-rc-6`, `./mvnw -B -DskipTests validate -e` | PASS |
 | Maven 4 package | Maven `4.0.0-rc-6`, `./mvnw -B -DskipTests package` | PASS on 2026-08-24; Maven 4 reports imported-BOM model warnings |
-| Maven Consumer POM contract | Maven `4.0.0-rc-6`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 3.9 and Maven 4 RC6 | PASS on 2026-08-24; verifies flattened child POMs, both direct Spring BOM lines, the Boot parent, and Cloud Alibaba versionless resolution with Maven 3.9 and Maven 4 |
+| Maven Consumer POM contract | Maven `4.0.0-rc-6`, clean `install`, then `scripts/verify-consumer-pom.sh` with Maven 4 | PASS on 2026-08-24; verifies flattened child POMs, both direct Spring BOM lines, the Boot parent, and Cloud Alibaba versionless resolution |
 | Mason YAML full reactor | `scripts/verify-mason-poc.sh`, focused tests, `scripts/verify-mason-model-equivalence.sh 6d6e36b9`, and `scripts/verify-ci-matrix.sh` | PASS on 2026-08-28 for 122 YAML projects, aggregate effective-model equivalence, warning equivalence, and the complete Java 25 matrix; Quarkus modules using `@QuarkusTest` bind `generate-code-tests` and skip it with `-DskipTests` |
-| Mason Maven 3 publication bridge | `scripts/verify-mason-maven3-bridge.sh "$(command -v mvn)"` | PASS on 2026-08-28 for Maven 3.9.16 validation and local file-repository deploy across 122 projects |
-| Maven 4 Central no-upload PoC | `scripts/verify-mason-central-poc.sh` | PASS on 2026-08-28; 122-project signed bundle captured only on loopback, not accepted by a Sonatype test service |
+| Maven 4 Central publication readiness | Release workflow `Verify Maven 4 Central readiness` | BLOCKED while wrapper is RC6 or `MAVEN_CENTRAL_MAVEN4_READY` is not `true` |
 | Mason reactor version update | `scripts/set-mason-reactor-version-test.sh` plus a disposable full-tree update | PASS on 2026-08-28; 123 classified references updated across 122 POMs while comments and output timestamps remained unchanged |
 | Spring Cloud BOM resolution | Versionless Spring Cloud Alibaba Nacos Discovery consumer with `jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies` | Required before Central deploy; rejects the unsupported Spring Boot 4.1.1 plus Spring Cloud 2025.1.2 combination |
 | Quarkus JVM consumer smoke test | Install runtime/deployment artifacts, then `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pjvm-integration verify` | PASS on Java 25 with PostgreSQL on 2026-08-28 from the complete Mason YAML tree |
@@ -100,11 +98,11 @@ Historic evidence was recorded on 2026-06-27 with local Java `21.0.10-tem` and M
 GitHub Actions runs the Java 25 release baseline. Helidon Native verification also uses GraalVM
 Community 25.
 
-Aggregate effective-model equivalence, warning equivalence, and the complete Maven 3.9.16 local
-deployment bridge are migration-time POC evidence against the immutable pre-conversion baseline.
+Aggregate effective-model and warning equivalence are migration-time POC evidence against the immutable
+pre-conversion baseline.
 They are not continuous release gates that require retaining or reconstructing an XML baseline.
 Sustainable checks instead enforce root-reactor reachability for all 122 YAML projects, converter
-and version-update behavior, the Maven 3 publication flow in the release workflow, and the normal
+and version-update behavior, the guarded Maven 4 publication flow in the release workflow, and the normal
 Java/runtime matrix.
 
 Helidon MP 4.5.3 Narayana JTA Native Image support is experimental. On GraalVM Community 25.0.2 for
@@ -131,7 +129,7 @@ REST Client support.
 - `./mvnw -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify`
 - Java 25 release-baseline test in CI
 - Maven 4 Wrapper package compatibility and Consumer POM contract before Central deployment
-- Mason source and 122-project reactor-reachability checks, converter and version-update tests, Quarkus model-handoff checks, and release-workflow Maven 3 publication checks while the Mason PoC remains in the repository
+- Mason source and 122-project reactor-reachability checks, converter and version-update tests, Quarkus model-handoff checks, and the guarded Maven 4 release workflow
 - Spring and Quarkus Native Image smoke tests in CI
 - Spring Native Image MyBatis-Plus persistence integration in CI
 - Spring Native Image Redisson lock and JobRunr Outbox integrations in CI

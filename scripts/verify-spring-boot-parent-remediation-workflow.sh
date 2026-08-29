@@ -38,8 +38,7 @@ require_text 'require_central_status "jfoundry-dependencies" "200"'
 require_text 'require_central_status "jfoundry-spring-dependencies" "200"'
 require_text "404)"
 require_text "200)"
-require_text "MAVEN_3_VERSION: 3.9.16"
-require_text "MAVEN_3_SHA512:"
+require_text "Verify signed historical Parent POM with Maven 4"
 require_text "HISTORICAL_SOURCE_COMMIT: 3eb6c53833fcbca26a4107c0d6aec6d4afde1a77"
 require_text "HISTORICAL_POM_REPOSITORY_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml"
 require_text "HISTORICAL_POM_SHA256: 1856dbb984e2a9985c9a0f1ae3fd777a6c736142f3a085cf33696422a870598f"
@@ -54,7 +53,7 @@ require_text 'expected_coordinate = ["io.github.xfoundries", "jfoundry-spring-bo
 require_text '"jfoundry-dependencies", "${project.version}", "pom", "import"'
 require_text '"jfoundry-spring-dependencies", "${project.version}", "pom", "import"'
 require_text 'value.call(project.elements["scm"], "tag") == "v#{expected_version}"'
-require_text '"${{ steps.maven_3.outputs.executable }}" -B -f "${PARENT_POM_PATH}"'
+require_text './mvnw -B -f "${PARENT_POM_PATH}"'
 require_text "jfoundry-parent-remediation-deployment"
 require_text "deploymentId: ([[:alnum:]-]+)"
 require_text "central-deploy.log"
@@ -73,7 +72,8 @@ require_text "        if: success()"
 forbid_text 'PARENT_POM_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.yaml'
 forbid_text '${{ runner.temp }}'
 forbid_text 'bash scripts/generate-maven3-publication-tree.sh'
-forbid_text './mvnw -B -f "${PARENT_POM_PATH}"'
+forbid_text 'MAVEN_3_VERSION'
+forbid_text 'MAVEN_3_SHA512'
 forbid_text 'git tag -fa "v${PARENT_VERSION}" -m "JFoundry v${PARENT_VERSION}" "${GITHUB_SHA}"'
 
 workspace_configuration_line="$(grep -n -F -- "- name: Configure remediation workspace" "${workflow_file}" | head -n 1 | cut -d: -f1)"
