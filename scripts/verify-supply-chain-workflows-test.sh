@@ -377,7 +377,7 @@ jobs:
   prepare:
     steps:
       - run: git tag --points-at sha
-      - run: ruby --disable-gems scripts/set-maven-reactor-version.rb . 2.0.0-SNAPSHOT
+      - run: ruby scripts/set-maven-reactor-version.rb . 2.0.0-SNAPSHOT
       - run: git push --set-upstream origin branch
       - run: gh pr create
 YAML

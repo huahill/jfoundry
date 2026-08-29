@@ -89,7 +89,7 @@ jobs:
           fi
 
           git switch --create "${BRANCH}"
-          ruby --disable-gems scripts/set-maven-reactor-version.rb . "${NEXT_VERSION}"
+          ruby scripts/set-maven-reactor-version.rb . "${NEXT_VERSION}"
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
