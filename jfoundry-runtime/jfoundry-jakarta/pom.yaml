@@ -1,4 +1,4 @@
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-parent
@@ -8,7 +8,7 @@ artifactId: jfoundry-jakarta
 packaging: pom
 name: jfoundry-jakarta
 description: "Shared Jakarta runtime adapters for JFoundry."
-modules:
+subprojects:
   - jfoundry-http-jaxrs
   - jfoundry-restclient-jaxrs
   - jfoundry-web-jaxrs

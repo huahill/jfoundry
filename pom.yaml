@@ -1,5 +1,5 @@
 child.project.url.inherit.append.path: "false"
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 groupId: io.github.xfoundries
 artifactId: jfoundry-parent
 version: 1.5.0-SNAPSHOT
@@ -45,7 +45,7 @@ properties:
   cyclonedx-maven-plugin.version: 2.9.3
   argLine: ""
   mockito.javaagent.argLine: ""
-modules:
+subprojects:
   - jfoundry-boms/jfoundry-modules-dependencies
   - jfoundry-boms/jfoundry-foundation-dependencies
   - jfoundry-boms/jfoundry-spring-boot-dependencies

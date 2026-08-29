@@ -1,4 +1,4 @@
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-parent
@@ -11,7 +11,7 @@ packaging: pom
 dependencies:
   - groupId: org.jspecify
     artifactId: jspecify
-modules:
+subprojects:
   - jfoundry-application-core
   - jfoundry-transaction-core
   - jfoundry-lock-core

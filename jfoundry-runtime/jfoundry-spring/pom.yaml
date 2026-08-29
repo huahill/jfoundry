@@ -1,4 +1,4 @@
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-parent
@@ -15,7 +15,7 @@ dependencyManagement:
       version: ${project.version}
       type: pom
       scope: import
-modules:
+subprojects:
   - runtime/jfoundry-domain-event-spring
   - runtime/jfoundry-persistence-spring
   - runtime/jfoundry-messaging-spring

@@ -1,4 +1,4 @@
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-parent
@@ -25,7 +25,7 @@ build:
           goals:
             - jandex
           phase: process-classes
-modules:
+subprojects:
   - jfoundry-transaction-helidon
   - jfoundry-domain-event-helidon
   - jfoundry-persistence-helidon

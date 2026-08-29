@@ -45,8 +45,8 @@ while IFS= read -r yaml_pom; do
     relative_yaml="${yaml_pom#${repository_root}/}"
     xml_pom="${yaml_pom%yaml}xml"
     yaml_count=$((yaml_count + 1))
-    require_text "${relative_yaml}" 'modelVersion:' \
-        "Mason YAML POM must declare a model version"
+    require_text "${relative_yaml}" 'modelVersion: 4.1.0' \
+        "Mason YAML POM must use the Maven 4.1.0 model"
     if [[ -e "${xml_pom}" ]]; then
         fail "Converted project retains an XML shadow POM: ${relative_yaml%yaml}xml"
     fi
@@ -76,21 +76,21 @@ active = {}
 
 visit = lambda do |pom|
   unless pom.file?
-    warn "Reactor module does not contain pom.yaml: #{pom.relative_path_from(root)}"
+    warn "Reactor subproject does not contain pom.yaml: #{pom.relative_path_from(root)}"
     exit 1
   end
 
   pom = pom.realpath
   unless pom.to_s.start_with?("#{root}#{File::SEPARATOR}")
-    warn "Reactor module resolves outside repository root: #{pom}"
+    warn "Reactor subproject resolves outside repository root: #{pom}"
     exit 1
   end
   if active[pom]
-    warn "Reactor module cycle detected: #{pom.relative_path_from(root)}"
+    warn "Reactor subproject cycle detected: #{pom.relative_path_from(root)}"
     exit 1
   end
   if seen[pom]
-    warn "Reactor module is declared more than once: #{pom.relative_path_from(root)}"
+    warn "Reactor subproject is declared more than once: #{pom.relative_path_from(root)}"
     exit 1
   end
 
@@ -102,23 +102,23 @@ visit = lambda do |pom|
     exit 1
   end
 
-  Array(model["modules"]).each do |module_path|
-    unless module_path.is_a?(String) && !module_path.empty?
-      warn "Reactor module path must be a non-empty string: #{pom.relative_path_from(root)}"
+  Array(model["subprojects"]).each do |subproject_path|
+    unless subproject_path.is_a?(String) && !subproject_path.empty?
+      warn "Reactor subproject path must be a non-empty string: #{pom.relative_path_from(root)}"
       exit 1
     end
 
-    module_path = Pathname(module_path)
-    if module_path.absolute?
-      warn "Reactor module path must be relative: #{module_path}"
+    subproject_path = Pathname(subproject_path)
+    if subproject_path.absolute?
+      warn "Reactor subproject path must be relative: #{subproject_path}"
       exit 1
     end
-    if module_path.each_filename.include?("..")
-      warn "Reactor module path must not contain '..': #{module_path}"
+    if subproject_path.each_filename.include?("..")
+      warn "Reactor subproject path must not contain '..': #{subproject_path}"
       exit 1
     end
 
-    child = pom.dirname.join(module_path)
+    child = pom.dirname.join(subproject_path)
     child = child.join("pom.yaml") unless child.extname == ".yaml"
     visit.call(child.cleanpath)
   end

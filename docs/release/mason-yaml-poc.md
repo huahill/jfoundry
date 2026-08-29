@@ -7,7 +7,8 @@ The repository-wide Mason YAML proof of concept is technically successful. All
 intentional XML consumer fixture under `jfoundry-spring-boot-parent`.
 
 This branch adopts Mason as the committed reactor model and supports Maven 4
-only. Published artifacts still contain ordinary XML Consumer POM metadata, so
+only. All source POMs use Maven's 4.1.0 model and the `subprojects` reactor
+field. Published artifacts still contain ordinary XML Consumer POM metadata, so
 downstream consumers need neither Mason nor Maven 4. Maven 3 is not a supported
 source-build, CI, or release runtime.
 
@@ -27,7 +28,7 @@ The conversion and source checks are provided by:
 - `scripts/verify-mason-poc.sh` for source-layout invariants;
 - `scripts/verify-mason-model-equivalence.sh` for effective-model comparison.
 
-The source verifier recursively follows every `modules` declaration, requires
+The source verifier recursively follows every `subprojects` declaration, requires
 exactly 122 reachable YAML projects, rejects XML shadow POMs and XML parent
 paths, and checks Mason registration and known Mason 0.3.0 syntax limitations.
 

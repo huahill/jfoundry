@@ -12,7 +12,11 @@ normalize_model() {
     xsltproc "${normalizer_xslt}" "${source_file}" |
         xmllint --xpath '/*' - |
         xmllint --c14n - |
-        sed -E 's#(<relativePath>[^<]*)pom\.yaml(</relativePath>)#\1pom.xml\2#g' \
+        sed -E \
+            -e 's#http://maven\.apache\.org/POM/4\.1\.0#http://maven.apache.org/POM/4.0.0#g' \
+            -e 's#https://maven\.apache\.org/xsd/maven-4\.1\.0\.xsd#https://maven.apache.org/xsd/maven-4.0.0.xsd#g' \
+            -e 's#<modelVersion>4\.1\.0</modelVersion>#<modelVersion>4.0.0</modelVersion>#g' \
+            -e 's#(<relativePath>[^<]*)pom\.yaml(</relativePath>)#\1pom.xml\2#g' \
             > "${destination_file}"
 }
 

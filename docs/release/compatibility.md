@@ -10,6 +10,7 @@
 | Spring Cloud line | Spring Boot 4.0.7, Spring Cloud 2025.1.2, Spring Cloud Alibaba 2025.1.0.0 |
 | Quarkus | 3.39.1 |
 | Helidon MP | 4.5.3 |
+| Maven source descriptor model | 4.1.0 (Maven 4-only YAML model) |
 | Maven build, Consumer POM, and publication tool | 4.0.0-rc-6 (Maven 4-only; publication blocked until final) |
 | Maven 3 source-build compatibility | Not supported |
 
@@ -71,7 +72,7 @@ dependency-management rules.
 
 ## Verification Evidence
 
-The complete 122-project Mason YAML proof of concept was verified on 2026-08-28 with GraalVM Community `25.0.4`, Maven `4.0.0-rc-6`, Mason `0.3.0`, and Docker Desktop `29.7.2`; Quarkus tests consume Maven's resolved model through `generate-code-tests`. See [Mason YAML Proof of Concept](mason-yaml-poc.md).
+The complete 122-project Mason YAML proof of concept was verified on 2026-08-28 with the Maven 4.1.0 source descriptor model, GraalVM Community `25.0.4`, Maven `4.0.0-rc-6`, Mason `0.3.0`, and Docker Desktop `29.7.2`; Quarkus tests consume Maven's resolved model through `generate-code-tests`. See [Mason YAML Proof of Concept](mason-yaml-poc.md).
 
 | Gate | Command | Result |
 |------|---------|--------|

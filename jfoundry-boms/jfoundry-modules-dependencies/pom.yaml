@@ -1,5 +1,5 @@
 child.project.url.inherit.append.path: "false"
-modelVersion: 4.0.0
+modelVersion: 4.1.0
 groupId: io.github.xfoundries
 artifactId: jfoundry-modules-dependencies
 version: 1.5.0-SNAPSHOT

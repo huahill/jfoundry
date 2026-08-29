@@ -58,6 +58,23 @@ write_model "${fixture_root}/baseline.xml" "1.0" "verify" "release" "false"
 write_model "${fixture_root}/equivalent.xml" "1.0" "verify" "release" "false"
 "${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/equivalent.xml"
 
+sed \
+    -e 's#http://maven.apache.org/POM/4.0.0#http://maven.apache.org/POM/4.1.0#g' \
+    -e 's#<modelVersion>4.0.0</modelVersion>#<modelVersion>4.1.0</modelVersion>#g' \
+    "${fixture_root}/baseline.xml" > "${fixture_root}/model-4.1.xml"
+"${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/model-4.1.xml"
+
+perl -0pe \
+    's#</build>#<resources><resource><directory>/tmp/src/main/resources-filtered</directory><filtering>true</filtering></resource></resources><testResources><testResource><directory>/tmp/src/test/resources-filtered</directory><filtering>true</filtering></testResource></testResources></build>#' \
+    "${fixture_root}/model-4.1.xml" > "${fixture_root}/model-4.1-default-resources.xml"
+"${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/model-4.1-default-resources.xml"
+
+perl -0pe 's#</project>#<modules><module>child</module></modules></project>#' \
+    "${fixture_root}/baseline.xml" > "${fixture_root}/model-modules.xml"
+perl -0pe 's#</project>#<subprojects><subproject>child</subproject></subprojects></project>#' \
+    "${fixture_root}/model-4.1.xml" > "${fixture_root}/model-subprojects.xml"
+"${verifier}" --compare-files "${fixture_root}/model-modules.xml" "${fixture_root}/model-subprojects.xml"
+
 write_model "${fixture_root}/poc-profile.xml" "1.0" "verify" "release" "false" "mason-central-poc"
 "${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/poc-profile.xml"
 

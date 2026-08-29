@@ -29,20 +29,20 @@ write_valid_fixture() {
     printf '%s\n' 'wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.4/maven-wrapper-3.3.4.jar' 'distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/4.0.0-rc-6/apache-maven-4.0.0-rc-6-bin.zip' > "${root}/.mvn/wrapper/maven-wrapper.properties"
     printf '%s\n' 'Verify Maven 4 Central readiness' 'MAVEN_CENTRAL_MAVEN4_READY: true' './mvnw -B -T 1 -Prelease -DskipTests deploy' > "${root}/.github/workflows/release.yml"
     printf '%s\n' \
-        'modelVersion: 4.0.0' \
+        'modelVersion: 4.1.0' \
         'artifactId: root' \
-        'modules:' \
+        'subprojects:' \
         '  - child' \
         "  - ${quarkus_test_modules[0]}" \
         "  - ${quarkus_test_modules[1]}" \
         "  - ${quarkus_test_modules[2]}" \
         > "${root}/pom.yaml"
-    printf '%s\n' 'modelVersion: 4.0.0' 'parent:' '  relativePath: ../pom.yaml' 'artifactId: child' > "${root}/child/pom.yaml"
+    printf '%s\n' 'modelVersion: 4.1.0' 'parent:' '  relativePath: ../pom.yaml' 'artifactId: child' > "${root}/child/pom.yaml"
     printf '%s\n' '<project><modelVersion>4.0.0</modelVersion></project>' > "${root}/jfoundry-boms/jfoundry-spring-boot-parent/src/test/resources/single-parent-consumer/pom.xml"
 
     for path in "${quarkus_test_modules[@]}"; do
         mkdir -p "${root}/${path}"
-        printf '%s\n' 'modelVersion: 4.0.0' 'artifactId: quarkus-test-module' 'build:' '  plugins:' '    - groupId: io.quarkus' '      artifactId: quarkus-maven-plugin' '      extensions: true' '      configuration:' '        skipSourceGeneration: ${skipTests}' '      executions:' '        - goals:' '            - generate-code-tests' > "${root}/${path}/pom.yaml"
+        printf '%s\n' 'modelVersion: 4.1.0' 'artifactId: quarkus-test-module' 'build:' '  plugins:' '    - groupId: io.quarkus' '      artifactId: quarkus-maven-plugin' '      extensions: true' '      configuration:' '        skipSourceGeneration: ${skipTests}' '      executions:' '        - goals:' '            - generate-code-tests' > "${root}/${path}/pom.yaml"
     done
 }
 
@@ -88,48 +88,48 @@ remaining_xml="${fixture_root}/remaining-xml"
 write_valid_fixture "${remaining_xml}"
 rm "${remaining_xml}/child/pom.yaml"
 printf '%s\n' '<project/>' > "${remaining_xml}/child/pom.xml"
-expect_failure "Reactor module does not contain pom.yaml" "${remaining_xml}" 4
+expect_failure "Reactor subproject does not contain pom.yaml" "${remaining_xml}" 4
 
 unreachable_yaml="${fixture_root}/unreachable-yaml"
 write_valid_fixture "${unreachable_yaml}"
 mkdir -p "${unreachable_yaml}/orphan"
-printf '%s\n' 'modelVersion: 4.0.0' 'artifactId: orphan' > "${unreachable_yaml}/orphan/pom.yaml"
+printf '%s\n' 'modelVersion: 4.1.0' 'artifactId: orphan' > "${unreachable_yaml}/orphan/pom.yaml"
 expect_failure "Mason YAML POM is not reachable from the root reactor" "${unreachable_yaml}" 6
 
 missing_reactor_module="${fixture_root}/missing-reactor-module"
 write_valid_fixture "${missing_reactor_module}"
 printf '%s\n' '  - missing' >> "${missing_reactor_module}/pom.yaml"
-expect_failure "Reactor module does not contain pom.yaml" "${missing_reactor_module}"
+expect_failure "Reactor subproject does not contain pom.yaml" "${missing_reactor_module}"
 
 duplicate_reactor_module="${fixture_root}/duplicate-reactor-module"
 write_valid_fixture "${duplicate_reactor_module}"
 printf '%s\n' '  - child' >> "${duplicate_reactor_module}/pom.yaml"
-expect_failure "Reactor module is declared more than once" "${duplicate_reactor_module}"
+expect_failure "Reactor subproject is declared more than once" "${duplicate_reactor_module}"
 
 absolute_reactor_module="${fixture_root}/absolute-reactor-module"
 write_valid_fixture "${absolute_reactor_module}"
 printf '%s\n' '  - /absolute/module' >> "${absolute_reactor_module}/pom.yaml"
-expect_failure "Reactor module path must be relative" "${absolute_reactor_module}"
+expect_failure "Reactor subproject path must be relative" "${absolute_reactor_module}"
 
 escaping_reactor_module="${fixture_root}/escaping-reactor-module"
 write_valid_fixture "${escaping_reactor_module}"
 printf '%s\n' '  - ../outside' >> "${escaping_reactor_module}/pom.yaml"
-expect_failure "Reactor module path must not contain '..'" "${escaping_reactor_module}"
+expect_failure "Reactor subproject path must not contain '..'" "${escaping_reactor_module}"
 
 external_target="${fixture_root}/external-reactor-target"
 mkdir -p "${external_target}"
-printf '%s\n' 'modelVersion: 4.0.0' 'artifactId: external' > "${external_target}/pom.yaml"
+printf '%s\n' 'modelVersion: 4.1.0' 'artifactId: external' > "${external_target}/pom.yaml"
 external_reactor_module="${fixture_root}/external-reactor-module"
 write_valid_fixture "${external_reactor_module}"
 ln -s "${external_target}" "${external_reactor_module}/external"
 printf '%s\n' '  - external' >> "${external_reactor_module}/pom.yaml"
-expect_failure "Reactor module resolves outside repository root" "${external_reactor_module}"
+expect_failure "Reactor subproject resolves outside repository root" "${external_reactor_module}"
 
 cyclic_reactor_module="${fixture_root}/cyclic-reactor-module"
 write_valid_fixture "${cyclic_reactor_module}"
 ln -s "${cyclic_reactor_module}" "${cyclic_reactor_module}/child/root-link"
-printf '%s\n' 'modules:' '  - root-link' >> "${cyclic_reactor_module}/child/pom.yaml"
-expect_failure "Reactor module cycle detected" "${cyclic_reactor_module}"
+printf '%s\n' 'subprojects:' '  - root-link' >> "${cyclic_reactor_module}/child/pom.yaml"
+expect_failure "Reactor subproject cycle detected" "${cyclic_reactor_module}"
 
 wrong_parent="${fixture_root}/wrong-parent"
 write_valid_fixture "${wrong_parent}"
