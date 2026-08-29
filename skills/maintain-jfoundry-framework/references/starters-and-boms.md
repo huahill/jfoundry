@@ -55,11 +55,12 @@ application still declares each selected starter or client explicitly.
 
 `jfoundry-spring-boot-dependencies` manages only the supported Boot-only Spring Boot line. The separate
 `jfoundry-spring-cloud-dependencies` line manages the supported Spring Cloud and Spring Cloud Alibaba
-line; the Cloud application's parent or another explicit BOM manages Spring Boot. Exact platform
-baselines belong in `docs/release/compatibility.md`. This
-allows a Cloud application to add an appropriate Cloud starter without a version while keeping the
-choice of configuration server, service discovery, traffic management, or other platform capability
-explicit in the application.
+line; the Cloud application's parent or another explicit BOM manages Spring Boot. Runtime BOM POMs are
+the executable source of exact platform versions. `docs/release/compatibility.md` records the supported
+lines, repeats verified versions for readers, and is checked against the owning BOMs in CI. This allows
+a Cloud application to add an appropriate Cloud starter without a version while keeping the choice of
+configuration server, service discovery, traffic management, or other platform capability explicit in
+the application.
 
 Do not add every available ecosystem BOM to a runtime BOM. Add one only when all of the following hold:
 

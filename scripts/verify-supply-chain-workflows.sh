@@ -30,6 +30,29 @@ forbid_text() {
     fi
 }
 
+verify_compatibility_matrix_workflow() {
+    ruby - "${root_dir}/.github/workflows/ci.yml" <<'RUBY'
+require "yaml"
+
+def fail_workflow(command)
+  warn ".github/workflows/ci.yml Documentation checks must run: #{command}"
+  exit 1
+end
+
+path = ARGV.fetch(0)
+config = YAML.safe_load(File.read(path), aliases: false)
+steps = config.dig("jobs", "docs", "steps")
+required_commands = [
+  "bash scripts/verify-compatibility-matrix.sh",
+  "bash scripts/verify-compatibility-matrix-test.sh"
+]
+
+required_commands.each do |command|
+  fail_workflow(command) unless steps.is_a?(Array) && steps.any? { |step| step["run"] == command }
+end
+RUBY
+}
+
 verify_dependabot_policy() {
     ruby - "${root_dir}/.github/dependabot.yml" <<'RUBY'
 require "yaml"
@@ -261,6 +284,7 @@ require_file ".github/workflows/snapshot.yml"
 require_file ".github/workflows/prepare-snapshot.yml"
 require_file ".github/workflows/auto-merge-dependabot.yml"
 
+verify_compatibility_matrix_workflow
 require_text ".github/dependabot.yml" "package-ecosystem: maven"
 require_text ".github/dependabot.yml" "package-ecosystem: github-actions"
 verify_dependabot_policy
