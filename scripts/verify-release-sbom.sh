@@ -27,7 +27,7 @@ if File.extname(path) == ".yaml"
   end
   configuration = plugin&.fetch("configuration", nil)
   valid = execution && configuration&.fetch("outputFormat", nil) == "all" &&
-    configuration&.fetch("includeTestScope", nil) == false
+    [false, "false"].include?(configuration&.fetch("includeTestScope", nil))
 else
   project = REXML::Document.new(File.read(path)).root
   release = project.elements.to_a("profiles/profile").find do |profile|

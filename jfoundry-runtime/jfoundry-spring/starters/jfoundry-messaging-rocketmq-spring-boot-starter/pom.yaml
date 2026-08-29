@@ -2,7 +2,7 @@ modelVersion: 4.0.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-spring
-  version: 1.4.0-SNAPSHOT
+  version: 1.5.0-SNAPSHOT
   relativePath: ../../pom.yaml
 artifactId: jfoundry-messaging-rocketmq-spring-boot-starter
 name: jfoundry-messaging-rocketmq-spring-boot-starter

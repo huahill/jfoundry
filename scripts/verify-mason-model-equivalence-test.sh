@@ -61,6 +61,35 @@ write_model "${fixture_root}/equivalent.xml" "1.0" "verify" "release" "false"
 write_model "${fixture_root}/poc-profile.xml" "1.0" "verify" "release" "false" "mason-central-poc"
 "${verifier}" --compare-files "${fixture_root}/baseline.xml" "${fixture_root}/poc-profile.xml"
 
+cat > "${fixture_root}/mason-test-handoffs.xml" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example</groupId><artifactId>sample</artifactId><version>1</version>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>io.quarkus</groupId><artifactId>quarkus-maven-plugin</artifactId>
+        <executions><execution><goals><goal>generate-code-tests</goal></goals></execution></executions>
+      </plugin>
+    </plugins>
+  </build>
+  <configuration>
+    <additionalClasspathDependencies>
+      <additionalClasspathDependency><groupId>org.yaml</groupId><artifactId>snakeyaml</artifactId></additionalClasspathDependency>
+    </additionalClasspathDependencies>
+  </configuration>
+</project>
+XML
+cat > "${fixture_root}/mason-test-handoffs-baseline.xml" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example</groupId><artifactId>sample</artifactId><version>1</version>
+</project>
+XML
+"${verifier}" --compare-files "${fixture_root}/mason-test-handoffs-baseline.xml" "${fixture_root}/mason-test-handoffs.xml"
+
 write_model "${fixture_root}/dependency.xml" "2.0" "verify" "release" "false"
 expect_difference "dependency version" "${fixture_root}/dependency.xml"
 

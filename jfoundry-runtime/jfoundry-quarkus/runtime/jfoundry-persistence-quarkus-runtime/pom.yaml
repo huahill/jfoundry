@@ -2,7 +2,7 @@ modelVersion: 4.0.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-quarkus
-  version: 1.4.0-SNAPSHOT
+  version: 1.5.0-SNAPSHOT
   relativePath: ../../pom.yaml
 artifactId: jfoundry-persistence-quarkus-runtime
 name: jfoundry-persistence-quarkus-runtime
@@ -32,8 +32,7 @@ build:
       configuration:
         skipSourceGeneration: ${skipTests}
       executions:
-        -
-          goals:
+        - goals:
             - generate-code-tests
     - groupId: io.quarkus
       artifactId: quarkus-extension-maven-plugin

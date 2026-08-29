@@ -2,7 +2,7 @@ modelVersion: 4.0.0
 parent:
   groupId: io.github.xfoundries
   artifactId: jfoundry-quarkus
-  version: 1.4.0-SNAPSHOT
+  version: 1.5.0-SNAPSHOT
   relativePath: ../../pom.yaml
 artifactId: jfoundry-restclient-quarkus-deployment
 name: jfoundry-restclient-quarkus-deployment
@@ -33,3 +33,15 @@ build:
       artifactId: maven-javadoc-plugin
       configuration:
         skip: "true"
+    - groupId: org.apache.maven.plugins
+      artifactId: maven-jar-plugin
+      executions:
+        - id: attach-empty-javadoc
+          phase: package
+          goals:
+            - jar
+          configuration:
+            classesDirectory: ${maven.multiModuleProjectDirectory}/.mvn/javadoc-placeholder
+            classifier: javadoc
+            includes:
+              - README.md

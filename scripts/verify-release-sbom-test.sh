@@ -60,4 +60,8 @@ assert_rejects "${unsafe_pom}"
 assert_accepts "${safe_pom}"
 assert_accepts "${ROOT_DIR}/pom.yaml"
 
+yaml_test_scope="${temp_dir}/yaml-pom.yaml"
+sed 's/includeTestScope: "false"/includeTestScope: false/' "${ROOT_DIR}/pom.yaml" > "${yaml_test_scope}"
+assert_accepts "${yaml_test_scope}"
+
 echo "Release SBOM verification tests passed."
