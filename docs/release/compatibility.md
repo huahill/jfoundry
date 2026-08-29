@@ -13,7 +13,7 @@ platform versions. The table below repeats those versions for readers, and
 | Spring Cloud | 2025.1.x | 2025.1.3 | `jfoundry-spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | 2025.1.0.0 | `jfoundry-spring-cloud-dependencies` |
 | Quarkus | 3.39.x | 3.39.1 | `jfoundry-quarkus-dependencies` |
-| Helidon MP | 4.5.x | 4.5.3 | `jfoundry-helidon-dependencies` |
+| Helidon MP | 4.5.x | 4.5.4 | `jfoundry-helidon-dependencies` |
 
 Spring Cloud applications use Spring Boot 4.0.x; the current consumer compatibility check uses Spring
 Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the application parent remains
