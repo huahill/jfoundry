@@ -372,14 +372,8 @@ jobs:
               sed -n 's/^\[INFO\] \[stdout\] //p' |
               tail -n 1
           )"
-          maven_3="$(command -v mvn)"
-          maven_3_details="$("${maven_3}" --version)"
-          if [[ "${maven_3_details}" != "Apache Maven 3."* ]]; then
-            echo "Consumer POM compatibility requires Maven 3, but found: ${maven_3_details}" >&2
-            exit 1
-          fi
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
-            "${maven_3}" "$(pwd)/mvnw"
+            "$(pwd)/mvnw"
 
   merge-gate:
     name: Merge gate
