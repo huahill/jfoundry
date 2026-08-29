@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
     <parent>
-        <groupId>io.github.xfoundries</groupId><artifactId>jfoundry-helidon</artifactId><version>1.5.0-SNAPSHOT</version><relativePath>../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>jfoundry-web-helidon</artifactId>
     <name>jfoundry-web-helidon</name>
