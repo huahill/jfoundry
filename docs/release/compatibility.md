@@ -2,18 +2,19 @@
 
 This document defines the supported platform lines, validated capability scope, and known limitations
 for the current JFoundry development line. Runtime BOM POMs are the executable source of exact
-platform versions. The table below repeats those versions for readers, and
-`scripts/verify-compatibility-matrix.sh` keeps the documentation aligned with the owning BOMs.
+platform versions. The table below records stable support lines and their owning BOMs;
+`scripts/verify-compatibility-matrix.sh` keeps those boundaries aligned with the BOMs without coupling
+documentation to patch-level updates.
 
 ## Runtime Platform Baselines
 
-| Platform | Supported line | Verified version | Exact version source |
-|----------|----------------|------------------|----------------------|
-| Spring Boot-only | 4.1.x | 4.1.1 | `jfoundry-spring-boot-dependencies` |
-| Spring Cloud | 2025.1.x | 2025.1.3 | `jfoundry-spring-cloud-dependencies` |
-| Spring Cloud Alibaba | 2025.1.x | 2025.1.0.0 | `jfoundry-spring-cloud-dependencies` |
-| Quarkus | 3.39.x | 3.39.1 | `jfoundry-quarkus-dependencies` |
-| Helidon MP | 4.5.x | 4.5.4 | `jfoundry-helidon-dependencies` |
+| Platform | Supported line | Version source |
+|----------|----------------|----------------|
+| Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
+| Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
+| Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
+| Quarkus | 3.39.x | `jfoundry-quarkus-dependencies` |
+| Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
 Spring Cloud applications use Spring Boot 4.0.x; the current consumer compatibility check uses Spring
 Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the application parent remains
@@ -97,14 +98,15 @@ contains an unannotated substitution method, so the Helidon Native smoke path ex
 
 ## Verification And Release Evidence
 
-The authoritative verification definitions are in `.github/workflows/ci.yml` and
-`scripts/verify-runtime-ci.sh`. They cover:
+The authoritative verification definitions are in `.github/workflows/ci.yml`,
+`scripts/verify-runtime-ci.sh`, and the owning runtime BOM POMs. They cover:
 
 - Java 25 unit tests and artifact packaging;
 - Spring, Quarkus, and Helidon middleware integration;
 - Spring, Quarkus, and Helidon Native Image consumer checks;
 - Maven 4 packaging and Maven 3.9/Maven 4 Consumer POM verification;
-- runtime BOM and compatibility-matrix consistency;
+- runtime BOM and supported-line consistency; exact versions are captured in CI logs and release
+  evidence for each immutable commit or tag;
 - release metadata and supply-chain policy.
 
 For a released version, use the immutable tag's GitHub checks, release evidence artifact, and release

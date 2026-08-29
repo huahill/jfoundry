@@ -109,7 +109,7 @@ JSON 标量、数组和对象类型。
 
 `jfoundry-restclient-helidon` 会引入 `helidon-microprofile-rest-client`，并把 JFoundry provider 自动注册到每个
 MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。
-该集成已通过 JVM 验证。Helidon 4.5.3 的 REST Client 原生镜像 substitution 与当前 GraalVM 25
+该集成已通过 JVM 验证。受支持的 Helidon 4.5.x REST Client 原生镜像 substitution 与当前 GraalVM 25
 基线不兼容，因此原生 REST Client 日志暂不属于发布支持声明。当前不支持 Spring `WebClient`。
 
 日志不会包含 URI query、user info 或 fragment。敏感 header 与嵌套 JSON 字段会以不区分大小写的方式脱敏，

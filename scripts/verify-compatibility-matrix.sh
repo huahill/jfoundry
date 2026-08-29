@@ -51,12 +51,19 @@ matrix_path = File.join(root_dir, "docs", "release", "compatibility.md")
 fail_matrix("missing document: #{matrix_path}") unless File.file?(matrix_path)
 
 rows = {}
+in_platform_table = false
 File.foreach(matrix_path) do |line|
+  if line.start_with?("| Platform | Supported line | Version source |")
+    in_platform_table = true
+    next
+  end
+  break if in_platform_table && line.strip.empty?
+  next unless in_platform_table
   next unless line.start_with?("|")
 
   columns = line.split("|", -1)[1...-1].map(&:strip)
-  next unless columns.size >= 4
   next unless PLATFORMS.any? { |platform| platform.name == columns[0] }
+  fail_matrix("#{columns[0]} row must have three columns") unless columns.size == 3
 
   fail_matrix("duplicate platform row: #{columns[0]}") if rows.key?(columns[0])
   rows[columns[0]] = columns
@@ -67,26 +74,19 @@ PLATFORMS.each do |platform|
   fail_matrix("missing platform row: #{platform.name}") unless row
 
   supported_line = row[1]
-  documented_version = row[2]
-  documented_source = row[3].delete("`")
+  documented_source = row[2].delete("`")
   pom_path = File.join(root_dir, "jfoundry-boms", platform.artifact_id, "pom.xml")
   bom_version = property_value(pom_path, platform.property_name)
   expected_line = version_line(bom_version)
 
-  if documented_version != bom_version
-    fail_matrix(
-      "#{platform.name} verified version #{documented_version} must match " \
-      "#{platform.artifact_id} #{platform.property_name} #{bom_version}"
-    )
-  end
   if supported_line != expected_line
     fail_matrix(
-      "#{platform.name} supported line #{supported_line} must match verified version line #{expected_line}"
+      "#{platform.name} supported line #{supported_line} must match BOM version line #{expected_line}"
     )
   end
   if documented_source != platform.artifact_id
     fail_matrix(
-      "#{platform.name} exact version source #{documented_source} must be #{platform.artifact_id}"
+      "#{platform.name} version source #{documented_source} must be #{platform.artifact_id}"
     )
   end
 end

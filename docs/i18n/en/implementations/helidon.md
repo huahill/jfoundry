@@ -11,7 +11,8 @@ Helidon-owned runtime classes remain the public CDI/provider entry points and re
 service-loading, scheduling, logging, and Native Image behavior. Applications select the Helidon runtime
 modules rather than assembling these shared implementation modules.
 
-See the [compatibility matrix](../../../release/compatibility.md) for the exact platform version.
+See the [compatibility matrix](../../../release/compatibility.md) for the supported platform line. The
+owning runtime BOM supplies the exact Helidon patch version used by each release.
 
 ## Dependency Composition
 
@@ -124,7 +125,7 @@ Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
 `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. This integration is verified on the JVM.
-Helidon 4.5.3's REST Client
+Helidon's supported 4.5.x REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.
 
