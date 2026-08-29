@@ -30,7 +30,7 @@
         <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
-        <helidon.version>4.5.3</helidon.version>
+        <helidon.version>4.5.4</helidon.version>
         <helidon.groovy-all.version>3.0.25</helidon.groovy-all.version>
         <helidon.jackson-annotations.version>2.22</helidon.jackson-annotations.version>
     </properties>
