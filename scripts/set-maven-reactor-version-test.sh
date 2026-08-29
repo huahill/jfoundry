@@ -45,7 +45,7 @@ cat > "${fixture_root}/module/target/pom.xml" <<'XML'
 <project><version>1.0.0</version></project>
 XML
 
-ruby --disable-gems "${updater}" "${fixture_root}" "2.0.0-SNAPSHOT"
+ruby "${updater}" "${fixture_root}" "2.0.0-SNAPSHOT"
 
 grep -Fq '<version>2.0.0-SNAPSHOT</version>' "${fixture_root}/pom.xml"
 grep -Fq '<version>2.0.0-SNAPSHOT</version>' "${fixture_root}/module/pom.xml"
@@ -57,7 +57,7 @@ grep -Fq '<version>1.0.0</version>' "${fixture_root}/module/target/pom.xml"
 cat >> "${fixture_root}/module/pom.xml" <<'XML'
 <dependencies><dependency><groupId>org.example</groupId><artifactId>unrelated</artifactId><version>2.0.0-SNAPSHOT</version></dependency></dependencies>
 XML
-if ruby --disable-gems "${updater}" "${fixture_root}" "3.0.0-SNAPSHOT" >/dev/null 2>&1; then
+if ruby "${updater}" "${fixture_root}" "3.0.0-SNAPSHOT" >/dev/null 2>&1; then
     echo "Expected an unclassified reactor-version occurrence to be rejected." >&2
     exit 1
 fi
