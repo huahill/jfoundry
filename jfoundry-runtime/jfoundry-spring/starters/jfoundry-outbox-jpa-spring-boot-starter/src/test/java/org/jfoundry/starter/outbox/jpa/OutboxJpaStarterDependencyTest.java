@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class OutboxJpaStarterDependencyTest {
 
-    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0";
+    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.1.0";
 
     @Test
     void declaresTheExplicitJPAOutboxCapabilityDependencies() throws Exception {
