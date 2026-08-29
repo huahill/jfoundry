@@ -44,10 +44,9 @@ require_text 'require_central_status "jfoundry-dependencies" "200"'
 require_text 'require_central_status "jfoundry-spring-dependencies" "200"'
 require_text "404)"
 require_text "200)"
-require_text "MAVEN_3_VERSION: 3.9.16"
-require_text "MAVEN_3_SHA512:"
 require_text '-f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml -Prelease'
-require_text "jfoundry-parent-remediation-deployment"
+require_text '          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \'
+require_text "central-deploy.log"
 require_text "deploymentId: ([[:alnum:]-]+)"
 require_text "central-deploy.log"
 require_text "actions/upload-artifact"
@@ -63,5 +62,9 @@ if ! grep -Fq -- "<tag>v1.0.0</tag>" "${parent_pom_file}"; then
     echo "Spring Boot parent POM must identify v1.0.0 as its SCM tag." >&2
     exit 1
 fi
+
+forbid_text "MAVEN_3_VERSION"
+forbid_text "MAVEN_3_SHA512"
+forbid_text "steps.maven_3"
 
 echo "Spring Boot parent remediation workflow verification passed: ${workflow_file}"

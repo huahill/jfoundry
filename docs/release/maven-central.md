@@ -10,7 +10,10 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 
 - Java 25.
 - The checked-in Maven Wrapper, currently Maven `4.0.0-rc-6` with Consumer POM transformation enabled.
-- Maven `3.9.16` for Maven Central publication and the release consumer-compatibility check.
+- Maven 4 final for Maven Central publication and the release Consumer POM check. Maven 3 is not a supported JFoundry source-build or release runtime.
+- Set repository variable `MAVEN_CENTRAL_MAVEN4_READY` to `true` only after Maven 4 final and Central
+  publication have been validated. The release workflow rejects RC/beta/alpha wrappers and fails
+  when this variable is absent.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
 - For local release dry-runs, a Maven server entry named `jfoundry` in `~/.m2/settings.xml`.
@@ -68,7 +71,7 @@ Then run the release profile through `verify` so sources, Javadocs, and local si
 ./mvnw -Prelease -DskipTests verify
 ```
 
-The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle. The protected workflow uses Maven 4 to generate and verify Consumer POMs, then uses Maven 3.9.16 for the Central `deploy` lifecycle.
+The `verify` phase checks local artifact generation and signatures up to the GPG signing step. It does not upload or stage a Central Portal deployment bundle. The protected workflow uses Maven 4 for the complete build, Consumer POM checks, and Central `deploy` lifecycle after the readiness guard passes.
 
 If GPG is not configured locally, the release-profile verification may fail at the signing step. Failures before signing, including compilation, source JARs, Javadocs, metadata, placeholder metadata guards, or Central publishing plugin setup, must be fixed before release.
 
@@ -82,32 +85,28 @@ is `1.0.0-RC1`.
 The release workflow checks out the requested annotated tag, verifies the tag-to-version relationship,
 a clean source tree, and matching SCM tags on every independent publication POM. It then runs
 `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor into an isolated repository,
-and verifies the Maven 4 Consumer POMs and Maven 3.9/Maven 4 consumer
-resolution for both direct Spring BOM imports and business projects that inherit the supported Spring
-Boot parent. It checks for open High or Critical Dependabot alerts and only then runs the serial
-Maven 3.9.16 `deploy` lifecycle. The workflow requires the plugin to report a Central
+and verifies Maven 4 Consumer POMs and consumer resolution for both direct Spring BOM imports and
+business projects that inherit the supported Spring Boot parent. It checks for open High or Critical
+Dependabot alerts, verifies Maven 4 final/Central readiness, and runs the Maven 4 `deploy` lifecycle.
+The workflow requires the plugin to report a Central
 `deploymentId` before it treats the deployment as successful. It never changes POM versions or
 pushes a branch during publication.
 
 Maven 4 is still an RC release. JFoundry uses its official Consumer POM transformation because Maven
 Central validates the POM that is deployed, rather than the build-time inheritance model. The source
 POMs remain maintainable parent/BOM-based POMs; Maven 4 produces flattened Consumer POMs for child
-artifacts. The workflow archives those transformed POMs and checks that Maven 3.9 and Maven 4 can
-consume them before publication.
+artifacts. The workflow archives those transformed POMs and checks them with Maven 4 before publication.
 
 The ordinary CI Maven 4 compatibility job performs the same isolated reactor installation and
-Maven 3.9/Maven 4 consumer resolution before a release tag can be created. Its expected Spring Boot
+Maven 4 consumer resolution before a release tag can be created. Its expected Spring Boot
 parent version is read from the generated `jfoundry-spring-boot-dependencies` Consumer POM, so the
 verification cannot remain green by sharing a stale hardcoded version with its test fixture. Release
 POM metadata verification also requires each non-SNAPSHOT independent BOM or parent SCM tag to match
 the project version; the next minor SNAPSHOT line retains the immediately preceding stable tag.
 
-Maven Central publication itself currently runs with Apache Maven `3.9.16`. Maven 4 RC6 does not
-reliably apply the Central plugin lifecycle extension, and an explicit plugin goal packages Maven 4
-Consumer POM attachments as nonstandard `*-consumer.pom` files that Central cannot associate with
-artifact coordinates. The workflow downloads Maven 3.9.16 from Apache's repository, verifies its
-SHA-512 checksum, and executes a serial `deploy` lifecycle. Maven 4 remains the normal build runtime
-and the authority for Consumer POM verification.
+Central publication is currently blocked because the wrapper is Maven 4 RC6 and Central readiness has
+not been validated. Once Maven 4 final is available, the wrapper executes the standard `deploy`
+lifecycle directly. No Maven 3 bridge is retained.
 
 Every JFoundry publication POM, including the independent BOM POMs, configures the Central publishing
 plugin with `autoPublish=true` and `waitUntil=PUBLISHED`. The workflow then verifies that Maven

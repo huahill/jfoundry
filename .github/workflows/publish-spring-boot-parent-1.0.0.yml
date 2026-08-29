@@ -93,24 +93,6 @@ jobs:
           ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml -Prelease -DskipTests verify \
             -Dgpg.passphrase="${GPG_PASSPHRASE}"
 
-      - name: Install Apache Maven 3 for Central publication
-        id: maven_3
-        env:
-          MAVEN_3_VERSION: 3.9.16
-          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
-        run: |
-          set -euo pipefail
-
-          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
-          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
-            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
-          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
-          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
-
-          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
-          "${executable}" --version
-          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
-
       - name: Publish only the missing Parent POM
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
@@ -119,9 +101,8 @@ jobs:
         run: |
           set -euo pipefail
 
-          "${{ steps.maven_3.outputs.executable }}" -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
+          ./mvnw -B -f jfoundry-boms/jfoundry-spring-boot-parent/pom.xml \
             -Prelease -DskipTests deploy \
-            "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-parent-remediation-deployment" \
             -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee central-deploy.log
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then

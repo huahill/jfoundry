@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.1.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          child.project.url.inherit.append.path="false"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-parent</artifactId>
@@ -65,24 +65,24 @@
         <mockito.javaagent.argLine/>
     </properties>
 
-    <modules>
-        <module>jfoundry-boms/jfoundry-modules-dependencies</module>
-        <module>jfoundry-boms/jfoundry-foundation-dependencies</module>
-        <module>jfoundry-boms/jfoundry-spring-boot-dependencies</module>
-        <module>jfoundry-boms/jfoundry-spring-cloud-dependencies</module>
-        <module>jfoundry-boms/jfoundry-quarkus-dependencies</module>
-        <module>jfoundry-boms/jfoundry-helidon-dependencies</module>
-        <module>jfoundry-boms/jfoundry-dependencies</module>
-        <module>jfoundry-boms/jfoundry-spring-boot-parent</module>
-        <module>jfoundry-core/jfoundry-architecture</module>
-        <module>jfoundry-core/jfoundry-domain</module>
-        <module>jfoundry-core/jfoundry-application</module>
-        <module>jfoundry-core/jfoundry-infrastructure</module>
-        <module>jfoundry-runtime/jfoundry-jakarta</module>
-        <module>jfoundry-runtime/jfoundry-spring</module>
-        <module>jfoundry-runtime/jfoundry-quarkus</module>
-        <module>jfoundry-runtime/jfoundry-helidon</module>
-    </modules>
+    <subprojects>
+        <subproject>jfoundry-boms/jfoundry-modules-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-foundation-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-spring-boot-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-spring-cloud-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-quarkus-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-helidon-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-spring-boot-parent</subproject>
+        <subproject>jfoundry-core/jfoundry-architecture</subproject>
+        <subproject>jfoundry-core/jfoundry-domain</subproject>
+        <subproject>jfoundry-core/jfoundry-application</subproject>
+        <subproject>jfoundry-core/jfoundry-infrastructure</subproject>
+        <subproject>jfoundry-runtime/jfoundry-jakarta</subproject>
+        <subproject>jfoundry-runtime/jfoundry-spring</subproject>
+        <subproject>jfoundry-runtime/jfoundry-quarkus</subproject>
+        <subproject>jfoundry-runtime/jfoundry-helidon</subproject>
+    </subprojects>
 
     <dependencyManagement>
         <dependencies>
@@ -200,7 +200,7 @@
                                         <version>[21,)</version>
                                     </requireJavaVersion>
                                     <requireMavenVersion>
-                                        <version>[3.9.0,)</version>
+                                        <version>[4.0.0-rc-1,)</version>
                                     </requireMavenVersion>
                                     <requireReleaseDeps>
                                         <onlyWhenRelease>true</onlyWhenRelease>

@@ -79,6 +79,15 @@ jobs:
       - name: Test compatibility matrix verification
         run: bash scripts/verify-compatibility-matrix-test.sh
 
+      - name: Verify Maven 4.1 model
+        run: bash scripts/verify-maven-4-model.sh
+
+      - name: Test Maven 4.1 model verifier
+        run: bash scripts/verify-maven-4-model-test.sh
+
+      - name: Test Maven reactor version updater
+        run: bash scripts/set-maven-reactor-version-test.sh
+
       - name: Verify release workflow
         run: bash scripts/verify-release-workflow.sh
 

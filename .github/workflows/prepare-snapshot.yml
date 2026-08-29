@@ -89,16 +89,7 @@ jobs:
           fi
 
           git switch --create "${BRANCH}"
-          ./mvnw -B versions:set -DnewVersion="${NEXT_VERSION}" \
-            -DgenerateBackupPoms=false -DprocessAllModules
-          for pom_file in $(git diff --name-only -- '*.xml'); do
-            baseline_timestamp="$(git show "HEAD:${pom_file}" 2>/dev/null | sed -n 's:.*<project.build.outputTimestamp>\([^<]*\)</project.build.outputTimestamp>.*:\1:p' | head -n 1)"
-            if [[ -n "${baseline_timestamp}" ]]; then
-              ruby -e 'path, timestamp = ARGV; content = File.read(path); content.gsub!(/(<project\.build\.outputTimestamp>)[^<]+(<\/project\.build\.outputTimestamp>)/, "\\1#{timestamp}\\2"); File.write(path, content)' -- "${pom_file}" "${baseline_timestamp}"
-            fi
-          done
-          sed -i 's/<jfoundry.version>[^<]*<\//<jfoundry.version>'"${NEXT_VERSION}"'<\//g' \
-            jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
+          ruby --disable-gems scripts/set-maven-reactor-version.rb . "${NEXT_VERSION}"
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com

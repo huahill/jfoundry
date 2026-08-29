@@ -152,13 +152,13 @@ is opt-in so ordinary module tests do not require Docker:
 ## Native Image Status
 
 The Helidon consumer is built with GraalVM Native Image and has verified CDI discovery, application
-startup, and the Problem Details HTTP response. Use GraalVM 25 with Maven 3.9 and the repository's
-Native Image profile:
+startup, and the Problem Details HTTP response. Use GraalVM 25 with the repository's Maven 4 wrapper
+and Native Image profile:
 
 ```bash
 GRAALVM_HOME=/path/to/graalvm-25 \
 JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
+./mvnw -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
   -am -Pnative-image package
 ```
 
