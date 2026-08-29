@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InboxJpaStarterDependencyTest {
 
-    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.0.0";
+    private static final String MAVEN_POM_NAMESPACE = "http://maven.apache.org/POM/4.1.0";
 
     @Test
     void declaresTheExplicitJPAInboxCapabilityDependencies() throws Exception {
