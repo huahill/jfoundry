@@ -27,10 +27,16 @@ jobs:
       HISTORICAL_SOURCE_COMMIT: 3eb6c53833fcbca26a4107c0d6aec6d4afde1a77
       HISTORICAL_POM_REPOSITORY_PATH: jfoundry-boms/jfoundry-spring-boot-parent/pom.xml
       HISTORICAL_POM_SHA256: 1856dbb984e2a9985c9a0f1ae3fd777a6c736142f3a085cf33696422a870598f
-      REMEDIATION_EVIDENCE_ROOT: ${{ runner.temp }}/jfoundry-parent-remediation-source
-      PARENT_POM_PATH: ${{ runner.temp }}/jfoundry-parent-remediation-source/pom.xml
       CONFIRMATION: ${{ inputs.confirmation }}
     steps:
+      - name: Configure remediation workspace
+        run: |
+          set -euo pipefail
+
+          remediation_evidence_root="${RUNNER_TEMP}/jfoundry-parent-remediation-source"
+          echo "REMEDIATION_EVIDENCE_ROOT=${remediation_evidence_root}" >> "${GITHUB_ENV}"
+          echo "PARENT_POM_PATH=${remediation_evidence_root}/pom.xml" >> "${GITHUB_ENV}"
+
       - name: Verify remediation publication request
         run: |
           set -euo pipefail

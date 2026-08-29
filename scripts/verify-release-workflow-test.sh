@@ -34,7 +34,6 @@ permissions:
   actions: read
   contents: write
   security-events: read
-  vulnerability-alerts: read
   attestations: write
   id-token: write
 jobs:
@@ -301,9 +300,10 @@ awk '
 ' "${complete_workflow}" > "${missing_consumer_pom_version_extraction_workflow}"
 assert_rejects "${missing_consumer_pom_version_extraction_workflow}"
 
-missing_vulnerability_alerts_permission_workflow="${temp_dir}/missing-vulnerability-alerts-permission-release.yml"
-grep -v "vulnerability-alerts: read" "${complete_workflow}" > "${missing_vulnerability_alerts_permission_workflow}"
-assert_rejects "${missing_vulnerability_alerts_permission_workflow}"
+unsupported_vulnerability_alerts_permission_workflow="${temp_dir}/unsupported-vulnerability-alerts-permission-release.yml"
+sed '/security-events: read/a\
+  vulnerability-alerts: read' "${complete_workflow}" > "${unsupported_vulnerability_alerts_permission_workflow}"
+assert_rejects "${unsupported_vulnerability_alerts_permission_workflow}"
 
 missing_contents_write_workflow="${temp_dir}/missing-contents-write-release.yml"
 sed 's/contents: write/contents: read/' "${complete_workflow}" > "${missing_contents_write_workflow}"

@@ -16,7 +16,6 @@ permissions:
   actions: read
   contents: write
   security-events: read
-  vulnerability-alerts: read
   attestations: write
   id-token: write
 
