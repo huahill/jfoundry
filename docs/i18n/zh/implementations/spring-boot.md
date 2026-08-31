@@ -154,6 +154,10 @@ Spring Boot 应用可以使用 `jfoundry-restclient-spring-boot-starter`，并�
 Security 常规注册之前。应用可以提供自己的 `HttpLoggingFilter` 或
 `FilterRegistrationBean<HttpLoggingFilter>`，以适配转发、追踪或安全拓扑所需的其他顺序。
 
+自动配置的过滤器默认排除 `/actuator/health/**`，包括 liveness 与 readiness 探针。应用可将
+`jfoundry.web.mvc.logging-excluded-paths` 设置为 Ant 风格的应用内路径列表，以替换默认列表；如需在保留
+健康检查排除的同时增加其他路径，请在列表中同时保留 `/actuator/health/**`。匹配前会移除 Servlet context path。
+
 入站时长在同步链完成，或异步请求进入 complete、error、timeout 终态时结束。`FULL` 使用 tee 包装器立即转发
 请求与响应字节，并最多保留 8 KiB；该时长不表示客户端何时收到流式响应。两个方向都以 `INFO` 分类输出 request、
 header、body 与 response 事件，始终移除 URI query，并脱敏敏感 header 与嵌套 JSON 字段；不安全的 body

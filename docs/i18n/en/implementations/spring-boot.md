@@ -221,6 +221,11 @@ defaults to `Ordered.HIGHEST_PRECEDENCE + 20`, before Spring Security's normal r
 application-provided `HttpLoggingFilter` or `FilterRegistrationBean<HttpLoggingFilter>` replaces this
 default when forwarding, tracing, or security topology requires another order.
 
+The auto-configured filter excludes `/actuator/health/**` by default, including liveness and readiness
+probes. Set `jfoundry.web.mvc.logging-excluded-paths` to a list of Ant-style application paths to replace
+the default list; include `/actuator/health/**` in that list when adding exclusions while retaining the
+health exclusion. Matching removes the Servlet context path before evaluating a pattern.
+
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
 complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at
 most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
