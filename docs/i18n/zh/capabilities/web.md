@@ -140,6 +140,11 @@ Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。Qua
 | Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
 | Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
 
+Spring MVC 默认从入站日志中排除 `/actuator/health/**`。应用可通过
+`jfoundry.web.mvc.logging-excluded-paths` 配置 Ant 风格的应用内路径，以替换默认列表并增加更多排除项。
+匹配前会先移除 Servlet context path，因此 context path 为 `/api` 时，
+`/api/actuator/health/liveness` 会按 `/actuator/health/liveness` 进行匹配。
+
 Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。Spring 应用也可以通过
 `RestClientSupport.configure(builder, HttpLoggingLevel)` 为手工 builder 选择级别。JFoundry 当前不集成

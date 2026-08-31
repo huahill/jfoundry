@@ -38,6 +38,7 @@
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
 | `jfoundry.web.rest-client.logging-level` | `NONE` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
 | `jfoundry.web.mvc.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用后的事件以 `INFO` 输出。 |
+| `jfoundry.web.mvc.logging-excluded-paths` | `/actuator/health/**` | 从入站 Servlet HTTP 日志中排除的 Ant 风格应用内路径；配置列表会替换默认值。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
@@ -82,7 +83,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`、JPA `InboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Inbox 适配器。用户提供的 `InboxMessageStore` 或 `JpaInboxClaimStrategy` 优先；内置领取策略仅支持 PostgreSQL 和 MySQL，未知数据库产品在应用未提供策略时会快速失败。 |
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC 应用且处理器类存在；没有已有 JFoundry 处理器。它先于 Spring Boot Web MVC 自动配置运行，使 Boot 的通用问题详情处理器回退。 |
-| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`、`JfoundryWebMvcProperties` | Servlet 应用与 Filter API 存在，且应用未提供 `HttpLoggingFilter` 或对应注册。`NONE` 创建 disabled registration；启用后以 `HIGHEST_PRECEDENCE + 20` 覆盖 request、async、error 派发。 |
+| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`、`JfoundryWebMvcProperties` | Servlet 应用与 Filter API 存在，且应用未提供 `HttpLoggingFilter` 或对应注册。`NONE` 创建 disabled registration；启用后以 `HIGHEST_PRECEDENCE + 20` 覆盖 request、async、error 派发。健康检查与应用配置的路径会在创建日志状态或 body 捕获前跳过。 |
 | `WebRestClientAutoConfiguration` | `RestClientCustomizer`、`JfoundryWebProperties` | Spring Boot `RestClient` 类和 `jfoundry-restclient-spring` 存在；customizer 将配置的日志级别应用到 Boot 管理的 builder。 |
 
 ## 说明

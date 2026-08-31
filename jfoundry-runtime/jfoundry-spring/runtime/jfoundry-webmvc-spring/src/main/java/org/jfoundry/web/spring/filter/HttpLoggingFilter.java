@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
+import java.util.function.Predicate;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.AsyncEvent;
@@ -51,19 +52,37 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private final HttpLoggingLevel level;
 
+    private final Predicate<HttpServletRequest> excludedRequest;
+
     private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
     /// Creates a filter with the requested logging detail.
     public HttpLoggingFilter(HttpLoggingLevel level) {
-        this(level, LOG::isInfoEnabled, System::nanoTime);
+        this(level, request -> false, LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    /// Creates a filter with the requested logging detail and request exclusion predicate.
+    public HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest) {
+        this(level, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        this(level, request -> false, infoEnabled, nanoTime);
+    }
+
+    HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest,
+            BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
+        this.excludedRequest = Objects.requireNonNull(excludedRequest, "excludedRequest must not be null");
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return this.excludedRequest.test(request);
     }
 
     @Override

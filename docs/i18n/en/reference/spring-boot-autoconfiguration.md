@@ -40,6 +40,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
 | `jfoundry.web.rest-client.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
 | `jfoundry.web.mvc.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled events are emitted at `INFO`. |
+| `jfoundry.web.mvc.logging-excluded-paths` | `/actuator/health/**` | Ant-style application paths excluded from inbound Servlet HTTP logs. A configured list replaces the default. |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |
@@ -85,7 +86,7 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`, JPA `InboxMessageStore` | `EntityManagerFactory` and the JPA Inbox adapter are present. A user `InboxMessageStore` or `JpaInboxClaimStrategy` takes precedence; built-in claim strategies support only PostgreSQL and MySQL, and an unknown database product fails fast unless the application supplies a strategy. |
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
 | `WebMvcProblemDetailAutoConfiguration` | `ProblemDetailsExceptionHandler` | Servlet Web MVC application and handler class are present; no existing JFoundry handler. It runs before Spring Boot Web MVC auto-configuration, causing Boot's generic problem-details handler to back off. |
-| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`, `JfoundryWebMvcProperties` | Servlet application and Filter APIs are present; no application `HttpLoggingFilter` or matching registration exists. `NONE` creates a disabled registration; enabled levels cover request, async, and error dispatches at `HIGHEST_PRECEDENCE + 20`. |
+| `WebMvcHttpLoggingAutoConfiguration` | `FilterRegistrationBean<HttpLoggingFilter>`, `JfoundryWebMvcProperties` | Servlet application and Filter APIs are present; no application `HttpLoggingFilter` or matching registration exists. `NONE` creates a disabled registration; enabled levels cover request, async, and error dispatches at `HIGHEST_PRECEDENCE + 20`. Health and application-configured paths are skipped before logging state or body capture is created. |
 | `WebRestClientAutoConfiguration` | `RestClientCustomizer`, `JfoundryWebProperties` | Spring Boot RestClient classes and `jfoundry-restclient-spring` are present; the customizer applies the configured logging level to Boot-managed builders. |
 
 ## Notes

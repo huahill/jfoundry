@@ -5,6 +5,12 @@
       "type": "org.jfoundry.http.HttpLoggingLevel",
       "defaultValue": "NONE",
       "description": "Inbound Servlet HTTP logging detail: NONE, BASIC, HEADERS, or FULL. Logging is emitted at INFO when enabled."
+    },
+    {
+      "name": "jfoundry.web.mvc.logging-excluded-paths",
+      "type": "java.util.List<java.lang.String>",
+      "defaultValue": ["/actuator/health/**"],
+      "description": "Ant-style application paths excluded from inbound Servlet HTTP logs. The configured list replaces the default."
     }
   ]
 }

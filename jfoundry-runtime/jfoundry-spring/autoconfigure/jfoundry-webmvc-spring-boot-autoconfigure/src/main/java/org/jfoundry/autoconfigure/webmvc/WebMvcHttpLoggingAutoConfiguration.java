@@ -1,8 +1,11 @@
 package org.jfoundry.autoconfigure.webmvc;
 
 import java.util.EnumSet;
+import java.util.List;
+import java.util.function.Predicate;
 
 import jakarta.servlet.DispatcherType;
+import jakarta.servlet.http.HttpServletRequest;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -13,6 +16,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.Ordered;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.StringUtils;
 
 /// Auto-configures inbound Servlet HTTP diagnostic logging for Spring MVC applications.
 @AutoConfiguration
@@ -33,12 +38,34 @@ public class WebMvcHttpLoggingAutoConfiguration {
     @ConditionalOnMissingFilterBean(HttpLoggingFilter.class)
     public FilterRegistrationBean<HttpLoggingFilter> jfoundryHttpLoggingFilterRegistration(
             JfoundryWebMvcProperties properties) {
-        var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLoggingLevel()));
+        var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLoggingLevel(),
+                excludedRequest(properties.getLoggingExcludedPaths())));
         registration.setName("jfoundryHttpLoggingFilter");
         registration.setOrder(DEFAULT_FILTER_ORDER);
         registration.setAsyncSupported(true);
         registration.setDispatcherTypes(EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.ERROR));
         registration.setEnabled(properties.getLoggingLevel() != HttpLoggingLevel.NONE);
         return registration;
+    }
+
+    private static Predicate<HttpServletRequest> excludedRequest(List<String> patterns) {
+        var matcher = new AntPathMatcher();
+        var normalizedPatterns = patterns == null ? List.<String>of() : patterns.stream()
+                .filter(StringUtils::hasText)
+                .map(WebMvcHttpLoggingAutoConfiguration::normalizePattern)
+                .toList();
+        return request -> {
+            var contextPath = request.getContextPath();
+            var requestUri = request.getRequestURI();
+            var hasContextPath = contextPath != null && !contextPath.isEmpty()
+                    && (requestUri.equals(contextPath) || requestUri.startsWith(contextPath + "/"));
+            var applicationPath = hasContextPath ? requestUri.substring(contextPath.length()) : requestUri;
+            return normalizedPatterns.stream().anyMatch(pattern -> matcher.match(pattern, applicationPath));
+        };
+    }
+
+    private static String normalizePattern(String pattern) {
+        var trimmed = pattern.trim();
+        return trimmed.startsWith("/") ? trimmed : "/" + trimmed;
     }
 }

@@ -80,6 +80,31 @@ class HttpLoggingFilterTest {
     }
 
     @Test
+    void excludedRequestDelegatesWithOriginalObjectsWithoutQueryingClock() throws Exception {
+        var clockQueries = new AtomicInteger();
+        LongSupplier clock = () -> {
+            clockQueries.incrementAndGet();
+            return 0;
+        };
+        var request = request("secret".getBytes(StandardCharsets.UTF_8));
+        var response = new MockHttpServletResponse();
+        var seenRequest = new AtomicReference<>();
+        var seenResponse = new AtomicReference<>();
+
+        new HttpLoggingFilter(HttpLoggingLevel.FULL, requestValue -> true, () -> true, clock)
+                .doFilter(request, response,
+                (actualRequest, actualResponse) -> {
+                    seenRequest.set(actualRequest);
+                    seenResponse.set(actualResponse);
+                });
+
+        assertThat(seenRequest).hasValue(request);
+        assertThat(seenResponse).hasValue(response);
+        assertThat(clockQueries).hasValue(0);
+        assertThat(messages()).isEmpty();
+    }
+
+    @Test
     void basicRecordsQueryFreeLifecycleStatusAndDeterministicDuration() throws Exception {
         var request = request(new byte[0]);
         var response = new MockHttpServletResponse();

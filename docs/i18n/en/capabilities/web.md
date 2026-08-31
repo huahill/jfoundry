@@ -173,6 +173,11 @@ disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, 
 | Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
 | Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
 
+Spring MVC excludes `/actuator/health/**` from inbound logging by default. Configure
+`jfoundry.web.mvc.logging-excluded-paths` with Ant-style application paths to replace that default and add
+more exclusions. Matching removes the Servlet context path first, so `/api/actuator/health/liveness` is
+matched as `/actuator/health/liveness` when the context path is `/api`.
+
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
 `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring applications can also select
 the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.

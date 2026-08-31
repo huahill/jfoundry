@@ -13,6 +13,8 @@ import org.springframework.boot.test.context.runner.WebApplicationContextRunner;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,10 +30,66 @@ class WebMvcHttpLoggingAutoConfigurationTest {
             assertThat(context).hasSingleBean(JfoundryWebMvcProperties.class);
             assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingLevel())
                     .isEqualTo(HttpLoggingLevel.NONE);
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingExcludedPaths())
+                    .containsExactly("/actuator/health/**");
             var registration = registration(context);
             assertThat(registration.isEnabled()).isFalse();
             assertThat(level(registration)).isEqualTo(HttpLoggingLevel.NONE);
         });
+    }
+
+    @Test
+    void excludesDefaultHealthPathsAfterContextPath() throws Exception {
+        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+                .run(context -> {
+                    var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
+                    request.setContextPath("/api");
+                    var response = new MockHttpServletResponse();
+                    var filter = registration(context).getFilter();
+                    filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+                        assertThat(actualRequest).isSameAs(request);
+                        assertThat(actualResponse).isSameAs(response);
+                    });
+                    assertThat(request.getAttribute(
+                            "org.jfoundry.web.spring.filter.HttpLoggingFilter.STATE")).isNull();
+                });
+    }
+
+    @Test
+    void applicationExcludedPathsReplaceDefaultsAndCanAddCustomPatterns() throws Exception {
+        runner.withPropertyValues(
+                "jfoundry.web.mvc.logging-level=BASIC",
+                "jfoundry.web.mvc.logging-excluded-paths[0]=/internal/**",
+                "jfoundry.web.mvc.logging-excluded-paths[1]=/actuator/health/**")
+                .run(context -> {
+                    assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingExcludedPaths())
+                            .containsExactly("/internal/**", "/actuator/health/**");
+                    var request = new MockHttpServletRequest("GET", "/api/internal/metrics");
+                    request.setContextPath("/api");
+                    var response = new MockHttpServletResponse();
+                    registration(context).getFilter().doFilter(request, response,
+                            (actualRequest, actualResponse) -> {
+                            });
+                    assertThat(request.getAttribute(
+                            "org.jfoundry.web.spring.filter.HttpLoggingFilter.STATE")).isNull();
+                });
+    }
+
+    @Test
+    void applicationExcludedPathsReplaceTheDefaultHealthPattern() throws Exception {
+        runner.withPropertyValues(
+                "jfoundry.web.mvc.logging-level=BASIC",
+                "jfoundry.web.mvc.logging-excluded-paths[0]=/internal/**")
+                .run(context -> {
+                    var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
+                    request.setContextPath("/api");
+                    var response = new MockHttpServletResponse();
+                    registration(context).getFilter().doFilter(request, response,
+                            (actualRequest, actualResponse) -> {
+                            });
+                    assertThat(request.getAttribute(
+                            "org.jfoundry.web.spring.filter.HttpLoggingFilter.STATE")).isNotNull();
+                });
     }
 
     @Test
