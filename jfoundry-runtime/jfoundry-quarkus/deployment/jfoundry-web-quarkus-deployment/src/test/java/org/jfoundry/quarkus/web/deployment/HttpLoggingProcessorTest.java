@@ -2,6 +2,7 @@ package org.jfoundry.quarkus.web.deployment;
 
 import jakarta.ws.rs.Priorities;
 import org.jfoundry.http.quarkus.HttpLoggingProvider;
+import org.jfoundry.http.quarkus.RequestCorrelationProvider;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,5 +30,17 @@ class HttpLoggingProcessorTest {
         assertThat(writer.getClassName()).isEqualTo(HttpLoggingProvider.class.getName());
         assertThat(writer.getPriority()).isEqualTo(Priorities.USER - 200);
         assertThat(writer.isRegisterAsBean()).isTrue();
+    }
+
+    @Test
+    void registersRequestCorrelationBeforeHttpLogging() {
+        var processor = new HttpLoggingProcessor();
+        assertThat(processor.registerRequestCorrelationRequestFilter().getClassName())
+                .isEqualTo(RequestCorrelationProvider.class.getName());
+        assertThat(processor.registerRequestCorrelationRequestFilter().getPriority())
+                .isEqualTo(RequestCorrelationProvider.PRIORITY);
+        assertThat(processor.registerRequestCorrelationResponseFilter().getPriority())
+                .isEqualTo(RequestCorrelationProvider.PRIORITY);
+        assertThat(RequestCorrelationProvider.PRIORITY).isLessThan(Priorities.USER - 200);
     }
 }

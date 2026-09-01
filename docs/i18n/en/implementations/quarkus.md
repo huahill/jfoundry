@@ -368,6 +368,17 @@ The extension does not configure security. A Quarkus security adapter that owns 
 authorization can render its own `401` or `403` descriptor with the public
 `ProblemDetailsRenderer.render(...)` API.
 
+## Request Correlation
+
+`jfoundry-web-quarkus-runtime` registers a pre-matching request/response provider at
+`Priorities.USER - 300`, before the HTTP diagnostic provider at `USER - 200`. It validates or generates
+`X-Request-Id`, stores `RequestCorrelationContext.ATTRIBUTE_NAME`, writes the response header by default,
+and projects `request_id` through SLF4J MDC. Configure
+`jfoundry.web.quarkus.request-correlation.enabled`, `header-name`, `accept-incoming`, `write-response`,
+`maximum-length` (36-64), and comma-separated `excluded-paths` using Ant-style `*`, `**`, and `?` patterns.
+The provider restores the request-thread context in the terminal response callback; application-managed worker
+threads need an explicit Quarkus context-propagation mechanism.
+
 ## HTTP Diagnostic Logging
 
 `jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer

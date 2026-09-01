@@ -11,6 +11,42 @@
       "type": "java.util.List<java.lang.String>",
       "defaultValue": ["/actuator/health/**"],
       "description": "Ant-style application paths excluded from inbound Servlet HTTP logs. The configured list replaces the default."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable inbound request correlation for Spring MVC."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.header-name",
+      "type": "java.lang.String",
+      "defaultValue": "X-Request-Id",
+      "description": "HTTP header used for inbound request correlation."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.accept-incoming",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Accept a valid incoming correlation header; invalid or missing values are generated."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.write-response",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Write the final correlation identifier to the response header."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.maximum-length",
+      "type": "java.lang.Integer",
+      "defaultValue": 64,
+      "description": "Maximum accepted correlation-header length, from 36 through 64 characters."
+    },
+    {
+      "name": "jfoundry.web.mvc.request-correlation.excluded-paths",
+      "type": "java.util.List<java.lang.String>",
+      "defaultValue": [],
+      "description": "Ant-style application paths excluded from request correlation."
     }
   ]
 }

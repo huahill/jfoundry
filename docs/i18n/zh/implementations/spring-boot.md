@@ -99,6 +99,15 @@ Outbox 装配包含四项独立决策：能力、存储、派发触发方式和�
 
 `jfoundry-messaging-spring-boot-starter` 不会注册回退 `MessageSender`。启用投递前，必须添加一个消息代理专用启动器或提供应用 `MessageSender`，否则不存在生产投递路径。自动 Outbox 事件记录默认关闭，通过 `jfoundry.domain.event.dispatch.outbox.enabled=true` 启用。它只写入标注 `@Externalized` 的领域事件或被 `DomainEventExternalizer` 选中的事件，绝不会从持久化变更推断消息。直接选择消息代理见[消息传输](../capabilities/message-delivery.md)，Outbox 与 Inbox 语义见[可靠消息](../capabilities/reliable-messaging.md)。
 
+## 请求关联
+
+`jfoundry-webmvc-spring-boot-starter` 默认注册 `RequestCorrelationFilter`，顺序为
+`Ordered.HIGHEST_PRECEDENCE + 10`，早于 `+20` 的 `HttpLoggingFilter`。它覆盖 `REQUEST`、`ASYNC` 和
+`ERROR` 分派，校验或生成 `X-Request-Id`，提供 `RequestCorrelationContext.current()`，默认回写响应 Header，
+并通过 SLF4J MDC 投影 `request_id`。可配置 `jfoundry.web.mvc.request-correlation.enabled`、`header-name`、
+`accept-incoming`、`write-response`、`maximum-length`（36-64）和 `excluded-paths`（Ant 风格应用路径）。
+每次分派结束时过滤器会恢复此前的线程状态；任意异步工作线程仍需由应用使用上下文传播机制。
+
 ## Web、锁与替换
 
 Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。

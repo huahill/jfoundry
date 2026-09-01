@@ -148,6 +148,17 @@ inferred from a persistence change. See [Message Delivery](../capabilities/messa
 direct broker selection and [reliable messaging](../capabilities/reliable-messaging.md) for Outbox
 and Inbox semantics.
 
+## Request Correlation
+
+`jfoundry-webmvc-spring-boot-starter` registers `RequestCorrelationFilter` by default at
+`Ordered.HIGHEST_PRECEDENCE + 10`, before `HttpLoggingFilter` at `+20`. It covers `REQUEST`, `ASYNC`,
+and `ERROR` dispatches, validates or generates `X-Request-Id`, exposes
+`RequestCorrelationContext.current()`, writes the response header by default, and projects
+`request_id` through SLF4J MDC. Configure `jfoundry.web.mvc.request-correlation.enabled`,
+`header-name`, `accept-incoming`, `write-response`, `maximum-length` (36-64), and
+`excluded-paths` (Ant-style application paths). The filter restores the previous thread state at the
+end of each dispatch; arbitrary async worker threads require the application's context-propagation mechanism.
+
 ## Web, Locks, And Replacement
 
 The Web MVC starter is an inbound adapter. It owns the shared RFC 9457 contract for supported

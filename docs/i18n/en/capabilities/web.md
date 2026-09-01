@@ -2,8 +2,8 @@
 
 `jfoundry-web` is JFoundry's runtime-neutral Web capability foundation. It owns shared HTTP problem
 semantics, while runtime adapters render those semantics through their respective HTTP stacks. The
-currently published Web capabilities are RFC 9457 Problem Details and safe diagnostic HTTP logging
-for Spring, Quarkus, and Helidon applications.
+currently published Web capabilities are RFC 9457 Problem Details, safe diagnostic HTTP logging, and
+unified [request correlation](request-correlation.md) for Spring, Quarkus, and Helidon applications.
 
 ## Select A Web Capability
 
@@ -12,6 +12,7 @@ for Spring, Quarkus, and Helidon applications.
 | RFC 9457 Problem Details for an HTTP API | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
 | Inbound HTTP diagnostic logging | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
 | Outbound HTTP diagnostic logging | `jfoundry-restclient-spring-boot-starter` or `jfoundry-restclient-spring` | `jfoundry-restclient-quarkus-runtime` | `jfoundry-restclient-helidon` |
+| Inbound request correlation | Select with `jfoundry-webmvc-spring-boot-starter` | Select with `jfoundry-web-quarkus-runtime` | Select with `jfoundry-web-helidon` |
 
 `jfoundry-restclient-spring` requires an application-provided Spring Web API. A Spring Boot application
 can add `jfoundry-restclient-spring-boot-starter`, which supplies the Spring Boot `RestClient` integration.
@@ -139,6 +140,21 @@ responsible for selecting the JSON provider used to deserialize request bodies.
 - [Quarkus Runtime Integration](../implementations/quarkus.md) covers extension composition and
   Quarkus REST behavior.
 - [Helidon MP Runtime Integration](../implementations/helidon.md) covers CDI and JAX-RS behavior.
+
+## Request Correlation
+
+The Web entry points also register request correlation by default. The final validated value is available
+from `RequestCorrelationContext.current()`, is returned in `X-Request-Id` by default, and is projected to
+SLF4J MDC in Spring MVC and Quarkus. Helidon MP keeps the request context and response header but uses
+`System.Logger`, which has no standard MDC API; Helidon application logs must include the value explicitly.
+
+Configure Spring with `jfoundry.web.mvc.request-correlation.*`, Quarkus with
+`jfoundry.web.quarkus.request-correlation.*`, and Helidon with
+`jfoundry.web.helidon.request-correlation.*`. All runtimes support `enabled`, `header-name`,
+`accept-incoming`, `write-response`, `maximum-length` (36-64), and `excluded-paths`. Exclusions use
+application paths with Ant-style `*`, `**`, and `?` patterns; Spring removes the Servlet context path
+before matching, while Jakarta REST matches the request URI path. Invalid or oversized values are replaced
+with a generated UUID. See [Request Correlation](request-correlation.md) for lifecycle and tracing boundaries.
 
 ## HTTP Integration And Diagnostic Logging
 

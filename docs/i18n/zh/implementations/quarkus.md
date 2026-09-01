@@ -321,6 +321,15 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 该扩展不配置安全能力。拥有认证和授权语义的 Quarkus 安全适配器可使用公开的
 `ProblemDetailsRenderer.render(...)` API 渲染自己的 `401` 或 `403` 描述符。
 
+## 请求关联
+
+`jfoundry-web-quarkus-runtime` 会以 `Priorities.USER - 300` 注册 pre-matching request/response provider，早于
+`USER - 200` 的 HTTP 诊断 provider。它校验或生成 `X-Request-Id`，存入
+`RequestCorrelationContext.ATTRIBUTE_NAME`，默认回写响应 Header，并通过 SLF4J MDC 投影 `request_id`。
+可配置 `jfoundry.web.quarkus.request-correlation.enabled`、`header-name`、`accept-incoming`、`write-response`、
+`maximum-length`（36-64）以及使用 Ant 风格 `*`、`**`、`?` pattern 的逗号分隔 `excluded-paths`。provider 会在
+终态响应回调恢复请求线程上下文；应用自行管理的工作线程仍需显式使用 Quarkus 上下文传播机制。
+
 ## HTTP 诊断日志
 
 `jfoundry-web-quarkus-runtime` 会注册 Quarkus REST 请求/响应 filter 与 reader/writer interceptor。
