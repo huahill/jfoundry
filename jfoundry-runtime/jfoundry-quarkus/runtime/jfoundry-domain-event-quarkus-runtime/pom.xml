@@ -36,6 +36,14 @@
             <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Keep parallel reactors from augmenting tests before the transaction deployment module is built. -->
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
