@@ -73,6 +73,21 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     }
 
     @Test
+    void logsSpringBootErrorPathAfterServletPath() throws Exception {
+        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+                .run(context -> {
+                    var request = new MockHttpServletRequest("GET", "/api/error");
+                    request.setServletPath("/api");
+                    var response = new MockHttpServletResponse();
+                    registration(context).getFilter().doFilter(request, response,
+                            (actualRequest, actualResponse) -> {
+                            });
+                    assertThat(request.getAttribute(
+                            "org.jfoundry.web.spring.filter.HttpLoggingFilter.STATE")).isNotNull();
+                });
+    }
+
+    @Test
     void applicationExcludedPathsReplaceDefaultsAndCanAddCustomPatterns() throws Exception {
         runner.withPropertyValues(
                 "jfoundry.web.mvc.logging-level=BASIC",
