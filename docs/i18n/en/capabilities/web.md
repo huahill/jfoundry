@@ -191,8 +191,9 @@ disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, 
 
 Spring MVC excludes `/actuator/health/**` from inbound logging by default. Configure
 `jfoundry.web.mvc.logging-excluded-paths` with Ant-style application paths to replace that default and add
-more exclusions. Matching removes the Servlet context path first, so `/api/actuator/health/liveness` is
-matched as `/actuator/health/liveness` when the context path is `/api`.
+more exclusions. Matching removes the Servlet context and servlet paths first, so
+`/api/actuator/health/liveness` is matched as `/actuator/health/liveness` when `/api` is the
+configured servlet path.
 
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
 `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring applications can also select

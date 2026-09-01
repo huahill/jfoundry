@@ -235,7 +235,7 @@ default when forwarding, tracing, or security topology requires another order.
 The auto-configured filter excludes `/actuator/health/**` by default, including liveness and readiness
 probes. Set `jfoundry.web.mvc.logging-excluded-paths` to a list of Ant-style application paths to replace
 the default list; include `/actuator/health/**` in that list when adding exclusions while retaining the
-health exclusion. Matching removes the Servlet context path before evaluating a pattern.
+health exclusion. Matching removes the Servlet context and servlet paths before evaluating a pattern.
 
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
 complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at

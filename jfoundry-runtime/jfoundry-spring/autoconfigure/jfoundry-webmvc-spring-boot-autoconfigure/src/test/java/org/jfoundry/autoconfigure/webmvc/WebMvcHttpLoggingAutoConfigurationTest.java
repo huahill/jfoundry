@@ -56,6 +56,23 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     }
 
     @Test
+    void excludesDefaultHealthPathsAfterServletPath() throws Exception {
+        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+                .run(context -> {
+                    var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
+                    request.setServletPath("/api");
+                    var response = new MockHttpServletResponse();
+                    var filter = registration(context).getFilter();
+                    filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+                        assertThat(actualRequest).isSameAs(request);
+                        assertThat(actualResponse).isSameAs(response);
+                    });
+                    assertThat(request.getAttribute(
+                            "org.jfoundry.web.spring.filter.HttpLoggingFilter.STATE")).isNull();
+                });
+    }
+
+    @Test
     void applicationExcludedPathsReplaceDefaultsAndCanAddCustomPatterns() throws Exception {
         runner.withPropertyValues(
                 "jfoundry.web.mvc.logging-level=BASIC",
