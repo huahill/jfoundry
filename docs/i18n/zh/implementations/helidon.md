@@ -116,6 +116,16 @@ MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.
 body 捕获上限为 8 KiB。客户端时长在响应 header 到达时结束，body 日志在消费或关闭后出现。Jakarta REST
 没有可移植的传输失败回调，因此该适配器不会依赖 Helidon 私有 hook 来声称与 Spring 相同的失败日志。
 
+## 请求关联
+
+`jfoundry-web-helidon` 会以 `Priorities.USER - 300` 注册 pre-matching request/response provider，早于 HTTP 诊断
+provider。它校验或生成 `X-Request-Id`，保存请求上下文，默认回写响应 Header，并提供
+`RequestCorrelationContext.current()`。可配置 `jfoundry.web.helidon.request-correlation.enabled`、`header-name`、
+`accept-incoming`、`write-response`、`maximum-length`（36-64）以及使用 Ant 风格 `*`、`**`、`?` pattern 的逗号
+分隔 `excluded-paths`。Helidon MP 保证的日志门面是 `System.Logger`，没有标准 MDC 或线程上下文 API，因此
+任意应用日志记录不会自动出现 `request_id` 字段；应用应从请求上下文显式加入该值。provider 会在终态响应回调恢复
+请求线程状态。
+
 ## PostgreSQL/JTA 中间件验证
 
 运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL，并验证真实的 JTA

@@ -135,6 +135,17 @@ response headers arrive, while body logs appear after consumption or close. Jaka
 portable transport-failure callback, so this adapter does not depend on Helidon-private hooks to
 claim Spring-equivalent failure logging.
 
+## Request Correlation
+
+`jfoundry-web-helidon` registers a pre-matching request/response provider at `Priorities.USER - 300`,
+before the diagnostic HTTP provider. It validates or generates `X-Request-Id`, stores the request context,
+writes the response header by default, and exposes `RequestCorrelationContext.current()`. Configure
+`jfoundry.web.helidon.request-correlation.enabled`, `header-name`, `accept-incoming`, `write-response`,
+`maximum-length` (36-64), and comma-separated `excluded-paths` with Ant-style `*`, `**`, and `?` patterns.
+Helidon MP's guaranteed facade is `System.Logger`, which has no standard MDC or thread-context API, so
+arbitrary application log records do not receive an automatic `request_id` field; include it explicitly from
+the request context. The provider restores request-thread state in the terminal response callback.
+
 ## PostgreSQL/JTA Middleware Verification
 
 The runtime-local JVM integration profile starts PostgreSQL through Testcontainers and verifies a

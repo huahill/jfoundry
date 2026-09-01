@@ -1,6 +1,6 @@
 # Web
 
-`jfoundry-web` 是 JFoundry 运行时无关的 Web 能力基础。它负责共享的 HTTP 问题语义，运行时适配器再通过各自的 HTTP 技术栈渲染这些语义。当前已发布的 Web 能力包括 RFC 9457 Problem Details，以及面向 Spring、Quarkus 和 Helidon 的安全诊断 HTTP 日志。
+`jfoundry-web` 是 JFoundry 运行时无关的 Web 能力基础。它负责共享的 HTTP 问题语义，运行时适配器再通过各自的 HTTP 技术栈渲染这些语义。当前已发布的 Web 能力包括 RFC 9457 Problem Details、安全诊断 HTTP 日志，以及统一的[请求关联](request-correlation.md)。
 
 ## 选择 Web 能力
 
@@ -9,6 +9,7 @@
 | 为 HTTP API 提供 RFC 9457 Problem Details | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
 | 入站 HTTP 诊断日志 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` | `jfoundry-web-helidon` |
 | 出站 HTTP 诊断日志 | `jfoundry-restclient-spring-boot-starter` 或 `jfoundry-restclient-spring` | `jfoundry-restclient-quarkus-runtime` | `jfoundry-restclient-helidon` |
+| 入站请求关联 | 与 `jfoundry-webmvc-spring-boot-starter` 一起选择 | 与 `jfoundry-web-quarkus-runtime` 一起选择 | 与 `jfoundry-web-helidon` 一起选择 |
 
 `jfoundry-restclient-spring` 要求应用自行提供 Spring Web API。Spring Boot 应用可以加入
 `jfoundry-restclient-spring-boot-starter`，它提供 Spring Boot `RestClient` 集成以及
@@ -112,6 +113,19 @@ Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须�
 - [Spring Boot 运行时装配](../implementations/spring-boot.md)说明自动配置与 Spring MVC 替换规则。
 - [Quarkus 运行时集成](../implementations/quarkus.md)说明扩展组合与 Quarkus REST 行为。
 - [Helidon MP 运行时集成](../implementations/helidon.md)说明 CDI 与 JAX-RS 行为。
+
+## 请求关联
+
+Web 运行时入口默认注册请求关联。最终校验后的值可通过 `RequestCorrelationContext.current()` 读取，默认回写
+`X-Request-Id`；Spring MVC 与 Quarkus 会将它投影到 SLF4J MDC。Helidon MP 使用没有标准 MDC API 的
+`System.Logger`，因此 Helidon 应用日志必须显式加入该值，但请求上下文和响应 Header 仍保持一致。
+
+Spring 使用 `jfoundry.web.mvc.request-correlation.*`，Quarkus 使用
+`jfoundry.web.quarkus.request-correlation.*`，Helidon 使用
+`jfoundry.web.helidon.request-correlation.*`。三个运行时都支持 `enabled`、`header-name`、
+`accept-incoming`、`write-response`、`maximum-length`（36-64）和 `excluded-paths`。排除项使用应用路径与
+Ant 风格 `*`、`**`、`?` pattern；Spring 会先移除 Servlet context path，Jakarta REST 则匹配请求 URI path。
+非法或超长值会被替换为服务端生成的 UUID。生命周期与 tracing 边界见[请求关联](request-correlation.md)。
 
 ## HTTP 集成与诊断日志
 
