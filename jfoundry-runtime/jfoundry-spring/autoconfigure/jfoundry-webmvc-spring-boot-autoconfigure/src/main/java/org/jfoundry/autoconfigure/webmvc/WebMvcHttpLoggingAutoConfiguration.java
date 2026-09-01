@@ -55,13 +55,20 @@ public class WebMvcHttpLoggingAutoConfiguration {
                 .map(WebMvcHttpLoggingAutoConfiguration::normalizePattern)
                 .toList();
         return request -> {
-            var contextPath = request.getContextPath();
-            var requestUri = request.getRequestURI();
-            var hasContextPath = contextPath != null && !contextPath.isEmpty()
-                    && (requestUri.equals(contextPath) || requestUri.startsWith(contextPath + "/"));
-            var applicationPath = hasContextPath ? requestUri.substring(contextPath.length()) : requestUri;
+            var contextRelativePath = removePathPrefix(request.getRequestURI(), request.getContextPath());
+            var applicationPath = removePathPrefix(contextRelativePath, request.getServletPath());
             return normalizedPatterns.stream().anyMatch(pattern -> matcher.match(pattern, applicationPath));
         };
+    }
+
+    private static String removePathPrefix(String requestUri, String pathPrefix) {
+        if (pathPrefix == null || pathPrefix.isEmpty() || "/".equals(pathPrefix)) {
+            return requestUri;
+        }
+        if (requestUri.equals(pathPrefix)) {
+            return "/";
+        }
+        return requestUri.startsWith(pathPrefix + "/") ? requestUri.substring(pathPrefix.length()) : requestUri;
     }
 
     private static String normalizePattern(String pattern) {

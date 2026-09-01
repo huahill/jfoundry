@@ -156,7 +156,7 @@ Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。Qua
 
 Spring MVC 默认从入站日志中排除 `/actuator/health/**`。应用可通过
 `jfoundry.web.mvc.logging-excluded-paths` 配置 Ant 风格的应用内路径，以替换默认列表并增加更多排除项。
-匹配前会先移除 Servlet context path，因此 context path 为 `/api` 时，
+匹配前会先移除 Servlet context path 与 servlet path，因此 servlet path 为 `/api` 时，
 `/api/actuator/health/liveness` 会按 `/actuator/health/liveness` 进行匹配。
 
 Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
