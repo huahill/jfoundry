@@ -14,7 +14,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
-    <version>1.5.0</version>
+    <version>1.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>jfoundry-spring-boot-parent</name>
     <description>Spring Boot parent POM for jfoundry applications.</description>
@@ -46,7 +46,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <jfoundry.version>1.5.0</jfoundry.version>
+        <jfoundry.version>1.6.0-SNAPSHOT</jfoundry.version>
         <project.build.outputTimestamp>2026-08-28T08:08:36Z</project.build.outputTimestamp>
         <jfoundry.release.url>https://github.com/xfoundries/jfoundry</jfoundry.release.url>
         <jfoundry.release.scm.connection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.connection>
