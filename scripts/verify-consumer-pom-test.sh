@@ -73,12 +73,14 @@ XML
 done
 
 spring_boot_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
-ruby - "${spring_boot_bom_fixture}" <<'RUBY'
-path = ARGV.fetch(0)
-content = File.read(path)
-content.sub!("  <dependencyManagement>", "  <properties><spring-boot.version>9.8.7</spring-boot.version></properties>\n  <dependencyManagement>")
-File.write(path, content)
-RUBY
+python3 - "${spring_boot_bom_fixture}" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+content = path.read_text()
+content = content.replace("  <dependencyManagement>", "  <properties><spring-boot.version>9.8.7</spring-boot.version></properties>\n  <dependencyManagement>", 1)
+path.write_text(content)
+PY
 
 cloud_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
 cat > "${cloud_bom_fixture}" <<'XML'

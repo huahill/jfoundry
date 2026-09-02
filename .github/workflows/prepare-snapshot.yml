@@ -89,7 +89,7 @@ jobs:
           fi
 
           git switch --create "${BRANCH}"
-          ruby scripts/set-maven-reactor-version.rb . "${NEXT_VERSION}"
+          python3 scripts/set-maven-reactor-version.py . "${NEXT_VERSION}"
 
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com

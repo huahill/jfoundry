@@ -70,6 +70,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - name: Set up Python workflow-check dependencies
+        run: python3 -m pip install --disable-pip-version-check --user 'PyYAML>=6,<7'
+
       - name: Verify documentation
         run: bash scripts/verify-docs.sh
 
@@ -87,6 +90,19 @@ jobs:
 
       - name: Test Maven reactor version updater
         run: bash scripts/set-maven-reactor-version-test.sh
+
+      - name: Test Maven 3 publication tree
+        run: |
+          set -euo pipefail
+          archive="${RUNNER_TEMP}/apache-maven-3.9.16-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.tar.gz"
+          printf '%s  %s\n' \
+            831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6 \
+            "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+          bash scripts/verify-maven3-publication-tree-test.sh \
+            "${RUNNER_TEMP}/apache-maven-3.9.16/bin/mvn"
 
       - name: Verify release workflow
         run: bash scripts/verify-release-workflow.sh

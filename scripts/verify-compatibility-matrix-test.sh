@@ -66,12 +66,14 @@ write_fixture() {
 
     write_pom "${fixture}" "jfoundry-spring-boot-dependencies" "spring-boot.version" "4.1.1"
     write_pom "${fixture}" "jfoundry-spring-cloud-dependencies" "spring-cloud.version" "2025.1.3"
-    ruby - "${fixture}/jfoundry-boms/jfoundry-spring-cloud-dependencies/pom.xml" <<'RUBY'
-path = ARGV.fetch(0)
-content = File.read(path)
-content.sub!("</properties>", "<spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version></properties>")
-File.write(path, content)
-RUBY
+    python3 - "${fixture}/jfoundry-boms/jfoundry-spring-cloud-dependencies/pom.xml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+content = path.read_text()
+content = content.replace("</properties>", "<spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version></properties>", 1)
+path.write_text(content)
+PY
     write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.version" "3.39.1"
     write_pom "${fixture}" "jfoundry-helidon-dependencies" "helidon.version" "4.5.3"
     write_matrix "${fixture}"

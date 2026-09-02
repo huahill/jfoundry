@@ -109,9 +109,20 @@ cat >> "${complete_workflow}" <<'YAML'
           executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
           "${executable}" --version
           echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
+      - name: Generate Maven 3 publication tree
+        id: maven_3_tree
+        if: steps.central_publication.outputs.already_published != 'true'
+        run: |
+          generator="${RUNNER_TEMP}/generate-maven3-publication-tree.sh"
+          git show origin/main:scripts/generate-maven3-publication-tree.sh > "${generator}"
+          chmod +x "${generator}"
+          publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"
+          bash "${generator}" "${publication_tree}" "${GITHUB_WORKSPACE}"
+          echo "path=${publication_tree}" >> "${GITHUB_OUTPUT}"
       - name: Publish Maven Central deployment
         run: |
-          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy \
+          cd "${{ steps.maven_3_tree.outputs.path }}"
+          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests -Denforcer.skip=true deploy \
             "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment" \
             -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee "${GITHUB_WORKSPACE}/central-deploy.log"
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
@@ -179,7 +190,7 @@ grep -v 'test "${GITHUB_REF}" = "refs/heads/main"' "${complete_workflow}" > "${n
 assert_rejects "${non_main_workflow_source_workflow}"
 
 maven3_publish_workflow="${temp_dir}/maven3-publish-release.yml"
-sed 's#"\${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy#mvn -B -T 1 -Prelease -DskipTests deploy#' \
+sed 's#"\${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests -Denforcer.skip=true deploy#mvn -B -T 1 -Prelease -DskipTests deploy#' \
     "${complete_workflow}" > "${maven3_publish_workflow}"
 assert_rejects "${maven3_publish_workflow}"
 
@@ -322,13 +333,16 @@ grep -v "verify-release-pom-metadata.sh" "${complete_workflow}" > "${missing_rel
 assert_rejects "${missing_release_pom_metadata_workflow}"
 
 misplaced_release_pom_metadata_workflow="${temp_dir}/misplaced-release-pom-metadata-release.yml"
-ruby - "${complete_workflow}" "${misplaced_release_pom_metadata_workflow}" <<'RUBY'
-source, target = ARGV
-content = File.read(source)
+python3 - "${complete_workflow}" "${misplaced_release_pom_metadata_workflow}" <<'PY'
+import sys
+from pathlib import Path
+source, target = map(Path, sys.argv[1:])
+content = source.read_text()
 metadata_call = "          bash scripts/verify-release-pom-metadata.sh\n"
-abort "Expected release POM metadata call" unless content.sub!(metadata_call, "")
-File.write(target, "#{content}#{metadata_call}")
-RUBY
+if metadata_call not in content:
+    raise SystemExit("Expected release POM metadata call")
+target.write_text(content.replace(metadata_call, "", 1) + metadata_call)
+PY
 assert_rejects "${misplaced_release_pom_metadata_workflow}"
 
 directory_provenance_subject_workflow="${temp_dir}/directory-provenance-subject-release.yml"

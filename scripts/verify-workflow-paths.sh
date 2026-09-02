@@ -22,25 +22,20 @@ done
 
 require_text ".github/workflows/ci.yml" "README.md|README_ZH.md|AGENTS.md|docs/*)"
 
-ruby - "${root_dir}/.github/workflows/codeql.yml" "${root_dir}/.github/workflows/snapshot.yml" <<'RUBY'
-require "yaml"
+python3 - "${root_dir}/.github/workflows/codeql.yml" "${root_dir}/.github/workflows/snapshot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
 
 expected = ["README.md", "README_ZH.md", "AGENTS.md", "docs/**"]
-
-ARGV.each do |path|
-  source = File.read(path)
-  workflow = YAML.safe_load(source, aliases: false)
-  events = workflow[true] || workflow["on"]
-  push = events.fetch("push")
-  actual = push.fetch("paths-ignore")
-  abort "#{path} push paths-ignore must be #{expected.inspect}" unless actual == expected
-
-  if path.end_with?("codeql.yml")
-    pull_request = events.fetch("pull_request")
-    actual_pull_request = pull_request.fetch("paths-ignore")
-    abort "#{path} pull_request paths-ignore must be #{expected.inspect}" unless actual_pull_request == expected
-  end
-end
-RUBY
+for raw_path in sys.argv[1:]:
+    path = Path(raw_path)
+    workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
+    events = workflow.get(True, workflow.get("on"))
+    if events["push"]["paths-ignore"] != expected:
+        raise SystemExit(f"{path} push paths-ignore must be {expected!r}")
+    if path.name == "codeql.yml" and events["pull_request"]["paths-ignore"] != expected:
+        raise SystemExit(f"{path} pull_request paths-ignore must be {expected!r}")
+PY
 
 echo "Workflow path verification passed: documentation whitelist is README.md, README_ZH.md, AGENTS.md, docs/**"

@@ -24,6 +24,13 @@ if [[ ! -f "${pom_file}" ]]; then
     exit 1
 fi
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+publication_tree_generator="${script_dir}/generate-maven3-publication-tree.sh"
+if [[ ! -x "${publication_tree_generator}" ]]; then
+    echo "Maven 3 publication-tree generator does not exist or is not executable: ${publication_tree_generator}" >&2
+    exit 1
+fi
+
 require_text() {
     local text="$1"
     if ! grep -Fq -- "${text}" "${workflow_file}"; then
@@ -82,7 +89,12 @@ require_text "MAVEN_3_VERSION"
 require_text "MAVEN_3_SHA512"
 require_text "sha512sum --check --status"
 require_text 'apache-maven-${MAVEN_3_VERSION}-bin.tar.gz'
+require_text "Generate Maven 3 publication tree"
+require_text "git show origin/main:scripts/generate-maven3-publication-tree.sh"
+require_text 'bash "${generator}" "${publication_tree}" "${GITHUB_WORKSPACE}"'
 require_text 'steps.maven_3.outputs.executable'
+require_text 'cd "${{ steps.maven_3_tree.outputs.path }}"'
+require_text "-Denforcer.skip=true deploy"
 require_text '"-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment"'
 require_text 'tee "${GITHUB_WORKSPACE}/central-deploy.log"'
 require_text "deployment_id="
