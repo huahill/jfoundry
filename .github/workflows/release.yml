@@ -198,6 +198,19 @@ jobs:
           "${executable}" --version
           echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
 
+      - name: Generate Maven 3 publication tree
+        id: maven_3_tree
+        if: steps.central_publication.outputs.already_published != 'true'
+        run: |
+          set -euo pipefail
+
+          generator="${RUNNER_TEMP}/generate-maven3-publication-tree.sh"
+          git show origin/main:scripts/generate-maven3-publication-tree.sh > "${generator}"
+          chmod +x "${generator}"
+          publication_tree="${RUNNER_TEMP}/jfoundry-maven3-publication-tree"
+          bash "${generator}" "${publication_tree}" "${GITHUB_WORKSPACE}"
+          echo "path=${publication_tree}" >> "${GITHUB_OUTPUT}"
+
       - name: Publish Maven Central deployment
         id: publish_central
         if: steps.central_publication.outputs.already_published != 'true'
@@ -207,10 +220,11 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           set -euo pipefail
-          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy \
+          cd "${{ steps.maven_3_tree.outputs.path }}"
+          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests -Denforcer.skip=true deploy \
             "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment" \
             -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee "${GITHUB_WORKSPACE}/central-deploy.log"
-          deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
+          deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' "${GITHUB_WORKSPACE}/central-deploy.log" | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then
             echo "Central Publishing did not report a deploymentId." >&2
             exit 1

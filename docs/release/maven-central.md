@@ -13,6 +13,10 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 - Maven 4 for the project build, Maven 4.1 model checks, and release Consumer POM verification.
 - Apache Maven `3.9.16` for the final Maven Central `deploy` lifecycle. Maven 3 is not a supported
   JFoundry source-build runtime; it is used only as the Central publication compatibility runtime.
+- Python 3 for the standard-library publication-tree converter. The converter is a release helper and
+  does not add a project or runtime dependency.
+- PyYAML 6 for the Python-based GitHub workflow and Dependabot policy checks. CI installs it in the
+  documentation-check job; local runs can use `python3 -m pip install --user 'PyYAML>=6,<7'`.
 - A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
 - SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
 - For local release dry-runs, a Maven server entry named `jfoundry` in `~/.m2/settings.xml`.
@@ -86,8 +90,10 @@ a clean source tree, and matching SCM tags on every independent publication POM.
 `./mvnw -B -Prelease -DskipTests verify`, installs the complete reactor into an isolated repository,
 and verifies Maven 4 Consumer POMs and consumer resolution for both direct Spring BOM imports and
 business projects that inherit the supported Spring Boot parent. It checks for open High or Critical
-Dependabot alerts, then downloads and checksum-verifies Apache Maven 3.9.16 before running the serial
-Central `deploy` lifecycle. The workflow requires the plugin to report a Central
+Dependabot alerts, then downloads and checksum-verifies Apache Maven 3.9.16. It creates a temporary
+publication tree from the immutable release source, converts Maven 4.1-only workspace elements to
+Maven 4.0.0 syntax, restores explicit local parent coordinates, and runs the serial Central `deploy`
+lifecycle there with the Maven-version Enforcer skipped. The workflow requires the plugin to report a Central
 `deploymentId` before it treats the deployment as successful. It never changes POM versions or
 pushes a branch during publication.
 
@@ -105,8 +111,9 @@ the project version; the next minor SNAPSHOT line retains the immediately preced
 
 Maven 4.0.0-rc-6 remains the project build and Consumer POM verification runtime because the repository
 uses the Maven 4.1.0 model. Maven 3.9.16 remains intentionally isolated to the final Central publication
-step: Maven 4 RC6's transformed Consumer POM attachments are not reliably associated with Central
-coordinates when it performs the deploy lifecycle directly.
+step. Because Maven 3 must parse the project before it can honor `altDeploymentRepository`, it runs from
+the temporary publication tree rather than from the Maven 4.1 source tree. The source tree keeps the
+Maven 4.1 model; the generated tree is disposable and is never committed or tagged.
 
 Every JFoundry publication POM, including the independent BOM POMs, configures the Central publishing
 plugin with `autoPublish=true` and `waitUntil=PUBLISHED`. The workflow then verifies that Maven

@@ -32,6 +32,7 @@ must not combine the Boot-only and Cloud runtime BOMs.
 | Maven wrapper and Consumer POM verification | 4.0.0-rc-6 (Maven 4-only model/build validation) |
 | Maven Central deploy runtime | Apache Maven 3.9.16 |
 | Maven 3 source-build compatibility | Not supported; deploy-only compatibility runtime |
+| Maven 3 publication-tree conversion | Python 3 standard library; disposable release-only tree |
 
 ## Consumer Composition
 

@@ -159,25 +159,28 @@ replace_in_auto_merge_workflow() {
     local expected="$1"
     local replacement="$2"
 
-    ruby - "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" "${expected}" "${replacement}" <<'RUBY'
-path, expected, replacement = ARGV
-content = File.read(path)
-abort "Expected workflow text was not found: #{expected}" unless content.sub!(expected, replacement)
-File.write(path, content)
-RUBY
+    python3 - "${temp_dir}/.github/workflows/auto-merge-dependabot.yml" "${expected}" "${replacement}" <<'PY'
+import sys
+from pathlib import Path
+path, expected, replacement = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+content = path.read_text()
+if expected not in content:
+    raise SystemExit(f"Expected workflow text was not found: {expected}")
+path.write_text(content.replace(expected, replacement, 1))
+PY
 }
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-path = ARGV.fetch(0)
-content = File.read(path)
-content.sub!("        update-types: [patch]\n", <<~YAML)
-        update-types: [patch]
-    ignore:
-      - dependency-name: org.example:manual-policy
-YAML
-File.write(path, content)
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+content = path.read_text()
+replacement = "        update-types: [patch]\n    ignore:\n      - dependency-name: org.example:manual-policy\n"
+if "        update-types: [patch]\n" not in content:
+    raise SystemExit("Expected Dependabot marker")
+path.write_text(content.replace("        update-types: [patch]\n", replacement, 1))
+PY
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
@@ -377,81 +380,85 @@ jobs:
   prepare:
     steps:
       - run: git tag --points-at sha
-      - run: ruby scripts/set-maven-reactor-version.rb . 2.0.0-SNAPSHOT
+      - run: python3 scripts/set-maven-reactor-version.py . 2.0.0-SNAPSHOT
       - run: git push --set-upstream origin branch
       - run: gh pr create
 YAML
 assert_accepts "${temp_dir}"
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-require "yaml"
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-groups = config.fetch("updates").first.fetch("groups")
-config.fetch("updates").first["groups"] = {
-  "jfoundry-maven-patches" => groups.fetch("jfoundry-maven-patches"),
-  "jfoundry-spring-boot-platform" => groups.fetch("jfoundry-spring-boot-platform"),
-  "jfoundry-quarkus-platform" => groups.fetch("jfoundry-quarkus-platform")
-}
-File.write(path, YAML.dump(config))
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+groups = config["updates"][0]["groups"]
+config["updates"][0]["groups"] = {name: groups[name] for name in ["jfoundry-maven-patches", "jfoundry-spring-boot-platform", "jfoundry-quarkus-platform"]}
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
 assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches"
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-require "yaml"
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-patterns = config.fetch("updates").first.fetch("groups").fetch("jfoundry-quarkus-platform").fetch("patterns")
-patterns.delete("io.quarkus.platform:quarkus-bom")
-File.write(path, YAML.dump(config))
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+patterns = config["updates"][0]["groups"]["jfoundry-quarkus-platform"]["patterns"]
+patterns.remove("io.quarkus.platform:quarkus-bom")
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
 assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates"
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-require "yaml"
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-config.fetch("updates").first.fetch("cooldown")["semver-minor-days"] = 1
-File.write(path, YAML.dump(config))
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["cooldown"]["semver-minor-days"] = 1
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
 assert_rejects_with_message "${temp_dir}" 'Dependabot update policy is invalid: Maven updates must use the {"default-days"=>1, "semver-major-days"=>7, "semver-minor-days"=>7, "semver-patch-days"=>1, "include"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin", "io.quarkus.platform:quarkus-bom", "io.quarkus:quarkus-extension-maven-plugin", "io.quarkus:quarkus-extension-processor", "io.quarkus:quarkus-maven-plugin"], "exclude"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin"]} cooldown'
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-require "yaml"
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-config.fetch("updates").first.fetch("cooldown").fetch("include").delete("io.quarkus.platform:quarkus-bom")
-File.write(path, YAML.dump(config))
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["cooldown"]["include"].remove("io.quarkus.platform:quarkus-bom")
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/dependabot.yml" <<'RUBY'
-require "yaml"
-
-path = ARGV.fetch(0)
-config = YAML.safe_load(File.read(path), aliases: false)
-config.fetch("updates").first.fetch("cooldown")["exclude"] = []
-File.write(path, YAML.dump(config))
-RUBY
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["cooldown"]["exclude"] = []
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
-ruby - "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'RUBY'
-path = ARGV.fetch(0)
-content = File.read(path)
+python3 - "${temp_dir}/.github/workflows/prepare-snapshot.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+content = path.read_text()
 needle = "      - run: gh pr create\n"
-abort "Expected prepare-snapshot marker" unless content.sub!(needle, "#{needle}      - run: sed -i jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml\n")
-File.write(path, content)
-RUBY
+if needle not in content:
+    raise SystemExit("Expected prepare-snapshot marker")
+path.write_text(content.replace(needle, needle + "      - run: sed -i jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml\n", 1))
+PY
 assert_rejects "${temp_dir}"
 
 write_compliant_dependabot
@@ -831,7 +838,7 @@ cat > "${temp_dir}/.github/dependabot.yml" <<'YAML'
 version: 2
 # package-ecosystem: maven
 # package-ecosystem: github-actions
-updates: !ruby/object:Policy
+updates: !unsupported/object:Policy
   name: dependabot
 YAML
 assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: could not safely parse YAML"
@@ -1410,42 +1417,52 @@ YAML
 assert_rejects "${temp_dir}"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries.sh") }.join)
-RUBY
+python3 - "${temp_dir}/.github/workflows/ci.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-dependency-boundaries.sh" not in line))
+PY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-consumer-pom.sh") }.join)
-RUBY
+python3 - "${temp_dir}/.github/workflows/ci.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-consumer-pom.sh" not in line))
+PY
 assert_rejects_with_message "${temp_dir}" '.github/workflows/ci.yml must contain: bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"'
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-dependency-boundaries-test.sh") }.join)
-RUBY
+python3 - "${temp_dir}/.github/workflows/ci.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-dependency-boundaries-test.sh" not in line))
+PY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml must contain: bash scripts/verify-dependency-boundaries-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix.sh") }.join)
-RUBY
+python3 - "${temp_dir}/.github/workflows/ci.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix.sh" not in line))
+PY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
-ruby - "${temp_dir}/.github/workflows/ci.yml" <<'RUBY'
-path = ARGV.fetch(0)
-File.write(path, File.read(path).lines.reject { |line| line.include?("bash scripts/verify-compatibility-matrix-test.sh") }.join)
-RUBY
+python3 - "${temp_dir}/.github/workflows/ci.yml" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix-test.sh" not in line))
+PY
 assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
