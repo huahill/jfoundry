@@ -77,10 +77,13 @@ require_text 'GH_TOKEN: ${{ github.token }}'
 require_text "-Prelease -DskipTests verify"
 require_text "Verify Maven Central Consumer POMs"
 require_text "verify-consumer-pom.sh"
-require_text "Verify Maven 4 Central readiness"
-require_text "MAVEN_CENTRAL_MAVEN4_READY"
-require_text "Maven 4 final"
-require_text './mvnw -B -T 1 -Prelease -DskipTests deploy'
+require_text "Install Apache Maven 3 for Central publication"
+require_text "MAVEN_3_VERSION"
+require_text "MAVEN_3_SHA512"
+require_text "sha512sum --check --status"
+require_text 'apache-maven-${MAVEN_3_VERSION}-bin.tar.gz'
+require_text 'steps.maven_3.outputs.executable'
+require_text '"-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment"'
 require_text 'tee "${GITHUB_WORKSPACE}/central-deploy.log"'
 require_text "deployment_id="
 require_text "deploymentId: ([[:alnum:]-]+)"
@@ -157,9 +160,12 @@ fi
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
-forbid_text "MAVEN_3_VERSION"
-forbid_text "MAVEN_3_SHA512"
-forbid_text "steps.maven_3"
+forbid_text "Verify Maven 4 Central readiness"
+forbid_text "MAVEN_CENTRAL_MAVEN4_READY"
+forbid_text "Maven 4 final"
+forbid_text './mvnw -B -T 1 -Prelease -DskipTests deploy'
+forbid_text 'mvn -B -T 1 -Prelease -DskipTests deploy'
+forbid_text '"$(command -v mvn)" "$(pwd)/mvnw"'
 forbid_text "org.sonatype.central:central-publishing-maven-plugin:0.11.0:publish"
 forbid_text "./mvnw -B -Prelease -DskipTests verify \\"
 forbid_text "-DforceStdout | tail -n 1"

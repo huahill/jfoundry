@@ -106,23 +106,6 @@ jobs:
             fi
           done
 
-      - name: Verify Maven 4 Central readiness
-        env:
-          MAVEN_CENTRAL_MAVEN4_READY: ${{ vars.MAVEN_CENTRAL_MAVEN4_READY }}
-        run: |
-          set -euo pipefail
-
-          wrapper_version="$(sed -n 's#^.*/apache-maven/\([^/]*\)/apache-maven-.*#\1#p' .mvn/wrapper/maven-wrapper.properties)"
-          if [[ -z "${wrapper_version}" || "${wrapper_version}" == *-rc-* || "${wrapper_version}" == *-beta* || "${wrapper_version}" == *-alpha* ]]; then
-            echo "Maven 4 final is required for Central publication; wrapper is ${wrapper_version:-unknown}." >&2
-            exit 1
-          fi
-          if [[ "${MAVEN_CENTRAL_MAVEN4_READY:-}" != "true" ]]; then
-            echo "Maven 4 Central publication readiness has not been explicitly confirmed." >&2
-            exit 1
-          fi
-          ./mvnw --version | grep -E '^Apache Maven 4\.'
-
       - name: Set up Java and Maven Central credentials
         uses: actions/setup-java@dd06d9cba3e5552c54d9f8ea23572deb30010f7c # v6.0.0
         with:
@@ -158,7 +141,7 @@ jobs:
               tail -n 1
           )"
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
-            "$(command -v mvn)" "$(pwd)/mvnw"
+            "$(pwd)/mvnw"
           echo "CONSUMER_POM_REPOSITORY=${consumer_pom_repository}" >> "${GITHUB_ENV}"
 
       - name: Verify Dependabot security alerts
@@ -196,6 +179,25 @@ jobs:
               ;;
           esac
 
+      - name: Install Apache Maven 3 for Central publication
+        id: maven_3
+        if: steps.central_publication.outputs.already_published != 'true'
+        env:
+          MAVEN_3_VERSION: 3.9.16
+          MAVEN_3_SHA512: 831a8591fe20c8243b1dbe7d71e3244f31d1665b0804b2e825e38cbbe5ce0cafb8338851f90780735568773e0a6cd07bbec107cda0b896b008b861075358b6f6
+        run: |
+          set -euo pipefail
+
+          archive="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          curl --fail --location --retry 3 --retry-all-errors --output "${archive}" \
+            "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/${MAVEN_3_VERSION}/apache-maven-${MAVEN_3_VERSION}-bin.tar.gz"
+          printf '%s  %s\n' "${MAVEN_3_SHA512}" "${archive}" | sha512sum --check --status
+          tar -xzf "${archive}" -C "${RUNNER_TEMP}"
+
+          executable="${RUNNER_TEMP}/apache-maven-${MAVEN_3_VERSION}/bin/mvn"
+          "${executable}" --version
+          echo "executable=${executable}" >> "${GITHUB_OUTPUT}"
+
       - name: Publish Maven Central deployment
         id: publish_central
         if: steps.central_publication.outputs.already_published != 'true'
@@ -205,7 +207,8 @@ jobs:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           set -euo pipefail
-          ./mvnw -B -T 1 -Prelease -DskipTests deploy \
+          "${{ steps.maven_3.outputs.executable }}" -B -T 1 -Prelease -DskipTests deploy \
+            "-DaltDeploymentRepository=jfoundry::file:${RUNNER_TEMP}/jfoundry-release-deployment" \
             -Dgpg.passphrase="${GPG_PASSPHRASE}" 2>&1 | tee "${GITHUB_WORKSPACE}/central-deploy.log"
           deployment_id="$(sed -nE 's/.*deploymentId: ([[:alnum:]-]+).*/\1/p' central-deploy.log | tail -n 1)"
           if [[ -z "${deployment_id}" ]]; then
