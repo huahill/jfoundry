@@ -29,8 +29,9 @@ must not combine the Boot-only and Cloud runtime BOMs.
 | Runtime Java | 25 |
 | Native Image | GraalVM 25 |
 | Maven source descriptor model | 4.1.0 (Maven 4-only XML model) |
-| Maven wrapper and release tool | 4.0.0-rc-6 (Maven 4-only; publication blocked until final) |
-| Maven 3 source-build compatibility | Not supported |
+| Maven wrapper and Consumer POM verification | 4.0.0-rc-6 (Maven 4-only model/build validation) |
+| Maven Central deploy runtime | Apache Maven 3.9.16 |
+| Maven 3 source-build compatibility | Not supported; deploy-only compatibility runtime |
 
 ## Consumer Composition
 
