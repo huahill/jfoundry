@@ -42,20 +42,21 @@ publication_tree="${temporary_root}/publication-tree"
 local_repository="${temporary_root}/repository"
 "${generator}" "${publication_tree}"
 
-if rg -l -F '<modelVersion>4.1.0</modelVersion>' "${publication_tree}" --glob 'pom.xml' | grep -q .; then
+if grep -RIl --include='pom.xml' -F '<modelVersion>4.1.0</modelVersion>' "${publication_tree}" | grep -q .; then
     echo "Publication tree still contains Maven 4 modelVersion elements." >&2
     exit 1
 fi
-if rg -l -F '<subprojects>' "${publication_tree}" --glob 'pom.xml' | grep -q .; then
+if grep -RIl --include='pom.xml' -F '<subprojects>' "${publication_tree}" | grep -q .; then
     echo "Publication tree still contains Maven 4 subprojects elements." >&2
     exit 1
 fi
-if rg -l -e 'child\.[A-Za-z0-9_.-]+=' "${publication_tree}" --glob 'pom.xml' | grep -q .; then
+if grep -RIEl --include='pom.xml' 'child\.[A-Za-z0-9_.-]+=' "${publication_tree}" | grep -q .; then
     echo "Publication tree still contains Maven 4 child.* attributes." >&2
     exit 1
 fi
-rg -Uq '<modelVersion>\s*4\.0\.0\s*</modelVersion>' "${publication_tree}/pom.xml"
-rg -Uq '<modules>\s*<module>' "${publication_tree}/pom.xml"
+grep -Eq '<modelVersion>[[:space:]]*4\.0\.0[[:space:]]*</modelVersion>' "${publication_tree}/pom.xml"
+grep -Eq '<modules>' "${publication_tree}/pom.xml"
+grep -Eq '<module>' "${publication_tree}/pom.xml"
 
 mkdir -p "${local_repository}"
 (
