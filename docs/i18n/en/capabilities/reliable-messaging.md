@@ -29,7 +29,8 @@ does not select the other.
 These are separate responsibilities, not necessarily separate direct Maven declarations. The
 built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-boot-starter`
 transitively, so an application does not declare it again. That dependency is Spring Boot assembly
-convenience; the store and dispatcher remain replaceable adapters.
+convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
+port and `*OutboxTrigger` stays the scheduling adapter.
 
 Runtime-specific `*OutboxTrigger` types are scheduling adapters. `OutboxDispatcher` remains the
 dispatch service port that they invoke.
