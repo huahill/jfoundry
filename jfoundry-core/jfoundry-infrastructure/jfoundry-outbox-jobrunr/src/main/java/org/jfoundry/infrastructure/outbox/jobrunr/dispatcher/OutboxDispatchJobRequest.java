@@ -8,6 +8,6 @@ public final class OutboxDispatchJobRequest implements JobRequest {
 
     @Override
     public Class<? extends JobRequestHandler> getJobRequestHandler() {
-        return JobRunrOutboxDispatcher.class;
+        return JobRunrOutboxTrigger.class;
     }
 }

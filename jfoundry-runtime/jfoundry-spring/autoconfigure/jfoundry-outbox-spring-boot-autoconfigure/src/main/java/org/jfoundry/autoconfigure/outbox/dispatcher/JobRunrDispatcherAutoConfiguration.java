@@ -1,12 +1,9 @@
 package org.jfoundry.autoconfigure.outbox.dispatcher;
 
-import org.jfoundry.application.messaging.MessageSender;
-import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxDispatcher;
-import org.jfoundry.application.outbox.OutboxMessageStore;
-import org.jfoundry.application.transaction.TransactionRunner;
 import org.jfoundry.autoconfigure.transaction.TransactionRunnerAutoConfiguration;
-import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher;
+import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigger;
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.OutboxDispatchJobRequest;
 import org.jobrunr.scheduling.JobRequestScheduler;
 import org.springframework.beans.factory.ObjectProvider;
@@ -24,10 +21,9 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 /// <p>
 /// When {@code jfoundry-outbox-jobrunr} is on the classpath and
 /// {@code jfoundry.outbox.dispatcher.mode=jobrunr}, this class automatically registers a
-/// {@link JobRunrOutboxDispatcher} bean, overriding the {@code scheduled}-mode
-/// {@code ScheduledOutboxDispatcher}. The latter is registered by
-/// {@code OutboxDispatcherAutoConfiguration} when mode is scheduled or missing; mutual exclusion is
-/// based on the OutboxDispatcher bean.
+/// {@link JobRunrOutboxTrigger} bean alongside the default
+/// {@link DefaultOutboxDispatchService}. The scheduled trigger is registered by
+/// {@code OutboxDispatcherAutoConfiguration} only in scheduled mode.
 /// <p>
 /// Applications do not need to component-scan {@code org.jfoundry.infrastructure.outbox.jobrunr};
 /// the Spring Boot starter registers this configuration through
@@ -44,7 +40,7 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 @ConditionalOnClass(name = {
         "org.jobrunr.jobs.annotations.Job",
         "org.jobrunr.scheduling.JobScheduler",
-        "org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher"
+        "org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigger"
 })
 @ConditionalOnProperty(prefix = "jfoundry.outbox.dispatcher", name = "mode", havingValue = "jobrunr")
 @EnableConfigurationProperties(OutboxDispatcherProperties.class)
@@ -52,26 +48,16 @@ import org.springframework.context.annotation.ImportRuntimeHints;
 public class JobRunrDispatcherAutoConfiguration {
 
     @Bean
-    @ConditionalOnBean({OutboxMessageStore.class, MessageSender.class, BackoffStrategy.class, TransactionRunner.class})
-    @ConditionalOnMissingBean(OutboxDispatcher.class)
-    public JobRunrOutboxDispatcher jobRunrOutboxDispatcher(
-            OutboxMessageStore outboxRepository,
-            MessageSender messageSender,
-            BackoffStrategy backoffStrategy,
-            TransactionRunner transactionRunner,
+    @ConditionalOnBean(OutboxDispatcher.class)
+    @ConditionalOnMissingBean(JobRunrOutboxTrigger.class)
+    public JobRunrOutboxTrigger jobRunrOutboxTrigger(
+            OutboxDispatcher dispatcher,
             OutboxDispatcherProperties properties,
             ObjectProvider<JobRequestScheduler> jobRequestScheduler) {
-        JobRunrOutboxDispatcher dispatcher = new JobRunrOutboxDispatcher(
-                outboxRepository,
-                messageSender,
-                transactionRunner,
-                properties.getBatchSize(),
-                properties.getMaxRetries(),
-                backoffStrategy);
         jobRequestScheduler.ifAvailable(scheduler -> scheduler.scheduleRecurrently(
                 "jfoundry-outbox-dispatch",
                 properties.getCron(),
                 new OutboxDispatchJobRequest()));
-        return dispatcher;
+        return new JobRunrOutboxTrigger(dispatcher, properties.getBatchSize());
     }
 }
