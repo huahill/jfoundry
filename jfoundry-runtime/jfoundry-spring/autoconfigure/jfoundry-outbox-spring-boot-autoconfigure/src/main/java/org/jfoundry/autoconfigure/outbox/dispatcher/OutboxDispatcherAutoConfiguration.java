@@ -2,12 +2,14 @@ package org.jfoundry.autoconfigure.outbox.dispatcher;
 
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessageStore;
+import org.jfoundry.application.outbox.OutboxRuntimeIds;
 import org.jfoundry.application.transaction.TransactionRunner;
 import org.jfoundry.autoconfigure.transaction.TransactionRunnerAutoConfiguration;
 import org.jfoundry.infrastructure.outbox.spring.backoff.ExponentialBackoffStrategy;
-import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxDispatcher;
+import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxTrigger;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -25,14 +27,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 /// <p>
 /// Selects the Outbox dispatch trigger according to {@code jfoundry.outbox.dispatcher.mode}:
 /// <ul>
-///   <li>{@code scheduled} (default): registers ScheduledOutboxDispatcher. This class enables
-///       scheduling.</li>
-///   <li>{@code jobrunr}: requires jfoundry-outbox-jobrunr on the classpath. The Spring Boot starter
-///       registers {@code JobRunrDispatcherAutoConfiguration} through this auto-configuration module.
-///       It is mutually exclusive with this class: both sides are guarded by
-///       {@code @ConditionalOnMissingBean(OutboxDispatcher.class)}, and their modes match
-///       {@code scheduled} and {@code jobrunr} respectively, so they cannot both apply. Recovery and
-///       cleanup remain lightweight Spring scheduled maintenance jobs.</li>
+///   <li>{@code scheduled} (default): registers a {@link DefaultOutboxDispatchService} service and
+///       a {@link ScheduledOutboxTrigger}. This class enables scheduling.</li>
+///   <li>{@code jobrunr}: requires jfoundry-outbox-jobrunr on the classpath. The JobRunr-specific
+///       auto-configuration registers its own dispatcher trigger separately. Recovery and cleanup
+///       remain lightweight Spring scheduled maintenance jobs.</li>
 ///   <li>{@code none}: registers no dispatcher, recovery job, or cleanup job.</li>
 /// </ul>
 @AutoConfiguration
@@ -40,7 +39,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         value = TransactionRunnerAutoConfiguration.class,
         name = "org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration"
 )
-@ConditionalOnClass({OutboxMessageStore.class, MessageSender.class, ScheduledOutboxDispatcher.class})
+@ConditionalOnClass({OutboxMessageStore.class, MessageSender.class, ScheduledOutboxTrigger.class})
 @EnableConfigurationProperties({OutboxDispatcherProperties.class, OutboxRecoveryProperties.class, OutboxCleanupProperties.class})
 @ImportRuntimeHints(ScheduledOutboxNativeRuntimeHints.class)
 public class OutboxDispatcherAutoConfiguration {
@@ -60,15 +59,29 @@ public class OutboxDispatcherAutoConfiguration {
     @Bean
     @ConditionalOnBean({OutboxMessageStore.class, MessageSender.class, BackoffStrategy.class, TransactionRunner.class})
     @ConditionalOnMissingBean(OutboxDispatcher.class)
-    @ConditionalOnProperty(prefix = "jfoundry.outbox.dispatcher", name = "mode", havingValue = "scheduled", matchIfMissing = true)
-    public ScheduledOutboxDispatcher scheduledOutboxDispatcher(
+    @Conditional(OutboxMaintenanceConditions.ManagedDispatcherMode.class)
+    public DefaultOutboxDispatchService outboxDispatcher(
             OutboxMessageStore outboxRepository,
             MessageSender messageSender,
             BackoffStrategy backoffStrategy,
             TransactionRunner transactionRunner,
             OutboxDispatcherProperties properties) {
-        return new ScheduledOutboxDispatcher(outboxRepository, messageSender, transactionRunner,
-                properties.getMaxRetries(), backoffStrategy, properties.getBatchSize());
+        return new DefaultOutboxDispatchService(
+                outboxRepository,
+                messageSender,
+                transactionRunner,
+                properties.getMaxRetries(),
+                backoffStrategy,
+                OutboxRuntimeIds.generateClaimerId());
+    }
+
+    @Bean
+    @ConditionalOnBean(OutboxDispatcher.class)
+    @ConditionalOnMissingBean(ScheduledOutboxTrigger.class)
+    @ConditionalOnProperty(prefix = "jfoundry.outbox.dispatcher", name = "mode", havingValue = "scheduled", matchIfMissing = true)
+    public ScheduledOutboxTrigger scheduledOutboxTrigger(OutboxDispatcher outboxDispatcher,
+                                                         OutboxDispatcherProperties properties) {
+        return new ScheduledOutboxTrigger(outboxDispatcher, properties.getBatchSize());
     }
 
     /// Stuck-DISPATCHING recovery job.

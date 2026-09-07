@@ -28,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /// End-to-end integration test:
 /// @ApplicationService → DomainEventDispatcher → DomainEventOutboxRecorder → Outbox table →
-/// ScheduledOutboxDispatcher → CollectingMessageSender.
+/// ScheduledOutboxTrigger → CollectingMessageSender.
 /// <p>
 /// @EnableAutoConfiguration lets Spring Boot load the capability-specific auto-configuration chain
 /// according to @AutoConfigureAfter ordering. The test
