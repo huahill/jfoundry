@@ -2,9 +2,11 @@ package org.jfoundry.infrastructure.outbox.helidon;
 
 import io.helidon.scheduling.FixedRate;
 import io.helidon.scheduling.Task;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.Initialized;
+import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jfoundry.application.outbox.OutboxDispatcher;
@@ -35,14 +37,15 @@ public class HelidonOutboxTrigger {
         this.interval = interval;
     }
 
-    @PostConstruct
-    void schedule() {
-        if (enabled) {
-            task = FixedRate.builder()
-                    .delayBy(interval)
-                    .interval(interval)
-                    .task(ignored -> scheduledDispatch())
-                    .build();
+    void initialize(@Observes @Initialized(ApplicationScoped.class) Object ignored) {
+        synchronized (this) {
+            if (enabled && task == null) {
+                task = FixedRate.builder()
+                        .delayBy(interval)
+                        .interval(interval)
+                        .task(ignoredEvent -> scheduledDispatch())
+                        .build();
+            }
         }
     }
 
