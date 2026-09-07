@@ -21,7 +21,8 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 `jfoundry-outbox-*-spring-boot-starter` 持久化 Outbox 记录；选择其中一项不会自动选择另一项。
 
 职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
-`jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利，存储与派发器仍可替换。
+`jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换，
+而 `OutboxDispatcher` 仍是派发服务端口，`*OutboxTrigger` 仍是调度适配器。
 
 运行时特定的 `*OutboxTrigger` 类型是调度适配器。`OutboxDispatcher` 仍然是它们调用的派发服务端口。
 
