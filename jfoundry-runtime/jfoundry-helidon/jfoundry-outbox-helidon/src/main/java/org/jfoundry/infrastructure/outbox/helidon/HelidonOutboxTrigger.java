@@ -4,7 +4,6 @@ import io.helidon.scheduling.FixedRate;
 import io.helidon.scheduling.Task;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -14,7 +13,7 @@ import org.jfoundry.application.outbox.OutboxDispatcher;
 import java.time.Duration;
 
 /// Helidon scheduling trigger for the framework-neutral Outbox dispatch runtime.
-@Dependent
+@ApplicationScoped
 public class HelidonOutboxTrigger {
 
     private final OutboxDispatcher outboxDispatcher;
