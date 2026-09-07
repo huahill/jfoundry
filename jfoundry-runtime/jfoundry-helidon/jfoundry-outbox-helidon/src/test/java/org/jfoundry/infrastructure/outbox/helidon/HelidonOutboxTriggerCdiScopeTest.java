@@ -15,8 +15,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class HelidonOutboxTriggerCdiScopeTest {
 
     @Test
-    void usesDependentScopeForNativeCdiCompatibility() {
-        assertThat(HelidonOutboxTrigger.class.isAnnotationPresent(Dependent.class)).isTrue();
+    void usesApplicationScopeForSchedulingLifecycle() {
+        assertThat(HelidonOutboxTrigger.class.isAnnotationPresent(ApplicationScoped.class)).isTrue();
+        assertThat(HelidonOutboxTrigger.class.isAnnotationPresent(Dependent.class)).isFalse();
     }
 
     @Test
