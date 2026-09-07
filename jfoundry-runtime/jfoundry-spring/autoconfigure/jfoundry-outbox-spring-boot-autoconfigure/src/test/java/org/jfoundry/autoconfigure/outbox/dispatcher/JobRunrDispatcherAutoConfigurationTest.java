@@ -3,12 +3,13 @@ package org.jfoundry.autoconfigure.outbox.dispatcher;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionRunner;
-import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher;
+import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigger;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.jobrunr.scheduling.JobRequestScheduler;
@@ -28,7 +29,8 @@ import static org.mockito.Mockito.when;
 
 /// {@link JobRunrDispatcherAutoConfiguration} must be registered through jfoundry-spring-boot-
 /// autoconfigure's {@code META-INF/spring/...AutoConfiguration.imports}, and must register
-/// {@link JobRunrOutboxDispatcher} as the {@link OutboxDispatcher} bean when {@code mode=jobrunr}.
+/// {@link JobRunrOutboxTrigger} alongside the default {@link DefaultOutboxDispatchService} when
+/// {@code mode=jobrunr}.
 /// <p>
 /// Uses {@link ApplicationContextRunner} + {@link AutoConfigurations#of} instead of
 /// {@code @SpringBootTest} to avoid triggering JobRunr's own auto-configuration
@@ -44,9 +46,23 @@ class JobRunrDispatcherAutoConfigurationTest {
                     .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                     .withBean(CountingTransactionRunner.class, CountingTransactionRunner::new);
 
+    private final ApplicationContextRunner completePathRunner =
+            new ApplicationContextRunner()
+                    .withConfiguration(AutoConfigurations.of(
+                            OutboxDispatcherAutoConfiguration.class,
+                            JobRunrDispatcherAutoConfiguration.class))
+                    .withPropertyValues(
+                            "spring.task.scheduling.enabled=false",
+                            "jfoundry.outbox.recovery.enabled=false",
+                            "jfoundry.outbox.cleanup.enabled=false")
+                    .withBean(OutboxMessageStore.class, () -> mock(OutboxMessageStore.class))
+                    .withBean(MessageSender.class, () -> (MessageSender) outbound -> SendResult.ok())
+                    .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
+                    .withBean(CountingTransactionRunner.class, CountingTransactionRunner::new);
+
     @Test
     void jobRunrDispatcherBeanIsRegisteredWhenModeIsJobRunr() {
-        runner
+        completePathRunner
                 .withPropertyValues(
                         "jfoundry.outbox.dispatcher.mode=jobrunr",
                         "jfoundry.outbox.dispatcher.batchSize=20",
@@ -55,8 +71,8 @@ class JobRunrDispatcherAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(OutboxDispatcher.class);
                     assertThat(context.getBean(OutboxDispatcher.class))
-                            .isInstanceOf(JobRunrOutboxDispatcher.class);
-                    assertThat(context).hasSingleBean(JobRunrOutboxDispatcher.class);
+                            .isInstanceOf(DefaultOutboxDispatchService.class);
+                    assertThat(context).hasSingleBean(JobRunrOutboxTrigger.class);
                 });
     }
 
@@ -66,7 +82,7 @@ class JobRunrDispatcherAutoConfigurationTest {
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=scheduled")
                 .run(context -> {
                     assertThat(context).doesNotHaveBean(OutboxDispatcher.class);
-                    assertThat(context).doesNotHaveBean(JobRunrOutboxDispatcher.class);
+                    assertThat(context).doesNotHaveBean(JobRunrOutboxTrigger.class);
                 });
     }
 
@@ -74,13 +90,13 @@ class JobRunrDispatcherAutoConfigurationTest {
     void dispatcherBeanIsAbsentWhenModeIsMissing() {
         runner.run(context -> {
             assertThat(context).doesNotHaveBean(OutboxDispatcher.class);
-            assertThat(context).doesNotHaveBean(JobRunrOutboxDispatcher.class);
+            assertThat(context).doesNotHaveBean(JobRunrOutboxTrigger.class);
         });
     }
 
     @Test
     void batchSizeIsInjectedFromProperties() {
-        runner
+        completePathRunner
                 .withPropertyValues(
                         "jfoundry.outbox.dispatcher.mode=jobrunr",
                         "jfoundry.outbox.dispatcher.batchSize=20",
@@ -91,9 +107,8 @@ class JobRunrDispatcherAutoConfigurationTest {
                     when(repo.claimDispatchable(anyInt(), any())).thenReturn(List.of());
 
                     // recurringDispatch uses the batchSize field injected through the constructor
-                    // (@Job entrypoint), not the dispatch(int) argument. This is the actual path
-                    // where properties injection takes effect.
-                    context.getBean(JobRunrOutboxDispatcher.class).recurringDispatch();
+                    // (@Job entrypoint), which is the actual path where properties injection takes effect.
+                    context.getBean(JobRunrOutboxTrigger.class).recurringDispatch();
 
                     ArgumentCaptor<Integer> captor = ArgumentCaptor.forClass(Integer.class);
                     verify(repo).claimDispatchable(captor.capture(), any());
@@ -108,7 +123,7 @@ class JobRunrDispatcherAutoConfigurationTest {
     void schedulesRecurringDispatchUsingAJobRequest() {
         JobRequestScheduler jobRequestScheduler = mock(JobRequestScheduler.class);
 
-        runner
+        completePathRunner
                 .withBean(JobRequestScheduler.class, () -> jobRequestScheduler)
                 .withPropertyValues(
                         "jfoundry.outbox.dispatcher.mode=jobrunr",
@@ -128,7 +143,7 @@ class JobRunrDispatcherAutoConfigurationTest {
                 .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=jobrunr")
                 .run(context -> {
-                    assertThat(context).doesNotHaveBean(OutboxDispatcher.class);
+                    assertThat(context).doesNotHaveBean(JobRunrOutboxTrigger.class);
                     assertThat(context).hasNotFailed();
                 });
     }
