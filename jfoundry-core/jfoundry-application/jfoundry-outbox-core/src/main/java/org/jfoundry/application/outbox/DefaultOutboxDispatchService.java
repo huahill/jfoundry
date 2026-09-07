@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-/// Framework-neutral Outbox dispatch runtime.
+/// Framework-neutral Outbox dispatch service implementation.
 /// <p>
-/// Framework adapters decide when this service is triggered. This service owns the shared
+/// Runtime adapters decide when this service is triggered. This service owns the shared
 /// claim/send/mark state transition so Spring, JobRunr, Helidon, or Quarkus integrations do
 /// not duplicate delivery behavior.
 public class DefaultOutboxDispatchService implements OutboxDispatcher {
