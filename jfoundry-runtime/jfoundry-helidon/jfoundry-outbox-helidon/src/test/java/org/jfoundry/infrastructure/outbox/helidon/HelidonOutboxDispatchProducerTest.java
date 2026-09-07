@@ -4,6 +4,7 @@ import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
@@ -35,6 +36,7 @@ class HelidonOutboxDispatchProducerTest {
                 Duration.ofSeconds(1));
 
         assertThatCode(() -> dispatcher.dispatch(11)).doesNotThrowAnyException();
+        assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
     }
 
     @Test
@@ -51,6 +53,7 @@ class HelidonOutboxDispatchProducerTest {
                 Duration.ofSeconds(1),
                 Duration.ofMinutes(5));
 
+        assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
         dispatcher.dispatch(37);
 
         assertThat(store.claimBatchSize).isEqualTo(37);

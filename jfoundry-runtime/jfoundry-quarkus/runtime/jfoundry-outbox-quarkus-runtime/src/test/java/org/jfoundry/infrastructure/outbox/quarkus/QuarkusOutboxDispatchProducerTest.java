@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
@@ -44,6 +45,7 @@ class QuarkusOutboxDispatchProducerTest {
                 Duration.ofSeconds(1));
 
         assertThatCode(() -> dispatcher.dispatch(11)).doesNotThrowAnyException();
+        assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
     }
 
     @Test
@@ -60,12 +62,30 @@ class QuarkusOutboxDispatchProducerTest {
                 Duration.ofSeconds(1),
                 Duration.ofMinutes(5));
 
+        assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
         dispatcher.dispatch(37);
 
         assertThat(store.claimBatchSize).isEqualTo(37);
         assertThat(store.claimerId).isNotBlank();
         assertThat(store.published).containsExactly("evt-1");
         assertThat(transactionRunner.options).hasSize(2);
+    }
+
+    @Test
+    void producedDispatcherValidatesBackoffWhenDependenciesAreAvailable() {
+        QuarkusOutboxDispatchProducer producer = new QuarkusOutboxDispatchProducer();
+        OutboxDispatcher dispatcher = producer.outboxDispatcher(
+                availableStore(new RecordingOutboxMessageStore()),
+                availableSender(message -> SendResult.ok()),
+                new NoOpTransactionRunner(),
+                5,
+                Duration.ZERO,
+                Duration.ofSeconds(1));
+
+        assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
+        assertThatCode(() -> dispatcher.dispatch(1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Invalid Outbox dispatch backoff configuration");
     }
 
     private static OutboxMessage message(String eventId) {

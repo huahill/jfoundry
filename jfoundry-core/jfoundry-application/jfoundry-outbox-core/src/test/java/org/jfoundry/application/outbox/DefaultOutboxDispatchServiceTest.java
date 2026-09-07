@@ -12,8 +12,10 @@ import org.junit.jupiter.api.Test;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class DefaultOutboxDispatchServiceTest {
 
@@ -23,6 +25,44 @@ class DefaultOutboxDispatchServiceTest {
     @Test
     void defaultDispatchServiceIsTheOutboxDispatcherImplementation() {
         assertThat(OutboxDispatcher.class.isAssignableFrom(DefaultOutboxDispatchService.class)).isTrue();
+    }
+
+    @Test
+    void skipsDispatchWhenLazyStoreOrSenderAreMissing() {
+        AtomicInteger backoffResolutions = new AtomicInteger();
+        DefaultOutboxDispatchService service = DefaultOutboxDispatchService.withLazyDependencies(
+                () -> null,
+                () -> message -> SendResult.ok(),
+                null,
+                3,
+                () -> {
+                    backoffResolutions.incrementAndGet();
+                    throw new IllegalStateException("Invalid Outbox dispatch backoff configuration");
+                },
+                "pod-1");
+
+        assertThatCode(() -> service.dispatch(10)).doesNotThrowAnyException();
+        assertThat(store.claimBatchSize).isZero();
+        assertThat(backoffResolutions).hasValue(0);
+    }
+
+    @Test
+    void resolvesLazyBackoffAfterDeliveryDependenciesArePresent() {
+        store.messages = List.of(message("evt-1"));
+        DefaultOutboxDispatchService service = DefaultOutboxDispatchService.withLazyDependencies(
+                () -> store,
+                () -> message -> SendResult.ok(),
+                null,
+                3,
+                () -> {
+                    throw new IllegalStateException("Invalid Outbox dispatch backoff configuration");
+                },
+                "pod-1");
+
+        assertThatCode(() -> service.dispatch(1))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Invalid Outbox dispatch backoff configuration");
+        assertThat(store.claimBatchSize).isZero();
     }
 
     @Test
