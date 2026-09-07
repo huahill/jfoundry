@@ -21,6 +21,11 @@ class DefaultOutboxDispatchServiceTest {
     private final BackoffStrategy backoff = attempts -> Duration.ofSeconds(attempts);
 
     @Test
+    void defaultDispatchServiceIsTheOutboxDispatcherImplementation() {
+        assertThat(OutboxDispatcher.class.isAssignableFrom(DefaultOutboxDispatchService.class)).isTrue();
+    }
+
+    @Test
     void marksClaimedMessagesPublishedWhenSendSucceeds() {
         store.messages = List.of(message("evt-1"));
         DefaultOutboxDispatchService service = new DefaultOutboxDispatchService(
