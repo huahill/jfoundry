@@ -133,7 +133,7 @@ lifecycle that cannot yet express a sound static contract.
 contract, and state machine.
 
 `jfoundry-outbox-spring` owns Spring runtime integration such as transaction synchronization,
-scheduled dispatching, and domain-event recording in a Spring runtime.
+scheduled Outbox triggers, and domain-event recording in a Spring runtime.
 
 `jfoundry-outbox-spring-boot-autoconfigure` owns Outbox configuration properties, conditions, and bean
 wiring. `OutboxDispatcherProperties` and related properties live there because property binding is

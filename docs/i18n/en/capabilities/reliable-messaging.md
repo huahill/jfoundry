@@ -19,7 +19,7 @@ the capability; it does not identify a complete Outbox solution.
 |---|---|---|
 | Outbox capability | Records, externalizes, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
 | Store adapter | Persists `OutboxMessageStore` records | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application implementation |
-| Dispatch trigger | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application dispatcher |
+| Dispatch trigger / scheduling adapter | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application trigger |
 | Message transport | Sends the claimed payload | A broker-specific `jfoundry-messaging-*-spring-boot-starter` or an application `MessageSender` |
 
 Aggregate persistence is a separate choice. A `jfoundry-persistence-*-spring-boot-starter` persists
@@ -30,6 +30,13 @@ These are separate responsibilities, not necessarily separate direct Maven decla
 built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-boot-starter`
 transitively, so an application does not declare it again. That dependency is Spring Boot assembly
 convenience; the store and dispatcher remain replaceable adapters.
+
+Runtime-specific `*OutboxTrigger` types are scheduling adapters. `OutboxDispatcher` remains the
+dispatch service port that they invoke.
+
+If an application directly constructed the old `ScheduledOutboxDispatcher`,
+`JobRunrOutboxDispatcher`, `QuarkusOutboxDispatcher`, or `HelidonOutboxDispatcher` types, rename
+those call sites to the matching `*OutboxTrigger` classes.
 
 ## Event Flow
 
@@ -77,7 +84,8 @@ the wire format portable and does not expose JVM type names.
 - `DEAD_LETTERED`: retry limits were exceeded.
 
 Recovery returns stuck `DISPATCHING` messages to `PENDING`. Cleanup deletes expired terminal
-records only. Runtime dispatch triggering and maintenance scheduling are implementation concerns.
+records only. Runtime-specific dispatch triggers and maintenance scheduling are implementation
+concerns.
 
 ## Runtime Transaction Boundaries
 

@@ -42,7 +42,7 @@ public final class MicrometerJFoundryObservability {
         return new ObservedOutboxRecorder(delegate);
     }
 
-    /// Returns an Outbox dispatcher that instruments dispatch runs.
+    /// Returns an Outbox dispatch service decorator.
     public OutboxDispatcher observe(OutboxDispatcher delegate) {
         Objects.requireNonNull(delegate, "delegate must not be null");
         return new ObservedOutboxDispatcher(delegate);

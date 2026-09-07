@@ -197,10 +197,11 @@ state-transition runtime:
 </dependency>
 ```
 
-The extension provides a default CDI `OutboxDispatcher` and uses the Quarkus Scheduler. It remains
-inactive unless `jfoundry.outbox.dispatcher.enabled=true`. The application must provide both an
+The extension provides the default CDI `OutboxDispatcher` service port and the
+`QuarkusOutboxTrigger` scheduling adapter through the Quarkus Scheduler. It remains inactive
+unless `jfoundry.outbox.dispatcher.enabled=true`. The application must provide both an
 `OutboxMessageStore` (for example through `jfoundry-outbox-jpa-quarkus-runtime`) and a real
-`MessageSender`; the dispatcher does not add a broker client or a logging sender. Configure
+`MessageSender`; the trigger does not add a broker client or a logging sender. Configure
 `jfoundry.outbox.dispatcher.interval` (default `5s`), `batch-size` (default `50`), `max-retries`
 (default `5`), `backoff-base` (default `1s`), and `backoff-max` (default `5m`) as needed. An
 application-provided CDI `OutboxDispatcher` takes precedence.

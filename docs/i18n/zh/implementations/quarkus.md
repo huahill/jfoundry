@@ -175,12 +175,13 @@ transactionRunner.run(() -> {
 </dependency>
 ```
 
-该扩展提供默认 CDI `OutboxDispatcher`，并使用 Quarkus Scheduler。只有配置
-`jfoundry.outbox.dispatcher.enabled=true` 时才会启动定时派发。应用必须提供
-`OutboxMessageStore`（例如通过 `jfoundry-outbox-jpa-quarkus-runtime`）和真实的 `MessageSender`；
-派发器不会引入消息代理客户端或日志发送器。可按需配置 `jfoundry.outbox.dispatcher.interval`
-（默认 `5s`）、`batch-size`（默认 `50`）、`max-retries`（默认 `5`）、`backoff-base`（默认 `1s`）和
-`backoff-max`（默认 `5m`）。应用提供的 CDI `OutboxDispatcher` 优先。
+该扩展通过 Quarkus Scheduler 提供默认 CDI `OutboxDispatcher` 服务端口和
+`QuarkusOutboxTrigger` 调度适配器。只有配置 `jfoundry.outbox.dispatcher.enabled=true` 时才会启动
+定时派发。应用必须提供 `OutboxMessageStore`（例如通过 `jfoundry-outbox-jpa-quarkus-runtime`）和真实的
+`MessageSender`；触发器不会引入消息代理客户端或日志发送器。可按需配置
+`jfoundry.outbox.dispatcher.interval`（默认 `5s`）、`batch-size`（默认 `50`）、`max-retries`
+（默认 `5`）、`backoff-base`（默认 `1s`）和 `backoff-max`（默认 `5m`）。应用提供的 CDI
+`OutboxDispatcher` 优先。
 
 消息发送始终位于数据库事务之外。每次领取和状态转换都通过 `TransactionRunner` 在独立事务中进行，
 与运行时无关的 Outbox 契约保持一致。

@@ -21,7 +21,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-outbox-spring-boot-starter` | Outbox core, `OutboxTemplate`, domain-event externalization, scheduled dispatch integration | Outbox table store, JobRunr |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox capability plus the JPA `OutboxMessageStore` adapter | Database migration execution |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox capability plus the MyBatis-Plus `OutboxMessageStore` adapter | Database migration execution |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox capability plus the JobRunr dispatch trigger | Outbox table store |
+| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox capability plus the JobRunr `OutboxTrigger` | Outbox table store |
 | `jfoundry-inbox-spring-boot-starter` | Inbox core and `InboxTemplate` | Inbox table store |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` adapter and supported-database claim strategy | Database migration execution, claim support for database products other than PostgreSQL and MySQL |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |
@@ -80,8 +80,8 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `RocketMqMessageSenderAutoConfiguration` | `SpringRocketMqMessageSender` | RocketMQ producer class and `MQProducer` bean exist; no existing `MessageSender`. |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox table-name customizer, `MybatisPlusInterceptor`, `OutboxMessageStore` | MyBatis-Plus and Outbox store adapter classes are present. SQL templates are not run automatically. |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | `EntityManagerFactory` and the JPA Outbox adapter are present; no user-defined `OutboxMessageStore` exists. |
-| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`, scheduled dispatcher, recovery job, cleanup job | An Outbox store, message sender, and `TransactionRunner` exist; mode is `scheduled` or maintenance is enabled by managed modes. |
-| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxDispatcher` | JobRunr and jfoundry JobRunr adapter classes are present; `mode=jobrunr`; store, sender, backoff, and `TransactionRunner` beans exist. |
+| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`, `ScheduledOutboxTrigger`, recovery job, cleanup job | An Outbox store, message sender, and `TransactionRunner` exist; mode is `scheduled` or maintenance is enabled by managed modes. |
+| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxTrigger` | JobRunr and jfoundry JobRunr trigger classes are present; `mode=jobrunr`; store, sender, backoff, and `TransactionRunner` beans exist. |
 | `InboxMybatisPlusAutoConfiguration` | MyBatis-Plus `InboxMessageStore` | `SqlSessionFactory`, mapper scanning, and Inbox store adapter are present; no existing store. |
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`, JPA `InboxMessageStore` | `EntityManagerFactory` and the JPA Inbox adapter are present. A user `InboxMessageStore` or `JpaInboxClaimStrategy` takes precedence; built-in claim strategies support only PostgreSQL and MySQL, and an unknown database product fails fast unless the application supplies a strategy. |
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
@@ -117,3 +117,7 @@ bean into the default recorder. Applications normally provide these mappings wit
   a different dispatcher mode.
 - `mode=none` means no dispatcher, recovery job, or cleanup job is registered, even when recovery
   or cleanup is explicitly enabled.
+- `ScheduledOutboxTrigger` is the Spring scheduling adapter for scheduled mode, and
+  `JobRunrOutboxTrigger` is the adapter for JobRunr mode. `OutboxDispatcher` remains the dispatch
+  service port. Applications that directly constructed the old `ScheduledOutboxDispatcher` or
+  `JobRunrOutboxDispatcher` types must rename those call sites.

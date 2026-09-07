@@ -55,7 +55,7 @@ public final class OpenTelemetryJFoundryObservability {
         });
     }
 
-    /// Returns an Outbox dispatcher that instruments dispatch runs.
+    /// Returns an Outbox dispatch service decorator.
     public OutboxDispatcher observe(OutboxDispatcher delegate) {
         Objects.requireNonNull(delegate, "delegate must not be null");
         return batchSize -> observeUnchecked(OUTBOX_DISPATCH, ignored -> SUCCESS, () -> {

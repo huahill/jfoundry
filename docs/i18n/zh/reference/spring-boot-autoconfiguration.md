@@ -19,7 +19,7 @@
 | `jfoundry-outbox-spring-boot-starter` | Outbox 核心、`OutboxTemplate`、领域事件外部化、定时派发集成 | Outbox 表存储、JobRunr |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox 能力与 MyBatis-Plus `OutboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox 能力与 JPA `OutboxMessageStore` 适配器 | 数据库迁移执行 |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox 能力与 JobRunr 派发触发方式 | Outbox 表存储 |
+| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox 能力加上 JobRunr `OutboxTrigger` | Outbox 表存储 |
 | `jfoundry-inbox-spring-boot-starter` | Inbox 核心、`InboxTemplate` | Inbox 表存储 |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
@@ -77,8 +77,8 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `RocketMqMessageSenderAutoConfiguration` | `SpringRocketMqMessageSender` | 存在 RocketMQ 生产者类和 `MQProducer` Bean；没有已有 `MessageSender`。 |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox 表名定制器、`MybatisPlusInterceptor`、`OutboxMessageStore` | MyBatis-Plus 和 Outbox 存储适配器类存在。SQL 模板不会自动执行。 |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Outbox 适配器；没有用户自定义 `OutboxMessageStore`。 |
-| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`、定时派发器、恢复任务、清理任务 | 存在 Outbox 存储、消息发送器和 `TransactionRunner`；模式为 `scheduled` 或维护任务由托管模式启用。 |
-| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxDispatcher` | 存在 JobRunr 和 jfoundry JobRunr 适配器类；`mode=jobrunr`；存在存储、发送器、退避策略和 `TransactionRunner` Bean。 |
+| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`、`ScheduledOutboxTrigger`、恢复任务、清理任务 | 存在 Outbox 存储、消息发送器和 `TransactionRunner`；模式为 `scheduled` 或维护任务由托管模式启用。 |
+| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxTrigger` | 存在 JobRunr 和 jfoundry JobRunr 触发器类；`mode=jobrunr`；存在存储、发送器、退避策略和 `TransactionRunner` Bean。 |
 | `InboxMybatisPlusAutoConfiguration` | MyBatis-Plus `InboxMessageStore` | 存在 `SqlSessionFactory`、映射器扫描和 Inbox 存储适配器；没有已有存储。 |
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`、JPA `InboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Inbox 适配器。用户提供的 `InboxMessageStore` 或 `JpaInboxClaimStrategy` 优先；内置领取策略仅支持 PostgreSQL 和 MySQL，未知数据库产品在应用未提供策略时会快速失败。 |
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
@@ -108,3 +108,6 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   选定值传给 `process-aot`；仅在启动原生可执行文件时变更该值，无法恢复被 AOT 裁剪的 Bean。需要不同
   派发模式的部署应构建独立镜像。
 - `mode=none` 表示不注册派发器、恢复任务或清理任务，即使显式开启恢复或清理也不会注册。
+- `ScheduledOutboxTrigger` 是 scheduled 模式的 Spring 调度适配器，`JobRunrOutboxTrigger` 是
+  JobRunr 模式的适配器。`OutboxDispatcher` 仍然是派发服务端口。直接构造旧的
+  `ScheduledOutboxDispatcher` 或 `JobRunrOutboxDispatcher` 类型的应用必须改写这些调用点。

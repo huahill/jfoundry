@@ -87,9 +87,10 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 `jfoundry-outbox-core` 拥有消息模型、存储契约、派发服务、重试/退避契约和状态机。
 
-`jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步、scheduled dispatch 和 Spring 运行时中的领域事件记录。
+`jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步、scheduled Outbox 触发器和 Spring 运行时中的领域事件记录。
 
-`jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties` 及关联属性位于这里，因为属性绑定属于 Boot 职责。
+`jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties`
+及关联属性位于这里，因为属性绑定属于 Boot 职责。
 
 `jfoundry-outbox-jobrunr` 是纯 JobRunr 派发适配器；它的 Spring Boot 自动配置也属于 `jfoundry-outbox-spring-boot-autoconfigure`。
 

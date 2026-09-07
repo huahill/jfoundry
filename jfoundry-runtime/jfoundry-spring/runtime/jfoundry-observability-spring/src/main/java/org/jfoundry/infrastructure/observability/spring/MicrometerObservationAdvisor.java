@@ -9,7 +9,8 @@ import org.springframework.aop.support.StaticMethodMatcherPointcut;
 
 import java.lang.reflect.Method;
 
-/// Spring AOP advisor that resolves the Micrometer interceptor lazily from the BeanFactory.
+/// Spring AOP advisor that resolves the Micrometer interceptor lazily from the BeanFactory for
+/// framework operations, including the Outbox dispatch service port.
 public final class MicrometerObservationAdvisor extends DefaultBeanFactoryPointcutAdvisor {
 
     /// Bean name used by this advisor to resolve its interceptor.
