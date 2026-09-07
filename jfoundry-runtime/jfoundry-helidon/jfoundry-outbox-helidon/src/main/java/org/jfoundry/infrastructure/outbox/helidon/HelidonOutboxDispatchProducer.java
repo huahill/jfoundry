@@ -13,6 +13,7 @@ import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxRuntimeIds;
 import org.jfoundry.application.transaction.TransactionRunner;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
 
@@ -32,19 +33,17 @@ public final class HelidonOutboxDispatchProducer {
                                       Duration backoffBase,
                                       @ConfigProperty(name = "jfoundry.outbox.dispatcher.backoff-max", defaultValue = "5m")
                                       Duration backoffMax) {
-        return batchSize -> {
-            if (!outboxMessageStore.isResolvable() || !messageSender.isResolvable()) {
-                return;
-            }
-            new DefaultOutboxDispatchService(
-                    outboxMessageStore.get(),
-                    messageSender.get(),
-                    transactionRunner,
-                    maxRetries,
-                    backoffStrategy(backoffBase, backoffMax),
-                    OutboxRuntimeIds.generateClaimerId())
-                    .dispatch(batchSize);
-        };
+        return DefaultOutboxDispatchService.withLazyDependencies(
+                () -> resolve(outboxMessageStore),
+                () -> resolve(messageSender),
+                transactionRunner,
+                maxRetries,
+                () -> backoffStrategy(backoffBase, backoffMax),
+                OutboxRuntimeIds.generateClaimerId());
+    }
+
+    private static <T> @Nullable T resolve(Instance<T> instance) {
+        return instance.isResolvable() ? instance.get() : null;
     }
 
     private static BackoffStrategy backoffStrategy(Duration base, Duration maximum) {
