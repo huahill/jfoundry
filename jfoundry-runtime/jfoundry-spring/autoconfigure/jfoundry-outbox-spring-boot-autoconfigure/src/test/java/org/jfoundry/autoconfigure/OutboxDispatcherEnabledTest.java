@@ -58,8 +58,8 @@ class OutboxDispatcherEnabledTest {
 
     @Test
     void legacyEnabledPropertyDoesNotDisableScheduledDispatcher() {
-        assertThat(context.containsBeanDefinition("scheduledOutboxDispatcher"))
-                .as("scheduledOutboxDispatcher is controlled by mode, not enabled")
+        assertThat(context.containsBeanDefinition("scheduledOutboxTrigger"))
+                .as("scheduledOutboxTrigger is controlled by mode, not enabled")
                 .isTrue();
     }
 }

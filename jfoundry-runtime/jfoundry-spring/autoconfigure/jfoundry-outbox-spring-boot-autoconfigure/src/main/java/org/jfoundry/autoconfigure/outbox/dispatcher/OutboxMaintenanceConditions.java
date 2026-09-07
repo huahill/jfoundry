@@ -33,6 +33,13 @@ final class OutboxMaintenanceConditions {
         }
     }
 
+    static final class ManagedDispatcherMode implements Condition {
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            return isManagedDispatcherMode(context.getEnvironment());
+        }
+    }
+
     static final class CleanupEnabled implements Condition {
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {

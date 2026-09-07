@@ -2,12 +2,14 @@ package org.jfoundry.autoconfigure.outbox.dispatcher;
 
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.BackoffStrategy;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionRunner;
+import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxTrigger;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
@@ -22,6 +24,7 @@ class OutboxDispatcherAutoConfigurationTest {
     private final ApplicationContextRunner runner =
             new ApplicationContextRunner()
                     .withConfiguration(AutoConfigurations.of(OutboxDispatcherAutoConfiguration.class))
+                    .withPropertyValues("spring.task.scheduling.enabled=false")
                     .withBean(OutboxMessageStore.class, () -> mock(OutboxMessageStore.class))
                     .withBean(MessageSender.class, () -> outbound -> SendResult.ok())
                     .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
@@ -30,26 +33,53 @@ class OutboxDispatcherAutoConfigurationTest {
     private final ApplicationContextRunner runnerWithoutMessageSender =
             new ApplicationContextRunner()
                     .withConfiguration(AutoConfigurations.of(OutboxDispatcherAutoConfiguration.class))
+                    .withPropertyValues("spring.task.scheduling.enabled=false")
                     .withBean(OutboxMessageStore.class, () -> mock(OutboxMessageStore.class))
                     .withBean(BackoffStrategy.class, () -> (BackoffStrategy) failedAttempts -> Duration.ofSeconds(1))
                     .withBean(CountingTransactionRunner.class, CountingTransactionRunner::new);
 
     @Test
-    void scheduledModeRegistersDispatcherAndMaintenanceJobs() {
+    void scheduledModeRegistersDefaultServiceTriggerAndMaintenanceJobs() {
         runner
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=scheduled")
                 .run(context -> {
-                    assertThat(context).hasSingleBean(OutboxDispatcher.class);
+                    assertThat(context).hasSingleBean(DefaultOutboxDispatchService.class);
+                    assertThat(context.getBean(OutboxDispatcher.class))
+                            .isInstanceOf(DefaultOutboxDispatchService.class);
+                    assertThat(context).hasSingleBean(ScheduledOutboxTrigger.class);
                     assertThat(context).hasSingleBean(OutboxRecoveryJob.class);
                     assertThat(context).hasSingleBean(OutboxCleanupJob.class);
                 });
     }
 
     @Test
-    void scheduledModeDoesNotRegisterDispatcherWithoutMessageSender() {
+    void scheduledModeDoesNotRegisterDefaultServiceWithoutMessageSender() {
         runnerWithoutMessageSender
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=scheduled")
-                .run(context -> assertThat(context).doesNotHaveBean(OutboxDispatcher.class));
+                .run(context -> assertThat(context).doesNotHaveBean(DefaultOutboxDispatchService.class));
+    }
+
+    @Test
+    void scheduledModeAllowsUserProvidedDispatcherToBackOffTheDefaultService() {
+        runner
+                .withBean(CountingDispatcher.class, CountingDispatcher::new)
+                .withPropertyValues(
+                        "jfoundry.outbox.dispatcher.mode=scheduled",
+                        "jfoundry.outbox.dispatcher.batchSize=13",
+                        "spring.task.scheduling.enabled=false"
+                )
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(DefaultOutboxDispatchService.class);
+                    assertThat(context).hasSingleBean(OutboxDispatcher.class);
+                    assertThat(context).hasSingleBean(ScheduledOutboxTrigger.class);
+
+                    int callsBeforeInvocation = context.getBean(CountingDispatcher.class).dispatchCalls;
+                    context.getBean(ScheduledOutboxTrigger.class).scheduledDispatch();
+
+                    assertThat(context.getBean(CountingDispatcher.class).batchSize).isEqualTo(13);
+                    assertThat(context.getBean(CountingDispatcher.class).dispatchCalls)
+                            .isGreaterThanOrEqualTo(callsBeforeInvocation + 1);
+                });
     }
 
     @Test
@@ -64,11 +94,14 @@ class OutboxDispatcherAutoConfigurationTest {
     }
 
     @Test
-    void jobrunrModeRegistersSpringScheduledMaintenanceJobs() {
+    void jobrunrModeRegistersDefaultServiceAndSpringScheduledMaintenanceJobs() {
         runner
                 .withPropertyValues("jfoundry.outbox.dispatcher.mode=jobrunr")
                 .run(context -> {
-                    assertThat(context).doesNotHaveBean(OutboxDispatcher.class);
+                    assertThat(context).hasSingleBean(DefaultOutboxDispatchService.class);
+                    assertThat(context.getBean(OutboxDispatcher.class))
+                            .isInstanceOf(DefaultOutboxDispatchService.class);
+                    assertThat(context).doesNotHaveBean(ScheduledOutboxTrigger.class);
                     assertThat(context).hasSingleBean(OutboxRecoveryJob.class);
                     assertThat(context).hasSingleBean(OutboxCleanupJob.class);
                 });
@@ -133,4 +166,16 @@ class OutboxDispatcherAutoConfigurationTest {
             return callback.execute();
         }
     }
+
+    static final class CountingDispatcher implements OutboxDispatcher {
+        private int dispatchCalls;
+        private int batchSize;
+
+        @Override
+        public void dispatch(int batchSize) {
+            this.dispatchCalls++;
+            this.batchSize = batchSize;
+        }
+    }
+
 }

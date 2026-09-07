@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "jfoundry.outbox.table-name=custom_outbox",
                 // Set dispatcher mode to none so this test exercises only the persistence
                 // layer (append → TableNameHandler → custom_outbox). Otherwise the full
-                // autoconfig chain starts a ScheduledOutboxDispatcher whose polling may
+                // autoconfig chain starts a ScheduledOutboxTrigger whose polling may
                 // interact with subsequent tests sharing the same H2 instance.
                 "jfoundry.outbox.dispatcher.mode=none",
                 "spring.autoconfigure.exclude=org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration",

@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.outbox.dispatcher;
 
-import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxDispatcher;
+import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxTrigger;
 import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.RuntimeHints;
 import org.springframework.aot.hint.predicate.RuntimeHintsPredicates;
@@ -16,7 +16,7 @@ class ScheduledOutboxNativeRuntimeHintsTest {
         new ScheduledOutboxNativeRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(ScheduledOutboxDispatcher.class, "scheduledDispatch")
+                .onMethodInvocation(ScheduledOutboxTrigger.class, "scheduledDispatch")
                 .test(hints)).isTrue();
         assertThat(RuntimeHintsPredicates.reflection()
                 .onMethodInvocation(OutboxRecoveryJob.class, "recoverStuckDispatching")

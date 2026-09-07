@@ -6,9 +6,9 @@ import org.jfoundry.application.messaging.SendResult;
 import org.jfoundry.infrastructure.outbox.mybatis.OutboxData;
 import org.jfoundry.infrastructure.outbox.mybatis.OutboxMapper;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
-import org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mybatis.spring.annotation.MapperScan;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/// Two ScheduledOutboxDispatcher instances with different podIds share the same
+/// Two DefaultOutboxDispatchService instances with different podIds share the same
 /// OutboxMessageStore and real H2 database, concurrently dispatch a batch of PENDING records, and
 /// assert that each record is passed to MessageSender.send only once. Multi-instance mutual
 /// exclusion is guaranteed by claimDispatchable atomicity, not by application-side idempotency.
@@ -86,11 +86,11 @@ class DispatcherConcurrencyIntegrationTest {
         CountingSender sender = new CountingSender();
         BackoffStrategy backoff = failedAttempts -> Duration.ofSeconds(1);
 
-        // Two dispatchers with explicit podIds (package-private constructor).
-        ScheduledOutboxDispatcher podA =
-                new ScheduledOutboxDispatcher(repository, sender, 5, backoff, total, "pod-A");
-        ScheduledOutboxDispatcher podB =
-                new ScheduledOutboxDispatcher(repository, sender, 5, backoff, total, "pod-B");
+        // Two dispatch services with explicit podIds.
+        DefaultOutboxDispatchService podA =
+                new DefaultOutboxDispatchService(repository, sender, 5, backoff, "pod-A");
+        DefaultOutboxDispatchService podB =
+                new DefaultOutboxDispatchService(repository, sender, 5, backoff, "pod-B");
 
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch start = new CountDownLatch(1);
@@ -131,10 +131,10 @@ class DispatcherConcurrencyIntegrationTest {
 
         CountingSender sender = new CountingSender();
         BackoffStrategy backoff = failedAttempts -> Duration.ofSeconds(1);
-        ScheduledOutboxDispatcher podA =
-                new ScheduledOutboxDispatcher(repository, sender, 5, backoff, 10, "pod-A");
-        ScheduledOutboxDispatcher podB =
-                new ScheduledOutboxDispatcher(repository, sender, 5, backoff, 10, "pod-B");
+        DefaultOutboxDispatchService podA =
+                new DefaultOutboxDispatchService(repository, sender, 5, backoff, "pod-A");
+        DefaultOutboxDispatchService podB =
+                new DefaultOutboxDispatchService(repository, sender, 5, backoff, "pod-B");
 
         podA.dispatch(10);
         podB.dispatch(10);
