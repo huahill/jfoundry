@@ -73,14 +73,14 @@ JPA Outbox 与 Inbox 能力复用运行时无关的 JPA 存储，不会创建 SQ
 Inbox SQL 模板复制到自己的迁移流程。Inbox 领取策略支持 PostgreSQL 与 MySQL；其它数据库需要
 由应用提供 `JpaInboxClaimStrategy` Bean。
 
-`jfoundry-outbox-helidon` 提供按需启用的调度。只有在提供存储和消息代理发送器后才启用
-定时派发：
+`jfoundry-outbox-helidon` 提供 `HelidonOutboxTrigger` 调度适配器和 `OutboxDispatcher` 服务端口。
+只有在提供存储和消息代理发送器后才启用定时派发：
 
 ```properties
 jfoundry.outbox.dispatcher.enabled=true
 ```
 
-派发器属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`、`batch-size` 默认 `50`、
+触发器属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`、`batch-size` 默认 `50`、
 `max-retries` 默认 `5`、`backoff-base` 默认 `1s`、`backoff-max` 默认 `5m`。
 
 当配置 `jfoundry.domain.event.dispatch.outbox.enabled=true` 时，它还会将标记 `@Externalized` 的领域事件

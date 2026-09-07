@@ -228,22 +228,22 @@ public final class FrameworkModuleRules {
                     .because("JacksonPayloadSerializer belongs to the Onion infrastructure ring");
 
     @ArchTest
-    public static final ArchRule scheduled_outbox_dispatcher_should_be_in_infrastructure_ring =
+    public static final ArchRule scheduled_outbox_trigger_should_be_in_infrastructure_ring =
             classes()
                     .that().haveFullyQualifiedName(
-                            "org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxDispatcher")
+                            "org.jfoundry.infrastructure.outbox.spring.dispatcher.ScheduledOutboxTrigger")
                     .should(resideInPackageAnnotatedWith(InfrastructureRing.class))
                     .allowEmptyShould(true)
-                    .because("ScheduledOutboxDispatcher belongs to the Onion infrastructure ring");
+                    .because("ScheduledOutboxTrigger belongs to the Onion infrastructure ring");
 
     @ArchTest
-    public static final ArchRule jobrunr_outbox_dispatcher_should_be_in_infrastructure_ring =
+    public static final ArchRule jobrunr_outbox_trigger_should_be_in_infrastructure_ring =
             classes()
                     .that().haveFullyQualifiedName(
-                            "org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxDispatcher")
+                            "org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigger")
                     .should(resideInPackageAnnotatedWith(InfrastructureRing.class))
                     .allowEmptyShould(true)
-                    .because("JobRunrOutboxDispatcher belongs to the Onion infrastructure ring");
+                    .because("JobRunrOutboxTrigger belongs to the Onion infrastructure ring");
 
     private static ArchCondition<JavaClass> resideInPackageAnnotatedWith(
             Class<? extends java.lang.annotation.Annotation> annotationType) {

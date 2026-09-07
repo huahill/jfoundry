@@ -28,7 +28,7 @@ class NativeJobRunrIT {
             .withPassword("jfoundry");
 
     @Test
-    void nativeImageSchedulesAndExecutesTheJobRunrOutboxDispatcher() throws Exception {
+    void nativeImageSchedulesAndExecutesTheJobRunrOutboxTrigger() throws Exception {
         assertThat(Files.isExecutable(APPLICATION))
                 .as("JobRunr Native Image executable")
                 .isTrue();

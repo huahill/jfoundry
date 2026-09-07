@@ -31,7 +31,7 @@ class FrameworkModuleRulesTest {
         assertThat(FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.kafka_message_sender_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.jackson_payload_serializer_should_be_in_infrastructure_ring).isNotNull();
-        assertThat(FrameworkModuleRules.scheduled_outbox_dispatcher_should_be_in_infrastructure_ring).isNotNull();
-        assertThat(FrameworkModuleRules.jobrunr_outbox_dispatcher_should_be_in_infrastructure_ring).isNotNull();
+        assertThat(FrameworkModuleRules.scheduled_outbox_trigger_should_be_in_infrastructure_ring).isNotNull();
+        assertThat(FrameworkModuleRules.jobrunr_outbox_trigger_should_be_in_infrastructure_ring).isNotNull();
     }
 }

@@ -14,7 +14,7 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 |---|---|---|
 | Outbox 能力 | 负责记录、外部化、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
 | 存储适配器 | 持久化 `OutboxMessageStore` 记录 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用实现 |
-| 派发触发方式 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用派发器 |
+| 派发触发方式 / 调度适配器 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用触发器 |
 | 消息传输 | 发送已领取的消息载荷 | 消息代理专用的 `jfoundry-messaging-*-spring-boot-starter` 或应用 `MessageSender` |
 
 聚合持久化是另一项独立选择。`jfoundry-persistence-*-spring-boot-starter` 持久化业务聚合，
@@ -22,6 +22,11 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 
 职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
 `jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利，存储与派发器仍可替换。
+
+运行时特定的 `*OutboxTrigger` 类型是调度适配器。`OutboxDispatcher` 仍然是它们调用的派发服务端口。
+
+如果应用曾经直接构造旧的 `ScheduledOutboxDispatcher`、`JobRunrOutboxDispatcher`、`QuarkusOutboxDispatcher`
+或 `HelidonOutboxDispatcher` 类型，请将这些调用点改为对应的 `*OutboxTrigger` 类。
 
 ## 事件流
 
@@ -53,7 +58,7 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 - `FAILED`：本次发送失败，等待重试。
 - `DEAD_LETTERED`：超过最大重试次数。
 
-Recovery 将卡住的 `DISPATCHING` 消息恢复为 `PENDING`。Cleanup 只删除过期终态记录。运行时派发触发和维护任务调度属于实现关注点。
+Recovery 将卡住的 `DISPATCHING` 消息恢复为 `PENDING`。Cleanup 只删除过期终态记录。运行时特定的派发触发器和维护任务调度属于实现关注点。
 
 ## 运行时事务边界
 

@@ -89,7 +89,7 @@ database, delivery, scheduling, and distributed-lock choices.
 | Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds recording, externalization, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
 | Outbox store | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application `OutboxMessageStore` | Persists Outbox records only; built-in store starters also bring the Outbox capability, while applications still own migrations. |
 | Inbox runtime and store | `jfoundry-inbox-spring-boot-starter` plus one `jfoundry-inbox-*-spring-boot-starter` | Consumer idempotency; applications own migrations. |
-| Outbox dispatch trigger | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application dispatcher | JobRunr replaces the built-in trigger and brings the Outbox capability transitively; every option still needs an Outbox store and real sender. |
+| Outbox dispatch trigger / scheduling adapter | Built-in scheduled mode (`ScheduledOutboxTrigger`), optional `jfoundry-outbox-jobrunr-spring-boot-starter` (`JobRunrOutboxTrigger`), or an application trigger | JobRunr replaces the built-in trigger and brings the Outbox capability transitively; every option still needs an Outbox store and real sender. |
 | Redisson distributed lock | `jfoundry-lock-redisson-spring-boot-starter` | Optional cross-instance locking only. |
 
 The exact starter catalog, configuration properties, conditions, and bean precedence are maintained
@@ -138,6 +138,9 @@ transport. The shared `outbox` prefix indicates which capability an adapter serv
 JPA, MyBatis-Plus, or JobRunr a complete Outbox solution. JFoundry does not create database tables or
 invent message destinations. Copy the selected SQL template into the application's own migration
 process.
+
+In Spring Boot, `OutboxDispatcher` is the dispatch service port. `ScheduledOutboxTrigger` and
+`JobRunrOutboxTrigger` are the scheduling adapters that invoke it.
 
 `jfoundry-messaging-spring-boot-starter` does not register a fallback `MessageSender`. Before
 enabling dispatch, add one broker-specific starter or provide an application `MessageSender`; without

@@ -82,14 +82,15 @@ tables: copy the published Outbox and Inbox SQL templates into the application's
 Inbox claim strategies support PostgreSQL and MySQL; another database requires an application
 `JpaInboxClaimStrategy` bean.
 
-`jfoundry-outbox-helidon` provides opt-in scheduling. Enable scheduled dispatch only after
-providing both the store and broker sender:
+`jfoundry-outbox-helidon` provides the `HelidonOutboxTrigger` scheduling adapter and the
+`OutboxDispatcher` service port. Enable scheduled dispatch only after providing both the store and
+broker sender:
 
 ```properties
 jfoundry.outbox.dispatcher.enabled=true
 ```
 
-The dispatcher properties match the runtime-neutral Outbox behavior: `interval` defaults to `5s`,
+The trigger properties match the runtime-neutral Outbox behavior: `interval` defaults to `5s`,
 `batch-size` to `50`, `max-retries` to `5`, `backoff-base` to `1s`, and `backoff-max` to `5m`.
 
 It also records domain events marked `@Externalized` into the current transaction when
