@@ -20,6 +20,7 @@ public class OutboxJpaResource {
 
     private final TransactionRunner transactionRunner;
     private final OutboxMessageStore outboxMessageStore;
+    /// Keeps the integration endpoint wired to the application OutboxDispatcher port.
     private final OutboxDispatcher outboxDispatcher;
     private final EntityManager entityManager;
 

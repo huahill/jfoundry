@@ -8,8 +8,9 @@ import org.jboss.jandex.AnnotationTarget;
 import org.jboss.jandex.DotName;
 import org.jfoundry.infrastructure.outbox.quarkus.externalization.OutboxDomainEventDispatcher;
 import org.jfoundry.infrastructure.outbox.quarkus.externalization.QuarkusOutboxExternalizationProducer;
-import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxDispatcher;
+import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxDispatchProducer;
 import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxMaintenance;
+import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxTrigger;
 import org.jmolecules.event.annotation.Externalized;
 
 import java.util.List;
@@ -20,7 +21,8 @@ class OutboxProcessor {
     @BuildStep
     AdditionalBeanBuildItem registerOutboxRuntime() {
         return AdditionalBeanBuildItem.builder()
-                .addBeanClass(QuarkusOutboxDispatcher.class)
+                .addBeanClass(QuarkusOutboxDispatchProducer.class)
+                .addBeanClass(QuarkusOutboxTrigger.class)
                 .addBeanClass(QuarkusOutboxMaintenance.class)
                 .addBeanClass(OutboxDomainEventDispatcher.class)
                 .addBeanClass(QuarkusOutboxExternalizationProducer.class)
