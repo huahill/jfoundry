@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Hua flower mark</title>
+  <desc id="description">A simple five-petal flower mark in coral and cherry red with a warm golden center.</desc>
+  <defs>
+    <linearGradient id="petal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff8a72"/>
+      <stop offset="0.55" stop-color="#ed5b62"/>
+      <stop offset="1" stop-color="#c93663"/>
+    </linearGradient>
+    <radialGradient id="core" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#ffe8a3"/>
+      <stop offset="0.7" stop-color="#f7bd58"/>
+      <stop offset="1" stop-color="#df8a3d"/>
+    </radialGradient>
+  </defs>
+  <g fill="url(#petal)" stroke="#a92f5d" stroke-width="7" stroke-linejoin="round">
+    <path d="M256 267C215 238 181 195 185 145c4-53 39-91 71-91s67 38 71 91c4 50-30 93-71 122Z"/>
+    <path d="M256 267C215 238 181 195 185 145c4-53 39-91 71-91s67 38 71 91c4 50-30 93-71 122Z" transform="rotate(72 256 256)"/>
+    <path d="M256 267C215 238 181 195 185 145c4-53 39-91 71-91s67 38 71 91c4 50-30 93-71 122Z" transform="rotate(144 256 256)"/>
+    <path d="M256 267C215 238 181 195 185 145c4-53 39-91 71-91s67 38 71 91c4 50-30 93-71 122Z" transform="rotate(216 256 256)"/>
+    <path d="M256 267C215 238 181 195 185 145c4-53 39-91 71-91s67 38 71 91c4 50-30 93-71 122Z" transform="rotate(288 256 256)"/>
+  </g>
+  <circle cx="256" cy="256" r="57" fill="url(#core)" stroke="#b96b3b" stroke-width="7"/>
+  <circle cx="238" cy="237" r="13" fill="#fff4c7" opacity="0.72"/>
+</svg>
