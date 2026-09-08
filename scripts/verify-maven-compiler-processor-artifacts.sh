@@ -106,7 +106,7 @@ verify_quarkus_build_steps \
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-messaging-rabbitmq-quarkus-deployment' \
     'jfoundry-messaging-rabbitmq-quarkus-deployment' \
-    'org.jfoundry.quarkus.messaging.rabbitmq.deployment.RabbitMqMessageSenderProcessor'
+    'org.jfoundry.quarkus.messaging.rabbitmq.deployment.RabbitMessageSenderProcessor'
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-outbox-jpa-quarkus-deployment' \
     'jfoundry-outbox-jpa-quarkus-deployment' \

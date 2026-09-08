@@ -6,11 +6,11 @@ import org.jfoundry.application.messaging.SendResult;
 import org.springframework.amqp.rabbit.core.RabbitOperations;
 
 /// Spring RabbitMQ-backed {@link MessageSender}.
-public class SpringRabbitMqMessageSender implements MessageSender {
+public class SpringRabbitMessageSender implements MessageSender {
 
     private final RabbitOperations rabbitOperations;
 
-    public SpringRabbitMqMessageSender(RabbitOperations rabbitOperations) {
+    public SpringRabbitMessageSender(RabbitOperations rabbitOperations) {
         this.rabbitOperations = rabbitOperations;
     }
 

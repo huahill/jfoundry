@@ -76,8 +76,8 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `DomainEventDispatchAutoConfiguration` | `DomainEventScope`, `DomainEventContext`, dispatch interceptor, Spring event dispatcher, optional Outbox dispatcher | Application service and dispatcher types are present; dispatch properties allow the selected path. |
 | `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`, `OutboxTemplate`, externalization resolvers, `DomainEventOutboxRecorder` | Outbox store and serializer dependencies are available; no user-defined replacement for each bean. |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | `KafkaOperations` class and bean exist; no existing `MessageSender`. |
-| `RabbitMqMessageSenderAutoConfiguration` | `SpringRabbitMqMessageSender` | `RabbitTemplate` class and `RabbitOperations` bean exist; no existing `MessageSender`. |
-| `RocketMqMessageSenderAutoConfiguration` | `SpringRocketMqMessageSender` | RocketMQ producer class and `MQProducer` bean exist; no existing `MessageSender`. |
+| `RabbitMessageSenderAutoConfiguration` | `SpringRabbitMessageSender` | `RabbitTemplate` class and `RabbitOperations` bean exist; no existing `MessageSender`. |
+| `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | RocketMQ producer class and `MQProducer` bean exist; no existing `MessageSender`. |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox table-name customizer, `MybatisPlusInterceptor`, `OutboxMessageStore` | MyBatis-Plus and Outbox store adapter classes are present. SQL templates are not run automatically. |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | `EntityManagerFactory` and the JPA Outbox adapter are present; no user-defined `OutboxMessageStore` exists. |
 | `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`, `ScheduledOutboxTrigger`, recovery job, cleanup job | An Outbox store, message sender, and `TransactionRunner` exist; mode is `scheduled` or maintenance is enabled by managed modes. |

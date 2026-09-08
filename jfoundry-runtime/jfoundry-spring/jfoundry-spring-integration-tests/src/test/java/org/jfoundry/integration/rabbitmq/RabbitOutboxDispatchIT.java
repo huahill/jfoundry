@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         classes = OutboxInboxDatabaseConfig.class,
         properties = "jfoundry.outbox.dispatcher.mode=none"
 )
-class RabbitMqOutboxDispatchIT {
+class RabbitOutboxDispatchIT {
 
     private static final String EXCHANGE = "jfoundry.integration.outbox";
     private static final String ROUTING_KEY = "order.created";
@@ -83,7 +83,7 @@ class RabbitMqOutboxDispatchIT {
     }
 
     @Test
-    void dispatchPublishesRabbitMqMessageAndMarksOutboxPublished() throws Exception {
+    void dispatchPublishesRabbitMessageAndMarksOutboxPublished() throws Exception {
         store.append(OutboxMessages.pending(
                 "evt-rabbit-1",
                 EXCHANGE,
@@ -94,7 +94,7 @@ class RabbitMqOutboxDispatchIT {
              Channel channel = connection.createChannel()) {
             new DefaultOutboxDispatchService(
                     store,
-                    rabbitMqSender(channel),
+                    rabbitSender(channel),
                     3,
                     retry -> Duration.ofMillis(10),
                     "it-pod").dispatch(10);
@@ -144,7 +144,7 @@ class RabbitMqOutboxDispatchIT {
         return connectionFactory;
     }
 
-    private static MessageSender rabbitMqSender(Channel channel) {
+    private static MessageSender rabbitSender(Channel channel) {
         return outbound -> {
             try {
                 channel.basicPublish(outbound.topic(),

@@ -1,7 +1,7 @@
 package org.jfoundry.autoconfigure.messaging.rabbitmq;
 
 import org.jfoundry.application.messaging.MessageSender;
-import org.jfoundry.infrastructure.messaging.spring.sender.SpringRabbitMqMessageSender;
+import org.jfoundry.infrastructure.messaging.spring.sender.SpringRabbitMessageSender;
 import org.springframework.amqp.rabbit.core.RabbitOperations;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Bean;
 
 @AutoConfiguration
 @ConditionalOnClass(RabbitTemplate.class)
-public class RabbitMqMessageSenderAutoConfiguration {
+public class RabbitMessageSenderAutoConfiguration {
 
     @Bean
     @ConditionalOnBean(RabbitOperations.class)
     @ConditionalOnMissingBean(MessageSender.class)
-    public SpringRabbitMqMessageSender rabbitMqMessageSender(RabbitOperations rabbitOperations) {
-        return new SpringRabbitMqMessageSender(rabbitOperations);
+    public SpringRabbitMessageSender rabbitMessageSender(RabbitOperations rabbitOperations) {
+        return new SpringRabbitMessageSender(rabbitOperations);
     }
 }

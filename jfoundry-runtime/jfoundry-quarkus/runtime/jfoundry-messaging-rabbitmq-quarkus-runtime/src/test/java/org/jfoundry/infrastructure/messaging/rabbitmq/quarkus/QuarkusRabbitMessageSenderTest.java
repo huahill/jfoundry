@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class QuarkusRabbitMqMessageSenderTest {
+class QuarkusRabbitMessageSenderTest {
 
     @Test
     void publishesThePayloadToTheRequestedExchangeAndRoutingKey() {
@@ -21,7 +21,7 @@ class QuarkusRabbitMqMessageSenderTest {
         when(client.basicPublish(org.mockito.ArgumentMatchers.eq("orders"), org.mockito.ArgumentMatchers.eq("order-42"),
                 org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.eq(Buffer.buffer("{\"id\":42}"))))
                 .thenReturn(Future.succeededFuture());
-        QuarkusRabbitMqMessageSender sender = new QuarkusRabbitMqMessageSender(client);
+        QuarkusRabbitMessageSender sender = new QuarkusRabbitMessageSender(client);
 
         var result = sender.send(OutboundMessage.of("orders", "order-42", "{\"id\":42}"));
 
