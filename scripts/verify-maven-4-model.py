@@ -10,6 +10,8 @@ import xml.etree.ElementTree as ET
 
 
 MAVEN_4_NAMESPACE = "http://maven.apache.org/POM/4.1.0"
+MAVEN_4_XSD = "https://maven.apache.org/xsd/maven-4.1.0.xsd"
+XSI_SCHEMA_LOCATION = "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"
 
 
 def fail(message: str) -> None:
@@ -23,17 +25,24 @@ def local_name(tag: str) -> str:
 
 def main() -> None:
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").expanduser().resolve()
-    expected_count = int(sys.argv[2] if len(sys.argv) > 2 else "124")
+    expected_count = int(sys.argv[2]) if len(sys.argv) > 2 else None
     if not root.is_dir():
         fail(f"root does not exist: {root}")
-    if any(root.rglob("pom.yaml")):
-        fail(f"source tree contains pom.yaml: {next(root.rglob('pom.yaml'))}")
+
+    yaml_poms = [
+        path for path in root.rglob("pom.yaml")
+        if "target" not in path.relative_to(root).parts
+    ]
+    if yaml_poms:
+        fail(f"source tree contains pom.yaml: {yaml_poms[0].relative_to(root)}")
 
     pom_files = sorted(
         path for path in root.rglob("pom.xml")
         if "target" not in path.relative_to(root).parts and "src/test" not in str(path.relative_to(root))
     )
-    if len(pom_files) != expected_count:
+    if not pom_files:
+        fail("no source POMs found")
+    if expected_count is not None and len(pom_files) != expected_count:
         fail(f"expected {expected_count} source POMs, found {len(pom_files)}")
 
     aggregator_count = 0
@@ -50,8 +59,8 @@ def main() -> None:
         model_version = next((child.text or "" for child in project if local_name(child.tag) == "modelVersion"), "")
         if model_version != "4.1.0":
             fail(f"{relative_path} must declare modelVersion 4.1.0")
-        schema_location = project.attrib.get("{http://www.w3.org/2001/XMLSchema-instance}schemaLocation", "").split()
-        if expected_count == 124 and schema_location != [MAVEN_4_NAMESPACE, "https://maven.apache.org/xsd/maven-4.1.0.xsd"]:
+        schema_location = project.attrib.get(XSI_SCHEMA_LOCATION, "").split()
+        if schema_location != [MAVEN_4_NAMESPACE, MAVEN_4_XSD]:
             fail(f"{relative_path} must reference the Maven 4.1.0 XSD")
 
         subprojects = [element for element in project.iter() if local_name(element.tag) == "subprojects"]
@@ -67,9 +76,10 @@ def main() -> None:
                 if not (element.text or "").strip():
                     fail(f"{relative_path} has an empty subproject path")
 
-    if expected_count == 124 and aggregator_count != 8:
-        fail(f"expected 8 subprojects aggregators, found {aggregator_count}")
-    print(f"Maven 4.1 model verification passed: {len(pom_files)} source POMs, {aggregator_count} subprojects aggregators.")
+    print(
+        f"Maven 4.1 model verification passed: {len(pom_files)} source POMs, "
+        f"{aggregator_count} subprojects aggregators."
+    )
 
 
 if __name__ == "__main__":

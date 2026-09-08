@@ -23,7 +23,9 @@ write_project() {
     mkdir -p "$(dirname "${path}")"
     cat > "${path}" <<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="${namespace}">
+<project xmlns="${namespace}"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="${namespace} https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>${model_version}</modelVersion>
     <groupId>example</groupId>
     <artifactId>sample</artifactId>
@@ -43,7 +45,9 @@ write_project "${fixture_root}/valid/child/pom.xml" "4.1.0" "http://maven.apache
 mkdir -p "${fixture_root}/valid/child/nested"
 cat > "${fixture_root}/valid/child/nested/pom.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.1.0">
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
     <groupId>example</groupId>
     <artifactId>sample</artifactId>
@@ -51,30 +55,47 @@ cat > "${fixture_root}/valid/child/nested/pom.xml" <<'XML'
 </project>
 XML
 
+"${verifier}" "${fixture_root}/valid"
 "${verifier}" "${fixture_root}/valid" 3
 
 expect_failure() {
     local name="$1"
     local root="$2"
-    if "${verifier}" "${root}" 3 >"${fixture_root}/${name}.out" 2>&1; then
+    shift 2
+    if "${verifier}" "${root}" "$@" >"${fixture_root}/${name}.out" 2>&1; then
         echo "Expected Maven 4 model verifier failure for ${name}." >&2
         exit 1
     fi
 }
 
+expect_failure "wrong-count" "${fixture_root}/valid" 2
+
 invalid_model="${fixture_root}/invalid-model"
 mkdir -p "${invalid_model}"
-write_project "${invalid_model}/pom.xml" "4.0.0" "http://maven.apache.org/POM/4.0.0" "subprojects" "subproject" ""
+write_project "${invalid_model}/pom.xml" "4.0.0" "http://maven.apache.org/POM/4.0.0" "subprojects" "subproject" "child"
 expect_failure "invalid-model" "${invalid_model}"
 
 invalid_reactor="${fixture_root}/invalid-reactor"
 mkdir -p "${invalid_reactor}"
-write_project "${invalid_reactor}/pom.xml" "4.1.0" "http://maven.apache.org/POM/4.1.0" "modules" "module" ""
+write_project "${invalid_reactor}/pom.xml" "4.1.0" "http://maven.apache.org/POM/4.1.0" "modules" "module" "child"
 expect_failure "invalid-reactor" "${invalid_reactor}"
+
+invalid_schema="${fixture_root}/invalid-schema"
+mkdir -p "${invalid_schema}"
+cat > "${invalid_schema}/pom.xml" <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0">
+    <modelVersion>4.1.0</modelVersion>
+    <groupId>example</groupId>
+    <artifactId>sample</artifactId>
+    <version>1.0.0</version>
+</project>
+XML
+expect_failure "invalid-schema" "${invalid_schema}"
 
 invalid_yaml="${fixture_root}/invalid-yaml"
 mkdir -p "${invalid_yaml}"
-write_project "${invalid_yaml}/pom.xml" "4.1.0" "http://maven.apache.org/POM/4.1.0" "subprojects" "subproject" ""
+write_project "${invalid_yaml}/pom.xml" "4.1.0" "http://maven.apache.org/POM/4.1.0" "subprojects" "subproject" "child"
 printf 'modelVersion: 4.1.0\n' > "${invalid_yaml}/pom.yaml"
 expect_failure "invalid-yaml" "${invalid_yaml}"
 
