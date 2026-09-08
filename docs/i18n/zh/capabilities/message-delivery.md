@@ -20,10 +20,10 @@
 |---|---|---|
 | Spring Boot | Kafka、RabbitMQ、RocketMQ | 加入对应的 `jfoundry-messaging-*-spring-boot-starter`。基础消息启动器不会提供回退发送器。 |
 | Quarkus | Kafka、RabbitMQ | 加入 `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime`。 |
-| Helidon MP | 无 | 为所选 Helidon 客户端提供并验证应用自有的 `MessageSender`。 |
+| Helidon MP | Kafka、RabbitMQ | 加入 `jfoundry-messaging-kafka-helidon` 或 `jfoundry-messaging-rabbitmq-helidon`。不要在同一 classpath 上同时加入两者。 |
 
-Spring Boot 中应用提供的 `MessageSender` Bean 优先于内置实现。Quarkus 将适配器作为可替换的 CDI 默认 Bean 提供。没有任何运行时集成会仅因存在 Outbox 就推断消息代理选择。
+Spring Boot 中应用提供的 `MessageSender` Bean 优先于内置实现。Quarkus 将适配器作为可替换的 CDI 默认 Bean 提供。Helidon 将适配器作为优先级 `1` 的可替换 CDI alternative 提供。没有任何运行时集成会仅因存在 Outbox 就推断消息代理选择。
 
 启动器组合见 [Spring Boot 运行时装配](../implementations/spring-boot.md)，Quarkus 客户端配置见
-[Quarkus 运行时集成](../implementations/quarkus.md)，Helidon 当前限制见
+[Quarkus 运行时集成](../implementations/quarkus.md)，Helidon 原生 Kafka 与 RabbitMQ 客户端配置见
 [Helidon MP 运行时集成](../implementations/helidon.md)。

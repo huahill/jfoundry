@@ -299,6 +299,8 @@
       <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-helidon</artifactId><version>${project.version}</version></dependency>
       <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
       <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-inbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
+      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-kafka-helidon</artifactId><version>${project.version}</version></dependency>
+      <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId><version>${project.version}</version></dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>

@@ -84,7 +84,7 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 - **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md) guide.
 - **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
 - **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, Problem Details and HTTP logging, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
-- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, Problem Details, and HTTP logging. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
+- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, Kafka and RabbitMQ delivery, Problem Details, and HTTP logging. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
 
 ## Minimal Setup
 

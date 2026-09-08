@@ -71,8 +71,9 @@ Quarkus 不是 Spring starter 的翻译层。当前显式依赖组合覆盖 CDI/
 Quarkus REST 边界，`jfoundry-restclient-quarkus-runtime` 负责出站 REST Client 注册，且都不会将 HTTP
 生命周期 API 移入核心。
 
-当前并不支持 MyBatis-Plus 聚合持久化、RocketMQ 投递、Redisson 分布式锁或 JobRunr 的 Quarkus 组合。不要以
-运行时无关适配器或 Spring 启动器替代；只有当项目自行拥有该集成时，才选择自定义应用适配器。
+Quarkus 的持久化、Outbox 与 Inbox 使用 JPA，因此不提供 MyBatis-Plus 组合。Quarkus 不支持 RocketMQ
+投递，也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁和 JobRunr 仍延后。
+不要以运行时无关适配器或 Spring 启动器替代；只有当项目自行拥有该集成时，才选择自定义应用适配器。
 
 ## 事务语义
 
@@ -381,5 +382,6 @@ bash scripts/verify-runtime-ci.sh quarkus
 
 当前 Quarkus 集成覆盖 CDI 发现、应用事务、RFC 9457 Problem Details、HTTP 服务端与 MicroProfile REST Client
 诊断日志、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
-Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。它尚未提供
-MyBatis-Plus、RocketMQ 或启动器的 Quarkus 装配；这些能力仍是后续的显式工作项。
+Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。
+它不装配 MyBatis-Plus，因为 Quarkus 持久化使用 JPA；不装配 RocketMQ，因为该运行时不支持该消息代理；
+也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁和 JobRunr 仍延后。
