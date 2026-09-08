@@ -33,12 +33,14 @@ idempotency, add Inbox as well. The complete state, retry, and ownership semanti
 |---|---|---|
 | Spring Boot | Kafka, RabbitMQ, RocketMQ | Add the matching `jfoundry-messaging-*-spring-boot-starter`. The base messaging starter provides no fallback sender. |
 | Quarkus | Kafka, RabbitMQ | Add `jfoundry-messaging-kafka-quarkus-runtime` or `jfoundry-messaging-rabbitmq-quarkus-runtime`. |
-| Helidon MP | None | Provide and verify an application-owned `MessageSender` for the selected Helidon client. |
+| Helidon MP | Kafka, RabbitMQ | Add `jfoundry-messaging-kafka-helidon` or `jfoundry-messaging-rabbitmq-helidon`. Do not add both on the same classpath. |
 
 Spring Boot application beans take precedence over the provided `MessageSender`. Quarkus supplies
-its adapters as replaceable CDI defaults. No runtime integration infers a broker choice merely from
-the presence of an Outbox.
+its adapters as replaceable CDI defaults. Helidon supplies its adapters as replaceable CDI
+alternatives at priority `1`. No runtime integration infers a broker choice merely from the presence
+of an Outbox.
 
 See [Spring Boot Runtime Assembly](../implementations/spring-boot.md) for starter composition,
 [Quarkus Runtime Integration](../implementations/quarkus.md) for its client configuration, and
-[Helidon MP Runtime Integration](../implementations/helidon.md) for its current limitation.
+[Helidon MP Runtime Integration](../implementations/helidon.md) for native Kafka and RabbitMQ
+client configuration.

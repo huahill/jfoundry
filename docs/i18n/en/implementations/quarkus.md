@@ -77,10 +77,11 @@ safe inbound and MicroProfile REST Client diagnostic logging. `jfoundry-web-quar
 the inbound Quarkus REST boundary, while `jfoundry-restclient-quarkus-runtime` owns outbound REST
 Client registration without moving HTTP lifecycle APIs into the core.
 
-MyBatis-Plus aggregate persistence, RocketMQ delivery, Redisson distributed locks, and JobRunr
-assembly are not supported Quarkus compositions today. Do not add the framework-neutral adapters or
-Spring starters as a substitute; select a custom application adapter only when the project owns that
-integration.
+MyBatis-Plus aggregate persistence is not a Quarkus composition because this runtime uses JPA.
+RocketMQ delivery is not supported. Quarkus applications compose extensions instead of Spring-style
+starters. Redisson distributed locks and JobRunr remain deferred. Do not add the framework-neutral
+adapters or Spring starters as a substitute; select a custom application adapter only when the
+project owns that integration.
 
 ## Transaction Semantics
 
@@ -439,5 +440,7 @@ This Quarkus integration covers CDI discovery, application transactions, RFC 945
 HTTP server and MicroProfile REST Client diagnostic logging,
 application-service domain-event dispatch, JPA aggregate persistence context assembly, optional JPA Outbox and
 Inbox storage, automatic externalization for explicitly marked events, Kafka and RabbitMQ message delivery, and
-optional Outbox dispatch, recovery, and cleanup. It does not yet provide Quarkus assembly for MyBatis-Plus,
-RocketMQ, or starters. Those capabilities remain explicit follow-up work.
+optional Outbox dispatch, recovery, and cleanup. It does not assemble MyBatis-Plus because Quarkus
+persistence uses JPA, does not assemble RocketMQ because that broker is not supported on Quarkus, and
+does not publish Spring-style starters because Quarkus applications compose extensions. Redisson
+distributed locks and JobRunr remain deferred.

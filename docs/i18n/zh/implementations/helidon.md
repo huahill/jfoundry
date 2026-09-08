@@ -47,6 +47,8 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
 | RFC 9457 JAX-RS 响应与入站日志 | `jfoundry-web-helidon` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
 | 出站 REST Client 日志 | `jfoundry-restclient-helidon` | 已包含 Helidon MicroProfile REST Client |
+| Kafka 消息投递 | `jfoundry-messaging-kafka-helidon` | 配置的 bootstrap servers 上可访问的 Kafka 代理 |
+| RabbitMQ 消息投递 | `jfoundry-messaging-rabbitmq-helidon` | 配置主机上可访问的 RabbitMQ 代理 |
 | Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon` | `OutboxMessageStore` 与真实 `MessageSender` |
 | JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon` | JPA 能力与应用迁移 |
 | JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon` | JPA 能力与应用迁移 |
@@ -87,6 +89,48 @@ jfoundry.outbox.dispatcher.enabled=true
 写入当前事务。该装配以 CDI alternative（优先级 `1`）提供 Jackson 序列化、路由 resolver、Outbox template
 和 recorder。若要在可移植 Helidon 应用中替换这些默认实现，应用实现必须声明为已启用的 CDI `@Alternative`，且
 `@Priority` 高于 `1`；普通 CDI Bean 不能覆盖已启用的 alternative。
+
+## Kafka 与 RabbitMQ 消息投递
+
+加入 `jfoundry-messaging-kafka-helidon` 或 `jfoundry-messaging-rabbitmq-helidon`，即可提供可替换的
+Helidon `MessageSender`。Helidon 没有 SmallRye 或 Vert.x 消息栈，因此这些适配器使用原生
+`kafka-clients` 生产者和 RabbitMQ `amqp-client`。不要在同一 classpath 上同时加入这两个模块：它们都会以
+优先级 `1` 注册 CDI `@Alternative` `MessageSender`，同类型的两个已启用 alternative 会产生歧义。
+若要覆盖所选默认实现，应用 `MessageSender` 必须声明为已启用的 `@Alternative`，且优先级大于 `1`。
+
+```xml
+<dependency>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-messaging-kafka-helidon</artifactId>
+</dependency>
+```
+
+```properties
+jfoundry.messaging.kafka.bootstrap-servers=localhost:9092
+jfoundry.messaging.kafka.send-timeout=1s
+```
+
+Kafka 适配器会创建原生生产者，并等待消息代理确认。`MessageSender.send(...)` 会从出站消息设置 Kafka
+topic 与 key，将有界传播条目复制为 Kafka header，并把失败映射为 `SendResult`。
+
+```xml
+<dependency>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId>
+</dependency>
+```
+
+```properties
+jfoundry.messaging.rabbitmq.host=localhost
+jfoundry.messaging.rabbitmq.port=5672
+jfoundry.messaging.rabbitmq.username=guest
+jfoundry.messaging.rabbitmq.password=guest
+```
+
+RabbitMQ 适配器会在首次发送时惰性连接，并为每次发布打开一个 channel。`topic` 映射为 exchange，
+`payloadKey` 映射为 routing key；`null` key 会变成空 routing key。传播条目会复制为 AMQP header。
+
+这些适配器是显式 Helidon 模块，不属于 Helidon 原生镜像或 PostgreSQL/JTA 中间件验证范围。
 
 ## Web 集成
 
@@ -180,6 +224,6 @@ bash scripts/verify-runtime-ci.sh helidon
 
 ## 延后集成
 
-当前没有 Helidon Kafka 或 RabbitMQ `MessageSender` 适配器、Redisson 分布式锁或 JobRunr。不要在
-Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。只有在所选 Helidon 版本中验证客户端生命周期和
-投递语义后，才应添加应用自有适配器。
+Helidon 不提供 RocketMQ 投递。Helidon 的持久化、Outbox 与 Inbox 使用 JPA，而不是 MyBatis-Plus。
+当前仍不提供 Redisson 分布式锁和 JobRunr。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
+只有在所选 Helidon 版本中验证客户端生命周期和投递语义后，才应添加应用自有适配器。

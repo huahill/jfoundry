@@ -21,7 +21,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | MyBatis-Plus business persistence adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-persistence-mybatis-plus` |
 | Jakarta Persistence business persistence adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-persistence-jpa` |
 | MyBatis-Plus Outbox/Inbox store adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-mybatis-plus` or `jfoundry-core/jfoundry-infrastructure/jfoundry-inbox-mybatis-plus` |
-| Broker `MessageSender` adapter | Matching runtime integration module, such as `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-messaging-spring` or `jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-messaging-<broker>-quarkus-runtime` |
+| Broker `MessageSender` adapter | Matching runtime integration module, such as `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-messaging-spring`, `jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-messaging-<broker>-quarkus-runtime`, or `jfoundry-runtime/jfoundry-helidon/jfoundry-messaging-<broker>-helidon` |
 | Payload serializer adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-messaging-jackson` |
 | Pure JobRunr dispatcher adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-jobrunr` |
 | Spring Framework local domain-event adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-domain-event-spring` |

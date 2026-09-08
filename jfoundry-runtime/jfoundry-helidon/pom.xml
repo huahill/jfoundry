@@ -54,6 +54,8 @@
         <subproject>jfoundry-outbox-helidon</subproject>
         <subproject>jfoundry-outbox-jpa-helidon</subproject>
         <subproject>jfoundry-inbox-jpa-helidon</subproject>
+        <subproject>jfoundry-messaging-kafka-helidon</subproject>
+        <subproject>jfoundry-messaging-rabbitmq-helidon</subproject>
         <subproject>jfoundry-helidon-integration-tests</subproject>
     </subprojects>
 </project>

@@ -51,6 +51,8 @@ Then select only the capabilities the application needs:
 | JPA aggregate persistence | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate integration, datasource, and persistence unit |
 | RFC 9457 JAX-RS responses and inbound logging | `jfoundry-web-helidon` | Helidon MP server; Bean Validation for request-validation mapping |
 | Outbound REST Client logging | `jfoundry-restclient-helidon` | Included Helidon MicroProfile REST Client |
+| Kafka message delivery | `jfoundry-messaging-kafka-helidon` | Kafka broker at the configured bootstrap servers |
+| RabbitMQ message delivery | `jfoundry-messaging-rabbitmq-helidon` | RabbitMQ broker at the configured host |
 | Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon` | an `OutboxMessageStore` and a real `MessageSender` |
 | JPA Outbox store | `jfoundry-outbox-jpa-helidon` | JPA capability and application migration |
 | JPA Inbox store | `jfoundry-inbox-jpa-helidon` | JPA capability and application migration |
@@ -99,6 +101,52 @@ routing resolvers, an Outbox template, and a recorder as CDI alternatives at pri
 one of these defaults in a portable Helidon application, declare the replacement as an enabled CDI
 `@Alternative` with a priority greater than `1`; a plain CDI bean does not override an enabled
 alternative.
+
+## Kafka And RabbitMQ Message Delivery
+
+Add `jfoundry-messaging-kafka-helidon` or `jfoundry-messaging-rabbitmq-helidon` to provide a
+replaceable Helidon `MessageSender`. Helidon has no SmallRye or Vert.x messaging stack, so these
+adapters use the native `kafka-clients` producer and RabbitMQ `amqp-client`. Do not add both modules
+on the same classpath: each registers a CDI `@Alternative` `MessageSender` at priority `1`, and two
+enabled alternatives of the same type are ambiguous. To replace the selected default, declare an
+application `MessageSender` as an enabled `@Alternative` with a priority greater than `1`.
+
+```xml
+<dependency>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-messaging-kafka-helidon</artifactId>
+</dependency>
+```
+
+```properties
+jfoundry.messaging.kafka.bootstrap-servers=localhost:9092
+jfoundry.messaging.kafka.send-timeout=1s
+```
+
+The Kafka adapter creates a native producer and waits for broker acknowledgement.
+`MessageSender.send(...)` sets the Kafka topic and key from the outbound message, copies bounded
+propagation entries as Kafka headers, and maps failures to `SendResult`.
+
+```xml
+<dependency>
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId>
+</dependency>
+```
+
+```properties
+jfoundry.messaging.rabbitmq.host=localhost
+jfoundry.messaging.rabbitmq.port=5672
+jfoundry.messaging.rabbitmq.username=guest
+jfoundry.messaging.rabbitmq.password=guest
+```
+
+The RabbitMQ adapter connects lazily on the first send and opens a channel per publish. `topic` maps
+to the exchange and `payloadKey` maps to the routing key; a null key becomes an empty routing key.
+Propagation entries are copied as AMQP headers.
+
+These adapters are explicit Helidon modules. They are not part of the Helidon Native Image or
+PostgreSQL/JTA middleware verification.
 
 ## Web Integration
 
@@ -209,7 +257,8 @@ Docker-free Java 25 baseline.
 
 ## Deferred Integrations
 
-Helidon Kafka and RabbitMQ `MessageSender` adapters, Redisson distributed locking, and JobRunr are not
-currently provided. Do not reuse Spring or Quarkus runtime adapters in a Helidon application. Add an
-application-owned adapter only when its client lifecycle and delivery semantics are verified for the
-selected Helidon release.
+RocketMQ delivery is not a supported Helidon composition. Helidon persistence, Outbox, and Inbox use
+JPA rather than MyBatis-Plus. Redisson distributed locking and JobRunr are not currently provided.
+Do not reuse Spring or Quarkus runtime adapters in a Helidon application. Add an application-owned
+adapter only when its client lifecycle and delivery semantics are verified for the selected Helidon
+release.
