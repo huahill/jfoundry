@@ -10,12 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /// Spring-managed RocketMQ-backed {@link MessageSender}.
-public class SpringRocketMqMessageSender implements MessageSender {
+public class SpringRocketMessageSender implements MessageSender {
 
     private final MQProducer producer;
     private final Duration sendTimeout;
 
-    public SpringRocketMqMessageSender(MQProducer producer, Duration sendTimeout) {
+    public SpringRocketMessageSender(MQProducer producer, Duration sendTimeout) {
         this.producer = producer;
         this.sendTimeout = sendTimeout;
     }

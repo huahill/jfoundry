@@ -73,8 +73,8 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `DomainEventDispatchAutoConfiguration` | `DomainEventScope`、`DomainEventContext`、派发拦截器、Spring 事件派发器、可选 Outbox 派发器 | 应用服务和派发器类型存在；配置项允许对应路径。 |
 | `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`、`OutboxTemplate`、外部化解析器、`DomainEventOutboxRecorder` | Outbox 存储和序列化器依赖可用；每种 Bean 均没有用户自定义替代。 |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | 存在 `KafkaOperations` 类和 Bean；没有已有 `MessageSender`。 |
-| `RabbitMqMessageSenderAutoConfiguration` | `SpringRabbitMqMessageSender` | 存在 `RabbitTemplate` 类和 `RabbitOperations` Bean；没有已有 `MessageSender`。 |
-| `RocketMqMessageSenderAutoConfiguration` | `SpringRocketMqMessageSender` | 存在 RocketMQ 生产者类和 `MQProducer` Bean；没有已有 `MessageSender`。 |
+| `RabbitMessageSenderAutoConfiguration` | `SpringRabbitMessageSender` | 存在 `RabbitTemplate` 类和 `RabbitOperations` Bean；没有已有 `MessageSender`。 |
+| `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | 存在 RocketMQ 生产者类和 `MQProducer` Bean；没有已有 `MessageSender`。 |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox 表名定制器、`MybatisPlusInterceptor`、`OutboxMessageStore` | MyBatis-Plus 和 Outbox 存储适配器类存在。SQL 模板不会自动执行。 |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Outbox 适配器；没有用户自定义 `OutboxMessageStore`。 |
 | `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`、`ScheduledOutboxTrigger`、恢复任务、清理任务 | 存在 Outbox 存储、消息发送器和 `TransactionRunner`；模式为 `scheduled` 或维护任务由托管模式启用。 |

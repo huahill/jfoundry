@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         classes = OutboxInboxDatabaseConfig.class,
         properties = "jfoundry.outbox.dispatcher.mode=none"
 )
-class RocketMqOutboxDispatchIT {
+class RocketOutboxDispatchIT {
 
     private static final String TOPIC = "jfoundry_integration_outbox";
     private static final DockerImageName ROCKETMQ_IMAGE = DockerImageName.parse("apache/rocketmq:5.5.0");
@@ -101,7 +101,7 @@ class RocketMqOutboxDispatchIT {
     }
 
     @Test
-    void dispatchPublishesRocketMqMessageAndMarksOutboxPublished() throws Exception {
+    void dispatchPublishesRocketMessageAndMarksOutboxPublished() throws Exception {
         store.append(OutboxMessages.pending(
                 "evt-rocket-1",
                 TOPIC,
@@ -116,7 +116,7 @@ class RocketMqOutboxDispatchIT {
 
             new DefaultOutboxDispatchService(
                     store,
-                    rocketMqSender(producer),
+                    rocketSender(producer),
                     3,
                     retry -> Duration.ofMillis(10),
                     "it-pod").dispatch(10);
@@ -173,7 +173,7 @@ class RocketMqOutboxDispatchIT {
         return producer;
     }
 
-    private static MessageSender rocketMqSender(DefaultMQProducer producer) {
+    private static MessageSender rocketSender(DefaultMQProducer producer) {
         return outbound -> {
             try {
                 org.apache.rocketmq.common.message.Message message = new org.apache.rocketmq.common.message.Message(

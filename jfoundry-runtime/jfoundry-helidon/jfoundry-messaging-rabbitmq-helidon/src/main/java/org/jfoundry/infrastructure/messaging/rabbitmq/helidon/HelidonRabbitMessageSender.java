@@ -22,13 +22,13 @@ import java.util.HashMap;
 @ApplicationScoped
 @Alternative
 @Priority(1)
-public class HelidonRabbitMqMessageSender implements MessageSender {
+public class HelidonRabbitMessageSender implements MessageSender {
 
     private final ConnectionFactory connectionFactory;
     private volatile @Nullable Connection connection;
 
     @Inject
-    public HelidonRabbitMqMessageSender(
+    public HelidonRabbitMessageSender(
             @ConfigProperty(name = "jfoundry.messaging.rabbitmq.host", defaultValue = "localhost")
             String host,
             @ConfigProperty(name = "jfoundry.messaging.rabbitmq.port", defaultValue = "5672")
@@ -40,7 +40,7 @@ public class HelidonRabbitMqMessageSender implements MessageSender {
         this(createConnectionFactory(host, port, username, password));
     }
 
-    HelidonRabbitMqMessageSender(ConnectionFactory connectionFactory) {
+    HelidonRabbitMessageSender(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 

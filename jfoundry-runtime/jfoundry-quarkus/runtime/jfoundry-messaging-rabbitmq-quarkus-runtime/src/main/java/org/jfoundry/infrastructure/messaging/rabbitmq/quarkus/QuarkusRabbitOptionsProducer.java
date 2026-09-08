@@ -8,12 +8,12 @@ import jakarta.enterprise.inject.Produces;
 
 /// Provides the default RabbitMQ client options when the application does not configure them.
 @ApplicationScoped
-public final class QuarkusRabbitMqOptionsProducer {
+public final class QuarkusRabbitOptionsProducer {
 
     @Produces
     @DefaultBean
     @Identifier("jfoundry-rabbitmq")
-    RabbitMQOptions rabbitMqOptions() {
+    RabbitMQOptions rabbitOptions() {
         return new RabbitMQOptions();
     }
 }

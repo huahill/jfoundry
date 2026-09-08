@@ -17,10 +17,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class SpringRocketMqMessageSenderTest {
+class SpringRocketMessageSenderTest {
 
     private final MQProducer producer = mock(MQProducer.class);
-    private final SpringRocketMqMessageSender sender = new SpringRocketMqMessageSender(producer, Duration.ofSeconds(1));
+    private final SpringRocketMessageSender sender = new SpringRocketMessageSender(producer, Duration.ofSeconds(1));
 
     @Test
     void sendsTopicKeyAndUtf8Payload() throws Exception {
@@ -46,7 +46,7 @@ class SpringRocketMqMessageSenderTest {
     }
 
     @Test
-    void returnsFailureWhenRocketMqSendFails() throws Exception {
+    void returnsFailureWhenRocketSendFails() throws Exception {
         when(producer.send(any(Message.class), eq(1_000L)))
                 .thenThrow(new IllegalStateException("broker down"));
 

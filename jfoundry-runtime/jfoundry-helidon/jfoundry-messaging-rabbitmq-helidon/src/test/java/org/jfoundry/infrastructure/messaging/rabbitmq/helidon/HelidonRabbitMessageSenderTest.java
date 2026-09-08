@@ -24,14 +24,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class HelidonRabbitMqMessageSenderTest {
+class HelidonRabbitMessageSenderTest {
 
     @Test
     void isAReplaceableCdiDefault() {
-        assertThat(HelidonRabbitMqMessageSender.class.isAnnotationPresent(ApplicationScoped.class)).isTrue();
-        assertThat(HelidonRabbitMqMessageSender.class.isAnnotationPresent(Alternative.class)).isTrue();
-        assertThat(HelidonRabbitMqMessageSender.class.getAnnotation(Priority.class).value()).isEqualTo(1);
-        assertThat(Modifier.isFinal(HelidonRabbitMqMessageSender.class.getModifiers())).isFalse();
+        assertThat(HelidonRabbitMessageSender.class.isAnnotationPresent(ApplicationScoped.class)).isTrue();
+        assertThat(HelidonRabbitMessageSender.class.isAnnotationPresent(Alternative.class)).isTrue();
+        assertThat(HelidonRabbitMessageSender.class.getAnnotation(Priority.class).value()).isEqualTo(1);
+        assertThat(Modifier.isFinal(HelidonRabbitMessageSender.class.getModifiers())).isFalse();
     }
 
     @Test
@@ -42,7 +42,7 @@ class HelidonRabbitMqMessageSenderTest {
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.isOpen()).thenReturn(true);
         when(connection.createChannel()).thenReturn(channel);
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         var result = sender.send(OutboundMessage.of("orders", "order-42", "{\"id\":42}"));
 
@@ -61,7 +61,7 @@ class HelidonRabbitMqMessageSenderTest {
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.isOpen()).thenReturn(true);
         when(connection.createChannel()).thenReturn(channel);
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         var result = sender.send(OutboundMessage.of("orders", null, "{}"));
 
@@ -77,7 +77,7 @@ class HelidonRabbitMqMessageSenderTest {
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.isOpen()).thenReturn(true);
         when(connection.createChannel()).thenReturn(channel);
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         var result = sender.send(new OutboundMessage(
                 "orders",
@@ -102,7 +102,7 @@ class HelidonRabbitMqMessageSenderTest {
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.isOpen()).thenReturn(true);
         when(connection.createChannel()).thenReturn(firstChannel, secondChannel);
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         assertThat(sender.send(OutboundMessage.of("orders", "order-1", "{}")).success()).isTrue();
         assertThat(sender.send(OutboundMessage.of("orders", "order-2", "{}")).success()).isTrue();
@@ -117,7 +117,7 @@ class HelidonRabbitMqMessageSenderTest {
     void returnsFailureWhenRabbitSendFails() throws Exception {
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.newConnection()).thenThrow(new IllegalStateException("broker down"));
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         var result = sender.send(OutboundMessage.of("orders", "order-42", "{}"));
 
@@ -133,7 +133,7 @@ class HelidonRabbitMqMessageSenderTest {
         when(connectionFactory.newConnection()).thenReturn(connection);
         when(connection.isOpen()).thenReturn(true);
         when(connection.createChannel()).thenReturn(channel);
-        HelidonRabbitMqMessageSender sender = new HelidonRabbitMqMessageSender(connectionFactory);
+        HelidonRabbitMessageSender sender = new HelidonRabbitMessageSender(connectionFactory);
 
         assertThat(sender.send(OutboundMessage.of("orders", "order-42", "{}")).success()).isTrue();
         sender.close();

@@ -20,17 +20,17 @@ import java.util.HashMap;
 /// Quarkus RabbitMQ-backed {@link MessageSender}.
 @ApplicationScoped
 @DefaultBean
-public class QuarkusRabbitMqMessageSender implements MessageSender {
+public class QuarkusRabbitMessageSender implements MessageSender {
 
     private final RabbitMQClient client;
     @Inject
-    public QuarkusRabbitMqMessageSender(
+    public QuarkusRabbitMessageSender(
             Vertx vertx,
             @Identifier("jfoundry-rabbitmq") RabbitMQOptions options) {
         this(RabbitMQClient.create(vertx, options));
     }
 
-    QuarkusRabbitMqMessageSender(RabbitMQClient client) {
+    QuarkusRabbitMessageSender(RabbitMQClient client) {
         this.client = client;
     }
 

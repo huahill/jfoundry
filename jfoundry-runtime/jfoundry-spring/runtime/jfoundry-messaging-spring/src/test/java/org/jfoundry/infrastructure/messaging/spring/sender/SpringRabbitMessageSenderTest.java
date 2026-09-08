@@ -11,10 +11,10 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-class SpringRabbitMqMessageSenderTest {
+class SpringRabbitMessageSenderTest {
 
     private final RabbitOperations rabbitOperations = mock(RabbitOperations.class);
-    private final SpringRabbitMqMessageSender sender = new SpringRabbitMqMessageSender(rabbitOperations);
+    private final SpringRabbitMessageSender sender = new SpringRabbitMessageSender(rabbitOperations);
 
     @Test
     void returnsOkWhenRabbitSendCompletes() {

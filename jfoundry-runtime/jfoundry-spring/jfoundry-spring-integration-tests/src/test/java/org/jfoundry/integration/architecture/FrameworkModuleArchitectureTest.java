@@ -21,7 +21,7 @@ class FrameworkModuleArchitectureTest {
         assertThat(classes).anyMatch(javaClass ->
                 javaClass.getName().equals("org.jfoundry.application.outbox.OutboxMessageStore"));
         assertThat(classes).anyMatch(javaClass ->
-                javaClass.getName().equals("org.jfoundry.infrastructure.messaging.spring.sender.SpringRabbitMqMessageSender"));
+                javaClass.getName().equals("org.jfoundry.infrastructure.messaging.spring.sender.SpringRabbitMessageSender"));
         assertThat(classes).anyMatch(javaClass ->
                 javaClass.getName().equals("org.jfoundry.autoconfigure.messaging.kafka.KafkaMessageSenderAutoConfiguration"));
     }
