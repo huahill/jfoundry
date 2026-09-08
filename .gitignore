@@ -12,3 +12,4 @@ target/
 .codegraph/
 graphify-out/
 docs/superpowers/
+.superpowers/
