@@ -11,6 +11,7 @@ import org.jfoundry.application.event.externalization.DomainEventExternalization
 import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
+import org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
@@ -51,9 +52,9 @@ public final class HelidonOutboxExternalizationProducer {
                                                          ExternalizationRuleResolver ruleResolver,
                                                          AggregateRoutingResolver aggregateRoutingResolver,
                                                          @Any Instance<DomainEventExternalizer<?>> externalizers) {
-        return new HelidonDomainEventOutboxRecorder(
-                outboxMessageStore,
-                payloadSerializer,
+        return new DefaultDomainEventOutboxRecorder(
+                () -> require(outboxMessageStore, "Automatic domain-event externalization requires an OutboxMessageStore CDI bean"),
+                () -> require(payloadSerializer, "Automatic domain-event externalization requires a PayloadSerializer CDI bean"),
                 ruleResolver,
                 aggregateRoutingResolver,
                 new DomainEventExternalizationResolver(externalizers.stream().toList()));

@@ -25,7 +25,7 @@ public class SpringKafkaMessageSender implements MessageSender {
         try {
             ProducerRecord<String, String> record = new ProducerRecord<>(
                     message.topic(), message.payloadKey(), message.payload());
-            message.propagation().entries().forEach((key, value) ->
+            message.applyHeaders((key, value) ->
                     record.headers().add(key, value.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             kafkaOperations.send(record).get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
             return SendResult.ok();

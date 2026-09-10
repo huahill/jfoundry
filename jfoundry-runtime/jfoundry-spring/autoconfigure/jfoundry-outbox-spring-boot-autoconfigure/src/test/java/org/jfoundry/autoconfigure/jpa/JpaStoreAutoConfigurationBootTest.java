@@ -75,9 +75,9 @@ class JpaStoreAutoConfigurationBootTest {
         transactions.executeWithoutResult(ignored -> outboxMessageStore.append(
                 OutboxMessage.newPending("evt-1", "topic", null, "example.Event", "{}", Instant.now())));
 
-        List<OutboxMessage> dispatchable = transactions.execute(
-                ignored -> outboxMessageStore.findDispatchable(1, Instant.now()));
-        assertThat(dispatchable)
+        List<OutboxMessage> claimed = transactions.execute(
+                ignored -> outboxMessageStore.claimDispatchable(1, "test"));
+        assertThat(claimed)
                 .extracting(OutboxMessage::getEventId)
                 .containsExactly("evt-1");
     }

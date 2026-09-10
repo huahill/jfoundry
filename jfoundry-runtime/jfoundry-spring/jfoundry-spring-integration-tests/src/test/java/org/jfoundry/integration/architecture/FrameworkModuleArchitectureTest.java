@@ -48,7 +48,7 @@ class FrameworkModuleArchitectureTest {
         FrameworkModuleRules.infrastructure_message_stores_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.spring_application_event_dispatcher_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.spring_event_dispatcher_should_not_be_in_messaging_package.check(classes);
-        FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_infrastructure_ring.check(classes);
+        FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_application_ring.check(classes);
         FrameworkModuleRules.outbox_domain_event_dispatcher_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.kafka_message_sender_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.jackson_payload_serializer_should_be_in_infrastructure_ring.check(classes);

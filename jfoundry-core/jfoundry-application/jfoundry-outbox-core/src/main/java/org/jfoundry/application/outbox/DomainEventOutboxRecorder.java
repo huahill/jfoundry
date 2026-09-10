@@ -4,9 +4,12 @@ import org.jmolecules.event.types.DomainEvent;
 
 import java.util.List;
 
-/**
- * Application-layer contract for recording domain events into the transactional outbox.
- */
+/// Optional adapter that records captured domain events as Outbox rows.
+/// <p>
+/// Domain events and Outbox are independent primitives. This contract is the
+/// composition between them. Outbox persistence does not require it; use
+/// {@link OutboxTemplate} for integration messages that are not derived from
+/// domain events.
 public interface DomainEventOutboxRecorder {
 
     void record(List<? extends DomainEvent> events);

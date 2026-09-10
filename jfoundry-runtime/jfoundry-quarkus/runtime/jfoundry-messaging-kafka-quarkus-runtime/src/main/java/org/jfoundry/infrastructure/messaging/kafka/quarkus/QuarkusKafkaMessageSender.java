@@ -27,7 +27,7 @@ public class QuarkusKafkaMessageSender implements MessageSender {
     public SendResult send(OutboundMessage message) {
         try {
             RecordHeaders headers = new RecordHeaders();
-            message.propagation().entries().forEach((key, value) ->
+            message.applyHeaders((key, value) ->
                     headers.add(key, value.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             OutgoingKafkaRecordMetadata<String> metadata = OutgoingKafkaRecordMetadata.<String>builder()
                     .withTopic(message.topic())

@@ -1,11 +1,11 @@
 package org.jfoundry.autoconfigure;
 
 import tools.jackson.databind.ObjectMapper;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder;
+import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
-import org.jfoundry.infrastructure.outbox.spring.externalization.DefaultDomainEventOutboxRecorder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringBootConfiguration;
@@ -62,11 +62,6 @@ class DomainEventOutboxRecorderConditionTest {
         }
 
         @Override
-        public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-            return List.of();
-        }
-
-        @Override
         public void markAsPublished(String eventId) {
             // no-op
         }
@@ -99,14 +94,12 @@ class DomainEventOutboxRecorderConditionTest {
         }
     }
 
-    private DefaultDomainEventOutboxRecorder defaultOutboxRecorder;
-
     @Autowired
     private DomainEventOutboxRecorder outboxRecorder;
 
     @Test
     void customOutboxRecorderReplacesDefaultOutboxRecorder() {
         assertThat(outboxRecorder).isNotNull();
-        assertThat(defaultOutboxRecorder).isNull();
+        assertThat(outboxRecorder).isNotInstanceOf(DefaultDomainEventOutboxRecorder.class);
     }
 }

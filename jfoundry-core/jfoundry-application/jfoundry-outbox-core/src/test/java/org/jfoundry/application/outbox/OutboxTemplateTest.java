@@ -156,11 +156,6 @@ class OutboxTemplateTest {
         }
 
         @Override
-        public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
         public void markAsPublished(String eventId) {
             throw new UnsupportedOperationException();
         }

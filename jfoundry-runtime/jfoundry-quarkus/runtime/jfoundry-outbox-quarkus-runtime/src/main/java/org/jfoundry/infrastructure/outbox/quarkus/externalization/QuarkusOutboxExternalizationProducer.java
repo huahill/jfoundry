@@ -10,6 +10,7 @@ import org.jfoundry.application.event.externalization.DomainEventExternalization
 import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
+import org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
@@ -56,10 +57,17 @@ public final class QuarkusOutboxExternalizationProducer {
             AggregateRoutingResolver aggregateRoutingResolver,
             @Any Instance<DomainEventExternalizer<?>> externalizers) {
         return new DefaultDomainEventOutboxRecorder(
-                outboxMessageStore,
+                () -> require(outboxMessageStore, "Automatic domain-event externalization requires an OutboxMessageStore CDI bean"),
                 payloadSerializer,
                 ruleResolver,
                 aggregateRoutingResolver,
                 new DomainEventExternalizationResolver(externalizers.stream().toList()));
+    }
+
+    private static <T> T require(Instance<T> instance, String message) {
+        if (!instance.isResolvable()) {
+            throw new IllegalStateException(message);
+        }
+        return instance.get();
     }
 }

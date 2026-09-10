@@ -1,8 +1,11 @@
 # Reliable Messaging: Outbox And Inbox
 
-Use Transactional Outbox only when a domain event must reach another process or external system
-reliably. In-process event handling does not require it. Inbox provides consumer-side idempotency
-for a message and consumer combination.
+Transactional Outbox records a broker message in the same database transaction as the business
+change, then dispatches it later. Domain events are an independent in-process fact model; they do
+not require Outbox. Compose the two only when a captured domain event must reach another process
+reliably. In-process event handling does not need Outbox. Use `OutboxTemplate` for integration
+messages that are not derived from domain events. Inbox provides consumer-side idempotency for a
+message and consumer combination.
 
 For direct broker publication and transport selection, see [Message Delivery](message-delivery.md).
 Reliable messaging composes that selected transport with Outbox recording and optional Inbox
@@ -41,6 +44,10 @@ those call sites to the matching `*OutboxTrigger` classes.
 
 ## Event Flow
 
+The flow below is the optional composition: captured domain events become Outbox rows. Outbox
+itself does not require a domain event; `OutboxTemplate` records explicit integration messages on
+the same store and dispatcher path.
+
 ```text
 aggregate explicitly records domain event
   -> automatic runtime drains events after the successful outermost application-service boundary
@@ -61,7 +68,9 @@ contract with `@Externalized` to serialize that event directly. For a versioned 
 provide a `DomainEventExternalizer<E>` bean: it maps an automatically captured domain event to zero or
 more `ExternalizedEvent` values, and the framework serializes and appends them in the current
 transaction. Each mapped value supplies a stable `payloadType`, payload, topic, key, and optional
-aggregate metadata; the source event supplies the Outbox event id and occurrence time.
+aggregate metadata. The source event supplies the origin event id and `occurredAt`; each
+mapped Outbox row receives its own `event_id`. For `@Externalized` events, the stored and
+on-wire `payloadType` is the destination topic.
 
 A matching externalizer takes precedence over `@Externalized`, including when it deliberately returns
 no messages, so a domain event is never written twice through both paths. When no externalizer matches,
@@ -72,8 +81,9 @@ synchronously.
 
 ## Payload Contract
 
-Treat `payloadType` as a stable contract name rather than a Java class name. Consumers should
-deserialize the envelope into their own versioned contract. Select a payload serializer that keeps
+Treat `payloadType` as a stable contract name rather than a Java class name. Dispatch copies that
+contract name onto the envelope header `jfoundry.payload-type`; consumers should deserialize from
+that envelope contract, not from a Java class name. Select a payload serializer that keeps
 the wire format portable and does not expose JVM type names.
 
 ## Outbox State Machine
