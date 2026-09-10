@@ -51,7 +51,7 @@ jobs:
             echo "is_patch_update=false" >> "${GITHUB_OUTPUT}"
           fi
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.eligibility.outputs.is_patch_update == 'true'
@@ -59,4 +59,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash

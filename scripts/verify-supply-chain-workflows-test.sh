@@ -143,7 +143,7 @@ jobs:
             echo "is_patch_update=false" >> "${GITHUB_OUTPUT}"
           fi
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.eligibility.outputs.is_patch_update == 'true'
@@ -151,7 +151,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 }
 
@@ -915,7 +915,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -924,8 +924,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -986,7 +986,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -995,8 +995,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1042,7 +1042,7 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1051,8 +1051,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1114,7 +1114,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1122,7 +1122,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1189,7 +1189,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1198,8 +1198,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1271,7 +1271,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1280,8 +1280,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1348,15 +1348,15 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1398,6 +1398,11 @@ assert_rejects "${temp_dir}"
 write_compliant_dependabot
 write_compliant_auto_merge_workflow
 replace_in_auto_merge_workflow $'GH_TOKEN: ${{ github.token }}' $'GH_TOKEN: ${{ secrets[\'GITHUB_TOKEN\'] }}'
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "--squash" "--rebase"
 assert_rejects "${temp_dir}"
 
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'

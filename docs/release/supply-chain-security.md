@@ -41,7 +41,7 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   build tools to match the consumer BOM. An incomplete platform update therefore fails the `Merge
   gate` instead of changing the supported baseline. Helidon has one platform version source in its
   consumer BOM and does not need a multi-coordinate group.
-- Only Maven-only patch pull requests may be queued for rebase auto-merge, and they merge only after
+- Only Maven-only patch pull requests may be queued for squash auto-merge, and they merge only after
   Dependency Review and the `Merge gate` succeed. Minor and major Maven updates require manual review.
   The complete supported runtime matrix remains the compatibility boundary for runtime changes.
 - Dependabot does not ignore runtime platform dependency-management updates. Spring Boot, Spring
@@ -60,8 +60,9 @@ Repository administrators must enable all of the following in GitHub repository 
 4. The `jfoundry` deployment environment with Maven Central and GPG secrets, plus release reviewers
    selected by the maintainers.
 5. An active tag ruleset for `refs/tags/v*` that prohibits deletion and updates without bypass actors.
-6. The active main-branch ruleset that requires the `Merge gate` status check. `Merge gate` requires
-   the CI-integrated Dependency Review job for every pull request.
+6. The active main-branch ruleset that requires the `Merge gate` status check and allows only
+   `Squash and merge`. `Merge gate` requires the CI-integrated Dependency Review job for every
+   pull request.
 
 The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, and
 `GPG_PASSPHRASE`. Those values must never be committed, printed, or copied into issue discussions.

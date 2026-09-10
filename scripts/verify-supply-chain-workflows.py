@@ -141,7 +141,7 @@ def verify_auto_merge(root: Path) -> None:
     if merges[0] <= eligibility_index or " ".join(str(merge.get("if", "")).split()) != "steps.scope.outputs.is_maven_update == 'true' && steps.eligibility.outputs.is_patch_update == 'true'":
         fail(f"{prefix}: merge must require Maven-only scope and patch eligibility")
     run = str(merge.get("run", ""))
-    if not re.search(r'--repo\s+"?\$\{REPOSITORY\}"?', run) or not re.search(r"(?:^|\s)--auto(?:\s|$)", run) or not re.search(r"(?:^|\s)--rebase(?:\s|$)", run) or merge.get("env", {}).get("REPOSITORY") != "${{ github.repository }}":
+    if not re.search(r'--repo\s+"?\$\{REPOSITORY\}"?', run) or not re.search(r"(?:^|\s)--auto(?:\s|$)", run) or not re.search(r"(?:^|\s)--squash(?:\s|$)", run) or merge.get("env", {}).get("REPOSITORY") != "${{ github.repository }}":
         fail(f"{prefix}: merge command is invalid")
 
 
