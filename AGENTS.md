@@ -85,7 +85,7 @@ jfoundry ships SQL only as copyable templates. Do not place framework SQL templa
 
 Recent history follows Conventional Commits, for example `fix(outbox): ...`, `test(archunit): ...`, `refactor(ddd-framework): ...`, and `docs: ...`. Keep commits scoped and use the module or concern as the scope when helpful. Follow the Language Policy for commit and PR text: keep the Conventional Commits type and optional scope, and write the subject and body in English, for example `refactor(application): split application core module` or `fix(outbox): update retry state consistently`. Do not add `Co-Authored-By` trailers for AI coding tools or agents. Pull requests should describe the behavior change, list validation commands run, link related issues, and call out migration, configuration, or compatibility impact.
 
-Keep `main` history linear. Do not use `git merge` to integrate completed work into `main`; rebase a feature branch onto the current `main` or cherry-pick its ordered commits instead. Do not rewrite already-pushed history unless the user explicitly authorizes it; when authorized, use `git push --force-with-lease`, not `--force`.
+Keep `main` history linear. Integrate completed work only with GitHub's `Squash and merge`; do not use merge commits or rebase-merge on `main`. Feature branches may be updated with GitHub's Update branch; squash discards those extra commits. Do not rewrite already-pushed history unless the user explicitly authorizes it; when authorized, use `git push --force-with-lease`, not `--force`.
 
 ### Branch Workflow
 
@@ -94,9 +94,10 @@ Before editing or committing, confirm that the checkout is not `main`. Fetch the
 ## Merge Gate
 
 Do not push directly to `main`. Create a short-lived branch and pull request for every repository change.
-The GitHub `Merge gate` status check must pass before integration. Use GitHub's `Rebase and merge` strategy
-to preserve the linear `main` history. Local verification accelerates feedback but does not replace the
-server-side merge gate.
+The GitHub `Merge gate` status check must pass before integration. Use GitHub's `Squash and merge` strategy
+to keep `main` linear. The squash commit subject is the pull request title, so keep that title in Conventional
+Commit form. Do not use merge commits or rebase-merge. Local verification accelerates feedback but does not
+replace the server-side merge gate.
 
 Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`, and
 `docs/**`. These paths still run documentation and dependency checks, but skip the full Java, runtime,
