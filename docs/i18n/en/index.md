@@ -40,7 +40,9 @@ linked from its owning runtime guide rather than presented as a technology-selec
 
 ## Modeling
 
+- [Modeling](modeling/index.md)
 - [Value Object Guide](modeling/value-object.md)
+- [Domain Events](modeling/domain-event.md)
 - [Repository and Read-side Contracts](modeling/repository-vs-read-contracts.md)
 
 ## Release and Compatibility

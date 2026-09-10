@@ -97,6 +97,8 @@ Jakarta Transactions 没有可移植的事务名称或只读事务设置，因�
 
 ## 领域事件分发
 
+聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。本页说明 Quarkus 的分发装配。
+
 `jfoundry-domain-event-quarkus-runtime` 扩展提供应用服务的事件边界。对于所有标注运行时无关 `@ApplicationService` 的 CDI Bean，
 Quarkus 会在增强阶段加入仅限运行时的拦截器绑定。最外层调用成功后，拦截器会
 从通过 `DomainEventContext` 注册的聚合中提取事件，并交给每个 CDI `DomainEventDispatcher`。

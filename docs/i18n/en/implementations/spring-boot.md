@@ -103,6 +103,8 @@ Spring `@Transactional` boundary can also be appropriate when the application de
 Spring semantics; do not layer independent transaction boundaries around the same use case without
 a defined ownership rule. See [application transactions](../capabilities/application-transactions.md).
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
+
 The event starter activates application-service domain-event dispatch and publishes each dispatched
 event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
 process. A `@TransactionalEventListener` selects the desired transaction phase, such as

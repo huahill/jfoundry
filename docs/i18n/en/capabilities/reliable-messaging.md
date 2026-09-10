@@ -2,8 +2,8 @@
 
 Transactional Outbox records a broker message in the same database transaction as the business
 change, then dispatches it later. Domain events are an independent in-process fact model; they do
-not require Outbox. Compose the two only when a captured domain event must reach another process
-reliably. In-process event handling does not need Outbox. Use `OutboxTemplate` for integration
+not require Outbox. See [Domain Events](../modeling/domain-event.md). Compose the two only when a
+captured domain event must reach another process reliably. In-process event handling does not need Outbox. Use `OutboxTemplate` for integration
 messages that are not derived from domain events. Inbox provides consumer-side idempotency for a
 message and consumer combination.
 

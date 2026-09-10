@@ -66,6 +66,8 @@ No capability module implicitly adds JPA, Outbox, Inbox, a database, or a broker
 creates. Transaction name and read-only options have no portable Jakarta Transactions equivalent and
 are rejected rather than ignored.
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
+
 `jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
 registered in an active JTA transaction, it records the Outbox path in `beforeCompletion` and notifies
 ordinary CDI dispatchers only after a successful commit. Outside a transaction, it dispatches after

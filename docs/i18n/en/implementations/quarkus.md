@@ -106,6 +106,8 @@ name or read-only transaction setting, so this adapter rejects `TransactionOptio
 
 ## Domain Event Dispatch
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md). This page covers Quarkus dispatch wiring.
+
 The `jfoundry-domain-event-quarkus-runtime` extension provides the application-service event boundary. For every CDI bean
 annotated with framework-neutral `@ApplicationService`, Quarkus adds a runtime-only interceptor
 binding during augmentation. On the outermost successful invocation, the interceptor drains events

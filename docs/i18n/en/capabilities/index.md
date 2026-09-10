@@ -11,7 +11,7 @@ configuration.
 
 | Capability | Use it when | Spring Boot | Quarkus | Helidon MP | Guide |
 |---|---|---|---|---|---|
-| Domain modeling | The business model needs aggregates, value objects, domain events, and explicit invariants. | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [Getting Started](../integration/getting-started.md) |
+| Domain modeling | The business model needs aggregates, value objects, domain events, and explicit invariants. | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [Modeling](../modeling/index.md) |
 | Application services | Use cases need explicit application boundaries. Add CQRS, transactions, or domain-event modules only when required. | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [Getting Started](../integration/getting-started.md) |
 | Executable architecture rules | The project needs reusable ArchUnit checks for Hexagonal or Onion boundaries. | `jfoundry-architecture-test` (test scope) | `jfoundry-architecture-test` (test scope) | `jfoundry-architecture-test` (test scope) | [ArchUnit Architecture Rules](../framework/archunit-rules.md) |
 | Application transactions | A use case needs a runtime transaction boundary. | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` | `jfoundry-transaction-helidon` | [Application Transactions](application-transactions.md) |
