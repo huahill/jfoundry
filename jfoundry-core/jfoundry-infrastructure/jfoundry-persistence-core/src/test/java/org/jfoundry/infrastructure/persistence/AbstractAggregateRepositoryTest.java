@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.persistence;
 
-import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.ddd.types.Identifier;
@@ -80,6 +79,25 @@ class AbstractAggregateRepositoryTest {
     }
 
     @Test
+    void addDoesNotRegisterWhenEventRegistrarIsMissing() {
+        List<String> operations = new ArrayList<>();
+        TestRepository repository = new TestRepository(operations);
+
+        repository.add(TestAggregate.create("one"));
+
+        assertThat(operations).containsExactly("add:one");
+    }
+
+    @Test
+    void setAggregateEventRegistrarRejectsNull() {
+        TestRepository repository = new TestRepository(new ArrayList<>());
+
+        assertThatThrownBy(() -> repository.setAggregateEventRegistrar(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("AggregateEventRegistrar must not be null.");
+    }
+
+    @Test
     void delegatesFindModifyAndRemoveToStorageOperations() {
         List<String> operations = new ArrayList<>();
         TestRepository repository = repository(operations);
@@ -95,7 +113,7 @@ class AbstractAggregateRepositoryTest {
 
     private static TestRepository repository(List<String> operations) {
         TestRepository repository = new TestRepository(operations);
-        repository.setDomainEventContext(new RecordingContext(operations));
+        repository.setAggregateEventRegistrar(new RecordingContext(operations));
         return repository;
     }
 
@@ -146,7 +164,7 @@ class AbstractAggregateRepositoryTest {
         }
     }
 
-    private static final class RecordingContext implements DomainEventContext {
+    private static final class RecordingContext implements AggregateEventRegistrar {
 
         private final List<String> operations;
 

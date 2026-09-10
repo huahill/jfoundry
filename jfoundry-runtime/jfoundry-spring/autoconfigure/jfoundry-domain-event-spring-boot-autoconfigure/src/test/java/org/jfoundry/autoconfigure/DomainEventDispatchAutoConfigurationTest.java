@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class DomainEventDispatchAutoConfigurationTest {
 
@@ -156,6 +157,19 @@ class DomainEventDispatchAutoConfigurationTest {
     }
 
     @Test
+    void persistenceRepositoriesSkipRegistrationWhenDomainEventContextIsAbsent() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(DomainEventPersistenceAutoConfiguration.class))
+                .withUserConfiguration(PersistenceRepositoryOnlyConfiguration.class)
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(DomainEventContext.class);
+                    TestPersistenceRepository repository = context.getBean(TestPersistenceRepository.class);
+                    assertThatCode(() -> repository.add(TestAggregate.create("order-1")))
+                            .doesNotThrowAnyException();
+                });
+    }
+
+    @Test
     void aggregateRepositoryLifecycleMethodsRemainAdvisableWithClassBasedProxies() {
         AtomicInteger interceptedCalls = new AtomicInteger();
         ProxyFactory proxyFactory = new ProxyFactory(new TestPersistenceRepository());
@@ -203,6 +217,15 @@ class DomainEventDispatchAutoConfigurationTest {
         RecordingDomainEventContext recordingDomainEventContext() {
             return new RecordingDomainEventContext();
         }
+
+        @Bean
+        TestPersistenceRepository testPersistenceRepository() {
+            return new TestPersistenceRepository();
+        }
+    }
+
+    @Configuration
+    static class PersistenceRepositoryOnlyConfiguration {
 
         @Bean
         TestPersistenceRepository testPersistenceRepository() {

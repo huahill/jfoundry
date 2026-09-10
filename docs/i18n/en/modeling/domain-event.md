@@ -50,8 +50,10 @@ Business code on those runtimes does not call it.
 
 The default path stays inside the process:
 
-1. Persistence or application code registers the touched aggregate with
-   `DomainEventContext.register(...)`.
+1. Runtime wiring binds `AbstractAggregateRepository` through
+   `AggregateEventRegistrar`. Applications without domain-event skip that
+   registration. Application code may still call
+   `DomainEventContext.register(...)` directly.
 2. After the outermost `@ApplicationService` invocation succeeds, the runtime
    drains pending events.
 3. Each `DomainEventDispatcher.dispatch(...)` receives the batch.

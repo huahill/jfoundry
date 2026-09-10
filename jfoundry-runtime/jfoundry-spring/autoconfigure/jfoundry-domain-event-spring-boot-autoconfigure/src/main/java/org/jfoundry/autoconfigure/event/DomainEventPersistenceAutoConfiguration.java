@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Role;
 @AutoConfigureBefore(DomainEventDispatchAutoConfiguration.class)
 @ConditionalOnClass(name = {
         "org.jfoundry.application.event.DomainEventContext",
-        "org.jfoundry.infrastructure.persistence.AbstractAggregateRepository"
+        "org.jfoundry.infrastructure.persistence.AggregateEventRegistrarAware"
 })
 public class DomainEventPersistenceAutoConfiguration {
 

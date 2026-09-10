@@ -44,7 +44,7 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 
 默认路径停留在进程内：
 
-1. 持久化或应用代码通过 `DomainEventContext.register(...)` 注册被触及的聚合。
+1. 运行时通过 `AggregateEventRegistrar` 把 `AbstractAggregateRepository` 接到领域事件上下文。未引入 domain-event 的应用会跳过该注册。应用代码仍可直接调用 `DomainEventContext.register(...)`。
 2. 最外层 `@ApplicationService` 调用成功后，运行时提取待分发事件。
 3. 每个 `DomainEventDispatcher.dispatch(...)` 接收该批次。
 

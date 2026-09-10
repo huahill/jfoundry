@@ -4,6 +4,7 @@ import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.jandex.DotName;
 import org.jfoundry.infrastructure.event.quarkus.CdiDomainEventDispatcher;
+import org.jfoundry.infrastructure.event.quarkus.QuarkusAggregateEventRegistrarBinder;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventContext;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventScope;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,8 @@ class DomainEventProcessorTest {
         assertThat(beans.getBeanClasses()).contains(
                 CdiDomainEventDispatcher.class.getName(),
                 QuarkusDomainEventScope.class.getName(),
-                QuarkusDomainEventContext.class.getName());
+                QuarkusDomainEventContext.class.getName(),
+                QuarkusAggregateEventRegistrarBinder.class.getName());
         assertThat(beans.isRemovable()).isFalse();
         assertThat(beans.getDefaultScope()).isEqualTo(DotName.createSimple(ApplicationScoped.class.getName()));
     }

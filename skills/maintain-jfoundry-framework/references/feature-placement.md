@@ -49,6 +49,10 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 - Keep persistence-context state and awareness contracts in `jfoundry-persistence-core`; place
   transaction-scoped implementations in runtime adapters and bean-lifecycle injection in Spring
   Boot auto-configuration. Business repository constructors should not expose runtime context.
+- Keep `AggregateEventRegistrar` and `AggregateEventRegistrarAware` in
+  `jfoundry-persistence-core`. Bind `DomainEventContext::register` in domain-event
+  runtime modules (Spring Boot auto-configuration, Quarkus runtime, and Helidon).
+  Do not place those binders in persistence-quarkus or persistence-helidon modules.
 - If the code uses Spring transaction synchronization, `ApplicationEventPublisher`, scheduling, MVC APIs, or bean lifecycle, put it under `jfoundry-runtime/jfoundry-spring/runtime`.
 - If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in the matching capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - If a test verifies middleware behavior through Spring's runtime wiring or Testcontainers, put it under `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`.

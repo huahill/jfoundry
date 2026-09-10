@@ -9,6 +9,7 @@ import org.jboss.jandex.AnnotationTransformation;
 import org.jboss.jandex.DotName;
 import org.jfoundry.application.ApplicationService;
 import org.jfoundry.infrastructure.event.quarkus.CdiDomainEventDispatcher;
+import org.jfoundry.infrastructure.event.quarkus.QuarkusAggregateEventRegistrarBinder;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventContext;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatch;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatchInterceptor;
@@ -25,6 +26,7 @@ class DomainEventProcessor {
                 .addBeanClass(CdiDomainEventDispatcher.class)
                 .addBeanClass(QuarkusDomainEventScope.class)
                 .addBeanClass(QuarkusDomainEventContext.class)
+                .addBeanClass(QuarkusAggregateEventRegistrarBinder.class)
                 .setUnremovable()
                 .setDefaultScope(DotName.createSimple(ApplicationScoped.class.getName()))
                 .build();
