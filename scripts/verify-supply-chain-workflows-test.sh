@@ -41,7 +41,10 @@ write_compliant_dependabot() {
 version: 2
 updates:
   - package-ecosystem: maven
-    directory: /
+    directories:
+      - "/"
+      - "/jfoundry-boms/*"
+      - "/jfoundry-runtime/*"
     schedule:
       interval: weekly
     cooldown:
@@ -385,6 +388,19 @@ jobs:
       - run: gh pr create
 YAML
 assert_accepts "${temp_dir}"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0].pop("directories", None)
+config["updates"][0]["directory"] = "/"
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+HEREDOC
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan /, /jfoundry-boms/*, and /jfoundry-runtime/*"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
