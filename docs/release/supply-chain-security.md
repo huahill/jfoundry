@@ -30,10 +30,14 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 - Dependabot version updates read Maven Central, not GitHub Releases. The Maven
   updater also follows only `<modules>` lists, so Maven 4.1 `<subprojects>`
   aggregators are invisible unless their manifests are named in `directories`.
-  Keep one Maven update block pointed at `/`, `/jfoundry-boms/*`, and
-  `/jfoundry-runtime/*` so plugin pins, consumer BOMs, and runtime aggregator
-  pins stay in scope and platform groups still apply across those manifests.
-  Do not dual-write `<modules>` to compensate, and do not glob every leaf module.
+  Keep one Maven update block pointed at `/` and `/jfoundry-boms/*` so plugin
+  pins and consumer BOMs stay in scope. Do not scan `/jfoundry-runtime/*`:
+  those aggregators use Maven 4.1 inferred parents and `${project.version}`
+  imports, which Dependabot cannot evaluate. Runtime aggregator version
+  properties remain duplicate pins of the corresponding consumer BOM; platform
+  upgrades follow the BOM, then update the aggregator property in the same
+  change. Do not dual-write `<modules>` to compensate, and do not glob every
+  leaf module.
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
