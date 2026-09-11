@@ -28,6 +28,7 @@ updates:
         - org.springframework.boot:spring-boot-starter-parent
         - org.springframework.boot:spring-boot-maven-plugin
     open-pull-requests-limit: 10
+    rebase-strategy: disabled
     groups:
       jfoundry-spring-boot-platform:
         patterns:
@@ -45,6 +46,9 @@ updates:
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
+      jfoundry-maven-minors:
+        patterns: ["*"]
+        update-types: [minor]
   - package-ecosystem: github-actions
     directory: /
     schedule:
