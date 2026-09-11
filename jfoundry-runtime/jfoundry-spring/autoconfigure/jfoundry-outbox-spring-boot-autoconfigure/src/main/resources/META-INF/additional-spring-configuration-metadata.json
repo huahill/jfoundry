@@ -1,0 +1,139 @@
+{
+  "groups": [
+    {
+      "name": "jfoundry.outbox",
+      "type": "org.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties",
+      "sourceType": "org.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties"
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher",
+      "type": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties",
+      "sourceType": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties"
+    },
+    {
+      "name": "jfoundry.outbox.recovery",
+      "type": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxRecoveryProperties",
+      "sourceType": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxRecoveryProperties"
+    },
+    {
+      "name": "jfoundry.outbox.cleanup",
+      "type": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxCleanupProperties",
+      "sourceType": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxCleanupProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jfoundry.outbox.table-name",
+      "type": "java.lang.String",
+      "defaultValue": "jfoundry_outbox_event",
+      "description": "Physical MyBatis-Plus Outbox table name. Applications must create the table themselves."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.mode",
+      "type": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties$Mode",
+      "defaultValue": "SCHEDULED",
+      "description": "Outbox dispatch trigger: SCHEDULED, JOBRUNR, or NONE."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.interval-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 5000,
+      "description": "Fixed-delay interval in milliseconds between scheduled dispatch attempts."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.cron",
+      "type": "java.lang.String",
+      "defaultValue": "*/10 * * * * *",
+      "description": "JobRunr recurring dispatch cron expression."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.batch-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 50,
+      "description": "Maximum pending records claimed by one dispatch attempt."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.max-retries",
+      "type": "java.lang.Integer",
+      "defaultValue": 5,
+      "description": "Maximum delivery attempts before a record is dead-lettered."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.backoff-base-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 1000,
+      "description": "Initial retry backoff in milliseconds."
+    },
+    {
+      "name": "jfoundry.outbox.dispatcher.backoff-max-ms",
+      "type": "java.lang.Long",
+      "defaultValue": 300000,
+      "description": "Maximum retry backoff in milliseconds."
+    },
+    {
+      "name": "jfoundry.outbox.recovery.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable stuck DISPATCHING recovery. When unset, recovery follows dispatcher mode: enabled for SCHEDULED and JOBRUNR, disabled for NONE."
+    },
+    {
+      "name": "jfoundry.outbox.recovery.interval",
+      "type": "java.time.Duration",
+      "defaultValue": "60s",
+      "description": "Interval between recovery job runs."
+    },
+    {
+      "name": "jfoundry.outbox.recovery.stuck-timeout",
+      "type": "java.time.Duration",
+      "defaultValue": "5m",
+      "description": "Age after which DISPATCHING records are rolled back to PENDING."
+    },
+    {
+      "name": "jfoundry.outbox.cleanup.enabled",
+      "type": "java.lang.Boolean",
+      "description": "Enable terminal-row cleanup. When unset, cleanup follows dispatcher mode: enabled for SCHEDULED and JOBRUNR, disabled for NONE."
+    },
+    {
+      "name": "jfoundry.outbox.cleanup.interval",
+      "type": "java.time.Duration",
+      "defaultValue": "24h",
+      "description": "Interval between cleanup job runs."
+    },
+    {
+      "name": "jfoundry.outbox.cleanup.published-retention-days",
+      "type": "java.lang.Integer",
+      "defaultValue": 7,
+      "description": "Retention in days for PUBLISHED records."
+    },
+    {
+      "name": "jfoundry.outbox.cleanup.dead-lettered-retention-days",
+      "type": "java.lang.Integer",
+      "defaultValue": 30,
+      "description": "Retention in days for DEAD_LETTERED records."
+    },
+    {
+      "name": "jfoundry.outbox.cleanup.batch-size",
+      "type": "java.lang.Integer",
+      "defaultValue": 1000,
+      "description": "Maximum records deleted in one cleanup batch."
+    }
+  ],
+  "hints": [
+    {
+      "name": "jfoundry.outbox.dispatcher.mode",
+      "values": [
+        {
+          "value": "scheduled",
+          "description": "Spring @Scheduled fixed-delay dispatch."
+        },
+        {
+          "value": "jobrunr",
+          "description": "JobRunr recurring-job dispatch."
+        },
+        {
+          "value": "none",
+          "description": "Disable framework dispatch, recovery, and cleanup jobs."
+        }
+      ]
+    }
+  ]
+}
