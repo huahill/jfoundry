@@ -89,7 +89,7 @@ Maven 4 can report imported-BOM model warnings for supported runtime ecosystems.
 requires successful package and consumer-POM resolution; it does not require a warning-free effective
 model while Maven 4 remains experimental.
 
-Quarkus 3.39.1's test bootstrap cannot currently load the Maven 4.1 `subprojects` workspace model,
+Quarkus 3.39.x test bootstrap cannot currently load the Maven 4.1 `subprojects` workspace model,
 so the Quarkus CDI unit-test stage remains blocked by
 [Quarkus issue #56270](https://github.com/quarkusio/quarkus/issues/56270) until its Maven 4 support
 is released. This does not affect Maven 4 packaging or the other runtime verification stages.
