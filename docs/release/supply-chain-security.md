@@ -41,7 +41,13 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
-  patch group so related updates available in the same Dependabot run are proposed together.
+  patch group and the catch-all Maven minor group so related updates available in the same Dependabot
+  run are proposed together. Remaining major updates stay ungrouped so accidental publications can be
+  closed without bundling them into a routine upgrade.
+- Maven version-update pull requests do not rebase automatically when `main` moves. Rebase the next
+  candidate with `@dependabot rebase` before merging. This prevents one merge from retriggering the
+  full CI matrix on every remaining Dependabot pull request. Pull requests opened before this setting
+  still rebase for up to 30 days.
 - Quarkus platform coordinates use a one-day patch cooldown and a seven-day minor/major cooldown.
   Spring Boot platform coordinates are explicitly excluded from the cooldown so the daily schedule
   can propose new releases promptly. The Quarkus delay gives platform publishers and Maven Central
