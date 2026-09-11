@@ -1,7 +1,12 @@
 version: 2
 updates:
+  # Dependabot's Maven fetcher follows <modules> only. This repository uses Maven 4.1
+  # <subprojects>, so BOM and runtime aggregator manifests must be listed explicitly.
   - package-ecosystem: maven
-    directory: /
+    directories:
+      - "/"
+      - "/jfoundry-boms/*"
+      - "/jfoundry-runtime/*"
     schedule:
       interval: daily
     cooldown:

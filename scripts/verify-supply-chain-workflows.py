@@ -84,6 +84,9 @@ def verify_dependabot(root: Path) -> None:
             fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
     if "ignore" in maven[0]:
         fail(f"{prefix}: Maven updates must not define ignore rules")
+    expected_directories = ["/", "/jfoundry-boms/*", "/jfoundry-runtime/*"]
+    if maven[0].get("directories") != expected_directories or "directory" in maven[0]:
+        fail(f"{prefix}: Maven updates must explicitly scan /, /jfoundry-boms/*, and /jfoundry-runtime/*")
     actions = [update for update in updates if update.get("package-ecosystem") == "github-actions"]
     if len(actions) != 1 or actions[0].get("groups") != {"github-codeql-action": {"patterns": ["github/codeql-action/*"]}}:
         fail(f"{prefix}: GitHub Actions groups are invalid")
