@@ -70,7 +70,7 @@
     <commons-text.version>1.15.0</commons-text.version>
 
     <!-- Caching -->
-    <caffeine.version>3.1.8</caffeine.version>
+    <caffeine.version>3.2.4</caffeine.version>
 
     <!-- Messaging and background jobs -->
     <jobrunr.version>8.8.2</jobrunr.version>
@@ -84,7 +84,7 @@
     <javassist.version>3.33.0-GA</javassist.version>
     <opentelemetry.version>1.65.0</opentelemetry.version>
     <slf4j.version>2.0.19</slf4j.version>
-    <snakeyaml.version>2.6</snakeyaml.version>
+    <snakeyaml.version>2.7</snakeyaml.version>
 
     <!-- Testing -->
     <awaitility.version>4.3.0</awaitility.version>
