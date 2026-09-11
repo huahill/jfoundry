@@ -77,6 +77,7 @@ class JtaDomainEventScopeTest {
             assertThat(outbox.events).isEmpty();
             assertThat(local.events).isEmpty();
 
+            scope.dispatchBeforeCommit();
             transactionRegistry.beforeCompletion();
             assertThat(outbox.events).extracting(event -> ((TestEvent) event).name())
                     .containsExactly("confirmed");

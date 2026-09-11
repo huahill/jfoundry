@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.event.helidon;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.inject.Produces;
@@ -17,7 +16,7 @@ public final class CdiDomainEventDispatcherProducer {
     }
 
     @Produces
-    @ApplicationScoped
+    @Dependent
     CdiDomainEventDispatcher cdiDomainEventDispatcher(Event<DomainEvent> events) {
         return new CdiDomainEventDispatcher(events);
     }

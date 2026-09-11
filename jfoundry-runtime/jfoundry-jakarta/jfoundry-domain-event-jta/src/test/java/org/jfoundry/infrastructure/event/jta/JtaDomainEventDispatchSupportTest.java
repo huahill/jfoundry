@@ -58,7 +58,7 @@ class JtaDomainEventDispatchSupportTest {
                     return null;
                 }, ignored -> false, "Test runtime");
 
-        assertThat(beforeCommit.events).isEmpty();
+        assertThat(beforeCommit.eventNames()).containsExactly("confirmed");
         assertThat(afterCommit.events).isEmpty();
 
         transactionRegistry.beforeCompletion();

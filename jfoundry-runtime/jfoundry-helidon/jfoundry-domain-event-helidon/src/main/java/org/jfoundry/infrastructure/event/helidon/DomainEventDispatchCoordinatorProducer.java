@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.event.helidon;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -19,7 +18,7 @@ public final class DomainEventDispatchCoordinatorProducer {
     }
 
     @Produces
-    @ApplicationScoped
+    @Dependent
     DomainEventDispatchCoordinator domainEventDispatchCoordinator(
             @Any Instance<DomainEventDispatcher> dispatchers) {
         return new DefaultDomainEventDispatchCoordinator(dispatchers.stream().toList());

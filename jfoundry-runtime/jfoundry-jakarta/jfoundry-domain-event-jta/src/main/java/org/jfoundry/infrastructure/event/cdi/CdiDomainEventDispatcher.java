@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.event.cdi;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import org.jfoundry.application.event.DomainEventBatch;
@@ -14,7 +13,6 @@ import java.util.Objects;
 ///
 /// Helidon produces this type directly. Quarkus registers a runtime subclass
 /// because `AdditionalBeanBuildItem` cannot see this class from the JTA jar.
-@ApplicationScoped
 public class CdiDomainEventDispatcher implements DomainEventDispatcher {
 
     private final Event<DomainEvent> events;

@@ -33,10 +33,14 @@ public final class JtaDomainEventDispatchSupport {
                     throw new UnsupportedOperationException(
                             runtimeName + " domain-event dispatch supports synchronous application-service methods only");
                 }
-                if (outermost && !scope.failed() && !scope.hasTransactionEvents()) {
-                    List<DomainEvent> events = scope.drainEvents();
-                    if (!events.isEmpty()) {
-                        coordinator.dispatchWithoutTransaction(events);
+                if (outermost && !scope.failed()) {
+                    if (scope.hasTransactionEvents()) {
+                        scope.dispatchBeforeCommit();
+                    } else {
+                        List<DomainEvent> events = scope.drainEvents();
+                        if (!events.isEmpty()) {
+                            coordinator.dispatchWithoutTransaction(events);
+                        }
                     }
                 }
                 return result;

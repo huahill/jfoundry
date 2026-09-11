@@ -76,6 +76,13 @@ public class JtaDomainEventScope {
         return state != null && state.hasTransactionEvents();
     }
 
+    void dispatchBeforeCommit() {
+        State state = current();
+        if (state != null) {
+            state.dispatchBeforeCommit();
+        }
+    }
+
     private State current() {
         return CURRENT.isBound() ? CURRENT.get() : null;
     }
@@ -121,6 +128,13 @@ public class JtaDomainEventScope {
 
         private boolean hasTransactionEvents() {
             return existingTransactionEvents() != null;
+        }
+
+        private void dispatchBeforeCommit() {
+            TransactionEvents events = existingTransactionEvents();
+            if (events != null && !failed) {
+                coordinator.dispatchBeforeCommit(events.events());
+            }
         }
 
         private boolean isActiveTransaction() {
@@ -182,11 +196,6 @@ public class JtaDomainEventScope {
 
         @Override
         public void beforeCompletion() {
-            List<DomainEvent> domainEvents = events.events();
-            if (!state.failed
-                    && state.transactionSynchronizationRegistry.getTransactionStatus() == Status.STATUS_ACTIVE) {
-                coordinator.dispatchBeforeCommit(domainEvents);
-            }
         }
 
         @Override
