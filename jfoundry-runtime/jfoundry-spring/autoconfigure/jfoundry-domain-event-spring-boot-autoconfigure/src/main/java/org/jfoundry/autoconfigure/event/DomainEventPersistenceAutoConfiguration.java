@@ -13,7 +13,8 @@ import org.springframework.context.annotation.Role;
 @AutoConfigureBefore(DomainEventDispatchAutoConfiguration.class)
 @ConditionalOnClass(name = {
         "org.jfoundry.application.event.DomainEventContext",
-        "org.jfoundry.infrastructure.persistence.AggregateEventRegistrarAware"
+        "org.jfoundry.infrastructure.persistence.AggregatePersistenceObserverAware",
+        "org.jfoundry.infrastructure.persistence.event.DomainEventAggregatePersistenceObserver"
 })
 public class DomainEventPersistenceAutoConfiguration {
 
@@ -22,6 +23,7 @@ public class DomainEventPersistenceAutoConfiguration {
     @ConditionalOnMissingBean(name = "domainEventContextBeanPostProcessorRegistrar")
     public static BeanFactoryPostProcessor domainEventContextBeanPostProcessorRegistrar() {
         return beanFactory -> beanFactory.addBeanPostProcessor(
-                new DomainEventContextBeanPostProcessor(beanFactory));
+                new DomainEventContextBeanPostProcessor(beanFactory)
+        );
     }
 }

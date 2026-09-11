@@ -3,6 +3,7 @@ package org.jfoundry.infrastructure.persistence.mybatis;
 import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContext;
+import org.jfoundry.infrastructure.persistence.event.DomainEventAggregatePersistenceObserver;
 import org.jfoundry.infrastructure.persistence.spring.SpringTransactionAggregatePersistenceContext;
 import org.jfoundry.infrastructure.persistence.mybatis.support.TestOrderDataMapper;
 import org.jfoundry.infrastructure.persistence.mybatis.support.TestOrderMapper;
@@ -62,7 +63,8 @@ class PersistenceTestConfig {
                                              DomainEventContext domainEventContext,
                                              TestOrderDataMapper dataMapper) {
         TestOrderRepository repository = new TestOrderRepository(mapper, dataMapper);
-        repository.setAggregateEventRegistrar(domainEventContext::register);
+        repository.setAggregatePersistenceObserver(
+                new DomainEventAggregatePersistenceObserver(domainEventContext));
         return repository;
     }
 

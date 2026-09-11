@@ -47,6 +47,9 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
   does not have a Quarkus-style deployment artifact.
 - Helidon transaction, local domain-event, and aggregate-persistence-context integration is split into
   `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon`.
+  The optional `jfoundry-domain-event-persistence-bridge-helidon` and
+  `jfoundry-domain-event-outbox-helidon` modules are separate compositions; generic
+  `jfoundry-outbox-helidon` does not depend on Domain Event.
 - Quarkus transaction, local domain-event, and aggregate-persistence-context integration uses the matching
   `jfoundry-transaction-quarkus-*`, `jfoundry-domain-event-quarkus-*`, and
   `jfoundry-persistence-quarkus-*` runtime/deployment pairs.

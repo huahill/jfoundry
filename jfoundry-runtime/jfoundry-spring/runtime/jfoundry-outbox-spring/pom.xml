@@ -7,7 +7,7 @@
 
     <artifactId>jfoundry-outbox-spring</artifactId>
     <name>jfoundry-outbox-spring</name>
-    <description>Spring runtime adapters for Transactional Outbox: domain-event externalization, scheduled dispatching, and retry backoff.</description>
+    <description>Spring runtime adapters for scheduled Outbox dispatching and retry backoff.</description>
 
     <properties>
         <mockito.javaagent.argLine>-javaagent:${org.mockito:mockito-core:jar}</mockito.javaagent.argLine>
@@ -16,19 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain-event-outbox-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-messaging-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jmolecules</groupId>
-            <artifactId>jmolecules-onion-architecture</artifactId>
         </dependency>
 
         <dependency>

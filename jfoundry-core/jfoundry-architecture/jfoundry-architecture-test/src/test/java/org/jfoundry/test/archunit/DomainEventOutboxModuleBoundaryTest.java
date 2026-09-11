@@ -30,6 +30,10 @@ class DomainEventOutboxModuleBoundaryTest {
                 .contains("jfoundry-domain-event-core", "jfoundry-outbox-core", "jfoundry-messaging-core");
         assertThat(repositoryRoot.resolve(Path.of(
                 "jfoundry-core", "jfoundry-application",
+                "jfoundry-domain-event-outbox-core", "pom.xml")))
+                .isRegularFile();
+        assertThat(repositoryRoot.resolve(Path.of(
+                "jfoundry-core", "jfoundry-application",
                 "jfoundry-domain-event-externalization-core", "pom.xml")))
                 .doesNotExist();
     }

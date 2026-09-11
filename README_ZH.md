@@ -30,6 +30,10 @@
 
 依赖方向始终指向内层。因此运行时集成位于核心之外，而不是每个应用的必需依赖。
 
+领域事件与 Outbox 是相互独立的能力：进程内领域事件派发不需要 Outbox，通用 Outbox 也不需要领域事件。
+只有在需要可靠地将领域事件外部化时，应用才选择显式的领域事件 Outbox 组合；可选的持久化桥接层负责保持聚合事件自动收集的便利性，
+同时避免通用持久化与领域事件耦合。
+
 在仓库结构中，`jfoundry-core/` 归集运行时无关模块，`jfoundry-runtime/` 归集 Spring、Quarkus 和 Helidon 集成，`jfoundry-boms/` 提供依赖管理。这些目录是源码分组，不是 Maven 聚合模块。
 
 ![jfoundry 模块架构](docs/i18n/assets/jfoundry-module-architecture.svg)

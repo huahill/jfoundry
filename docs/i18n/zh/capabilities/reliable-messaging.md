@@ -12,7 +12,8 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 
 | 决策 | 作用 | Spring Boot 选择 |
 |---|---|---|
-| Outbox 能力 | 负责记录、外部化、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
+| Outbox 能力 | 负责记录通用集成消息、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
+| 领域事件 Outbox 组合 | 将选定领域事件映射为通用 Outbox 消息 | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | 存储适配器 | 持久化 `OutboxMessageStore` 记录 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用实现 |
 | 派发触发方式 / 调度适配器 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用触发器 |
 | 消息传输 | 发送已领取的消息载荷 | 消息代理专用的 `jfoundry-messaging-*-spring-boot-starter` 或应用 `MessageSender` |
@@ -23,6 +24,11 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
 `jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换，
 而 `OutboxDispatcher` 仍是派发服务端口，`*OutboxTrigger` 仍是调度适配器。
+
+领域事件 Outbox 组合刻意独立于这两项能力。Spring 组合启动器包含领域事件、通用 Outbox、持久化桥接层和
+领域事件 Outbox 自动配置。Quarkus 与 Helidon 提供对应的显式模块：`jfoundry-domain-event-outbox-quarkus-runtime`
+和 `jfoundry-domain-event-outbox-helidon`；它们的通用 Outbox 模块不会注册领域事件 Bean。因此，仅使用领域事件的应用
+不会得到 Outbox 记录器，仅使用通用 Outbox 的应用也不会得到领域事件上下文或派发器。
 
 运行时特定的 `*OutboxTrigger` 类型是调度适配器。`OutboxDispatcher` 仍然是它们调用的派发服务端口。
 
@@ -91,8 +97,8 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 |------|------|
 | MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
 | JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../implementations/jpa.md) |
-| Quarkus Outbox 运行时、自动领域事件外部化与 Kafka 投递 | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox 运行时、自动领域事件外部化与 Kafka 或 RabbitMQ 投递 | [Helidon MP](../implementations/helidon.md) |
+| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../implementations/quarkus.md) |
+| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../implementations/helidon.md) |
 | Spring Boot 能力装配和派发器配置 | [Spring Boot](../implementations/spring-boot.md) |
 
 启动器、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。

@@ -1,4 +1,4 @@
-org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration
+org.jfoundry.autoconfigure.outbox.OutboxTemplateAutoConfiguration
 org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration
 org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaEntityScanAutoConfiguration
 org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration

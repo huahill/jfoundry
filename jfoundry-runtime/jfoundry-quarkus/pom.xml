@@ -33,6 +33,8 @@
     <subprojects>
         <subproject>runtime/jfoundry-transaction-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-domain-event-quarkus-runtime</subproject>
+        <subproject>runtime/jfoundry-domain-event-persistence-bridge-quarkus-runtime</subproject>
+        <subproject>runtime/jfoundry-domain-event-outbox-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-persistence-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-restclient-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-web-quarkus-runtime</subproject>
@@ -44,6 +46,8 @@
         <subproject>runtime/jfoundry-persistence-jpa-quarkus-runtime</subproject>
         <subproject>deployment/jfoundry-transaction-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-domain-event-quarkus-deployment</subproject>
+        <subproject>deployment/jfoundry-domain-event-persistence-bridge-quarkus-deployment</subproject>
+        <subproject>deployment/jfoundry-domain-event-outbox-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-persistence-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-restclient-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-web-quarkus-deployment</subproject>

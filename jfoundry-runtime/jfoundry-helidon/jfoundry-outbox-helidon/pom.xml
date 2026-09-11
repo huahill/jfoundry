@@ -7,9 +7,7 @@
   <artifactId>jfoundry-outbox-helidon</artifactId><name>jfoundry-outbox-helidon</name>
   <dependencies>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-transaction-helidon</artifactId></dependency>
-    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-helidon</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-core</artifactId></dependency>
-    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-outbox-core</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-core</artifactId></dependency>
     <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-messaging-jackson</artifactId></dependency>
     <dependency><groupId>tools.jackson.core</groupId><artifactId>jackson-databind</artifactId></dependency>

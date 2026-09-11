@@ -61,8 +61,10 @@ artifact automatically.
 |---|---|
 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
+| Domain Event persistence bridge | `jfoundry-domain-event-persistence-bridge-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`, `jfoundry-persistence-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-outbox-jpa-quarkus-runtime` and `jfoundry-outbox-quarkus-runtime` when dispatching is required |
+| Domain Event to Outbox composition | `jfoundry-domain-event-outbox-quarkus-runtime` plus the Domain Event runtime, persistence bridge, generic Outbox, store, and sender |
 | `jfoundry-inbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka or RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` or `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
@@ -141,6 +143,13 @@ synchronous application-service methods only; `CompletionStage` and Mutiny retur
 It provides in-process domain-event orchestration only and does not add an Outbox store, serializer,
 broker client, or automatic event externalization.
 
+Automatic collection from aggregate repositories is not part of the Domain Event extension itself.
+Add `jfoundry-domain-event-persistence-bridge-quarkus-runtime` to install the event-neutral persistence
+observer bridge; it registers an `EventRecordable` aggregate only after a successful repository
+operation. Add `jfoundry-domain-event-outbox-quarkus-runtime` only when those captured events must
+be mapped into generic Outbox messages. Generic Outbox remains usable without either Domain Event
+module.
+
 ## JPA Aggregate Persistence
 
 To use `JpaAggregateRepository`, add `jfoundry-transaction-quarkus-runtime`,
@@ -202,8 +211,9 @@ state-transition runtime:
 </dependency>
 ```
 
-The extension provides the default CDI `OutboxDispatcher` service port and the
-`QuarkusOutboxTrigger` scheduling adapter through the Quarkus Scheduler. It remains inactive
+The extension provides the default CDI `OutboxDispatcher` service port, the generic
+`OutboxTemplate` and `PayloadSerializer`, and the `QuarkusOutboxTrigger` scheduling adapter through
+the Quarkus Scheduler. It remains inactive
 unless `jfoundry.outbox.dispatcher.enabled=true`. The application must provide both an
 `OutboxMessageStore` (for example through `jfoundry-outbox-jpa-quarkus-runtime`) and a real
 `MessageSender`; the trigger does not add a broker client or a logging sender. Configure
@@ -276,11 +286,12 @@ connection timeouts. The CDI default bean is replaceable with an application `Me
 
 ## Automatic Domain-Event Externalization
 
-`jfoundry-outbox-quarkus-runtime` also supplies an explicit automatic externalization assembly. It
-adds Quarkus Jackson and produces replaceable defaults for `PayloadSerializer`,
-`ExternalizationRuleResolver`, `AggregateRoutingResolver`, `OutboxTemplate`, and
-`DomainEventOutboxRecorder`. It does not add an Outbox store or a broker client; add a store
-capability such as `jfoundry-outbox-jpa-quarkus-runtime` separately.
+`jfoundry-domain-event-outbox-quarkus-runtime` supplies the explicit automatic externalization assembly. It
+produces replaceable defaults for `ExternalizationRuleResolver`, `AggregateRoutingResolver`, and
+`DomainEventOutboxRecorder`, plus the Domain Event Outbox dispatcher. The generic
+`jfoundry-outbox-quarkus-runtime` supplies `PayloadSerializer` and `OutboxTemplate`; select both
+runtime modules for the complete composition. Neither module adds an Outbox store or a broker client;
+add a store capability such as `jfoundry-outbox-jpa-quarkus-runtime` separately.
 
 Automatic recording is disabled by default. Enable it only when the domain event itself is a stable
 integration contract:
@@ -301,8 +312,13 @@ are therefore atomic even when an application service creates its boundary with 
 Local CDI domain-event observers remain separate and are notified only after a successful commit.
 
 The extension registers `@Externalized` event classes for Jackson reflection during augmentation, so
-the default serializer works in Native Image. It does not prescribe a broker transport; use an
-explicit `MessageSender` adapter and enable the dispatcher separately when delivery is required.
+the default serializer works in Native Image for annotation-based externalization. For custom
+`DomainEventExternalizer` mappings, applications must register their integration payload classes for
+Quarkus reflection according to the selected Jackson/Quarkus setup (for example, annotate a payload
+with `io.quarkus.runtime.annotations.RegisterForReflection` or provide equivalent native reflection
+configuration). The extension does not prescribe
+a broker transport; use an explicit `MessageSender` adapter and enable the dispatcher separately when
+delivery is required.
 
 ## JPA Inbox Storage
 

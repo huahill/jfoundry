@@ -4,8 +4,7 @@ import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxDispatchProducer;
 import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxTrigger;
 import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxMaintenance;
-import org.jfoundry.infrastructure.outbox.quarkus.externalization.OutboxDomainEventDispatcher;
-import org.jfoundry.infrastructure.outbox.quarkus.externalization.QuarkusOutboxExternalizationProducer;
+import org.jfoundry.infrastructure.outbox.quarkus.QuarkusOutboxTemplateProducer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,8 +19,7 @@ class OutboxProcessorTest {
                 QuarkusOutboxTrigger.class.getName(),
                 QuarkusOutboxDispatchProducer.class.getName(),
                 QuarkusOutboxMaintenance.class.getName(),
-                OutboxDomainEventDispatcher.class.getName(),
-                QuarkusOutboxExternalizationProducer.class.getName());
+                QuarkusOutboxTemplateProducer.class.getName());
         assertThat(beans.isRemovable()).isFalse();
     }
 }

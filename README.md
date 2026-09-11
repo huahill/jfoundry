@@ -30,6 +30,11 @@ runtime integration
 
 Dependencies point inward. This keeps runtime integrations outside the core rather than making a particular framework a requirement for every application.
 
+Domain Event and Outbox are independent capabilities: in-process Domain Event dispatch does not
+require Outbox, and generic Outbox does not require Domain Event. Applications that need reliable
+externalization select the explicit Domain Event Outbox composition; the optional persistence bridge
+keeps automatic aggregate-event collection convenient without coupling generic persistence to events.
+
 At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules.
 
 ![jfoundry module architecture](docs/i18n/assets/jfoundry-module-architecture.svg)

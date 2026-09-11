@@ -3,7 +3,6 @@ package org.jfoundry.autoconfigure;
 import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;
@@ -13,8 +12,6 @@ import org.jfoundry.autoconfigure.event.DomainEventScope;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jmolecules.ddd.types.Identifier;
 import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
-import org.jfoundry.infrastructure.outbox.spring.externalization.OutboxDomainEventDispatcher;
-import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -123,23 +120,6 @@ class DomainEventDispatchAutoConfigurationTest {
     }
 
     @Test
-    void enabledOutboxDispatcherParticipatesInDispatchCoordinator() {
-        contextRunner
-                .withUserConfiguration(OutboxRecorderConfiguration.class)
-                .withPropertyValues("jfoundry.domain.event.dispatch.outbox.enabled=true")
-                .run(context -> {
-                    TestOutboxRecorder recorder = context.getBean(TestOutboxRecorder.class);
-                    DomainEventDispatchCoordinator coordinator = context.getBean(DomainEventDispatchCoordinator.class);
-
-                    coordinator.dispatchWithoutTransaction(List.of(new TestEvent("order-1")));
-
-                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
-                    assertThat(context).hasSingleBean(OutboxDomainEventDispatcher.class);
-                    assertThat(recorder.recordedEvents).extracting(TestEvent::id).containsExactly("order-1");
-                });
-    }
-
-    @Test
     void injectsDomainEventContextIntoPersistenceRepositories() {
         contextRunner
                 .withUserConfiguration(PersistenceRepositoryConfiguration.class)
@@ -182,30 +162,6 @@ class DomainEventDispatchAutoConfigurationTest {
         repository.add(TestAggregate.create("order-1"));
 
         assertThat(interceptedCalls).hasValue(1);
-    }
-
-    @Configuration
-    static class OutboxRecorderConfiguration {
-
-        @Bean
-        TestOutboxRecorder testOutboxRecorder() {
-            return new TestOutboxRecorder();
-        }
-    }
-
-    static final class TestOutboxRecorder implements DomainEventOutboxRecorder {
-
-        private final List<TestEvent> recordedEvents = new ArrayList<>();
-
-        @Override
-        public void record(List<? extends DomainEvent> events) {
-            for (DomainEvent event : events) {
-                recordedEvents.add((TestEvent) event);
-            }
-        }
-    }
-
-    record TestEvent(String id) implements DomainEvent {
     }
 
     @Configuration

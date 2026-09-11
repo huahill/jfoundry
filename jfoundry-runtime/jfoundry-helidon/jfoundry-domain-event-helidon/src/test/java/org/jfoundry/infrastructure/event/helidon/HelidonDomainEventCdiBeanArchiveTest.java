@@ -25,8 +25,6 @@ class HelidonDomainEventCdiBeanArchiveTest {
         assertInjectionConstructor(HelidonDomainEventContext.class);
         assertTrue(HelidonDomainEventContext.class.isAnnotationPresent(Dependent.class));
         assertTrue(HelidonDomainEventScope.class.isAnnotationPresent(Dependent.class));
-        assertInjectionConstructor(HelidonAggregateEventRegistrarBinder.class);
-        assertTrue(HelidonAggregateEventRegistrarBinder.class.isAnnotationPresent(Dependent.class));
         assertInjectionConstructor(CdiDomainEventDispatcherProducer.class);
         assertTrue(CdiDomainEventDispatcherProducer.class.isAnnotationPresent(Dependent.class));
         assertInjectionConstructor(DomainEventDispatchCoordinatorProducer.class);
