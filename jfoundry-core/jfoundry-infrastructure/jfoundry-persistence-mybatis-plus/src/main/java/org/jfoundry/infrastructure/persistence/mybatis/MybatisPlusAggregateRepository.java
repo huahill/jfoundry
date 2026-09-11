@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.core.metadata.TableInfo;
 import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.jfoundry.application.exception.ConflictException;
-import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jfoundry.infrastructure.persistence.AggregateData;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContext;
@@ -33,7 +32,7 @@ import java.util.function.Function;
 /// @param <D> persistence data type
 /// @param <K> persistence identifier type
 public abstract class MybatisPlusAggregateRepository<
-        T extends AggregateRoot<T, ID> & EventRecordable,
+        T extends AggregateRoot<T, ID>,
         ID extends Identifier,
         D extends AggregateData<K>,
         K extends Serializable>
