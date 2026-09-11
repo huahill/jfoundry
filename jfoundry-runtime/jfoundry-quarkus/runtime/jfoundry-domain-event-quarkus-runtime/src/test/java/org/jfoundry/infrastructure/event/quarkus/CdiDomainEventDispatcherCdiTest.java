@@ -3,10 +3,13 @@ package org.jfoundry.infrastructure.event.quarkus;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.application.transaction.TransactionRunner;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
+import org.jfoundry.infrastructure.event.cdi.CdiDomainEventDispatcher;
 import org.jmolecules.ddd.types.Identifier;
 import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +33,18 @@ class CdiDomainEventDispatcherCdiTest {
     @Inject
     RecordingObserver observer;
 
+    @Inject
+    Instance<DomainEventDispatcher> dispatchers;
+
     @BeforeEach
     void resetObserver() {
         observer.reset();
+    }
+
+    @Test
+    void exposesCdiDomainEventDispatcher() {
+        assertThat(dispatchers.stream().toList())
+                .anyMatch(CdiDomainEventDispatcher.class::isInstance);
     }
 
     @Test

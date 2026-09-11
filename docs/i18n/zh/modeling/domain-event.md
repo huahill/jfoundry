@@ -37,18 +37,21 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 }
 ```
 
-`EventRecordable.drainEvents()` 是运行时无关的交接 SPI。自动运行时会在最外层
-应用服务成功完成后调用它。这些运行时上的业务代码不调用该方法。
+`EventRecordable.drainEvents()` 是运行时无关的交接 SPI。自动运行时会在对应派发阶段调用它。这些运行时上的业务代码不调用该方法。
+
+运行时生命周期适配器只依赖一个 `DomainEventDispatchCoordinator`。默认协调器可以把整批事件路由到多个
+`DomainEventDispatcher` 实现，同时将提交前与提交后的行为隐藏在这个单一边界之后。
 
 ## 进程内分发
 
 默认路径停留在进程内：
 
 1. 运行时通过 `AggregateEventRegistrar` 把 `AbstractAggregateRepository` 接到领域事件上下文。未引入 domain-event 的应用会跳过该注册。应用代码仍可直接调用 `DomainEventContext.register(...)`。
-2. 最外层 `@ApplicationService` 调用成功后，运行时提取待分发事件。
-3. 每个 `DomainEventDispatcher.dispatch(...)` 接收该批次。
+2. `register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
+3. 存在活动事务时，作用域把已注册聚合放到事务资源上。Outbox 派发器（`BeforeCommitDomainEventDispatcher`）在 `beforeCommit` / `beforeCompletion` 触发；普通进程内派发器在 `afterCommit` / `afterCompletion(STATUS_COMMITTED)` 触发。拦截器不会派发这些事务绑定的事件。
+4. 没有活动事务时，最外层 `@ApplicationService` 成功完成后，会把整批事件交给每一个派发器。
 
-若最外层调用失败，待分发事件不会被发布。运行时文档说明分发与本地事务的先后关系。
+若最外层调用失败，待分发事件不会被发布。派发器被调用时立即同步触发，不会再等待后续事务阶段。
 
 ## 与 Outbox 相互独立
 

@@ -68,11 +68,13 @@ are rejected rather than ignored.
 
 How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
 
-`jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
-registered in an active JTA transaction, it records the Outbox path in `beforeCompletion` and notifies
-ordinary CDI dispatchers only after a successful commit. Outside a transaction, it dispatches after
-the outermost successful application-service invocation and discards events when that invocation
-fails. The boundary is synchronous; it does not support reactive return types.
+`jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans.
+`DomainEventContext.register(...)` is legal only inside that interceptor scope; outside it fails
+immediately. For events registered in an active JTA transaction, Outbox dispatchers run in
+`beforeCompletion` and ordinary CDI dispatchers run only after a successful commit. The interceptor
+does not dispatch those transaction-bound events. Outside a transaction, it dispatches the full batch
+after the outermost successful application-service invocation and discards events when that
+invocation fails. The boundary is synchronous; it does not support reactive return types.
 
 ## JPA, Outbox, And Inbox
 

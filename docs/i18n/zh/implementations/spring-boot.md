@@ -87,7 +87,9 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。
 
-事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。持久化在活动 Spring 事务中注册聚合时，运行时会在该事务的 `beforeCommit` 阶段派发事件，使聚合变更与任意 Outbox 记录原子提交，而 Spring 事件适配器仍只会在提交后发布。没有活动事务时，运行时才回退到最外层 `@ApplicationService` 成功完成时派发。该自动路径中的应用业务代码不调用 `drainEvents()`。
+事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。`DomainEventContext.register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
+
+持久化在活动 Spring 事务中注册聚合时，Outbox（`BeforeCommitDomainEventDispatcher`）在该事务的 `beforeCommit` 阶段写入，使聚合变更与任意 Outbox 记录原子提交；进程内 Spring 事件在 `afterCommit` 发布。存在事务事件时，拦截器不会派发。没有活动事务时，运行时在最外层 `@ApplicationService` 成功完成后派发整批事件。该自动路径中的应用业务代码不调用 `drainEvents()`。
 
 ## 持久化
 

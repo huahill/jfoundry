@@ -43,8 +43,13 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 ```
 
 `EventRecordable.drainEvents()` is the framework-neutral handoff SPI. Automatic
-runtimes invoke it after a successful outermost application-service boundary.
-Business code on those runtimes does not call it.
+runtimes invoke it at the dispatch phase. Business code on those runtimes does
+not call it.
+
+Runtime lifecycle adapters depend on one `DomainEventDispatchCoordinator`. The
+default coordinator may route a batch to multiple `DomainEventDispatcher`
+implementations, while keeping before-commit and after-commit behavior behind
+that single boundary.
 
 ## In-process dispatch
 
@@ -54,12 +59,19 @@ The default path stays inside the process:
    `AggregateEventRegistrar`. Applications without domain-event skip that
    registration. Application code may still call
    `DomainEventContext.register(...)` directly.
-2. After the outermost `@ApplicationService` invocation succeeds, the runtime
-   drains pending events.
-3. Each `DomainEventDispatcher.dispatch(...)` receives the batch.
+2. `register(...)` is legal only inside an `@ApplicationService` invocation.
+   Calling it outside that scope fails immediately.
+3. When a transaction is active, the scope stores registered aggregates on the
+   transaction resource. Outbox dispatchers
+   (`BeforeCommitDomainEventDispatcher`) fire in `beforeCommit` /
+   `beforeCompletion`. Ordinary in-process dispatchers fire in `afterCommit` /
+   `afterCompletion(STATUS_COMMITTED)`. The interceptor does not dispatch those
+   transaction-bound events.
+4. When no transaction is active, the outermost successful `@ApplicationService`
+   invocation dispatches the full batch to every dispatcher.
 
-If that outermost invocation fails, pending events are not published. Runtime
-pages describe when dispatch happens relative to the local transaction.
+If that outermost invocation fails, pending events are not published. Dispatchers
+fire synchronously when called; they do not wait for a later transaction phase.
 
 ## Independent of Outbox
 

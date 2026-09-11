@@ -1,7 +1,7 @@
 package org.jfoundry.autoconfigure;
 
-import org.jfoundry.application.event.CompositeDomainEventDispatcher;
 import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
@@ -51,8 +51,7 @@ class DomainEventDispatchAutoConfigurationTest {
             assertThat(context).hasSingleBean(DomainEventScope.class);
             assertThat(context).hasSingleBean(DomainEventContext.class);
             assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
-            assertThat(context).hasSingleBean(CompositeDomainEventDispatcher.class);
-            assertThat(context.getBean(DomainEventDispatcher.class)).isInstanceOf(CompositeDomainEventDispatcher.class);
+            assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
             assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
             assertThat(context).hasBean("domainEventDispatchAdvisor");
             assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
@@ -80,7 +79,7 @@ class DomainEventDispatchAutoConfigurationTest {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
                     assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
-                    assertThat(context.getBean(DomainEventDispatcher.class)).isInstanceOf(CompositeDomainEventDispatcher.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
                     assertThat(context).hasBean("domainEventDispatchAdvisor");
                 });
@@ -124,19 +123,18 @@ class DomainEventDispatchAutoConfigurationTest {
     }
 
     @Test
-    void enabledOutboxDispatcherParticipatesInCompositeDispatcher() {
+    void enabledOutboxDispatcherParticipatesInDispatchCoordinator() {
         contextRunner
                 .withUserConfiguration(OutboxRecorderConfiguration.class)
                 .withPropertyValues("jfoundry.domain.event.dispatch.outbox.enabled=true")
                 .run(context -> {
                     TestOutboxRecorder recorder = context.getBean(TestOutboxRecorder.class);
-                    DomainEventDispatcher dispatcher = context.getBean(DomainEventDispatcher.class);
+                    DomainEventDispatchCoordinator coordinator = context.getBean(DomainEventDispatchCoordinator.class);
 
-                    dispatcher.dispatch(List.of(new TestEvent("order-1")));
+                    coordinator.dispatchWithoutTransaction(List.of(new TestEvent("order-1")));
 
                     assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
                     assertThat(context).hasSingleBean(OutboxDomainEventDispatcher.class);
-                    assertThat(dispatcher).isInstanceOf(CompositeDomainEventDispatcher.class);
                     assertThat(recorder.recordedEvents).extracting(TestEvent::id).containsExactly("order-1");
                 });
     }

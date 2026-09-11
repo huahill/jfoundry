@@ -4,6 +4,8 @@ import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
@@ -26,9 +28,11 @@ class JtaDomainEventDispatchSupportTest {
         var scope = new JtaDomainEventScope(transactionRegistry);
         var beforeCommit = new RecordingBeforeCommitDispatcher();
         var afterCommit = new RecordingDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(beforeCommit, afterCommit));
 
         Object result = JtaDomainEventDispatchSupport.invoke(
-                scope, List.of(beforeCommit, afterCommit), () -> {
+                scope, coordinator, () -> {
                     scope.register(new RecordingAggregate(new TestEvent("confirmed")));
                     return "result";
                 }, ignored -> false, "Test runtime");
@@ -39,18 +43,25 @@ class JtaDomainEventDispatchSupportTest {
     }
 
     @Test
-    void dispatchesOnlyBeforeCommitDelegatesDuringTransactionalInvocation() throws Exception {
+    void leavesTransactionalEventsToTransactionSynchronization() throws Exception {
         var transactionRegistry = new RecordingTransactionSynchronizationRegistry();
         transactionRegistry.activate();
         var scope = new JtaDomainEventScope(transactionRegistry);
         var beforeCommit = new RecordingBeforeCommitDispatcher();
         var afterCommit = new RecordingDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(beforeCommit, afterCommit));
 
         JtaDomainEventDispatchSupport.invoke(
-                scope, List.of(beforeCommit, afterCommit), () -> {
+                scope, coordinator, () -> {
                     scope.register(new RecordingAggregate(new TestEvent("confirmed")));
                     return null;
                 }, ignored -> false, "Test runtime");
+
+        assertThat(beforeCommit.events).isEmpty();
+        assertThat(afterCommit.events).isEmpty();
+
+        transactionRegistry.beforeCompletion();
 
         assertThat(beforeCommit.eventNames()).containsExactly("confirmed");
         assertThat(afterCommit.events).isEmpty();
@@ -67,15 +78,18 @@ class JtaDomainEventDispatchSupportTest {
         var scope = new JtaDomainEventScope(transactionRegistry);
         var beforeCommit = new RecordingBeforeCommitDispatcher();
         var afterCommit = new RecordingDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(beforeCommit, afterCommit));
 
         assertThatThrownBy(() -> JtaDomainEventDispatchSupport.invoke(
-                scope, List.of(beforeCommit, afterCommit), () -> {
+                scope, coordinator, () -> {
                     scope.register(new RecordingAggregate(new TestEvent("failed")));
                     throw new IOException("write failed");
                 }, ignored -> false, "Test runtime"))
                 .isInstanceOf(IOException.class)
                 .hasMessage("write failed");
 
+        transactionRegistry.beforeCompletion();
         transactionRegistry.afterCompletion(Status.STATUS_COMMITTED);
 
         assertThat(beforeCommit.events).isEmpty();
@@ -87,9 +101,11 @@ class JtaDomainEventDispatchSupportTest {
         var transactionRegistry = new RecordingTransactionSynchronizationRegistry();
         var scope = new JtaDomainEventScope(transactionRegistry);
         var dispatcher = new RecordingDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(dispatcher));
 
         assertThatThrownBy(() -> JtaDomainEventDispatchSupport.invoke(
-                scope, List.of(dispatcher), () -> {
+                scope, coordinator, () -> {
                     scope.register(new RecordingAggregate(new TestEvent("deferred")));
                     return new Object();
                 }, ignored -> true, "Test runtime"))
@@ -145,6 +161,10 @@ class JtaDomainEventDispatchSupportTest {
 
         private void activate() {
             transactionKey = new Object();
+        }
+
+        private void beforeCompletion() {
+            synchronizations.forEach(Synchronization::beforeCompletion);
         }
 
         private void afterCompletion(int status) {

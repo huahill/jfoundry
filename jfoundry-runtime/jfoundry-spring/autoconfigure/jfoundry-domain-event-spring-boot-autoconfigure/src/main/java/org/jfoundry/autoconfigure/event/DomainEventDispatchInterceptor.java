@@ -2,31 +2,28 @@ package org.jfoundry.autoconfigure.event;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jmolecules.event.types.DomainEvent;
-
-import java.util.List;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 
 public class DomainEventDispatchInterceptor implements MethodInterceptor {
 
     private final DomainEventScope scope;
-    private final DomainEventDispatcher dispatcher;
+    private final DomainEventDispatchCoordinator coordinator;
 
     public DomainEventDispatchInterceptor(DomainEventScope scope,
-                                          DomainEventDispatcher dispatcher) {
+                                          DomainEventDispatchCoordinator coordinator) {
         this.scope = scope;
-        this.dispatcher = dispatcher;
+        this.coordinator = coordinator;
     }
 
     @Override
     public Object invoke(MethodInvocation invocation) throws Throwable {
-        return scope.invoke(dispatcher, outermost -> {
+        return scope.invoke(coordinator, outermost -> {
             try {
                 Object result = invocation.proceed();
-                if (outermost && !scope.failed()) {
-                    List<DomainEvent> events = scope.drainEvents();
+                if (outermost && !scope.failed() && !scope.hasTransactionEvents()) {
+                    var events = scope.drainEvents();
                     if (!events.isEmpty()) {
-                        dispatcher.dispatch(events);
+                        coordinator.dispatchWithoutTransaction(events);
                     }
                 }
                 return result;
