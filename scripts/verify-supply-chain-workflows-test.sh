@@ -63,6 +63,7 @@ updates:
         - org.springframework.boot:spring-boot-dependencies
         - org.springframework.boot:spring-boot-starter-parent
         - org.springframework.boot:spring-boot-maven-plugin
+    rebase-strategy: disabled
     groups:
       jfoundry-spring-boot-platform:
         patterns:
@@ -80,6 +81,9 @@ updates:
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
+      jfoundry-maven-minors:
+        patterns: ["*"]
+        update-types: [minor]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -421,10 +425,22 @@ import yaml
 path = Path(sys.argv[1])
 config = yaml.safe_load(path.read_text())
 groups = config["updates"][0]["groups"]
-config["updates"][0]["groups"] = {name: groups[name] for name in ["jfoundry-maven-patches", "jfoundry-spring-boot-platform", "jfoundry-quarkus-platform"]}
+config["updates"][0]["groups"] = {name: groups[name] for name in ["jfoundry-maven-patches", "jfoundry-spring-boot-platform", "jfoundry-quarkus-platform", "jfoundry-maven-minors"]}
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches, jfoundry-maven-minors"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0].pop("rebase-strategy", None)
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must disable automatic rebasing"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'

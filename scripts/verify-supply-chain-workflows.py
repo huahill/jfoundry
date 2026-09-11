@@ -72,6 +72,7 @@ def verify_dependabot(root: Path) -> None:
         "jfoundry-spring-boot-platform": {"patterns": expected_cooldown["include"][:3], "update-types": ["patch", "minor"]},
         "jfoundry-quarkus-platform": {"patterns": expected_cooldown["include"][3:], "update-types": ["patch", "minor"]},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
+        "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
     if list(groups) != list(expected_groups):
         fail(f"{prefix}: Maven groups must be ordered as {', '.join(expected_groups)}")
@@ -81,7 +82,11 @@ def verify_dependabot(root: Path) -> None:
                 fail(f"{prefix}: jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
             if name == "jfoundry-quarkus-platform":
                 fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
-            fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
+            if name == "jfoundry-maven-patches":
+                fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
+            fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
+    if maven[0].get("rebase-strategy") != "disabled":
+        fail(f"{prefix}: Maven updates must disable automatic rebasing")
     if "ignore" in maven[0]:
         fail(f"{prefix}: Maven updates must not define ignore rules")
     expected_directories = ["/", "/jfoundry-boms/*"]
