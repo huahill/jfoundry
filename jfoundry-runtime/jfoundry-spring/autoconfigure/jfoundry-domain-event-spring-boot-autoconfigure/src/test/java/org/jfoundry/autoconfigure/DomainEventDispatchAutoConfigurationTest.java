@@ -3,7 +3,7 @@ package org.jfoundry.autoconfigure;
 import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;

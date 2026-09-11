@@ -6,7 +6,7 @@ import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jfoundry.application.event.DomainEventBatch;
 import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jmolecules.event.types.DomainEvent;
 
 import java.util.List;

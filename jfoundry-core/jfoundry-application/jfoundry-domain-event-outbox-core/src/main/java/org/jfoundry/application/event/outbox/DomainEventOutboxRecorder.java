@@ -1,4 +1,4 @@
-package org.jfoundry.application.outbox;
+package org.jfoundry.application.event.outbox;
 
 import org.jmolecules.event.types.DomainEvent;
 

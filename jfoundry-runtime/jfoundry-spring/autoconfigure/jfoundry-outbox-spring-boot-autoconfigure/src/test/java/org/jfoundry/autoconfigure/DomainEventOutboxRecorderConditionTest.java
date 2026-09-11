@@ -2,8 +2,8 @@ package org.jfoundry.autoconfigure;
 
 import tools.jackson.databind.ObjectMapper;
 import org.jfoundry.application.outbox.BackoffStrategy;
-import org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DefaultDomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.junit.jupiter.api.Test;

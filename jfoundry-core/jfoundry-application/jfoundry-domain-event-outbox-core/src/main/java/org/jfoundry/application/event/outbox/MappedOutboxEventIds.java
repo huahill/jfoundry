@@ -1,4 +1,4 @@
-package org.jfoundry.application.outbox;
+package org.jfoundry.application.event.outbox;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

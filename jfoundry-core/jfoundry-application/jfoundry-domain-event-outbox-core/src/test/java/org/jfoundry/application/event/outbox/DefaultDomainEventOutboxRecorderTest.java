@@ -1,4 +1,4 @@
-package org.jfoundry.application.outbox;
+package org.jfoundry.application.event.outbox;
 
 import org.jfoundry.application.event.externalization.AggregateRouting;
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
@@ -8,6 +8,10 @@ import org.jfoundry.application.event.externalization.ExternalizedEvent;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.event.externalization.MessageRouting;
 import org.jfoundry.application.messaging.PayloadSerializer;
+import org.jfoundry.application.outbox.BackoffStrategy;
+import org.jfoundry.application.outbox.OutboxMessage;
+import org.jfoundry.application.outbox.OutboxMessageStore;
+import org.jfoundry.application.outbox.OutboxMessageStatus;
 import org.jfoundry.domain.event.BaseDomainEvent;
 import org.jmolecules.event.annotation.Externalized;
 import org.jmolecules.event.types.DomainEvent;

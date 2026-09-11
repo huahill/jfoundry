@@ -5,7 +5,7 @@ import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.jfoundry.infrastructure.outbox.spring.externalization.OutboxDomainEventDispatcher;
 import org.springframework.aop.Advisor;

@@ -2,7 +2,7 @@ package org.jfoundry.infrastructure.outbox.helidon.externalization;
 
 import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.Test;
 

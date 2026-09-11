@@ -1,6 +1,6 @@
 package org.jfoundry.infrastructure.outbox.spring.externalization;
 
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.Test;
 

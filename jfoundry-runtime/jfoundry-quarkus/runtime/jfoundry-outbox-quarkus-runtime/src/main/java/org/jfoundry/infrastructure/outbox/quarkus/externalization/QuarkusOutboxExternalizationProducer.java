@@ -10,8 +10,8 @@ import org.jfoundry.application.event.externalization.DomainEventExternalization
 import org.jfoundry.application.event.externalization.DomainEventExternalizer;
 import org.jfoundry.application.event.externalization.ExternalizationRuleResolver;
 import org.jfoundry.application.messaging.PayloadSerializer;
-import org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DefaultDomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
 import org.jfoundry.infrastructure.messaging.jackson.JacksonPayloadSerializer;

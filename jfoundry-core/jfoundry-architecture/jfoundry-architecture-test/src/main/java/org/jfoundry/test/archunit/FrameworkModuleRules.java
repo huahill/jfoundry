@@ -122,7 +122,7 @@ public final class FrameworkModuleRules {
     @ArchTest
     public static final ArchRule domain_event_outbox_recorder_should_be_in_application_ring =
             classes()
-                    .that().haveFullyQualifiedName("org.jfoundry.application.outbox.DomainEventOutboxRecorder")
+                    .that().haveFullyQualifiedName("org.jfoundry.application.event.outbox.DomainEventOutboxRecorder")
                     .should(resideInPackageAnnotatedWith(ApplicationRing.class))
                     .allowEmptyShould(true)
                     .because("DomainEventOutboxRecorder belongs to the Onion application ring");
@@ -197,7 +197,7 @@ public final class FrameworkModuleRules {
     public static final ArchRule default_domain_event_outbox_recorder_should_be_in_application_ring =
             classes()
                     .that().haveFullyQualifiedName(
-                            "org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder")
+                            "org.jfoundry.application.event.outbox.DefaultDomainEventOutboxRecorder")
                     .should(resideInPackageAnnotatedWith(ApplicationRing.class))
                     .allowEmptyShould(true)
                     .because("DefaultDomainEventOutboxRecorder belongs to the Onion application ring");

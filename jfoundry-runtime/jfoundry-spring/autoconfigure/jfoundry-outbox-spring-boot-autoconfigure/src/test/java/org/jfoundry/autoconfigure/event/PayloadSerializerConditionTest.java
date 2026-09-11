@@ -1,7 +1,7 @@
 package org.jfoundry.autoconfigure.event;
 
 import org.jfoundry.application.messaging.PayloadSerializer;
-import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
+import org.jfoundry.application.event.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
