@@ -60,7 +60,7 @@
     <jackson3.version>3.2.2</jackson3.version>
 
     <!-- Mapping and code generation -->
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Apache Commons -->
     <commons-codec.version>1.22.1</commons-codec.version>
