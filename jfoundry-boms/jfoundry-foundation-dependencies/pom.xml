@@ -51,7 +51,7 @@
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.4.6.Final</hibernate.version>
+    <hibernate.version>7.4.7.Final</hibernate.version>
     <h2.version>2.4.240</h2.version>
     <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
@@ -83,13 +83,13 @@
     <!-- Runtime utilities -->
     <javassist.version>3.33.0-GA</javassist.version>
     <opentelemetry.version>1.62.0</opentelemetry.version>
-    <slf4j.version>2.0.18</slf4j.version>
+    <slf4j.version>2.0.19</slf4j.version>
     <snakeyaml.version>2.6</snakeyaml.version>
 
     <!-- Testing -->
     <awaitility.version>4.3.0</awaitility.version>
     <assertj.version>3.27.7</assertj.version>
-    <byte-buddy.version>1.18.12</byte-buddy.version>
+    <byte-buddy.version>1.18.13</byte-buddy.version>
     <mockito.version>5.23.0</mockito.version>
     <junit-platform.version>6.1.3</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
