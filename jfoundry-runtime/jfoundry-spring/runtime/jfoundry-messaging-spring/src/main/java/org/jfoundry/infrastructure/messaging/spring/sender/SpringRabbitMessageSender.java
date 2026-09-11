@@ -18,7 +18,7 @@ public class SpringRabbitMessageSender implements MessageSender {
     public SendResult send(OutboundMessage message) {
         try {
             rabbitOperations.convertAndSend(message.topic(), message.payloadKey(), message.payload(), outbound -> {
-                outbound.getMessageProperties().getHeaders().putAll(message.propagation().entries());
+                message.applyHeaders((key, value) -> outbound.getMessageProperties().getHeaders().put(key, value));
                 return outbound;
             });
             return SendResult.ok();

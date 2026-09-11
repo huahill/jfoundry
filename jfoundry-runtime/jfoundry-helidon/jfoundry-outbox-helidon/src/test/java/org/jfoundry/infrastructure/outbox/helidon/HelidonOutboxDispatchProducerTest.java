@@ -165,15 +165,10 @@ class HelidonOutboxDispatchProducerTest {
         }
 
         @Override
-        public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-            return messages.subList(0, Math.min(limit, messages.size()));
-        }
-
-        @Override
         public List<OutboxMessage> claimDispatchable(int limit, String claimerId) {
             this.claimBatchSize = limit;
             this.claimerId = claimerId;
-            return findDispatchable(limit, Instant.now());
+            return messages.subList(0, Math.min(limit, messages.size()));
         }
 
         @Override

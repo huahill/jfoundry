@@ -62,7 +62,7 @@ class PersistenceTestConfig {
                                              DomainEventContext domainEventContext,
                                              TestOrderDataMapper dataMapper) {
         TestOrderRepository repository = new TestOrderRepository(mapper, dataMapper);
-        repository.setDomainEventContext(domainEventContext);
+        repository.setAggregateEventRegistrar(domainEventContext::register);
         return repository;
     }
 

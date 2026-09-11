@@ -77,7 +77,8 @@ class HelidonKafkaMessageSenderTest {
                 "order-42",
                 "{}",
                 MessagePropagation.from(Map.of(
-                        "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"))));
+                        "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01")),
+                "sales.order-created.v1"));
 
         assertThat(result.success()).isTrue();
         ArgumentCaptor<ProducerRecord<String, String>> record = ArgumentCaptor.forClass(ProducerRecord.class);
@@ -85,6 +86,8 @@ class HelidonKafkaMessageSenderTest {
         assertThat(record.getValue().headers().lastHeader("traceparent").value())
                 .isEqualTo("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"
                         .getBytes(StandardCharsets.UTF_8));
+        assertThat(record.getValue().headers().lastHeader(OutboundMessage.PAYLOAD_TYPE_HEADER).value())
+                .isEqualTo("sales.order-created.v1".getBytes(StandardCharsets.UTF_8));
     }
 
     @Test

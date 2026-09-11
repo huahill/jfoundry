@@ -106,13 +106,17 @@ name or read-only transaction setting, so this adapter rejects `TransactionOptio
 
 ## Domain Event Dispatch
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md). This page covers Quarkus dispatch wiring.
+
 The `jfoundry-domain-event-quarkus-runtime` extension provides the application-service event boundary. For every CDI bean
 annotated with framework-neutral `@ApplicationService`, Quarkus adds a runtime-only interceptor
-binding during augmentation. On the outermost successful invocation, the interceptor drains events
-from aggregates registered through `DomainEventContext` and sends them to every CDI
-`DomainEventDispatcher`. Nested application-service invocations share the same
-scope, so dispatch occurs once at the outermost boundary. An exception escaping that boundary
-discards its pending events.
+binding during augmentation. Nested application-service invocations share the same scope.
+
+`DomainEventContext.register(...)` is legal only inside that scope; outside it fails immediately.
+When a JTA transaction is active, Outbox dispatchers run in `beforeCompletion` and in-process CDI
+dispatchers run after a successful commit. The interceptor does not dispatch those transaction-bound
+events. Without a transaction, the outermost successful invocation dispatches the full batch to
+every CDI `DomainEventDispatcher`. An exception escaping that boundary discards its pending events.
 
 ```java
 @ApplicationScoped

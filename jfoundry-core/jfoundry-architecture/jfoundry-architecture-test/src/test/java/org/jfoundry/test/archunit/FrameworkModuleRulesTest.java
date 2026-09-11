@@ -28,7 +28,7 @@ class FrameworkModuleRulesTest {
         assertThat(FrameworkModuleRules.infrastructure_message_stores_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.spring_application_event_dispatcher_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.spring_event_dispatcher_should_not_be_in_messaging_package).isNotNull();
-        assertThat(FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_infrastructure_ring).isNotNull();
+        assertThat(FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_application_ring).isNotNull();
         assertThat(FrameworkModuleRules.kafka_message_sender_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.jackson_payload_serializer_should_be_in_infrastructure_ring).isNotNull();
         assertThat(FrameworkModuleRules.scheduled_outbox_trigger_should_be_in_infrastructure_ring).isNotNull();

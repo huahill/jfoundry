@@ -97,5 +97,5 @@ JFoundry 落地指导。
 从[能力目录](../capabilities/index.md)选择聚合持久化、事务、Web、消息、Outbox/Inbox、分布式锁或可观测性。
 每个能力页面都会列出不同运行时的对应入口和当前支持范围。
 
-开始实现前，可继续阅读 [Repository 与读侧契约](../modeling/repository-vs-read-contracts.md)。生产采用前请查看
+开始实现前，可继续阅读[建模](../modeling/index.md)中的值对象、领域事件和仓储契约约定。生产采用前请查看
 [采用就绪度与已验证范围](adoption-readiness.md)。

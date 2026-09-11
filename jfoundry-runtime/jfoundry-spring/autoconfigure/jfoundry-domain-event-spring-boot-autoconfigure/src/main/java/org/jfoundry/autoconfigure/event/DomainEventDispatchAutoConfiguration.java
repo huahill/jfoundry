@@ -1,8 +1,9 @@
 package org.jfoundry.autoconfigure.event;
 
 import org.jfoundry.application.ApplicationService;
-import org.jfoundry.application.event.CompositeDomainEventDispatcher;
 import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.application.outbox.DomainEventOutboxRecorder;
 import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
@@ -22,10 +23,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Role;
 
-import java.util.List;
 import java.util.function.Supplier;
 
 @AutoConfiguration
@@ -56,21 +55,20 @@ public class DomainEventDispatchAutoConfiguration {
     static class DispatchConfiguration {
 
         @Bean
-        @Primary
         @ConditionalOnBean(DomainEventDispatcher.class)
-        @ConditionalOnMissingBean(CompositeDomainEventDispatcher.class)
-        public CompositeDomainEventDispatcher compositeDomainEventDispatcher(
-                List<DomainEventDispatcher> dispatchers) {
-            return new CompositeDomainEventDispatcher(dispatchers);
+        @ConditionalOnMissingBean(DomainEventDispatchCoordinator.class)
+        public DomainEventDispatchCoordinator domainEventDispatchCoordinator(
+                org.springframework.beans.factory.ObjectProvider<DomainEventDispatcher> dispatchers) {
+            return new DefaultDomainEventDispatchCoordinator(dispatchers.orderedStream().toList());
         }
 
         @Bean
-        @ConditionalOnBean(CompositeDomainEventDispatcher.class)
+        @ConditionalOnBean(DomainEventDispatchCoordinator.class)
         @ConditionalOnMissingBean
         public DomainEventDispatchInterceptor domainEventDispatchInterceptor(
                 DomainEventScope scope,
-                DomainEventDispatcher dispatcher) {
-            return new DomainEventDispatchInterceptor(scope, dispatcher);
+                DomainEventDispatchCoordinator coordinator) {
+            return new DomainEventDispatchInterceptor(scope, coordinator);
         }
 
         @Bean

@@ -27,7 +27,7 @@ public class SpringRocketMessageSender implements MessageSender {
             if (outboundMessage.payloadKey() != null) {
                 message.setKeys(outboundMessage.payloadKey());
             }
-            outboundMessage.propagation().entries().forEach(message::putUserProperty);
+            outboundMessage.applyHeaders(message::putUserProperty);
             producer.send(message, sendTimeout.toMillis());
             return SendResult.ok();
         } catch (Exception exception) {

@@ -1,7 +1,9 @@
 package org.jfoundry.autoconfigure.event;
 
 import org.jfoundry.application.event.DefaultDomainEventContext;
-import org.jfoundry.application.event.DomainEventDispatcher;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -11,20 +13,22 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+/// Dynamically scoped domain-event context coordinated with Spring transactions.
 public class DomainEventScope {
 
     private static final ScopedValue<State> CURRENT = ScopedValue.newInstance();
 
     <T> T invoke(ScopedOperation<T> operation) throws Throwable {
-        return invoke(null, operation);
+        return invoke(new DefaultDomainEventDispatchCoordinator(List.of()), operation);
     }
 
-    <T> T invoke(DomainEventDispatcher dispatcher, ScopedOperation<T> operation) throws Throwable {
+    <T> T invoke(DomainEventDispatchCoordinator coordinator, ScopedOperation<T> operation) throws Throwable {
         if (CURRENT.isBound()) {
             return operation.get(false);
         }
-        return ScopedValue.where(CURRENT, new State(dispatcher)).call(() -> {
+        return ScopedValue.where(CURRENT, new State(coordinator)).call(() -> {
             try {
                 return operation.get(true);
             } catch (Throwable throwable) {
@@ -35,10 +39,11 @@ public class DomainEventScope {
 
     void register(EventRecordable aggregate) {
         State state = current();
-        if (state != null) {
-            state.context.register(aggregate);
-            state.registerTransactionEvent(aggregate);
+        if (state == null) {
+            DomainEventContext.requireActiveScope();
+            return;
         }
+        state.register(aggregate);
     }
 
     void markFailed() {
@@ -58,11 +63,12 @@ public class DomainEventScope {
         if (state == null) {
             return List.of();
         }
-        List<DomainEvent> events = new ArrayList<>();
-        for (EventRecordable aggregate : state.context.drainRegistered()) {
-            events.addAll(aggregate.drainEvents());
-        }
-        return List.copyOf(events);
+        return state.drainEvents();
+    }
+
+    boolean hasTransactionEvents() {
+        State state = current();
+        return state != null && state.hasTransactionEvents();
     }
 
     private State current() {
@@ -77,25 +83,40 @@ public class DomainEventScope {
     private static final class State {
 
         private final DefaultDomainEventContext context = new DefaultDomainEventContext();
-        private final DomainEventDispatcher dispatcher;
+        private final DomainEventDispatchCoordinator coordinator;
         private boolean failed;
 
-        private State(DomainEventDispatcher dispatcher) {
-            this.dispatcher = dispatcher;
+        private State(DomainEventDispatchCoordinator coordinator) {
+            this.coordinator = Objects.requireNonNull(coordinator, "Domain-event coordinator must not be null.");
         }
 
-        private void registerTransactionEvent(EventRecordable aggregate) {
-            if (dispatcher == null
-                    || !TransactionSynchronizationManager.isActualTransactionActive()
-                    || !TransactionSynchronizationManager.isSynchronizationActive()) {
+        private void register(EventRecordable aggregate) {
+            if (TransactionSynchronizationManager.isActualTransactionActive()
+                    && TransactionSynchronizationManager.isSynchronizationActive()) {
+                transactionEvents().register(aggregate);
                 return;
             }
-            TransactionEvents events = currentTransactionEvents();
-            events.register(aggregate);
+            context.register(aggregate);
         }
 
-        private TransactionEvents currentTransactionEvents() {
-            TransactionEvents events = (TransactionEvents) TransactionSynchronizationManager.getResource(this);
+        private List<DomainEvent> drainEvents() {
+            TransactionEvents transactionEvents = existingTransactionEvents();
+            if (transactionEvents != null) {
+                return transactionEvents.events();
+            }
+            List<DomainEvent> events = new ArrayList<>();
+            for (EventRecordable aggregate : context.drainRegistered()) {
+                events.addAll(aggregate.drainEvents());
+            }
+            return List.copyOf(events);
+        }
+
+        private boolean hasTransactionEvents() {
+            return TransactionSynchronizationManager.hasResource(this);
+        }
+
+        private TransactionEvents transactionEvents() {
+            TransactionEvents events = existingTransactionEvents();
             if (events != null) {
                 return events;
             }
@@ -103,8 +124,15 @@ public class DomainEventScope {
             TransactionEvents created = new TransactionEvents();
             TransactionSynchronizationManager.bindResource(this, created);
             TransactionSynchronizationManager.registerSynchronization(new TransactionEventSynchronization(
-                    this, created, dispatcher));
+                    this, created, coordinator));
             return created;
+        }
+
+        private TransactionEvents existingTransactionEvents() {
+            if (!TransactionSynchronizationManager.hasResource(this)) {
+                return null;
+            }
+            return (TransactionEvents) TransactionSynchronizationManager.getResource(this);
         }
     }
 
@@ -112,6 +140,7 @@ public class DomainEventScope {
 
         private final List<EventRecordable> aggregates = new ArrayList<>();
         private final Map<EventRecordable, Boolean> seen = new IdentityHashMap<>();
+        private List<DomainEvent> events;
 
         private void register(EventRecordable aggregate) {
             if (seen.put(aggregate, Boolean.TRUE) == null) {
@@ -119,33 +148,44 @@ public class DomainEventScope {
             }
         }
 
-        private List<DomainEvent> drainEvents() {
-            List<DomainEvent> events = new ArrayList<>();
+        private List<DomainEvent> events() {
+            if (events != null) {
+                return events;
+            }
+            List<DomainEvent> drained = new ArrayList<>();
             for (EventRecordable aggregate : aggregates) {
-                events.addAll(aggregate.drainEvents());
+                drained.addAll(aggregate.drainEvents());
             }
             aggregates.clear();
             seen.clear();
-            return List.copyOf(events);
+            events = List.copyOf(drained);
+            return events;
         }
     }
 
     private record TransactionEventSynchronization(State state, TransactionEvents events,
-                                                   DomainEventDispatcher dispatcher)
+                                                   DomainEventDispatchCoordinator coordinator)
             implements TransactionSynchronization {
 
         @Override
         public void beforeCommit(boolean readOnly) {
-            List<DomainEvent> domainEvents = events.drainEvents();
-            if (!domainEvents.isEmpty()) {
-                dispatcher.dispatch(domainEvents);
+            List<DomainEvent> domainEvents = events.events();
+            if (!state.failed) {
+                coordinator.dispatchBeforeCommit(domainEvents);
+            }
+        }
+
+        @Override
+        public void afterCommit() {
+            if (!state.failed) {
+                coordinator.dispatchAfterCommit(events.events());
             }
         }
 
         @Override
         public void afterCompletion(int status) {
             if (status != STATUS_COMMITTED) {
-                events.drainEvents();
+                events.events();
             }
             unbindIfCurrent();
         }

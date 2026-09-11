@@ -37,7 +37,7 @@ class MybatisPlusOutboxMessageStoreTest {
         OutboxMessage entry = pendingMessage("evt-1");
         repository.append(entry);
 
-        OutboxMessage loaded = repository.findDispatchable(100, Instant.now()).get(0);
+        OutboxMessage loaded = OutboxData.toMessage(mapper().selectById("evt-1"));
         assertThat(loaded.getEventId()).isEqualTo("evt-1");
     }
 
@@ -49,7 +49,7 @@ class MybatisPlusOutboxMessageStoreTest {
 
         repository.append(entry);
 
-        OutboxMessage loaded = repository.findDispatchable(100, Instant.now()).get(0);
+        OutboxMessage loaded = OutboxData.toMessage(mapper().selectById("evt-aggregate"));
         assertThat(loaded.getAggregateType()).isEqualTo("Order");
         assertThat(loaded.getAggregateId()).isEqualTo("order-1");
         assertThat(loaded.getAggregateVersion()).isEqualTo(7L);
@@ -64,24 +64,24 @@ class MybatisPlusOutboxMessageStoreTest {
 
         repository.append(entry);
 
-        OutboxMessage loaded = repository.findDispatchable(100, Instant.now()).getFirst();
+        OutboxMessage loaded = OutboxData.toMessage(mapper().selectById("evt-trace-context"));
         assertThat(loaded.getPropagation()).isEqualTo(entry.getPropagation());
     }
 
     @Test
-    void findDispatchableReturnsOnlyPendingOrFailedReady() {
+    void claimDispatchableReturnsOnlyPendingOrFailedReady() {
         repository.append(pendingMessage("evt-ready"));
         OutboxMessage failedNotReady = pendingMessage("evt-failed-not-ready");
         failedNotReady.markFailed("err", 5, fixedBackoff); // nextRetryAt = now + 10s
         repository.append(failedNotReady);
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
 
         assertThat(ready).extracting(OutboxMessage::getEventId).containsExactly("evt-ready");
     }
 
     @Test
-    void findDispatchableReturnsFailedWhoseNextRetryAtReached() throws InterruptedException {
+    void claimDispatchableReturnsFailedWhoseNextRetryAtReached() throws InterruptedException {
         BackoffStrategy instant = failedAttempts -> Duration.ofMillis(1);
         OutboxMessage failed = pendingMessage("evt-failed");
         failed.markFailed("err", 5, instant);
@@ -89,7 +89,7 @@ class MybatisPlusOutboxMessageStoreTest {
 
         Thread.sleep(20); // wait for next_retry_at to pass
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).extracting(OutboxMessage::getEventId).contains("evt-failed");
     }
 
@@ -99,7 +99,7 @@ class MybatisPlusOutboxMessageStoreTest {
         repository.claimDispatchable(1, "pod-a");
         repository.markAsPublished("evt-1");
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).isEmpty();
     }
 
@@ -109,7 +109,7 @@ class MybatisPlusOutboxMessageStoreTest {
 
         repository.markAsPublished("evt-1");
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).extracting(OutboxMessage::getEventId).containsExactly("evt-1");
     }
 
@@ -135,7 +135,7 @@ class MybatisPlusOutboxMessageStoreTest {
         repository.markAsFailed("evt-1", "boom", 5, fixedBackoff);
 
         // Should not be dispatchable immediately (nextRetryAt = now + 10s)
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).isEmpty();
     }
 
@@ -145,7 +145,7 @@ class MybatisPlusOutboxMessageStoreTest {
 
         repository.markAsFailed("evt-1", "boom", 5, fixedBackoff);
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).extracting(OutboxMessage::getEventId).containsExactly("evt-1");
     }
 
@@ -172,7 +172,7 @@ class MybatisPlusOutboxMessageStoreTest {
         repository.markAsFailed("evt-1", "boom", 1, fixedBackoff);
 
         // DEAD_LETTERED should not be dispatchable
-        assertThat(repository.findDispatchable(100, Instant.now())).isEmpty();
+        assertThat(repository.claimDispatchable(100, "test")).isEmpty();
     }
 
     @Test
@@ -183,7 +183,7 @@ class MybatisPlusOutboxMessageStoreTest {
 
         repository.reactivate("evt-1");
 
-        List<OutboxMessage> ready = repository.findDispatchable(100, Instant.now());
+        List<OutboxMessage> ready = repository.claimDispatchable(100, "test");
         assertThat(ready).extracting(OutboxMessage::getEventId).contains("evt-1");
     }
 

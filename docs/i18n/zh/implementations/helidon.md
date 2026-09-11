@@ -61,9 +61,9 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 `TransactionPropagation` 映射到 Jakarta Transactions。它支持由自身创建事务的超时；Jakarta
 Transactions 没有可移植的事务名称和只读语义，因此会拒绝这两类选项，而不是静默忽略。
 
-`jfoundry-domain-event-helidon` 会向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。对于在活跃 JTA 事务中注册的
-事件，它会在 `beforeCompletion` 阶段记录 Outbox，并仅在成功提交后通知普通 CDI 派发器。事务外的事件仍在
-最外层应用服务成功完成后派发；该调用失败时则丢弃事件。此边界仅支持同步调用，不支持 reactive 返回类型。
+聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。
+
+`jfoundry-domain-event-helidon` 会向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。`DomainEventContext.register(...)` 只允许在该拦截器作用域内使用；作用域外立即失败。对于在活跃 JTA 事务中注册的事件，Outbox 派发器在 `beforeCompletion` 运行，普通 CDI 派发器仅在成功提交后运行。拦截器不会派发这些事务绑定的事件。事务外的事件仍在最外层应用服务成功完成后整批派发；该调用失败时则丢弃事件。此边界仅支持同步调用，不支持 reactive 返回类型。
 
 ## JPA、Outbox 与 Inbox
 

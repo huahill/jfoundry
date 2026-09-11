@@ -1,13 +1,11 @@
 package org.jfoundry.infrastructure.event.quarkus;
 
 import jakarta.annotation.Priority;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.interceptor.AroundInvoke;
 import jakarta.interceptor.Interceptor;
 import jakarta.interceptor.InvocationContext;
-import org.jfoundry.application.event.DomainEventDispatcher;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.infrastructure.event.jta.JtaDomainEventDispatchSupport;
 
 import java.util.concurrent.CompletionStage;
@@ -19,20 +17,20 @@ import java.util.concurrent.CompletionStage;
 public class QuarkusDomainEventDispatchInterceptor {
 
     private final QuarkusDomainEventScope scope;
-    private final Instance<DomainEventDispatcher> dispatchers;
+    private final DomainEventDispatchCoordinator coordinator;
 
     @Inject
     public QuarkusDomainEventDispatchInterceptor(
             QuarkusDomainEventScope scope,
-            @Any Instance<DomainEventDispatcher> dispatchers) {
+            DomainEventDispatchCoordinator coordinator) {
         this.scope = scope;
-        this.dispatchers = dispatchers;
+        this.coordinator = coordinator;
     }
 
     @AroundInvoke
     Object dispatch(InvocationContext invocation) throws Exception {
         return JtaDomainEventDispatchSupport.invoke(
-                scope.delegate(), dispatchers.stream().toList(), invocation::proceed,
+                scope.delegate(), coordinator, invocation::proceed,
                 QuarkusDomainEventDispatchInterceptor::isAsynchronousResult, "Quarkus");
     }
 

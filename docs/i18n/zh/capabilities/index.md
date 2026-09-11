@@ -6,7 +6,7 @@
 
 | 能力 | 适用场景 | Spring Boot | Quarkus | Helidon MP | 指南 |
 |---|---|---|---|---|---|
-| 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [接入指南](../integration/getting-started.md) |
+| 领域建模 | 业务模型需要聚合、值对象、领域事件与显式不变量。 | `jfoundry-domain` | `jfoundry-domain` | `jfoundry-domain` | [建模](../modeling/index.md) |
 | 应用服务 | 用例需要清晰的应用边界；仅在需要时添加 CQRS、事务或领域事件模块。 | `jfoundry-application-core` | `jfoundry-application-core` | `jfoundry-application-core` | [接入指南](../integration/getting-started.md) |
 | 可执行架构规则 | 项目需要可复用的 ArchUnit 检查来约束 Hexagonal 或 Onion 边界。 | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | `jfoundry-architecture-test`（测试范围） | [ArchUnit 架构规则](../framework/archunit-rules.md) |
 | 应用事务 | 用例需要运行时事务边界。 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` | `jfoundry-transaction-helidon` | [应用事务](application-transactions.md) |

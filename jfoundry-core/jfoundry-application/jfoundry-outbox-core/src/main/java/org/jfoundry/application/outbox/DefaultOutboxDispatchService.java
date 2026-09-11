@@ -99,7 +99,8 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
         @Nullable String claimToken = message.getClaimToken();
         try {
             SendResult result = messageSender.send(new OutboundMessage(
-                    message.getTopic(), message.getPayloadKey(), message.getPayloadJson(), message.getPropagation()));
+                    message.getTopic(), message.getPayloadKey(), message.getPayloadJson(),
+                    message.getPropagation(), message.getPayloadType()));
             if (result.success()) {
                 inNewTransaction(() -> {
                     repository.markAsPublished(message.getEventId(), claimToken);

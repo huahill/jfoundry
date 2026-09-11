@@ -103,17 +103,23 @@ Spring `@Transactional` boundary can also be appropriate when the application de
 Spring semantics; do not layer independent transaction boundaries around the same use case without
 a defined ownership rule. See [application transactions](../capabilities/application-transactions.md).
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
+
 The event starter activates application-service domain-event dispatch and publishes each dispatched
 event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
 process. A `@TransactionalEventListener` selects the desired transaction phase, such as
 `AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
 not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
-fact with `recordEvent(...)`. When persistence registers the aggregate inside an active Spring
-transaction, the runtime dispatches its events in that transaction's `beforeCommit` phase. This makes
-the aggregate change and any Outbox row atomic, while the Spring event adapter still publishes only
-after commit. Without an active transaction, the runtime falls back to dispatching at the successful
-outermost `@ApplicationService` boundary. Application business code does not call `drainEvents()` in
-this automatic path.
+fact with `recordEvent(...)`. `DomainEventContext.register(...)` is legal only inside an
+`@ApplicationService` invocation; outside that scope it fails immediately.
+
+When persistence registers the aggregate inside an active Spring transaction, Outbox
+(`BeforeCommitDomainEventDispatcher`) writes in that transaction's `beforeCommit` phase so the
+aggregate change and any Outbox row commit atomically. In-process Spring event publication happens
+in `afterCommit`. The interceptor does not dispatch when transaction events exist. Without an
+active transaction, the runtime dispatches the full batch at the successful outermost
+`@ApplicationService` boundary. Application business code does not call `drainEvents()` in this
+automatic path.
 
 ## Persistence
 

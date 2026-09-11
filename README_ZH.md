@@ -72,7 +72,7 @@ ArchUnit 规则。CQRS 仍是按需使用的局部模式。
 ## 选择路径
 
 - **选择能力**：先从[能力目录](docs/i18n/zh/capabilities/index.md)开始，将业务需求映射到受支持运行时的依赖入口。
-- **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
+- **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/index.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md)。
 - **Web**：先阅读[Web](docs/i18n/zh/capabilities/web.md)，再选择 RFC 9457 Problem Details 或运行时专属的 HTTP 服务端与 REST Client 诊断日志。
 - **消息传输**：通过[消息传输](docs/i18n/zh/capabilities/message-delivery.md)选择直接使用的 Kafka、RabbitMQ、RocketMQ 或应用自有传输适配器。
@@ -178,7 +178,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### 建模
 
+- [建模](docs/i18n/zh/modeling/index.md)
 - [值对象规范](docs/i18n/zh/modeling/value-object.md)
+- [领域事件](docs/i18n/zh/modeling/domain-event.md)
 - [Repository 与读侧契约迁移指南](docs/i18n/zh/modeling/repository-vs-read-contracts.md)
 
 ### 发布与兼容

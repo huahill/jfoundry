@@ -72,7 +72,7 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
             throw new IllegalStateException(
                     "MybatisPlusInterceptor does not contain PaginationInnerInterceptor. "
                             + "OutboxMessageStore relies on selectPage to generate dialect SQL in "
-                            + "findDispatchable, claimDispatchable, and deleteByStatusAndOccurredAtBefore. "
+                            + "claimDispatchable, and deleteByStatusAndOccurredAtBefore. "
                             + "Without it, selectPage can silently return a full table. "
                             + "Please add PaginationInnerInterceptor to MybatisPlusInterceptor.");
         }
@@ -83,17 +83,8 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
         mapper.insert(OutboxData.fromMessage(entry));
     }
 
-    @Override
-    public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-        Page<OutboxData> page = new Page<>(1, limit, false);
-        IPage<OutboxData> result = mapper.selectPage(page,
-                dispatchableCandidatesQuery(now).orderByAsc(OCCURRED_AT));
-        return result.getRecords().stream().map(OutboxData::toMessage).toList();
-    }
-
     /// WHERE condition for dispatchable candidates: {@code status IN (PENDING, FAILED) AND retry-due}.
-    /// {@link #findDispatchable} and {@link #claimDispatchable} share this condition and specify
-    /// their own orderBy clauses.
+    /// {@link #claimDispatchable} uses this condition and specifies its own orderBy clause.
     /// <p>
     /// retry-due means {@code nextRetryAt IS NULL} for never-failed rows or {@code nextRetryAt ≤ now}
     /// for rows whose retry time has arrived.
@@ -180,7 +171,7 @@ public class MybatisPlusOutboxMessageStore implements OutboxMessageStore {
     /// Two-step CAS claim: select candidates with selectPage, then CAS UPDATE each row. The outer
     /// retry loop continues until the limit is reached or the candidate pool is exhausted.
     /// <p>
-    /// Candidate semantics match {@link #findDispatchable}: all PENDING rows plus FAILED rows whose
+    /// Candidate semantics: all PENDING rows plus FAILED rows whose
     /// {@code next_retry_at} is due. The CAS guard
     /// {@code WHERE event_id=? AND status=candidate.status} prevents concurrent claimers from taking
     /// the same row. A CAS failure ({@code affectedRows=0}) means another claimer already changed the

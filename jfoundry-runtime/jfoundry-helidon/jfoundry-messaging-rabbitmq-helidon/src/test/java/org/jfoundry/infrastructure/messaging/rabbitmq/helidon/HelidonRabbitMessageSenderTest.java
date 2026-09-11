@@ -84,13 +84,15 @@ class HelidonRabbitMessageSenderTest {
                 "order-42",
                 "{}",
                 MessagePropagation.from(Map.of(
-                        "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01"))));
+                        "traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01")),
+                "sales.order-created.v1"));
 
         assertThat(result.success()).isTrue();
         ArgumentCaptor<AMQP.BasicProperties> properties = ArgumentCaptor.forClass(AMQP.BasicProperties.class);
         verify(channel).basicPublish(eq("orders"), eq("order-42"), properties.capture(), any());
         assertThat(properties.getValue().getHeaders())
-                .containsEntry("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
+                .containsEntry("traceparent", "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01")
+                .containsEntry(OutboundMessage.PAYLOAD_TYPE_HEADER, "sales.order-created.v1");
     }
 
     @Test

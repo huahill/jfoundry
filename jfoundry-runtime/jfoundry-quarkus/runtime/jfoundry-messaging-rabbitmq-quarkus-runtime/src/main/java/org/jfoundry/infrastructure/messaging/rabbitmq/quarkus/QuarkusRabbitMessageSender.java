@@ -40,8 +40,10 @@ public class QuarkusRabbitMessageSender implements MessageSender {
             if (!client.isConnected()) {
                 await(client.start());
             }
+            var headers = new HashMap<String, Object>();
+            message.applyHeaders((key, value) -> headers.put(key, value));
             BasicProperties properties = new BasicProperties.Builder()
-                    .headers(new HashMap<>(message.propagation().entries()))
+                    .headers(headers)
                     .build();
             await(client.basicPublish(message.topic(), message.payloadKey() == null ? "" : message.payloadKey(),
                     properties, Buffer.buffer(message.payload())));

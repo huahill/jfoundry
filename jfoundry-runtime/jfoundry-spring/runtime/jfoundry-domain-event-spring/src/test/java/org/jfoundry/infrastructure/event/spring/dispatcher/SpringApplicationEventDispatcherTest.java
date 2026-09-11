@@ -4,7 +4,6 @@ import org.jmolecules.event.types.DomainEvent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
@@ -36,33 +35,16 @@ class SpringApplicationEventDispatcherTest {
     }
 
     @Test
-    void deferPublishUntilTransactionCommitWhenSynchronizationActive() {
+    void publishImmediatelyWhenTransactionSynchronizationActive() {
         RecordingApplicationEventPublisher applicationEventPublisher = new RecordingApplicationEventPublisher();
         SpringApplicationEventDispatcher dispatcher = new SpringApplicationEventDispatcher(applicationEventPublisher);
         TestDomainEvent event = new TestDomainEvent("order-1");
 
         TransactionSynchronizationManager.initSynchronization();
         dispatcher.dispatch(List.of(event));
-
-        assertTrue(applicationEventPublisher.publishedEvents().isEmpty());
-        TransactionSynchronizationManager.getSynchronizations()
-                .forEach(TransactionSynchronization::afterCommit);
 
         assertEquals(List.of(event), applicationEventPublisher.publishedEvents());
-    }
-
-    @Test
-    void doNotPublishWhenTransactionRollsBack() {
-        RecordingApplicationEventPublisher applicationEventPublisher = new RecordingApplicationEventPublisher();
-        SpringApplicationEventDispatcher dispatcher = new SpringApplicationEventDispatcher(applicationEventPublisher);
-        TestDomainEvent event = new TestDomainEvent("order-1");
-
-        TransactionSynchronizationManager.initSynchronization();
-        dispatcher.dispatch(List.of(event));
-        TransactionSynchronizationManager.getSynchronizations()
-                .forEach(synchronization -> synchronization.afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK));
-
-        assertTrue(applicationEventPublisher.publishedEvents().isEmpty());
+        assertTrue(TransactionSynchronizationManager.getSynchronizations().isEmpty());
     }
 
     @Test
@@ -78,32 +60,12 @@ class SpringApplicationEventDispatcherTest {
     }
 
     @Test
-    void publishRegistersSingleTransactionSynchronizationForBatch() {
-        RecordingApplicationEventPublisher applicationEventPublisher = new RecordingApplicationEventPublisher();
-        SpringApplicationEventDispatcher dispatcher = new SpringApplicationEventDispatcher(applicationEventPublisher);
-        TestDomainEvent first = new TestDomainEvent("order-1");
-        TestDomainEvent second = new TestDomainEvent("order-2");
-
-        TransactionSynchronizationManager.initSynchronization();
-        dispatcher.dispatch(List.of(first, second));
-
-        assertEquals(1, TransactionSynchronizationManager.getSynchronizations().size());
-        assertTrue(applicationEventPublisher.publishedEvents().isEmpty());
-        TransactionSynchronizationManager.getSynchronizations()
-                .forEach(TransactionSynchronization::afterCommit);
-
-        assertEquals(List.of(first, second), applicationEventPublisher.publishedEvents());
-    }
-
-    @Test
     void publishDoesNothingForEmptyArguments() {
         RecordingApplicationEventPublisher applicationEventPublisher = new RecordingApplicationEventPublisher();
         SpringApplicationEventDispatcher dispatcher = new SpringApplicationEventDispatcher(applicationEventPublisher);
 
-        TransactionSynchronizationManager.initSynchronization();
         dispatcher.dispatch(List.of());
 
-        assertTrue(TransactionSynchronizationManager.getSynchronizations().isEmpty());
         assertTrue(applicationEventPublisher.publishedEvents().isEmpty());
     }
 

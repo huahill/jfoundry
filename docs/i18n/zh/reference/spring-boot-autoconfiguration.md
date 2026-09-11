@@ -65,7 +65,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | 存在 `TransactionRunner` 与 `TransactionTemplate`，Spring Boot 已配置 `PlatformTransactionManager`，且没有已有 `TransactionRunner`。 |
 | `DistributedLockAutoConfiguration` | `LockExecutor`、可选 Redisson `DistributedLockClient`、可选 `@DistributedLock` 顾问 | 存在 `jfoundry-lock-core`。Redisson 适配器需要 `RedissonClient`；注解顾问需要 `DistributedLockClient` 且开启注解支持。 |
 | `MicrometerObservationAutoConfiguration` | 原始 JFoundry 操作 Bean 的 Micrometer 顾问 | 存在 `ObservationRegistry`（使用可观测性启动器时由 Actuator 提供）；存在 Micrometer Observation、Spring AOP，以及至少一个符合条件的 Outbox、Inbox 或锁操作 Bean。 |
-| `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` 注入器 | 类路径中存在 `DomainEventContext` 和 `AbstractAggregateRepository`。 |
+| `DomainEventPersistenceAutoConfiguration` | Repository `AggregateEventRegistrar` 注入器 | 类路径中存在 `DomainEventContext` 和 `AggregateEventRegistrarAware`。 |
 | `PersistenceFailureAutoConfiguration` | 默认 Spring `PersistenceFailureTranslator` 与 Repository 注入器 | 存在 `AbstractAggregateRepository`、Spring 数据访问异常和 `jfoundry-persistence-spring`；没有用户自定义翻译器。 |
 | `AggregatePersistenceContextAutoConfiguration` | 事务绑定的 `AggregatePersistenceContext` 与感知型 Repository 注入器 | 存在持久化上下文 SPI、Spring 事务支持和 `jfoundry-persistence-spring`；没有用户自定义上下文。 |
 | `AuditStampingAutoConfiguration` | UTC `Clock`、空的 `AuditActorProvider` 与 `AuditStamping` | 存在 `jfoundry-persistence-core`；应用 `Clock`、操作者提供器或审计服务优先。 |

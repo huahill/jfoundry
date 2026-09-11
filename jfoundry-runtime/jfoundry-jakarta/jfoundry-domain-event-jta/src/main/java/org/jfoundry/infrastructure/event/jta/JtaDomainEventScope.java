@@ -3,9 +3,10 @@ package org.jfoundry.infrastructure.event.jta;
 import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionSynchronizationRegistry;
-import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
 import org.jfoundry.application.event.DefaultDomainEventContext;
-import org.jfoundry.application.event.DomainEventDispatcher;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
 
@@ -28,24 +29,26 @@ public class JtaDomainEventScope {
     }
 
     <T> T invoke(ScopedOperation<T> operation) throws Exception {
-        return invoke(List.of(), operation);
+        return invoke(new DefaultDomainEventDispatchCoordinator(List.of()), operation);
     }
 
-    <T> T invoke(List<DomainEventDispatcher> dispatchers, ScopedOperation<T> operation) throws Exception {
+    <T> T invoke(DomainEventDispatchCoordinator coordinator, ScopedOperation<T> operation) throws Exception {
         if (CURRENT.isBound()) {
             return operation.call(false);
         }
 
-        return ScopedValue.where(CURRENT, new State(dispatchers, transactionSynchronizationRegistry))
+        return ScopedValue.where(CURRENT, new State(coordinator, transactionSynchronizationRegistry))
                 .call(() -> operation.call(true));
     }
 
-    /// Registers an aggregate with the currently active application-service scope, when present.
+    /// Registers an aggregate with the currently active application-service scope.
     public void register(EventRecordable aggregate) {
         State state = current();
-        if (state != null) {
-            state.register(aggregate);
+        if (state == null) {
+            DomainEventContext.requireActiveScope();
+            return;
         }
+        state.register(aggregate);
     }
 
     void markFailed() {
@@ -73,6 +76,13 @@ public class JtaDomainEventScope {
         return state != null && state.hasTransactionEvents();
     }
 
+    void dispatchBeforeCommit() {
+        State state = current();
+        if (state != null) {
+            state.dispatchBeforeCommit();
+        }
+    }
+
     private State current() {
         return CURRENT.isBound() ? CURRENT.get() : null;
     }
@@ -86,13 +96,13 @@ public class JtaDomainEventScope {
     private static final class State {
 
         private final DefaultDomainEventContext context = new DefaultDomainEventContext();
-        private final List<DomainEventDispatcher> dispatchers;
+        private final DomainEventDispatchCoordinator coordinator;
         private final TransactionSynchronizationRegistry transactionSynchronizationRegistry;
         private boolean failed;
 
-        private State(List<DomainEventDispatcher> dispatchers,
+        private State(DomainEventDispatchCoordinator coordinator,
                       TransactionSynchronizationRegistry transactionSynchronizationRegistry) {
-            this.dispatchers = List.copyOf(dispatchers);
+            this.coordinator = Objects.requireNonNull(coordinator, "Domain-event coordinator must not be null.");
             this.transactionSynchronizationRegistry = transactionSynchronizationRegistry;
         }
 
@@ -120,6 +130,13 @@ public class JtaDomainEventScope {
             return existingTransactionEvents() != null;
         }
 
+        private void dispatchBeforeCommit() {
+            TransactionEvents events = existingTransactionEvents();
+            if (events != null && !failed) {
+                coordinator.dispatchBeforeCommit(events.events());
+            }
+        }
+
         private boolean isActiveTransaction() {
             return transactionSynchronizationRegistry.getTransactionKey() != null
                     && transactionSynchronizationRegistry.getTransactionStatus() == Status.STATUS_ACTIVE;
@@ -134,7 +151,7 @@ public class JtaDomainEventScope {
             TransactionEvents created = new TransactionEvents();
             transactionSynchronizationRegistry.putResource(this, created);
             transactionSynchronizationRegistry.registerInterposedSynchronization(new TransactionEventSynchronization(
-                    this, created, dispatchers));
+                    this, created, coordinator));
             return created;
         }
 
@@ -174,7 +191,7 @@ public class JtaDomainEventScope {
     }
 
     private record TransactionEventSynchronization(State state, TransactionEvents events,
-                                                   List<DomainEventDispatcher> dispatchers)
+                                                   DomainEventDispatchCoordinator coordinator)
             implements Synchronization {
 
         @Override
@@ -183,18 +200,10 @@ public class JtaDomainEventScope {
 
         @Override
         public void afterCompletion(int status) {
+            List<DomainEvent> domainEvents = events.events();
             if (!state.failed && status == Status.STATUS_COMMITTED) {
-                dispatch(events.events(), false);
+                coordinator.dispatchAfterCommit(domainEvents);
             }
-        }
-
-        private void dispatch(List<DomainEvent> events, boolean beforeCommit) {
-            if (events.isEmpty()) {
-                return;
-            }
-            dispatchers.stream()
-                    .filter(dispatcher -> (dispatcher instanceof BeforeCommitDomainEventDispatcher) == beforeCommit)
-                    .forEach(dispatcher -> dispatcher.dispatch(events));
         }
     }
 }

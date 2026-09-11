@@ -194,13 +194,13 @@ public final class FrameworkModuleRules {
                     .because("Spring ApplicationEvent publishing is a domain event adapter, not a messaging transport adapter");
 
     @ArchTest
-    public static final ArchRule default_domain_event_outbox_recorder_should_be_in_infrastructure_ring =
+    public static final ArchRule default_domain_event_outbox_recorder_should_be_in_application_ring =
             classes()
                     .that().haveFullyQualifiedName(
-                            "org.jfoundry.infrastructure.outbox.spring.externalization.DefaultDomainEventOutboxRecorder")
-                    .should(resideInPackageAnnotatedWith(InfrastructureRing.class))
+                            "org.jfoundry.application.outbox.DefaultDomainEventOutboxRecorder")
+                    .should(resideInPackageAnnotatedWith(ApplicationRing.class))
                     .allowEmptyShould(true)
-                    .because("DefaultDomainEventOutboxRecorder belongs to the Onion infrastructure ring");
+                    .because("DefaultDomainEventOutboxRecorder belongs to the Onion application ring");
 
     @ArchTest
     public static final ArchRule outbox_domain_event_dispatcher_should_be_in_infrastructure_ring =

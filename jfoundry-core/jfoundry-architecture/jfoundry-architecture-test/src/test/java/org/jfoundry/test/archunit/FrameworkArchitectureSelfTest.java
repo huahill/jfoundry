@@ -89,8 +89,8 @@ class FrameworkArchitectureSelfTest {
             FrameworkModuleRules.spring_event_dispatcher_should_not_be_in_messaging_package;
 
     @ArchTest
-    static final ArchRule default_domain_event_outbox_recorder_should_be_in_infrastructure_ring =
-            FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_infrastructure_ring;
+    static final ArchRule default_domain_event_outbox_recorder_should_be_in_application_ring =
+            FrameworkModuleRules.default_domain_event_outbox_recorder_should_be_in_application_ring;
 
     @ArchTest
     static final ArchRule kafka_message_sender_should_be_in_infrastructure_ring =

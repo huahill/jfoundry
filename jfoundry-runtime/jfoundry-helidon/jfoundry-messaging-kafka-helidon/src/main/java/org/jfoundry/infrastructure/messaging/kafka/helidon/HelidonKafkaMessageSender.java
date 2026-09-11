@@ -48,7 +48,7 @@ public class HelidonKafkaMessageSender implements MessageSender {
         try {
             ProducerRecord<String, String> record = new ProducerRecord<>(
                     message.topic(), message.payloadKey(), message.payload());
-            message.propagation().entries().forEach((key, value) ->
+            message.applyHeaders((key, value) ->
                     record.headers().add(key, value.getBytes(StandardCharsets.UTF_8)));
             producer.send(record).get(sendTimeout.toMillis(), TimeUnit.MILLISECONDS);
             return SendResult.ok();

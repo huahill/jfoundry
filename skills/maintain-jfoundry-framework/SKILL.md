@@ -89,6 +89,8 @@ Prefer current repository documents and code over memory:
 - `../../docs/i18n/en/framework/architecture-styles.md`
 - `../../docs/i18n/en/framework/archunit-rules.md`
 - `../../docs/i18n/en/capabilities/reliable-messaging.md`
+- `../../docs/i18n/en/modeling/index.md`
+- `../../docs/i18n/en/modeling/domain-event.md`
 - `../../docs/i18n/en/modeling/repository-vs-read-contracts.md`
 - `docs/release/compatibility.md`
 - `AGENTS.md` for repository-wide language, SQL template, and project skill policy

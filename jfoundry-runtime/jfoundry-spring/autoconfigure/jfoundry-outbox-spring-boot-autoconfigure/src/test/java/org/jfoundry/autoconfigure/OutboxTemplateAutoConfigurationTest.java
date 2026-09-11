@@ -71,11 +71,6 @@ class OutboxTemplateAutoConfigurationTest {
         }
 
         @Override
-        public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-            return List.of();
-        }
-
-        @Override
         public void markAsPublished(String eventId) {
         }
 

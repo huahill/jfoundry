@@ -28,15 +28,6 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
     }
 
     @Override
-    public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-        return dispatchableQuery(now)
-                .setMaxResults(limit)
-                .getResultStream()
-                .map(JpaOutboxMessageEntity::toMessage)
-                .toList();
-    }
-
-    @Override
     public void markAsPublished(String eventId) {
         JpaOutboxMessageEntity entity = entityManager.find(JpaOutboxMessageEntity.class, eventId);
         if (entity == null || !OutboxMessageStatus.DISPATCHING.name().equals(entity.getStatus())) {
@@ -220,10 +211,6 @@ public final class JpaOutboxMessageStore implements OutboxMessageStore {
             entityManager.clear();
             deleted += removed;
         }
-    }
-
-    private jakarta.persistence.TypedQuery<JpaOutboxMessageEntity> dispatchableQuery(Instant now) {
-        return dispatchableQuery(now, Set.of());
     }
 
     private jakarta.persistence.TypedQuery<JpaOutboxMessageEntity> dispatchableQuery(

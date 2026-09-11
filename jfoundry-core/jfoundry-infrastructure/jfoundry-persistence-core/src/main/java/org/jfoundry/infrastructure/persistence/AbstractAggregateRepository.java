@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.persistence;
 
-import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.domain.repository.AggregateRepository;
 import org.jmolecules.ddd.types.AggregateRoot;
@@ -24,14 +23,15 @@ public abstract class AbstractAggregateRepository<
         T extends AggregateRoot<T, ID> & EventRecordable,
         ID extends Identifier>
         extends AbstractPersistenceAdapter
-        implements AggregateRepository<T, ID> {
+        implements AggregateRepository<T, ID>, AggregateEventRegistrarAware {
 
-    private DomainEventContext domainEventContext;
+    private AggregateEventRegistrar eventRegistrar;
 
-    /// Injects the event context used to register successfully persisted aggregates.
-    public final void setDomainEventContext(DomainEventContext domainEventContext) {
-        this.domainEventContext = Objects.requireNonNull(
-                domainEventContext, "DomainEventContext must not be null.");
+    /// Injects the registrar used to record successfully persisted aggregates.
+    @Override
+    public final void setAggregateEventRegistrar(AggregateEventRegistrar registrar) {
+        this.eventRegistrar = Objects.requireNonNull(
+                registrar, "AggregateEventRegistrar must not be null.");
     }
 
     /// Loads and restores one complete aggregate, returning null when it does not exist.
@@ -115,8 +115,8 @@ public abstract class AbstractAggregateRepository<
     }
 
     private void registerAggregate(T aggregate) {
-        if (domainEventContext != null) {
-            domainEventContext.register(aggregate);
+        if (eventRegistrar != null) {
+            eventRegistrar.register(aggregate);
         }
     }
 

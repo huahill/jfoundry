@@ -97,10 +97,12 @@ Jakarta Transactions 没有可移植的事务名称或只读事务设置，因�
 
 ## 领域事件分发
 
+聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。本页说明 Quarkus 的分发装配。
+
 `jfoundry-domain-event-quarkus-runtime` 扩展提供应用服务的事件边界。对于所有标注运行时无关 `@ApplicationService` 的 CDI Bean，
-Quarkus 会在增强阶段加入仅限运行时的拦截器绑定。最外层调用成功后，拦截器会
-从通过 `DomainEventContext` 注册的聚合中提取事件，并交给每个 CDI `DomainEventDispatcher`。
-嵌套应用服务调用共享同一个作用域，因此只会在最外层边界分发一次；若异常从该边界逸出，待分发事件会被丢弃。
+Quarkus 会在增强阶段加入仅限运行时的拦截器绑定。嵌套应用服务调用共享同一个作用域。
+
+`DomainEventContext.register(...)` 只允许在该作用域内使用；作用域外立即失败。存在活动 JTA 事务时，Outbox 派发器在 `beforeCompletion` 运行，进程内 CDI 派发器在成功提交后运行。拦截器不会派发这些事务绑定的事件。没有事务时，最外层成功调用会把整批事件交给每个 CDI `DomainEventDispatcher`。若异常从该边界逸出，待分发事件会被丢弃。
 
 ```java
 @ApplicationScoped

@@ -38,7 +38,7 @@
         </dependency>
         <!--
           mybatis-plus-jsqlparser is required by PaginationInnerInterceptor.
-          MybatisPlusOutboxMessageStore.findDispatchable expresses "take the first N rows"
+          MybatisPlusOutboxMessageStore.claimDispatchable expresses "take the first N rows"
           through selectPage, and PaginationInnerInterceptor translates that paging request
           into database-specific SQL.
         -->

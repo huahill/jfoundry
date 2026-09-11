@@ -77,7 +77,7 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 ## Choose Your Path
 
 - **Choose a capability**: start with the [Capability Catalog](docs/i18n/en/capabilities/index.md) to map a business need to its supported runtime dependency.
-- **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/repository-vs-read-contracts.md).
+- **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/index.md).
 - **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
 - **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details or runtime-specific HTTP server and REST Client diagnostic logging.
 - **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
@@ -182,7 +182,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### Modeling
 
+- [Modeling](docs/i18n/en/modeling/index.md)
 - [Value Object Guide](docs/i18n/en/modeling/value-object.md)
+- [Domain Events](docs/i18n/en/modeling/domain-event.md)
 - [Repository and Read-side Contracts](docs/i18n/en/modeling/repository-vs-read-contracts.md)
 
 ### Release and Compatibility
