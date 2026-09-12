@@ -16,7 +16,8 @@
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` 适配器，在 Boot 创建 `KafkaOperations` 后选择 | Outbox 存储 |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` 适配器 | Outbox 存储 |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` 适配器 | Outbox 存储 |
-| `jfoundry-outbox-spring-boot-starter` | Outbox 核心、`OutboxTemplate`、领域事件外部化、定时派发集成 | Outbox 表存储、JobRunr |
+| `jfoundry-outbox-spring-boot-starter` | 通用 Outbox 核心、`OutboxTemplate`、定时派发集成 | 领域事件、Outbox 表存储、JobRunr |
+| `jfoundry-domain-event-outbox-spring-boot-starter` | 领域事件、通用 Outbox、持久化桥接层和领域事件到 Outbox 自动配置 | — |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox 能力与 MyBatis-Plus `OutboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox 能力与 JPA `OutboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox 能力加上 JobRunr `OutboxTrigger` | Outbox 表存储 |
@@ -55,7 +56,7 @@
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | `DEAD_LETTERED` 记录保留天数。 |
 | `jfoundry.outbox.cleanup.batch-size` | `1000` | 每批最多删除记录数。 |
 
-`DomainEventOutboxRecorderAutoConfiguration` 会将应用提供的全部 `DomainEventExternalizer<?>`
+`DomainEventOutboxRecorderAutoConfiguration`（来自显式的领域事件 Outbox 自动配置模块）会将应用提供的全部 `DomainEventExternalizer<?>`
 Bean 注入默认记录器。应用通常只需提供这些映射，无需替换 `DomainEventOutboxRecorder`；自定义记录器仍表示显式的完整替换。
 
 ## 自动配置条件
@@ -65,13 +66,14 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | 存在 `TransactionRunner` 与 `TransactionTemplate`，Spring Boot 已配置 `PlatformTransactionManager`，且没有已有 `TransactionRunner`。 |
 | `DistributedLockAutoConfiguration` | `LockExecutor`、可选 Redisson `DistributedLockClient`、可选 `@DistributedLock` 顾问 | 存在 `jfoundry-lock-core`。Redisson 适配器需要 `RedissonClient`；注解顾问需要 `DistributedLockClient` 且开启注解支持。 |
 | `MicrometerObservationAutoConfiguration` | 原始 JFoundry 操作 Bean 的 Micrometer 顾问 | 存在 `ObservationRegistry`（使用可观测性启动器时由 Actuator 提供）；存在 Micrometer Observation、Spring AOP，以及至少一个符合条件的 Outbox、Inbox 或锁操作 Bean。 |
-| `DomainEventPersistenceAutoConfiguration` | Repository `AggregateEventRegistrar` 注入器 | 类路径中存在 `DomainEventContext` 和 `AggregateEventRegistrarAware`。 |
+| `DomainEventPersistenceAutoConfiguration` | 可选持久化桥接层注入器 | 类路径中存在 `DomainEventContext`、`AggregatePersistenceObserverAware` 和 `DomainEventAggregatePersistenceObserver`，即显式桥接层存在。 |
 | `PersistenceFailureAutoConfiguration` | 默认 Spring `PersistenceFailureTranslator` 与 Repository 注入器 | 存在 `AbstractAggregateRepository`、Spring 数据访问异常和 `jfoundry-persistence-spring`；没有用户自定义翻译器。 |
 | `AggregatePersistenceContextAutoConfiguration` | 事务绑定的 `AggregatePersistenceContext` 与感知型 Repository 注入器 | 存在持久化上下文 SPI、Spring 事务支持和 `jfoundry-persistence-spring`；没有用户自定义上下文。 |
 | `AuditStampingAutoConfiguration` | UTC `Clock`、空的 `AuditActorProvider` 与 `AuditStamping` | 存在 `jfoundry-persistence-core`；应用 `Clock`、操作者提供器或审计服务优先。 |
 | `MybatisPlusAuditAutoConfiguration` | `MybatisPlusAuditMetaObjectHandler` | 存在 MyBatis-Plus 和 JFoundry MyBatis-Plus 适配器、可用的 `AuditStamping`，且没有应用 `MetaObjectHandler`。 |
-| `DomainEventDispatchAutoConfiguration` | `DomainEventScope`、`DomainEventContext`、派发拦截器、Spring 事件派发器、可选 Outbox 派发器 | 应用服务和派发器类型存在；配置项允许对应路径。 |
-| `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`、`OutboxTemplate`、外部化解析器、`DomainEventOutboxRecorder` | Outbox 存储和序列化器依赖可用；每种 Bean 均没有用户自定义替代。 |
+| `DomainEventDispatchAutoConfiguration` | `DomainEventScope`、`DomainEventContext`、派发拦截器、Spring 事件派发器 | 应用服务和派发器类型存在；配置项允许对应路径。 |
+| `OutboxTemplateAutoConfiguration` | `PayloadSerializer`、`OutboxTemplate` | Jackson、Outbox 存储可用，且没有用户自定义替代 Bean。 |
+| `DomainEventOutboxRecorderAutoConfiguration` | 外部化解析器、`DomainEventOutboxRecorder`、可选领域事件 Outbox 派发器 | 选择了显式领域事件 Outbox 自动配置，且所需的 Outbox 存储与序列化器依赖可用；没有用户自定义替代 Bean。 |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | 存在 `KafkaOperations` 类和 Bean；没有已有 `MessageSender`。 |
 | `RabbitMessageSenderAutoConfiguration` | `SpringRabbitMessageSender` | 存在 `RabbitTemplate` 类和 `RabbitOperations` Bean；没有已有 `MessageSender`。 |
 | `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | 存在 RocketMQ 生产者类和 `MQProducer` Bean；没有已有 `MessageSender`。 |

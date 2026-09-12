@@ -55,9 +55,12 @@ that single boundary.
 
 The default path stays inside the process:
 
-1. Runtime wiring binds `AbstractAggregateRepository` through
-   `AggregateEventRegistrar`. Applications without domain-event skip that
-   registration. Application code may still call
+1. When the optional `jfoundry-domain-event-persistence-bridge` is selected,
+   runtime wiring installs a `DomainEventAggregatePersistenceObserver` on
+   `AbstractAggregateRepository` through the event-neutral persistence observer
+   hook. The observer registers only `EventRecordable` aggregates after
+   successful persistence. Without that optional bridge, generic persistence
+   remains independent and application code may call
    `DomainEventContext.register(...)` directly.
 2. `register(...)` is legal only inside an `@ApplicationService` invocation.
    Calling it outside that scope fails immediately.
@@ -84,3 +87,10 @@ domain event must leave the process reliably. That optional path uses
 Runtime dispatch wiring lives in the [Spring Boot](../implementations/spring-boot.md),
 [Quarkus](../implementations/quarkus.md), and [Helidon MP](../implementations/helidon.md)
 guides.
+
+The module roles are deliberate: `jfoundry-domain-event-core` is the Domain
+Event capability, `jfoundry-outbox-core` is the generic Outbox capability,
+`jfoundry-domain-event-persistence-bridge` removes persistence boilerplate when
+the two are used together, and `jfoundry-domain-event-outbox-core` maps selected
+Domain Events to generic Outbox messages. None of these combinations is
+required for a domain model that only uses in-process events.

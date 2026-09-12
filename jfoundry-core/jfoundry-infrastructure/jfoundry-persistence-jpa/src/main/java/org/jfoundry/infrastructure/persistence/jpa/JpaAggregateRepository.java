@@ -3,7 +3,6 @@ package org.jfoundry.infrastructure.persistence.jpa;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
 import org.jfoundry.application.exception.ConflictException;
-import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContext;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContextAware;
@@ -19,7 +18,7 @@ import java.util.Objects;
 /// to that same entity and never calls {@link EntityManager#merge(Object)}. The application must
 /// keep load and modification in one transaction and persistence context.
 public abstract class JpaAggregateRepository<
-        A extends AggregateRoot<A, ID> & EventRecordable,
+        A extends AggregateRoot<A, ID>,
         ID extends Identifier,
         E,
         K>

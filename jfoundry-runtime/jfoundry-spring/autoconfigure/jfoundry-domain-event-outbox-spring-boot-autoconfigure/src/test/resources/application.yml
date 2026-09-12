@@ -1,0 +1,18 @@
+jfoundry:
+  outbox:
+    dispatcher:
+      mode: scheduled
+      interval-ms: 100
+      batch-size: 10
+      max-retries: 3
+      backoff-base-ms: 50
+      backoff-max-ms: 1000
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:jfoundry-starter-test;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:outbox_event.sql

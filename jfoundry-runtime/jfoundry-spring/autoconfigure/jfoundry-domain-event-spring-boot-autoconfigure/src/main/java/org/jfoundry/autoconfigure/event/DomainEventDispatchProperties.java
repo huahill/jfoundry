@@ -26,11 +26,6 @@ public class DomainEventDispatchProperties {
          */
         private final Spring spring = new Spring();
 
-        /**
-         * Transactional outbox recording options.
-         */
-        private final Outbox outbox = new Outbox();
-
         public boolean isEnabled() {
             return enabled;
         }
@@ -43,9 +38,6 @@ public class DomainEventDispatchProperties {
             return spring;
         }
 
-        public Outbox getOutbox() {
-            return outbox;
-        }
     }
 
     public static class Spring {
@@ -64,19 +56,4 @@ public class DomainEventDispatchProperties {
         }
     }
 
-    public static class Outbox {
-
-        /**
-         * Enables transactional outbox recording for domain events.
-         */
-        private boolean enabled;
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(boolean enabled) {
-            this.enabled = enabled;
-        }
-    }
 }

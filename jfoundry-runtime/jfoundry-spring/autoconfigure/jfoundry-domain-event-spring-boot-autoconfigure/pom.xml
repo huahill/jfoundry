@@ -23,21 +23,12 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-persistence-core</artifactId>
+            <artifactId>jfoundry-domain-event-persistence-bridge</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-spring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-outbox-core</artifactId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-outbox-spring</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

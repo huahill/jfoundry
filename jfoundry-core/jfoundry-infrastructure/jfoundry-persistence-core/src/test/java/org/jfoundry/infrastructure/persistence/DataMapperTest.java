@@ -77,10 +77,10 @@ class DataMapperTest {
     }
 
     @Test
-    void persistenceRepositoryConstructorShouldNotExposeAggregateEventRegistrar() {
+    void persistenceRepositoryConstructorShouldNotExposeAggregatePersistenceObserver() {
         assertThat(constructorParameterTypes(AbstractAggregateRepository.class))
-                .noneMatch(parameterTypes -> parameterTypes.contains(AggregateEventRegistrar.class)
-                        || parameterTypes.contains(AggregateEventRegistrarAware.class));
+                .noneMatch(parameterTypes -> parameterTypes.contains(AggregatePersistenceObserver.class)
+                        || parameterTypes.contains(AggregatePersistenceObserverAware.class));
     }
 
     private static List<String> typeParameterNames(Class<?> type) {

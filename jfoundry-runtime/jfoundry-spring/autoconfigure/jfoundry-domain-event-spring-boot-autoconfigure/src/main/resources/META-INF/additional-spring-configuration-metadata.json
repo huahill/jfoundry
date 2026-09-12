@@ -14,11 +14,6 @@
       "name": "jfoundry.domain.event.dispatch.spring",
       "type": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties$Spring",
       "sourceType": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties"
-    },
-    {
-      "name": "jfoundry.domain.event.dispatch.outbox",
-      "type": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties$Outbox",
-      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties"
     }
   ],
   "properties": [
@@ -33,12 +28,6 @@
       "type": "java.lang.Boolean",
       "defaultValue": true,
       "description": "Enable Spring ApplicationEventPublisher dispatch when the Spring event adapter is present."
-    },
-    {
-      "name": "jfoundry.domain.event.dispatch.outbox.enabled",
-      "type": "java.lang.Boolean",
-      "defaultValue": false,
-      "description": "Enable Outbox-backed domain event dispatch when a DomainEventOutboxRecorder bean exists."
     }
   ]
 }

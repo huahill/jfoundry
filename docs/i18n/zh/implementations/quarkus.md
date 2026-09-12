@@ -56,8 +56,10 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 |---|---|
 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
+| 领域事件持久化桥接层 | `jfoundry-domain-event-persistence-bridge-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`、`jfoundry-persistence-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-outbox-jpa-quarkus-runtime`；需要派发时再加 `jfoundry-outbox-quarkus-runtime` |
+| 领域事件到 Outbox 组合 | `jfoundry-domain-event-outbox-quarkus-runtime`，以及领域事件运行时、持久化桥接层、通用 Outbox、存储和发送器 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-inbox-jpa-quarkus-runtime` |
 | Kafka 或 RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
@@ -125,6 +127,11 @@ class ConfirmOrder {
 扩展提供此边界所使用的 `DomainEventContext`。该装配只支持同步应用服务方法，会拒绝 `CompletionStage` 和
 Mutiny 返回类型；它只提供进程内领域事件编排，不会引入 Outbox 存储、序列化器、消息代理客户端或自动事件外部化。
 
+聚合 Repository 的自动收集不属于领域事件扩展自身。加入 `jfoundry-domain-event-persistence-bridge-quarkus-runtime` 后，
+才会安装与事件无关的持久化观察器桥接层；它只在 Repository 操作成功后为实现 `EventRecordable` 的聚合注册事件。
+只有当这些已收集事件需要映射为通用 Outbox 消息时，才加入 `jfoundry-domain-event-outbox-quarkus-runtime`。
+通用 Outbox 仍可不依赖这两个领域事件模块而独立使用。
+
 ## JPA 聚合持久化
 
 使用 `JpaAggregateRepository` 时，需加入 `jfoundry-transaction-quarkus-runtime`、
@@ -178,8 +185,9 @@ transactionRunner.run(() -> {
 </dependency>
 ```
 
-该扩展通过 Quarkus Scheduler 提供默认 CDI `OutboxDispatcher` 服务端口和
-`QuarkusOutboxTrigger` 调度适配器。只有配置 `jfoundry.outbox.dispatcher.enabled=true` 时才会启动
+该扩展通过 Quarkus Scheduler 提供默认 CDI `OutboxDispatcher` 服务端口、通用的
+`OutboxTemplate` 与 `PayloadSerializer`，以及 `QuarkusOutboxTrigger` 调度适配器。只有配置
+`jfoundry.outbox.dispatcher.enabled=true` 时才会启动
 定时派发。应用必须提供 `OutboxMessageStore`（例如通过 `jfoundry-outbox-jpa-quarkus-runtime`）和真实的
 `MessageSender`；触发器不会引入消息代理客户端或日志发送器。可按需配置
 `jfoundry.outbox.dispatcher.interval`（默认 `5s`）、`batch-size`（默认 `50`）、`max-retries`
@@ -243,10 +251,11 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 
 ## 自动领域事件外部化
 
-`jfoundry-outbox-quarkus-runtime` 还提供显式的自动外部化装配。它引入 Quarkus Jackson，并提供可替换的
-`PayloadSerializer`、`ExternalizationRuleResolver`、`AggregateRoutingResolver`、`OutboxTemplate` 与
-`DomainEventOutboxRecorder` 默认 CDI Bean。它不会添加 Outbox 存储或消息代理客户端；应单独加入例如
-`jfoundry-outbox-jpa-quarkus-runtime` 的存储能力。
+`jfoundry-domain-event-outbox-quarkus-runtime` 提供显式的自动外部化装配。它提供可替换的
+`ExternalizationRuleResolver`、`AggregateRoutingResolver`、`DomainEventOutboxRecorder` 和领域事件
+Outbox 派发器默认 CDI Bean。通用的 `PayloadSerializer` 与 `OutboxTemplate` 由
+`jfoundry-outbox-quarkus-runtime` 提供；完整组合需要同时选择两个运行时模块。两个模块都不会添加
+Outbox 存储或消息代理客户端；应单独加入例如 `jfoundry-outbox-jpa-quarkus-runtime` 的存储能力。
 
 自动记录默认关闭。只有领域事件本身就是稳定的集成契约时才启用：
 
@@ -262,8 +271,12 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 应用服务在其内部通过 `TransactionRunner` 建立事务边界，聚合变更和 Outbox 行仍保持原子性。本地 CDI 领域事件
 监听器与此路径分离，只会在成功提交后接收事件。
 
-扩展会在增强阶段为 `@Externalized` 事件类型注册 Jackson 反射元数据，因此默认序列化器可以用于
-原生镜像。它不指定消息代理传输方式；需要投递时，请另行选择 `MessageSender` 适配器并启用派发器。
+扩展会在增强阶段为 `@Externalized` 事件类型注册 Jackson 反射元数据，因此基于注解的自动外部化可以使用
+原生镜像中的默认序列化器。对于自定义 `DomainEventExternalizer` 映射，应用必须按照所选 Jackson/Quarkus
+配置为集成载荷类型注册 Quarkus 反射元数据（例如在载荷类型上添加
+`io.quarkus.runtime.annotations.RegisterForReflection`，或提供等价的原生镜像反射配置）。扩展
+不指定消息代理传输方式；需要投递时，请另行选择
+`MessageSender` 适配器并启用派发器。
 
 ## JPA Inbox 存储
 

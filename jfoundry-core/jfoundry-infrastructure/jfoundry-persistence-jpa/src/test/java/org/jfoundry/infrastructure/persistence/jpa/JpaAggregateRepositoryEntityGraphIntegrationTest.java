@@ -5,8 +5,8 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.Persistence;
 import org.jfoundry.application.exception.ConflictException;
-import org.jfoundry.domain.event.EventRecordable;
-import org.jfoundry.infrastructure.persistence.AggregateEventRegistrar;
+import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserver;
+import org.jmolecules.ddd.types.AggregateRoot;
 import org.jfoundry.infrastructure.persistence.jpa.support.ChildGraphMutationMapper;
 import org.jfoundry.infrastructure.persistence.jpa.support.GraphOrder;
 import org.jfoundry.infrastructure.persistence.jpa.support.GraphOrderEntity;
@@ -98,8 +98,8 @@ class JpaAggregateRepositoryEntityGraphIntegrationTest {
 
     @Test
     void addAllPersistsEachGraphAndRegistersEachAggregateOnce() {
-        RecordingRegistrar registrar = new RecordingRegistrar();
-        repository.setAggregateEventRegistrar(registrar);
+        RecordingObserver observer = new RecordingObserver();
+        repository.setAggregatePersistenceObserver(observer);
         GraphOrder first = GraphOrder.create(new GraphOrderId("GRAPH-BATCH-1"), List.of("A"));
         GraphOrder second = GraphOrder.create(new GraphOrderId("GRAPH-BATCH-2"), List.of("B"));
 
@@ -107,7 +107,7 @@ class JpaAggregateRepositoryEntityGraphIntegrationTest {
 
         assertThat(lineSkus("GRAPH-BATCH-1")).containsExactly("A");
         assertThat(lineSkus("GRAPH-BATCH-2")).containsExactly("B");
-        assertThat(registrar.registered()).containsExactly(first, second);
+        assertThat(observer.observed()).containsExactly(first, second);
     }
 
     @Test
@@ -116,8 +116,8 @@ class JpaAggregateRepositoryEntityGraphIntegrationTest {
         GraphOrder second = GraphOrder.create(new GraphOrderId("GRAPH-MODIFY-BATCH-2"), List.of("B"));
         repository.addAll(List.of(first, second));
 
-        RecordingRegistrar registrar = new RecordingRegistrar();
-        repository.setAggregateEventRegistrar(registrar);
+        RecordingObserver observer = new RecordingObserver();
+        repository.setAggregatePersistenceObserver(observer);
         GraphOrder loadedFirst = repository.findById(first.getId());
         GraphOrder loadedSecond = repository.findById(second.getId());
         loadedFirst.replaceLines(List.of("A-UPDATED"));
@@ -127,7 +127,7 @@ class JpaAggregateRepositoryEntityGraphIntegrationTest {
 
         assertThat(lineSkus("GRAPH-MODIFY-BATCH-1")).containsExactly("A-UPDATED");
         assertThat(lineSkus("GRAPH-MODIFY-BATCH-2")).containsExactly("B-UPDATED");
-        assertThat(registrar.registered()).containsExactly(loadedFirst, loadedSecond);
+        assertThat(observer.observed()).containsExactly(loadedFirst, loadedSecond);
     }
 
     @Test
@@ -271,17 +271,17 @@ class JpaAggregateRepositoryEntityGraphIntegrationTest {
         }
     }
 
-    private static final class RecordingRegistrar implements AggregateEventRegistrar {
+    private static final class RecordingObserver implements AggregatePersistenceObserver {
 
-        private final List<EventRecordable> registered = new ArrayList<>();
+        private final List<AggregateRoot<?, ?>> observed = new ArrayList<>();
 
         @Override
-        public void register(EventRecordable aggregate) {
-            registered.add(aggregate);
+        public void afterPersisted(AggregateRoot<?, ?> aggregate) {
+            observed.add(aggregate);
         }
 
-        private List<EventRecordable> registered() {
-            return List.copyOf(registered);
+        private List<AggregateRoot<?, ?>> observed() {
+            return List.copyOf(observed);
         }
     }
 }

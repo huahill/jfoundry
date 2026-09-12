@@ -1,0 +1,17 @@
+{
+  "groups": [
+    {
+      "name": "jfoundry.domain.event.dispatch.outbox",
+      "type": "org.jfoundry.autoconfigure.event.DomainEventOutboxProperties",
+      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventOutboxProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jfoundry.domain.event.dispatch.outbox.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": false,
+      "description": "Enable Outbox-backed domain event dispatch in the explicit Domain Event Outbox composition."
+    }
+  ]
+}

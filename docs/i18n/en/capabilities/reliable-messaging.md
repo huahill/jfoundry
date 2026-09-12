@@ -20,7 +20,8 @@ the capability; it does not identify a complete Outbox solution.
 
 | Decision | Purpose | Spring Boot selection |
 |---|---|---|
-| Outbox capability | Records, externalizes, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
+| Outbox capability | Records generic integration messages, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
+| Domain Event Outbox composition | Maps selected Domain Events to generic Outbox messages | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | Store adapter | Persists `OutboxMessageStore` records | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application implementation |
 | Dispatch trigger / scheduling adapter | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application trigger |
 | Message transport | Sends the claimed payload | A broker-specific `jfoundry-messaging-*-spring-boot-starter` or an application `MessageSender` |
@@ -34,6 +35,14 @@ built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-
 transitively, so an application does not declare it again. That dependency is Spring Boot assembly
 convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
 port and `*OutboxTrigger` stays the scheduling adapter.
+
+The explicit Domain Event Outbox composition is separate from both capabilities. The Spring
+combination starter includes Domain Event, generic Outbox, the persistence bridge, and the Domain
+Event Outbox auto-configuration. Quarkus and Helidon expose the equivalent explicit modules
+`jfoundry-domain-event-outbox-quarkus-runtime` and `jfoundry-domain-event-outbox-helidon`; their
+generic Outbox modules do not register Domain Event beans. A Domain Event-only application therefore
+does not get an Outbox recorder, and a generic Outbox-only application does not get a Domain Event
+context or dispatcher.
 
 Runtime-specific `*OutboxTrigger` types are scheduling adapters. `OutboxDispatcher` remains the
 dispatch service port that they invoke.
@@ -145,8 +154,8 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 |------|-------|
 | JPA Outbox and Inbox stores, including database-specific Inbox claiming | [JPA](../implementations/jpa.md) |
 | MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| Quarkus Outbox runtime, automatic domain-event externalization, and Kafka delivery | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox runtime, automatic domain-event externalization, and Kafka or RabbitMQ delivery | [Helidon MP](../implementations/helidon.md) |
+| Quarkus Outbox runtime and Kafka delivery, with optional Domain Event Outbox composition | [Quarkus](../implementations/quarkus.md) |
+| Helidon MP Outbox runtime and Kafka or RabbitMQ delivery, with optional Domain Event Outbox composition | [Helidon MP](../implementations/helidon.md) |
 | Spring Boot capability assembly and dispatcher configuration | [Spring Boot](../implementations/spring-boot.md) |
 
 Use [Spring Boot Auto-configuration](../reference/spring-boot-autoconfiguration.md) as the lookup

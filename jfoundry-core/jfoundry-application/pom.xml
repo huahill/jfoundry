@@ -22,7 +22,7 @@
         <subproject>jfoundry-transaction-core</subproject>
         <subproject>jfoundry-lock-core</subproject>
         <subproject>jfoundry-domain-event-core</subproject>
-        <subproject>jfoundry-domain-event-externalization-core</subproject>
+        <subproject>jfoundry-domain-event-outbox-core</subproject>
         <subproject>jfoundry-messaging-core</subproject>
         <subproject>jfoundry-outbox-core</subproject>
         <subproject>jfoundry-inbox-core</subproject>

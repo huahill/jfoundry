@@ -30,6 +30,14 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-outbox-quarkus-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-persistence-quarkus-runtime</artifactId>
         </dependency>
         <dependency>
@@ -80,6 +88,20 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-deployment</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-outbox-quarkus-deployment</artifactId>
             <version>${project.version}</version>
             <type>pom</type>
             <scope>test</scope>

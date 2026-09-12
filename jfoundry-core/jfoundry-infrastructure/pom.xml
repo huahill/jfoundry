@@ -13,6 +13,7 @@
     <subprojects>
         <subproject>jfoundry-web</subproject>
         <subproject>jfoundry-persistence-core</subproject>
+        <subproject>jfoundry-domain-event-persistence-bridge</subproject>
         <subproject>jfoundry-persistence-jpa</subproject>
         <subproject>jfoundry-messaging-jackson</subproject>
         <subproject>jfoundry-observability-otel</subproject>

@@ -43,13 +43,15 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 |---|---|---|
 | CDI 事务 | `jfoundry-transaction-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
 | 本地领域事件派发 | `jfoundry-domain-event-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
+| 聚合事件自动收集 | `jfoundry-domain-event-persistence-bridge-helidon` | `jfoundry-domain-event-helidon` 与持久化适配器 |
 | 聚合持久化上下文与技术审计 | `jfoundry-persistence-helidon` | Helidon MP 服务器与 JTA CDI 集成 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate 集成、数据源与持久化单元 |
 | RFC 9457 JAX-RS 响应与入站日志 | `jfoundry-web-helidon` | Helidon MP 服务器；请求校验映射还需 Bean Validation |
 | 出站 REST Client 日志 | `jfoundry-restclient-helidon` | 已包含 Helidon MicroProfile REST Client |
 | Kafka 消息投递 | `jfoundry-messaging-kafka-helidon` | 配置的 bootstrap servers 上可访问的 Kafka 代理 |
 | RabbitMQ 消息投递 | `jfoundry-messaging-rabbitmq-helidon` | 配置主机上可访问的 RabbitMQ 代理 |
-| Outbox 调度、派发与自动事件外部化 | `jfoundry-outbox-helidon` | `OutboxMessageStore` 与真实 `MessageSender` |
+| Outbox 调度与派发 | `jfoundry-outbox-helidon` | `OutboxMessageStore` 与真实 `MessageSender` |
+| 领域事件到 Outbox 组合 | `jfoundry-domain-event-outbox-helidon` | 领域事件运行时、Outbox 运行时、`OutboxMessageStore` 与真实 `MessageSender` |
 | JPA Outbox 存储 | `jfoundry-outbox-jpa-helidon` | JPA 能力与应用迁移 |
 | JPA Inbox 存储 | `jfoundry-inbox-jpa-helidon` | JPA 能力与应用迁移 |
 
@@ -63,7 +65,7 @@ Transactions 没有可移植的事务名称和只读语义，因此会拒绝这�
 
 聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。
 
-`jfoundry-domain-event-helidon` 会向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。`DomainEventContext.register(...)` 只允许在该拦截器作用域内使用；作用域外立即失败。对于在活跃 JTA 事务中注册的事件，Outbox 派发器在 `beforeCompletion` 运行，普通 CDI 派发器仅在成功提交后运行。拦截器不会派发这些事务绑定的事件。事务外的事件仍在最外层应用服务成功完成后整批派发；该调用失败时则丢弃事件。此边界仅支持同步调用，不支持 reactive 返回类型。
+`jfoundry-domain-event-helidon` 会向标注 JFoundry `@ApplicationService` 的 CDI Bean 加入拦截器。`DomainEventContext.register(...)` 只允许在该拦截器作用域内使用；作用域外立即失败。对于在活跃 JTA 事务中注册的事件，领域事件 Outbox 组合的派发器在 `beforeCompletion` 运行，普通 CDI 派发器仅在成功提交后运行。拦截器不会派发这些事务绑定的事件。事务外的事件仍在最外层应用服务成功完成后整批派发；该调用失败时则丢弃事件。此边界仅支持同步调用，不支持 reactive 返回类型。
 
 ## JPA、Outbox 与 Inbox
 
@@ -85,10 +87,9 @@ jfoundry.outbox.dispatcher.enabled=true
 触发器属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`、`batch-size` 默认 `50`、
 `max-retries` 默认 `5`、`backoff-base` 默认 `1s`、`backoff-max` 默认 `5m`。
 
-当配置 `jfoundry.domain.event.dispatch.outbox.enabled=true` 时，它还会将标记 `@Externalized` 的领域事件
-写入当前事务。该装配以 CDI alternative（优先级 `1`）提供 Jackson 序列化、路由 resolver、Outbox template
-和 recorder。若要在可移植 Helidon 应用中替换这些默认实现，应用实现必须声明为已启用的 CDI `@Alternative`，且
-`@Priority` 高于 `1`；普通 CDI Bean 不能覆盖已启用的 alternative。
+通用 Outbox 模块不会提供领域事件 Bean。若需要可选的领域事件到 Outbox 派发器和外部化生产器，加入
+`jfoundry-domain-event-outbox-helidon`。若希望聚合持久化自动将实现 `EventRecordable` 的聚合注册到领域事件上下文，
+另行加入 `jfoundry-domain-event-persistence-bridge-helidon`。这些都是显式组合；仅使用领域事件或通用 Outbox 的应用仍保持独立。
 
 ## Kafka 与 RabbitMQ 消息投递
 

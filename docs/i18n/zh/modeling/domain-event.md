@@ -46,7 +46,10 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 
 默认路径停留在进程内：
 
-1. 运行时通过 `AggregateEventRegistrar` 把 `AbstractAggregateRepository` 接到领域事件上下文。未引入 domain-event 的应用会跳过该注册。应用代码仍可直接调用 `DomainEventContext.register(...)`。
+1. 应用显式选择 `jfoundry-domain-event-persistence-bridge` 后，运行时通过与事件无关的持久化观察钩子，
+   将 `DomainEventAggregatePersistenceObserver` 装配到 `AbstractAggregateRepository`。该观察器只会在持久化成功后，
+   为实现 `EventRecordable` 的聚合注册事件。没有选择该可选桥接模块时，通用持久化仍保持独立，应用代码也可以直接调用
+   `DomainEventContext.register(...)`。
 2. `register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
 3. 存在活动事务时，作用域把已注册聚合放到事务资源上。Outbox 派发器（`BeforeCommitDomainEventDispatcher`）在 `beforeCommit` / `beforeCompletion` 触发；普通进程内派发器在 `afterCommit` / `afterCompletion(STATUS_COMMITTED)` 触发。拦截器不会派发这些事务绑定的事件。
 4. 没有活动事务时，最外层 `@ApplicationService` 成功完成后，会把整批事件交给每一个派发器。
@@ -62,3 +65,7 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 运行时分发装配见 [Spring Boot](../implementations/spring-boot.md)、
 [Quarkus](../implementations/quarkus.md) 与 [Helidon MP](../implementations/helidon.md)
 指南。
+
+模块职责是刻意拆开的：`jfoundry-domain-event-core` 是领域事件能力，`jfoundry-outbox-core` 是通用 Outbox 能力，
+`jfoundry-domain-event-persistence-bridge` 在两者组合时消除持久化模板代码，`jfoundry-domain-event-outbox-core` 将选定领域事件映射为通用 Outbox 消息。
+只使用进程内领域事件的领域模型不需要这些组合模块。

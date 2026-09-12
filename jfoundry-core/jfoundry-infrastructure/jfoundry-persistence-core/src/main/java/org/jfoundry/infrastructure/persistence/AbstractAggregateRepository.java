@@ -1,13 +1,12 @@
 package org.jfoundry.infrastructure.persistence;
 
-import org.jfoundry.domain.event.EventRecordable;
 import org.jfoundry.domain.repository.AggregateRepository;
+import org.jspecify.annotations.Nullable;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 
 /// Storage-neutral lifecycle base for aggregate repository adapters.
 /// <p>
@@ -20,18 +19,18 @@ import java.util.Objects;
 /// @param <T> aggregate root type
 /// @param <ID> aggregate identifier type
 public abstract class AbstractAggregateRepository<
-        T extends AggregateRoot<T, ID> & EventRecordable,
+        T extends AggregateRoot<T, ID>,
         ID extends Identifier>
         extends AbstractPersistenceAdapter
-        implements AggregateRepository<T, ID>, AggregateEventRegistrarAware {
+        implements AggregateRepository<T, ID>, AggregatePersistenceObserverAware {
 
-    private AggregateEventRegistrar eventRegistrar;
+    private @Nullable AggregatePersistenceObserver persistenceObserver;
 
-    /// Injects the registrar used to record successfully persisted aggregates.
+    /// Injects the observer used to observe successfully persisted aggregates.
     @Override
-    public final void setAggregateEventRegistrar(AggregateEventRegistrar registrar) {
-        this.eventRegistrar = Objects.requireNonNull(
-                registrar, "AggregateEventRegistrar must not be null.");
+    public final void setAggregatePersistenceObserver(AggregatePersistenceObserver observer) {
+        persistenceObserver = java.util.Objects.requireNonNull(
+                observer, "AggregatePersistenceObserver must not be null.");
     }
 
     /// Loads and restores one complete aggregate, returning null when it does not exist.
@@ -58,14 +57,14 @@ public abstract class AbstractAggregateRepository<
     public void add(T aggregate) {
         T validatedAggregate = requireAggregate(aggregate);
         add(() -> doAdd(validatedAggregate));
-        registerAggregate(validatedAggregate);
+        notifyAfterPersisted(validatedAggregate);
     }
 
     @Override
     public void modify(T aggregate) {
         T validatedAggregate = requireAggregate(aggregate);
         modify(() -> doModify(validatedAggregate));
-        registerAggregate(validatedAggregate);
+        notifyAfterPersisted(validatedAggregate);
     }
 
     @Override
@@ -73,7 +72,7 @@ public abstract class AbstractAggregateRepository<
         List<T> aggregateList = requireAggregates(aggregates);
         aggregateList.forEach(aggregate ->
                 add(() -> doAdd(aggregate)));
-        aggregateList.forEach(this::registerAggregate);
+        aggregateList.forEach(this::notifyAfterPersisted);
     }
 
     @Override
@@ -81,7 +80,7 @@ public abstract class AbstractAggregateRepository<
         List<T> aggregateList = requireAggregates(aggregates);
         aggregateList.forEach(aggregate ->
                 modify(() -> doModify(aggregate)));
-        aggregateList.forEach(this::registerAggregate);
+        aggregateList.forEach(this::notifyAfterPersisted);
     }
 
     @Override
@@ -91,7 +90,7 @@ public abstract class AbstractAggregateRepository<
             throw new IllegalArgumentException("Aggregate id must not be null.");
         }
         remove(() -> doRemove(validatedAggregate));
-        registerAggregate(validatedAggregate);
+        notifyAfterPersisted(validatedAggregate);
     }
 
     private T requireAggregate(T aggregate) {
@@ -114,9 +113,9 @@ public abstract class AbstractAggregateRepository<
         return List.copyOf(aggregates);
     }
 
-    private void registerAggregate(T aggregate) {
-        if (eventRegistrar != null) {
-            eventRegistrar.register(aggregate);
+    private void notifyAfterPersisted(T aggregate) {
+        if (persistenceObserver != null) {
+            persistenceObserver.afterPersisted(aggregate);
         }
     }
 
