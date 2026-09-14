@@ -8,6 +8,8 @@ English | [中文](README_ZH.md)
 
 It helps business projects make domain modeling, architecture boundaries, and reliable integration executable in code. The core defines DDD concepts, architecture semantics, application contracts, domain events, persistence SPI, and messaging SPI without depending on a runtime framework. Spring, Quarkus, and Helidon assemble the same core through peer runtime integration modules.
 
+JFoundry is not a full application framework and does not require an application to adopt every module. It is a composable capability platform: applications select the DDD, persistence, messaging, reliable-integration, and runtime capabilities they need, while framework-specific adapters remain outside the runtime-neutral core.
+
 ## Why jfoundry
 
 DDD projects often lose their intended boundaries in implementation: domain code imports framework or ORM APIs, transaction ownership is unclear, repositories become generic query interfaces, and external events are not delivered reliably. `jfoundry` provides:
@@ -35,7 +37,7 @@ require Outbox, and generic Outbox does not require Domain Event. Applications t
 externalization select the explicit Domain Event Outbox composition; the optional persistence bridge
 keeps automatic aggregate-event collection convenient without coupling generic persistence to events.
 
-At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules.
+At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules. The number of modules reflects two independent axes—capability and runtime or implementation—not a requirement to depend on the whole repository.
 
 ![jfoundry module architecture](docs/i18n/assets/jfoundry-module-architecture.svg)
 
@@ -78,6 +80,21 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 | Message delivery | Runtime-neutral outbound transport contracts with explicit Kafka, RabbitMQ, and RocketMQ adapters |
 | Reliable messaging | Transactional Outbox, Inbox idempotency, messaging, and serialization SPI |
 | Runtime integration | Spring Framework and Spring Boot assembly; Quarkus and Helidon CDI/Jakarta Transactions, JPA, and Outbox/Inbox assembly |
+
+## Capability Composition
+
+JFoundry keeps capabilities independently selectable. A typical application chooses one path rather than importing the complete project:
+
+| Need | Typical composition |
+|------|---------------------|
+| DDD modeling and architecture constraints | Domain and architecture capabilities |
+| In-process domain events | Domain Event capability; Outbox is not required |
+| Generic reliable messaging | Outbox or Inbox capability with a selected store, transport, and serialization adapter |
+| Reliable domain-event externalization | Domain Event + Outbox composition; add the optional persistence bridge when automatic aggregate-event collection is desired |
+| Aggregate persistence | Persistence contract with a JPA or MyBatis-Plus implementation |
+| Runtime assembly | The matching Spring, Quarkus, or Helidon integration |
+
+This composition model keeps the default footprint small while allowing the framework to provide production-oriented capabilities when an application explicitly opts into them.
 
 ## Choose Your Path
 
