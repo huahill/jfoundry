@@ -3,8 +3,8 @@
 set -euo pipefail
 
 verify_merge_gate() {
-    if [[ "$#" -ne 16 ]]; then
-        echo "Expected run_full, pull-request flag, plus 14 job results, received $# arguments." >&2
+    if [[ "$#" -ne 17 ]]; then
+        echo "Expected run_full, pull-request flag, plus 15 job results, received $# arguments." >&2
         return 2
     fi
 
@@ -15,6 +15,7 @@ verify_merge_gate() {
 
     local -a job_names=(
         "Documentation checks"
+        "Repository metadata checks"
         "Dependency Review"
         "Test"
         "Package artifacts"
@@ -47,19 +48,21 @@ verify_merge_gate() {
         return 1
     fi
 
-    if [[ "${is_pull_request}" == "true" && "${job_results[1]}" != "success" ]]; then
-        echo "Dependency Review must succeed for pull requests, received: ${job_results[1]}" >&2
-        return 1
-    fi
-
     if [[ "${run_full}" == "false" ]]; then
         return 0
     fi
 
-    for index in "${!job_names[@]}"; do
-        if [[ "${index}" -eq 1 && "${is_pull_request}" == "false" ]]; then
-            continue
-        fi
+    if [[ "${job_results[1]}" != "success" ]]; then
+        echo "Repository metadata checks must succeed for code changes, received: ${job_results[1]}" >&2
+        return 1
+    fi
+
+    if [[ "${is_pull_request}" == "true" && "${job_results[2]}" != "success" ]]; then
+        echo "Dependency Review must succeed for code-change pull requests, received: ${job_results[2]}" >&2
+        return 1
+    fi
+
+    for index in {3..14}; do
         if [[ "${job_results[index]}" != "success" ]]; then
             echo "${job_names[index]} must succeed for code changes, received: ${job_results[index]}" >&2
             return 1

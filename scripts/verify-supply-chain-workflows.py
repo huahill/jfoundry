@@ -35,15 +35,35 @@ def values(value: object) -> list[str]:
 
 
 def verify_ci(root: Path) -> None:
-    config = load(root / ".github/workflows/ci.yml", ".github/workflows/ci.yml Documentation checks")
+    prefix = ".github/workflows/ci.yml"
+    config = load(root / ".github/workflows/ci.yml", prefix)
     jobs = config.get("jobs")
-    steps = jobs.get("docs", {}).get("steps") if isinstance(jobs, dict) and isinstance(jobs.get("docs"), dict) else None
+    if not isinstance(jobs, dict):
+        fail(f"{prefix}: jobs must be a mapping")
+
+    docs = jobs.get("docs")
+    docs_steps = docs.get("steps") if isinstance(docs, dict) else None
+    docs_commands = [step.get("run") for step in docs_steps if isinstance(step, dict) and "run" in step] \
+        if isinstance(docs_steps, list) else None
+    if docs_commands != ["bash scripts/verify-docs.sh"]:
+        fail(f"{prefix} Documentation checks must run only: bash scripts/verify-docs.sh")
+
+    metadata = jobs.get("metadata")
+    steps = metadata.get("steps") if isinstance(metadata, dict) else None
+    if not isinstance(metadata, dict) or metadata.get("needs") != "changes" \
+            or metadata.get("if") != "needs.changes.outputs.run_full == 'true'":
+        fail(f"{prefix} Repository metadata checks must require full changes")
     required = ["bash scripts/verify-compatibility-matrix.sh", "bash scripts/verify-compatibility-matrix-test.sh"]
     if not isinstance(steps, list) or any(step.get("run") not in required for step in [] if isinstance(step, dict)):
-        fail(f".github/workflows/ci.yml Documentation checks must run: {required[0]}")
+        fail(f"{prefix} Repository metadata checks must run: {required[0]}")
     for command in required:
         if not any(isinstance(step, dict) and step.get("run") == command for step in steps):
-            fail(f".github/workflows/ci.yml Documentation checks must run: {command}")
+            fail(f"{prefix} Repository metadata checks must run: {command}")
+
+    dependency_review = jobs.get("dependency-review")
+    if not isinstance(dependency_review, dict) or dependency_review.get("needs") != "changes" \
+            or dependency_review.get("if") != "github.event_name == 'pull_request' && needs.changes.outputs.run_full == 'true'":
+        fail(f"{prefix} Dependency Review must require full pull-request changes")
 
 
 def verify_dependabot(root: Path) -> None:

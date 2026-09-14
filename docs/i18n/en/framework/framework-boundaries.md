@@ -173,9 +173,10 @@ The capability state model and SQL-template policy belong in [Reliable Messaging
 
 All changes enter `main` through a pull request and GitHub's `Squash and merge` strategy; direct pushes are
 not permitted. The squash commit subject is the pull request title. The always-running `Merge gate` is the
-required status check. It accepts a documentation-only change only when documentation verification succeeds.
-For any code change, it requires every existing CI job, including runtime middleware and Native Image
-verification, to succeed. A skipped, cancelled, or failed runtime job does not satisfy the gate.
+required status check. Documentation-only changes run the documentation checks and skip repository metadata,
+Dependency Review, and the full Java/runtime matrix. For any code change, it requires repository metadata,
+Dependency Review for pull requests, and every existing CI job, including runtime middleware and Native Image
+verification, to succeed. A skipped, cancelled, or failed required job does not satisfy the gate.
 
 Contributors should run the CI-equivalent stage for the capability they change before pushing a branch. Local
 verification reduces feedback time but cannot replace the server-side gate.
