@@ -78,8 +78,8 @@ Repository administrators must enable all of the following in GitHub repository 
    selected by the maintainers.
 5. An active tag ruleset for `refs/tags/v*` that prohibits deletion and updates without bypass actors.
 6. The active main-branch ruleset that requires the `Merge gate` status check and allows only
-   `Squash and merge`. `Merge gate` requires the CI-integrated Dependency Review job for every
-   pull request.
+   `Squash and merge`. `Merge gate` requires the CI-integrated Dependency Review job for every full-change
+   pull request; documentation-only pull requests are exempt because they cannot change dependencies.
 
 The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, and
 `GPG_PASSPHRASE`. Those values must never be committed, printed, or copied into issue discussions.

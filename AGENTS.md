@@ -100,9 +100,9 @@ Commit form. Do not use merge commits or rebase-merge. Local verification accele
 replace the server-side merge gate.
 
 Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`, and
-`docs/**`. These paths still run documentation and dependency checks, but skip the full Java, runtime,
-Native Image, Maven compatibility, and CodeQL matrix. Changes to workflows, scripts, POMs, source code,
-or maintenance skills remain full-validation changes.
+`docs/**`. These paths run documentation checks and the merge gate, but skip repository metadata,
+Dependency Review, Java, runtime, Native Image, Maven compatibility, and CodeQL checks. Changes to
+workflows, scripts, POMs, source code, or maintenance skills remain full-validation changes.
 
 ## Documentation Comments
 

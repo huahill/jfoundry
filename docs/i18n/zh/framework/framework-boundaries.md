@@ -114,7 +114,7 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## 合并验证
 
-所有变更必须通过 Pull Request 进入 `main`，并使用 GitHub 的 `Squash and merge` 策略；不允许直接推送。压缩提交的标题使用 Pull Request 标题。始终执行的 `Merge gate` 是必需状态检查。仅文档变更只有在文档验证成功时才可通过；任何代码变更都要求现有全部 CI 任务成功，包括运行时中间件和原生镜像验证。运行时任务被跳过、取消或失败都不能满足门禁要求。
+所有变更必须通过 Pull Request 进入 `main`，并使用 GitHub 的 `Squash and merge` 策略；不允许直接推送。压缩提交的标题使用 Pull Request 标题。始终执行的 `Merge gate` 是必需状态检查。仅文档变更运行文档检查，并跳过仓库元数据、Dependency Review 以及完整的 Java、运行时和原生镜像矩阵。代码变更则要求仓库元数据、Pull Request 中的 Dependency Review，以及现有全部 CI 任务成功，包括运行时中间件和原生镜像验证。必需任务被跳过、取消或失败都不能满足门禁要求。
 
 贡献者应在推送分支前运行与所改能力对应的本地 CI 对齐阶段。本地验证可以缩短反馈时间，但不能替代服务端门禁。
 

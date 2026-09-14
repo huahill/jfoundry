@@ -217,13 +217,21 @@ jobs:
   docs:
     name: Documentation checks
     steps:
+      - name: Verify documentation
+        run: bash scripts/verify-docs.sh
+  metadata:
+    name: Repository metadata checks
+    needs: changes
+    if: needs.changes.outputs.run_full == 'true'
+    steps:
       - name: Verify compatibility matrix
         run: bash scripts/verify-compatibility-matrix.sh
       - name: Test compatibility matrix verification
         run: bash scripts/verify-compatibility-matrix-test.sh
   dependency-review:
     name: Dependency Review
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.run_full == 'true'
     permissions:
       contents: read
       pull-requests: read
@@ -1501,7 +1509,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix.sh" not in line))
 PY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix.sh"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Repository metadata checks must run: bash scripts/verify-compatibility-matrix.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
@@ -1511,7 +1519,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix-test.sh" not in line))
 PY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix-test.sh"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Repository metadata checks must run: bash scripts/verify-compatibility-matrix-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 rm "${temp_dir}/.github/dependabot.yml"
