@@ -71,9 +71,10 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
 | RFC 9457 Web MVC 错误响应 | `jfoundry-webmvc-spring-boot-starter` | 仅 HTTP 入站适配。 |
 | 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-restclient-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
-| JSON 序列化契约 | `jfoundry-messaging-spring-boot-starter` | 提供 Spring 消息集成和默认 Jackson `PayloadSerializer`，不提供真实发送器。 |
+| Outbox 记录的 JSON 序列化 | `jfoundry-outbox-spring-boot-starter`（或应用自己的 `PayloadSerializer`） | `OutboxTemplateAutoConfiguration` 在 Jackson 与 Outbox 存储可用时提供默认 Jackson `PayloadSerializer`；消息启动器只提供传输集成与依赖，本身不提供序列化器 Bean。 |
 | Kafka、RabbitMQ 或 RocketMQ 投递 | 对应 `jfoundry-messaging-*-spring-boot-starter` | 显式选择具体消息代理传输方式。 |
-| Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供记录、外部化、恢复、清理和内置定时派发触发器。手工组合时直接添加；内置存储与 JobRunr 启动器会传递引入它。 |
+| Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供通用消息记录、恢复、清理和内置定时派发触发器。手工组合时直接添加；内置存储与 JobRunr 启动器会传递引入它。 |
+| 领域事件到 Outbox 组合 | `jfoundry-domain-event-outbox-spring-boot-starter` | 提供领域事件、通用 Outbox、持久化桥接层和领域事件到 Outbox 的自动记录。只有已收集事件必须可靠离开本进程时才选择。 |
 | Outbox 存储 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用 `OutboxMessageStore` | 只持久化 Outbox 记录；内置存储启动器也会引入 Outbox 能力，迁移仍由应用负责。 |
 | Inbox 运行时与存储 | `jfoundry-inbox-spring-boot-starter` 加一个 `jfoundry-inbox-*-spring-boot-starter` | 消费端幂等；迁移由应用负责。 |
 | Outbox 派发触发方式 / 调度适配器 | 内置定时模式（`ScheduledOutboxTrigger`）、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter`（`JobRunrOutboxTrigger`）或应用触发器 | JobRunr 会替换内置触发方式并传递引入 Outbox 能力；任何选项仍需要 Outbox 存储和真实发送器。 |
@@ -85,7 +86,14 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 优先使用运行时无关的 `TransactionRunner` 表达可移植的应用事务边界。Spring 将该契约映射到其事务基础设施并支持六种 jfoundry 传播模式。当应用明确选择 Spring 语义时，也可以使用 Spring `@Transactional`；不要在同一用例上叠加彼此独立的事务边界，除非已明确其所有权规则。详见[应用事务](../capabilities/application-transactions.md)。
 
-事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。持久化在活动 Spring 事务中注册聚合时，运行时会在该事务的 `beforeCommit` 阶段派发事件，使聚合变更与任意 Outbox 记录原子提交，而 Spring 事件适配器仍只会在提交后发布。没有活动事务时，运行时才回退到最外层 `@ApplicationService` 成功完成时派发。该自动路径中的应用业务代码不调用 `drainEvents()`。
+聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。
+
+事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。`DomainEventContext.register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
+
+聚合 Repository 的自动收集只由领域事件 Outbox 组合启动器中显式提供的持久化桥接层负责。它使用与事件无关的
+`AggregatePersistenceObserver` 完成钩子，并且只在持久化成功后为实现 `EventRecordable` 的聚合注册事件。仅选择领域事件或通用持久化时，两者仍保持独立；应用也可以直接注册到 `DomainEventContext`。
+
+持久化在活动 Spring 事务中注册聚合时，领域事件 Outbox 组合的 `BeforeCommitDomainEventDispatcher` 在该事务的 `beforeCommit` 阶段写入，使聚合变更与任意 Outbox 记录原子提交；进程内 Spring 事件在 `afterCommit` 发布。存在事务事件时，拦截器不会派发。没有活动事务时，运行时在最外层 `@ApplicationService` 成功完成后派发整批事件。该自动路径中的应用业务代码不调用 `drainEvents()`。
 
 ## 持久化
 

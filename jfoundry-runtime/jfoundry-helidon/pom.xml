@@ -47,6 +47,8 @@
     <subprojects>
         <subproject>jfoundry-transaction-helidon</subproject>
         <subproject>jfoundry-domain-event-helidon</subproject>
+        <subproject>jfoundry-domain-event-persistence-bridge-helidon</subproject>
+        <subproject>jfoundry-domain-event-outbox-helidon</subproject>
         <subproject>jfoundry-persistence-helidon</subproject>
         <subproject>jfoundry-persistence-jpa-helidon</subproject>
         <subproject>jfoundry-web-helidon</subproject>

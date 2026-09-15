@@ -20,14 +20,6 @@ public interface OutboxMessageStore {
 
     void append(OutboxMessage entry);
 
-    /// Finds dispatchable entries:
-    /// <pre>
-    /// status IN (PENDING, FAILED) AND (next_retry_at IS NULL OR next_retry_at <= now)
-    /// ORDER BY occurredAt ASC
-    /// LIMIT n
-    /// </pre>
-    List<OutboxMessage> findDispatchable(int limit, Instant now);
-
     void markAsPublished(String eventId);
 
     default void markAsPublished(String eventId, @Nullable String claimToken) {

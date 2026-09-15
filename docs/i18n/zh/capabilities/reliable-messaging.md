@@ -1,6 +1,6 @@
 # 可靠消息：Outbox 与 Inbox
 
-只有领域事件必须可靠投递到其他进程或外部系统时，才使用 Transactional Outbox。进程内事件处理不需要它。Inbox 为一条消息与一个消费者的组合提供消费端幂等。
+Transactional Outbox 在同一数据库事务中记录一条待发的集成消息，稍后再派发到消息代理。领域事件是独立的进程内事实模型，并不依赖 Outbox。建模约定见[领域事件](../modeling/domain-event.md)。只有已收集的领域事件必须可靠到达其他进程时，才把两者组合起来。进程内事件处理不需要 Outbox。不是从领域事件派生的集成消息应使用 `OutboxTemplate`。Inbox 为一条消息与一个消费者的组合提供消费端幂等。
 
 直接发布消息代理以及选择传输适配器见[消息传输](message-delivery.md)。可靠消息将所选传输与 Outbox 记录和可选 Inbox 幂等组合，但它自身不选择消息代理。
 
@@ -12,7 +12,8 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 
 | 决策 | 作用 | Spring Boot 选择 |
 |---|---|---|
-| Outbox 能力 | 负责记录、外部化、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
+| Outbox 能力 | 负责记录通用集成消息、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
+| 领域事件 Outbox 组合 | 将选定领域事件映射为通用 Outbox 消息 | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | 存储适配器 | 持久化 `OutboxMessageStore` 记录 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用实现 |
 | 派发触发方式 / 调度适配器 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用触发器 |
 | 消息传输 | 发送已领取的消息载荷 | 消息代理专用的 `jfoundry-messaging-*-spring-boot-starter` 或应用 `MessageSender` |
@@ -24,12 +25,19 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 `jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换，
 而 `OutboxDispatcher` 仍是派发服务端口，`*OutboxTrigger` 仍是调度适配器。
 
+领域事件 Outbox 组合刻意独立于这两项能力。Spring 组合启动器包含领域事件、通用 Outbox、持久化桥接层和
+领域事件 Outbox 自动配置。Quarkus 与 Helidon 提供对应的显式模块：`jfoundry-domain-event-outbox-quarkus-runtime`
+和 `jfoundry-domain-event-outbox-helidon`；它们的通用 Outbox 模块不会注册领域事件 Bean。因此，仅使用领域事件的应用
+不会得到 Outbox 记录器，仅使用通用 Outbox 的应用也不会得到领域事件上下文或派发器。
+
 运行时特定的 `*OutboxTrigger` 类型是调度适配器。`OutboxDispatcher` 仍然是它们调用的派发服务端口。
 
 如果应用曾经直接构造旧的 `ScheduledOutboxDispatcher`、`JobRunrOutboxDispatcher`、`QuarkusOutboxDispatcher`
 或 `HelidonOutboxDispatcher` 类型，请将这些调用点改为对应的 `*OutboxTrigger` 类。
 
 ## 事件流
+
+下面这条链路是可选组合：已收集的领域事件变成 Outbox 行。Outbox 本身不要求领域事件；`OutboxTemplate` 把显式集成消息写到同一套存储和派发路径上。
 
 ```text
 聚合显式记录领域事件
@@ -43,13 +51,13 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 
 自动收集不会从持久化变更或对象状态推断领域事实。聚合的业务行为使用 `recordEvent(...)` 显式记录事实；在自动运行时中，应用业务代码通常不调用 `drainEvents()`。该方法仍是运行时集成和刻意采用手工派发时使用的运行时无关交接 SPI。
 
-自动外部化提供两条路径。领域事件本身就是刻意维护的稳定公共契约时，可使用 `@Externalized` 直接序列化该事件。需要版本化集成契约时，应用提供 `DomainEventExternalizer<E>` Bean：它将已被自动收集的领域事件映射为零到多个 `ExternalizedEvent`，框架在当前事务中完成序列化和追加。每个映射结果提供稳定的 `payloadType`、载荷、主题、键和可选聚合元数据；源领域事件提供 Outbox 事件 ID 与发生时间。
+自动外部化提供两条路径。领域事件本身就是刻意维护的稳定公共契约时，可使用 `@Externalized` 直接序列化该事件。需要版本化集成契约时，应用提供 `DomainEventExternalizer<E>` Bean：它将已被自动收集的领域事件映射为零到多个 `ExternalizedEvent`，框架在当前事务中完成序列化和追加。每个映射结果提供稳定的 `payloadType`、载荷、主题、键和可选聚合元数据。源领域事件提供来源事件 ID 与 `occurredAt`；每条映射后的 Outbox 行拥有自己的 `event_id`。对于 `@Externalized` 事件，存储与线上的 `payloadType` 是目标主题。
 
 匹配到外部化器时，其优先级高于 `@Externalized`，即使它有意返回空消息列表也是如此，因此同一个领域事件不会经由两条路径写入两次。没有匹配外部化器时，现有的显式注解路径保持不变。映射失败或映射元数据非法会使业务事务失败。对于并非来自已收集领域事件的集成消息，仍可使用 `OutboxTemplate`；它加入调用方事务，不会自行开启事务或同步发送。
 
 ## Payload 契约
 
-将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。消费者应将消息信封反序列化为各自的版本化契约。应选择保持消息格式可移植且不暴露 JVM 类型名的消息载荷序列化器。
+将 `payloadType` 视为稳定的契约名称，而不是 Java 类名。派发会把该契约名复制到信封头 `jfoundry.payload-type`；消费者应按该信封契约反序列化，而不是按 Java 类名。应选择保持消息格式可移植且不暴露 JVM 类型名的消息载荷序列化器。
 
 ## Outbox 状态机
 
@@ -89,8 +97,8 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 |------|------|
 | MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
 | JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../implementations/jpa.md) |
-| Quarkus Outbox 运行时、自动领域事件外部化与 Kafka 投递 | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox 运行时、自动领域事件外部化与 Kafka 或 RabbitMQ 投递 | [Helidon MP](../implementations/helidon.md) |
+| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../implementations/quarkus.md) |
+| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../implementations/helidon.md) |
 | Spring Boot 能力装配和派发器配置 | [Spring Boot](../implementations/spring-boot.md) |
 
 启动器、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。

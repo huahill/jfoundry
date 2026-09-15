@@ -84,9 +84,10 @@ database, delivery, scheduling, and distributed-lock choices.
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
 | Outbound `RestClient` support and configurable HTTP logging | `jfoundry-restclient-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
-| JSON serialization contract | `jfoundry-messaging-spring-boot-starter` | Adds Spring messaging integration and the default Jackson `PayloadSerializer`, but no real sender. |
+| JSON serialization for Outbox records | `jfoundry-outbox-spring-boot-starter` (or an application `PayloadSerializer`) | `OutboxTemplateAutoConfiguration` provides the default Jackson `PayloadSerializer` when Jackson and an Outbox store are available; messaging starters provide transport integration and dependencies, but no serializer bean by themselves. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |
-| Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds recording, externalization, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
+| Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds generic recording, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
+| Domain Event to Outbox composition | `jfoundry-domain-event-outbox-spring-boot-starter` | Adds Domain Event, generic Outbox, the persistence bridge, and automatic Domain Event-to-Outbox recording. Select it only when the captured event must leave the process reliably. |
 | Outbox store | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application `OutboxMessageStore` | Persists Outbox records only; built-in store starters also bring the Outbox capability, while applications still own migrations. |
 | Inbox runtime and store | `jfoundry-inbox-spring-boot-starter` plus one `jfoundry-inbox-*-spring-boot-starter` | Consumer idempotency; applications own migrations. |
 | Outbox dispatch trigger / scheduling adapter | Built-in scheduled mode (`ScheduledOutboxTrigger`), optional `jfoundry-outbox-jobrunr-spring-boot-starter` (`JobRunrOutboxTrigger`), or an application trigger | JobRunr replaces the built-in trigger and brings the Outbox capability transitively; every option still needs an Outbox store and real sender. |
@@ -103,17 +104,30 @@ Spring `@Transactional` boundary can also be appropriate when the application de
 Spring semantics; do not layer independent transaction boundaries around the same use case without
 a defined ownership rule. See [application transactions](../capabilities/application-transactions.md).
 
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
+
 The event starter activates application-service domain-event dispatch and publishes each dispatched
 event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
 process. A `@TransactionalEventListener` selects the desired transaction phase, such as
 `AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
 not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
-fact with `recordEvent(...)`. When persistence registers the aggregate inside an active Spring
-transaction, the runtime dispatches its events in that transaction's `beforeCommit` phase. This makes
-the aggregate change and any Outbox row atomic, while the Spring event adapter still publishes only
-after commit. Without an active transaction, the runtime falls back to dispatching at the successful
-outermost `@ApplicationService` boundary. Application business code does not call `drainEvents()` in
-this automatic path.
+fact with `recordEvent(...)`. `DomainEventContext.register(...)` is legal only inside an
+`@ApplicationService` invocation; outside that scope it fails immediately.
+
+Automatic collection from aggregate repositories is provided only by the explicit persistence bridge
+included in the Domain Event Outbox combination starter. It uses the event-neutral
+`AggregatePersistenceObserver` completion hook and registers an `EventRecordable` aggregate only
+after persistence succeeds. Domain Event-only and generic Persistence-only selections remain
+independent; applications can also register through `DomainEventContext` directly.
+
+When persistence registers the aggregate inside an active Spring transaction, the Domain Event Outbox
+combination's Outbox dispatcher
+(`BeforeCommitDomainEventDispatcher`) writes in that transaction's `beforeCommit` phase so the
+aggregate change and any Outbox row commit atomically. In-process Spring event publication happens
+in `afterCommit`. The interceptor does not dispatch when transaction events exist. Without an
+active transaction, the runtime dispatches the full batch at the successful outermost
+`@ApplicationService` boundary. Application business code does not call `drainEvents()` in this
+automatic path.
 
 ## Persistence
 

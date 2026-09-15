@@ -49,11 +49,14 @@ public class OutboxMaintenanceResource {
         });
 
         int recovered = outboxMaintenance.recoverStuckDispatching();
-        String status = transactionRunner.call(() -> outboxMessageStore.findDispatchable(10, Instant.now()).stream()
-                .filter(message -> eventId.equals(message.getEventId()))
-                .findFirst()
-                .map(message -> message.getStatus().name())
-                .orElse("MISSING"));
+        String status = transactionRunner.call(() -> {
+            Object value = entityManager.createNativeQuery("""
+                    select status from jfoundry_outbox_event where event_id = ?1
+                    """)
+                    .setParameter(1, eventId)
+                    .getSingleResult();
+            return value == null ? "MISSING" : String.valueOf(value);
+        });
         transactionRunner.run(() -> {
             OutboxMessage claimed = outboxMessageStore.claimDispatchable(1, "maintenance-recovery-cleanup").getFirst();
             if (!eventId.equals(claimed.getEventId())) {

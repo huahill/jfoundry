@@ -8,6 +8,8 @@ English | [中文](README_ZH.md)
 
 It helps business projects make domain modeling, architecture boundaries, and reliable integration executable in code. The core defines DDD concepts, architecture semantics, application contracts, domain events, persistence SPI, and messaging SPI without depending on a runtime framework. Spring, Quarkus, and Helidon assemble the same core through peer runtime integration modules.
 
+JFoundry is not a full application framework and does not require an application to adopt every module. It is a composable capability platform: applications select the DDD, persistence, messaging, reliable-integration, and runtime capabilities they need, while framework-specific adapters remain outside the runtime-neutral core.
+
 ## Why jfoundry
 
 DDD projects often lose their intended boundaries in implementation: domain code imports framework or ORM APIs, transaction ownership is unclear, repositories become generic query interfaces, and external events are not delivered reliably. `jfoundry` provides:
@@ -30,7 +32,12 @@ runtime integration
 
 Dependencies point inward. This keeps runtime integrations outside the core rather than making a particular framework a requirement for every application.
 
-At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules.
+Domain Event and Outbox are independent capabilities: in-process Domain Event dispatch does not
+require Outbox, and generic Outbox does not require Domain Event. Applications that need reliable
+externalization select the explicit Domain Event Outbox composition; the optional persistence bridge
+keeps automatic aggregate-event collection convenient without coupling generic persistence to events.
+
+At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoundry-runtime/` groups the Spring, Quarkus, and Helidon integrations, and `jfoundry-boms/` contains dependency management. These are source directory groupings, not Maven aggregator modules. The number of modules reflects two independent axes—capability and runtime or implementation—not a requirement to depend on the whole repository.
 
 ![jfoundry module architecture](docs/i18n/assets/jfoundry-module-architecture.svg)
 
@@ -74,10 +81,25 @@ requirements -> domain modeling -> architecture decision -> optional jfoundry la
 | Reliable messaging | Transactional Outbox, Inbox idempotency, messaging, and serialization SPI |
 | Runtime integration | Spring Framework and Spring Boot assembly; Quarkus and Helidon CDI/Jakarta Transactions, JPA, and Outbox/Inbox assembly |
 
+## Capability Composition
+
+JFoundry keeps capabilities independently selectable. A typical application chooses one path rather than importing the complete project:
+
+| Need | Typical composition |
+|------|---------------------|
+| DDD modeling and architecture constraints | Domain and architecture capabilities |
+| In-process domain events | Domain Event capability; Outbox is not required |
+| Generic reliable messaging | Outbox or Inbox capability with a selected store, transport, and serialization adapter |
+| Reliable domain-event externalization | Domain Event + Outbox composition; add the optional persistence bridge when automatic aggregate-event collection is desired |
+| Aggregate persistence | Persistence contract with a JPA or MyBatis-Plus implementation |
+| Runtime assembly | The matching Spring, Quarkus, or Helidon integration |
+
+This composition model keeps the default footprint small while allowing the framework to provide production-oriented capabilities when an application explicitly opts into them.
+
 ## Choose Your Path
 
 - **Choose a capability**: start with the [Capability Catalog](docs/i18n/en/capabilities/index.md) to map a business need to its supported runtime dependency.
-- **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/repository-vs-read-contracts.md).
+- **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/index.md).
 - **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
 - **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details or runtime-specific HTTP server and REST Client diagnostic logging.
 - **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
@@ -182,7 +204,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### Modeling
 
+- [Modeling](docs/i18n/en/modeling/index.md)
 - [Value Object Guide](docs/i18n/en/modeling/value-object.md)
+- [Domain Events](docs/i18n/en/modeling/domain-event.md)
 - [Repository and Read-side Contracts](docs/i18n/en/modeling/repository-vs-read-contracts.md)
 
 ### Release and Compatibility

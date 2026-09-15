@@ -27,10 +27,27 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 
 ## Dependabot Update Governance
 
+- Dependabot version updates read Maven Central, not GitHub Releases. The Maven
+  updater also follows only `<modules>` lists, so Maven 4.1 `<subprojects>`
+  aggregators are invisible unless their manifests are named in `directories`.
+  Keep one Maven update block pointed at `/` and `/jfoundry-boms/*` so plugin
+  pins and consumer BOMs stay in scope. Do not scan `/jfoundry-runtime/*`:
+  those aggregators use Maven 4.1 inferred parents and `${project.version}`
+  imports, which Dependabot cannot evaluate. Runtime aggregator version
+  properties remain duplicate pins of the corresponding consumer BOM; platform
+  upgrades follow the BOM, then update the aggregator property in the same
+  change. Do not dual-write `<modules>` to compensate, and do not glob every
+  leaf module.
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
-  patch group so related updates available in the same Dependabot run are proposed together.
+  patch group and the catch-all Maven minor group so related updates available in the same Dependabot
+  run are proposed together. Remaining major updates stay ungrouped so accidental publications can be
+  closed without bundling them into a routine upgrade.
+- Maven version-update pull requests do not rebase automatically when `main` moves. Rebase the next
+  candidate with `@dependabot rebase` before merging. This prevents one merge from retriggering the
+  full CI matrix on every remaining Dependabot pull request. Pull requests opened before this setting
+  still rebase for up to 30 days.
 - Quarkus platform coordinates use a one-day patch cooldown and a seven-day minor/major cooldown.
   Spring Boot platform coordinates are explicitly excluded from the cooldown so the daily schedule
   can propose new releases promptly. The Quarkus delay gives platform publishers and Maven Central
@@ -41,7 +58,7 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   build tools to match the consumer BOM. An incomplete platform update therefore fails the `Merge
   gate` instead of changing the supported baseline. Helidon has one platform version source in its
   consumer BOM and does not need a multi-coordinate group.
-- Only Maven-only patch pull requests may be queued for rebase auto-merge, and they merge only after
+- Only Maven-only patch pull requests may be queued for squash auto-merge, and they merge only after
   Dependency Review and the `Merge gate` succeed. Minor and major Maven updates require manual review.
   The complete supported runtime matrix remains the compatibility boundary for runtime changes.
 - Dependabot does not ignore runtime platform dependency-management updates. Spring Boot, Spring
@@ -60,8 +77,9 @@ Repository administrators must enable all of the following in GitHub repository 
 4. The `jfoundry` deployment environment with Maven Central and GPG secrets, plus release reviewers
    selected by the maintainers.
 5. An active tag ruleset for `refs/tags/v*` that prohibits deletion and updates without bypass actors.
-6. The active main-branch ruleset that requires the `Merge gate` status check. `Merge gate` requires
-   the CI-integrated Dependency Review job for every pull request.
+6. The active main-branch ruleset that requires the `Merge gate` status check and allows only
+   `Squash and merge`. `Merge gate` requires the CI-integrated Dependency Review job for every full-change
+   pull request; documentation-only pull requests are exempt because they cannot change dependencies.
 
 The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, and
 `GPG_PASSPHRASE`. Those values must never be committed, printed, or copied into issue discussions.

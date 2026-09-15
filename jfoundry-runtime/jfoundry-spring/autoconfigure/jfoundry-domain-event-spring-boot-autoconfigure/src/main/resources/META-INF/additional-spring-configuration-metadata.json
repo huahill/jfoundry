@@ -1,0 +1,33 @@
+{
+  "groups": [
+    {
+      "name": "jfoundry.domain.event",
+      "type": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties",
+      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties"
+    },
+    {
+      "name": "jfoundry.domain.event.dispatch",
+      "type": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties$Dispatch",
+      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties"
+    },
+    {
+      "name": "jfoundry.domain.event.dispatch.spring",
+      "type": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties$Spring",
+      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventDispatchProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "jfoundry.domain.event.dispatch.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable automatic domain event dispatch at application-service boundaries."
+    },
+    {
+      "name": "jfoundry.domain.event.dispatch.spring.enabled",
+      "type": "java.lang.Boolean",
+      "defaultValue": true,
+      "description": "Enable Spring ApplicationEventPublisher dispatch when the Spring event adapter is present."
+    }
+  ]
+}

@@ -47,13 +47,15 @@ Then select only the capabilities the application needs:
 |---|---|---|
 | CDI transactions | `jfoundry-transaction-helidon` | Helidon MP server and JTA CDI integration |
 | Local domain-event dispatch | `jfoundry-domain-event-helidon` | Helidon MP server and JTA CDI integration |
+| Automatic aggregate event collection | `jfoundry-domain-event-persistence-bridge-helidon` | `jfoundry-domain-event-helidon` and a persistence adapter |
 | Aggregate persistence context and technical audit | `jfoundry-persistence-helidon` | Helidon MP server and JTA CDI integration |
 | JPA aggregate persistence | `jfoundry-persistence-jpa-helidon` | CDI JPA/Hibernate integration, datasource, and persistence unit |
 | RFC 9457 JAX-RS responses and inbound logging | `jfoundry-web-helidon` | Helidon MP server; Bean Validation for request-validation mapping |
 | Outbound REST Client logging | `jfoundry-restclient-helidon` | Included Helidon MicroProfile REST Client |
 | Kafka message delivery | `jfoundry-messaging-kafka-helidon` | Kafka broker at the configured bootstrap servers |
 | RabbitMQ message delivery | `jfoundry-messaging-rabbitmq-helidon` | RabbitMQ broker at the configured host |
-| Outbox scheduling, dispatch, and automatic event externalization | `jfoundry-outbox-helidon` | an `OutboxMessageStore` and a real `MessageSender` |
+| Outbox scheduling and dispatch | `jfoundry-outbox-helidon` | an `OutboxMessageStore` and a real `MessageSender` |
+| Domain Event to Outbox composition | `jfoundry-domain-event-outbox-helidon` | Domain Event runtime, Outbox runtime, an `OutboxMessageStore`, and a real `MessageSender` |
 | JPA Outbox store | `jfoundry-outbox-jpa-helidon` | JPA capability and application migration |
 | JPA Inbox store | `jfoundry-inbox-jpa-helidon` | JPA capability and application migration |
 
@@ -66,11 +68,15 @@ No capability module implicitly adds JPA, Outbox, Inbox, a database, or a broker
 creates. Transaction name and read-only options have no portable Jakarta Transactions equivalent and
 are rejected rather than ignored.
 
-`jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans. For events
-registered in an active JTA transaction, it records the Outbox path in `beforeCompletion` and notifies
-ordinary CDI dispatchers only after a successful commit. Outside a transaction, it dispatches after
-the outermost successful application-service invocation and discards events when that invocation
-fails. The boundary is synchronous; it does not support reactive return types.
+How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
+
+`jfoundry-domain-event-helidon` adds a CDI interceptor to JFoundry `@ApplicationService` beans.
+`DomainEventContext.register(...)` is legal only inside that interceptor scope; outside it fails
+immediately. For events registered in an active JTA transaction, Outbox dispatchers run in
+`beforeCompletion` and ordinary CDI dispatchers run only after a successful commit. The interceptor
+does not dispatch those transaction-bound events. Outside a transaction, it dispatches the full batch
+after the outermost successful application-service invocation and discards events when that
+invocation fails. The boundary is synchronous; it does not support reactive return types.
 
 ## JPA, Outbox, And Inbox
 
@@ -95,12 +101,12 @@ jfoundry.outbox.dispatcher.enabled=true
 The trigger properties match the runtime-neutral Outbox behavior: `interval` defaults to `5s`,
 `batch-size` to `50`, `max-retries` to `5`, `backoff-base` to `1s`, and `backoff-max` to `5m`.
 
-It also records domain events marked `@Externalized` into the current transaction when
-`jfoundry.domain.event.dispatch.outbox.enabled=true`. The assembly provides Jackson serialization,
-routing resolvers, an Outbox template, and a recorder as CDI alternatives at priority `1`. To replace
-one of these defaults in a portable Helidon application, declare the replacement as an enabled CDI
-`@Alternative` with a priority greater than `1`; a plain CDI bean does not override an enabled
-alternative.
+The generic Outbox module does not provide Domain Event beans. Add
+`jfoundry-domain-event-outbox-helidon` for the optional Domain Event-to-Outbox dispatcher and
+externalization producer. Add `jfoundry-domain-event-persistence-bridge-helidon` separately when
+aggregate persistence should automatically register `EventRecordable` aggregates in the Domain
+Event context. These are explicit compositions; Domain Event-only and generic Outbox-only
+applications remain independent.
 
 ## Kafka And RabbitMQ Message Delivery
 

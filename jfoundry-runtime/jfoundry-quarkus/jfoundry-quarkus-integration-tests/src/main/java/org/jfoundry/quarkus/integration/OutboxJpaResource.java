@@ -47,11 +47,14 @@ public class OutboxJpaResource {
                 "{}",
                 Instant.now())));
 
-        return transactionRunner.call(() -> outboxMessageStore.findDispatchable(10, Instant.now()).stream()
-                .filter(message -> eventId.equals(message.getEventId()))
-                .findFirst()
-                .map(message -> message.getStatus().name())
-                .orElse("MISSING"));
+        return transactionRunner.call(() -> {
+            Object status = entityManager.createNativeQuery("""
+                    select status from jfoundry_outbox_event where event_id = ?1
+                    """)
+                    .setParameter(1, eventId)
+                    .getSingleResult();
+            return status == null ? "MISSING" : String.valueOf(status);
+        });
     }
 
     @GET

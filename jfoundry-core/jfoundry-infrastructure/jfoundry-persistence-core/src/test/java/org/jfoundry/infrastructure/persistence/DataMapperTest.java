@@ -1,6 +1,5 @@
 package org.jfoundry.infrastructure.persistence;
 
-import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
@@ -78,9 +77,10 @@ class DataMapperTest {
     }
 
     @Test
-    void persistenceRepositoryConstructorShouldNotExposeDomainEventContext() {
+    void persistenceRepositoryConstructorShouldNotExposeAggregatePersistenceObserver() {
         assertThat(constructorParameterTypes(AbstractAggregateRepository.class))
-                .noneMatch(parameterTypes -> parameterTypes.contains(DomainEventContext.class));
+                .noneMatch(parameterTypes -> parameterTypes.contains(AggregatePersistenceObserver.class)
+                        || parameterTypes.contains(AggregatePersistenceObserverAware.class));
     }
 
     private static List<String> typeParameterNames(Class<?> type) {

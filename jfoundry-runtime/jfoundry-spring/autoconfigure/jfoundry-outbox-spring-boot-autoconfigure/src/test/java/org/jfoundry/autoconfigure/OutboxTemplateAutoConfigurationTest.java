@@ -7,7 +7,7 @@ import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStatus;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.outbox.OutboxTemplate;
-import org.jfoundry.autoconfigure.event.DomainEventOutboxRecorderAutoConfiguration;
+import org.jfoundry.autoconfigure.outbox.OutboxTemplateAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class OutboxTemplateAutoConfigurationTest {
 
     private final ApplicationContextRunner runner = new ApplicationContextRunner()
-            .withConfiguration(AutoConfigurations.of(DomainEventOutboxRecorderAutoConfiguration.class));
+            .withConfiguration(AutoConfigurations.of(OutboxTemplateAutoConfiguration.class));
 
     @Test
     void createsTemplateWhenStoreAndSerializerExist() {
@@ -34,7 +34,7 @@ class OutboxTemplateAutoConfigurationTest {
     void createsTemplateWithBootConfiguredObjectMapper() {
         new ApplicationContextRunner()
                 .withConfiguration(AutoConfigurations.of(
-                        DomainEventOutboxRecorderAutoConfiguration.class,
+                        OutboxTemplateAutoConfiguration.class,
                         JacksonAutoConfiguration.class))
                 .withBean(OutboxMessageStore.class, StubOutboxMessageStore::new)
                 .run(context -> assertThat(context).hasSingleBean(OutboxTemplate.class));
@@ -68,11 +68,6 @@ class OutboxTemplateAutoConfigurationTest {
 
         @Override
         public void append(OutboxMessage entry) {
-        }
-
-        @Override
-        public List<OutboxMessage> findDispatchable(int limit, Instant now) {
-            return List.of();
         }
 
         @Override

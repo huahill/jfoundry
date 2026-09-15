@@ -1,6 +1,6 @@
 package org.jfoundry.infrastructure.persistence.mybatis;
 
-import org.jfoundry.application.event.DomainEventContext;
+import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserver;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.junit.jupiter.api.Test;
 
@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MybatisPlusAggregateRepositoryApiTest {
 
     @Test
-    void mybatisPlusRepositoryConstructorShouldNotExposeDomainEventContext() {
+    void mybatisPlusRepositoryConstructorShouldNotExposeAggregatePersistenceObserver() {
         assertThat(constructorParameterTypes(MybatisPlusAggregateRepository.class))
-                .noneMatch(parameterTypes -> parameterTypes.contains(DomainEventContext.class));
+                .noneMatch(parameterTypes -> parameterTypes.contains(AggregatePersistenceObserver.class));
         assertThat(MybatisPlusAggregateRepository.class.getSuperclass())
                 .isEqualTo(AbstractAggregateRepository.class);
     }

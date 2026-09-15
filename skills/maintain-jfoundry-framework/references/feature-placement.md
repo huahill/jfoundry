@@ -13,7 +13,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Application service marker or application-layer contract | `jfoundry-core/jfoundry-application/jfoundry-application-core` |
 | Application transaction abstraction or `TransactionRunner` contract | `jfoundry-core/jfoundry-application/jfoundry-transaction-core` |
 | Domain event dispatch contract | `jfoundry-core/jfoundry-application/jfoundry-domain-event-core` |
-| Domain event externalization metadata or routing rules | `jfoundry-core/jfoundry-application/jfoundry-domain-event-externalization-core` |
+| Domain Event to Outbox mapping, externalization metadata, or routing rules | `jfoundry-core/jfoundry-application/jfoundry-domain-event-outbox-core` |
 | Message sending or payload serialization SPI | `jfoundry-core/jfoundry-application/jfoundry-messaging-core` |
 | Outbox state, store contract, dispatcher service, retry/backoff core | `jfoundry-core/jfoundry-application/jfoundry-outbox-core` |
 | Inbox state, store contract, `InboxTemplate` | `jfoundry-core/jfoundry-application/jfoundry-inbox-core` |
@@ -49,6 +49,13 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 - Keep persistence-context state and awareness contracts in `jfoundry-persistence-core`; place
   transaction-scoped implementations in runtime adapters and bean-lifecycle injection in Spring
   Boot auto-configuration. Business repository constructors should not expose runtime context.
+- Keep `AggregatePersistenceObserver` and `AggregatePersistenceObserverAware` in
+  `jfoundry-persistence-core`; these contracts must remain Domain Event neutral.
+  Put `DomainEventAggregatePersistenceObserver` in
+  `jfoundry-domain-event-persistence-bridge`, and bind it in explicit bridge runtime
+  modules (Spring Boot auto-configuration, Quarkus runtime, and Helidon). Do not
+  place the bridge in generic persistence modules or make Domain Event-only
+  runtime artifacts depend on it.
 - If the code uses Spring transaction synchronization, `ApplicationEventPublisher`, scheduling, MVC APIs, or bean lifecycle, put it under `jfoundry-runtime/jfoundry-spring/runtime`.
 - If the code registers Spring Boot beans conditionally or binds `@ConfigurationProperties`, put it in the matching capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 - If a test verifies middleware behavior through Spring's runtime wiring or Testcontainers, put it under `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`.

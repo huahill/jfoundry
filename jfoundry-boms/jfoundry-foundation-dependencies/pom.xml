@@ -4,7 +4,7 @@
 
   <groupId>io.github.xfoundries</groupId>
   <artifactId>jfoundry-foundation-dependencies</artifactId>
-  <version>1.6.0-SNAPSHOT</version>
+  <version>1.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>jfoundry-foundation-dependencies</name>
   <description>Dependency management BOM for framework-neutral foundation libraries used by jfoundry.</description>
@@ -15,7 +15,7 @@
     <connection>${jfoundry.release.scm.connection}</connection>
     <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
     <url>${jfoundry.release.scm.url}</url>
-    <tag>v1.5.0</tag>
+    <tag>v1.6.0</tag>
   </scm>
   <properties>
     <project.build.outputTimestamp>2026-08-28T08:08:35Z</project.build.outputTimestamp>
@@ -31,7 +31,6 @@
     <junit-jupiter.version>6.1.3</junit-jupiter.version>
 
     <!-- Domain modeling and architecture -->
-    <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
     <archunit.version>1.5.0</archunit.version>
 
     <!-- Validation -->
@@ -44,14 +43,15 @@
     <jakarta-json.version>2.1.3</jakarta-json.version>
     <jakarta-rest.version>4.0.0</jakarta-rest.version>
     <jakarta-transaction.version>2.0.1</jakarta-transaction.version>
+    <jakarta-cdi.version>4.1.0</jakarta-cdi.version>
     <microprofile-config.version>3.1.1</microprofile-config.version>
     <parsson.version>1.1.9</parsson.version>
 
     <!-- Persistence and database integration -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.4.6.Final</hibernate.version>
-    <h2.version>2.4.240</h2.version>
+    <hibernate.version>7.4.8.Final</hibernate.version>
+    <h2.version>2.5.250</h2.version>
     <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
     <postgresql.version>42.7.13</postgresql.version>
 
@@ -59,7 +59,7 @@
     <jackson3.version>3.2.2</jackson3.version>
 
     <!-- Mapping and code generation -->
-    <mapstruct.version>1.5.5.Final</mapstruct.version>
+    <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Apache Commons -->
     <commons-codec.version>1.22.1</commons-codec.version>
@@ -69,7 +69,7 @@
     <commons-text.version>1.15.0</commons-text.version>
 
     <!-- Caching -->
-    <caffeine.version>3.1.8</caffeine.version>
+    <caffeine.version>3.2.4</caffeine.version>
 
     <!-- Messaging and background jobs -->
     <jobrunr.version>8.8.2</jobrunr.version>
@@ -81,14 +81,14 @@
 
     <!-- Runtime utilities -->
     <javassist.version>3.33.0-GA</javassist.version>
-    <opentelemetry.version>1.62.0</opentelemetry.version>
-    <slf4j.version>2.0.18</slf4j.version>
-    <snakeyaml.version>2.6</snakeyaml.version>
+    <opentelemetry.version>1.66.0</opentelemetry.version>
+    <slf4j.version>2.0.19</slf4j.version>
+    <snakeyaml.version>2.7</snakeyaml.version>
 
     <!-- Testing -->
     <awaitility.version>4.3.0</awaitility.version>
     <assertj.version>3.27.7</assertj.version>
-    <byte-buddy.version>1.18.12</byte-buddy.version>
+    <byte-buddy.version>1.18.13</byte-buddy.version>
     <mockito.version>5.23.0</mockito.version>
     <junit-platform.version>6.1.3</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
@@ -112,16 +112,6 @@
       </dependency>
 
       <!-- Domain modeling and architecture -->
-      <dependency>
-        <groupId>org.jmolecules.integrations</groupId>
-        <artifactId>jmolecules-archunit</artifactId>
-        <version>${jmolecules-integrations.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jmolecules.integrations</groupId>
-        <artifactId>jmolecules-jackson3</artifactId>
-        <version>${jmolecules-integrations.version}</version>
-      </dependency>
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
         <artifactId>archunit-junit5</artifactId>
@@ -162,6 +152,11 @@
         <groupId>jakarta.transaction</groupId>
         <artifactId>jakarta.transaction-api</artifactId>
         <version>${jakarta-transaction.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.enterprise</groupId>
+        <artifactId>jakarta.enterprise.cdi-api</artifactId>
+        <version>${jakarta-cdi.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.microprofile.config</groupId>

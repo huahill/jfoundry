@@ -48,8 +48,10 @@ public class HelidonRabbitMessageSender implements MessageSender {
     public SendResult send(OutboundMessage message) {
         try {
             try (Channel channel = connection().createChannel()) {
+                var headers = new HashMap<String, Object>();
+                message.applyHeaders((key, value) -> headers.put(key, value));
                 AMQP.BasicProperties properties = new AMQP.BasicProperties.Builder()
-                        .headers(new HashMap<>(message.propagation().entries()))
+                        .headers(headers)
                         .build();
                 channel.basicPublish(
                         message.topic(),

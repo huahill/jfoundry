@@ -77,7 +77,7 @@ class JpaOutboxMessageStoreTest {
     }
 
     @Test
-    void findDispatchableOrdersPendingAndRetryDueRowsByOccurrenceThenEventId() {
+    void claimDispatchableOrdersPendingAndRetryDueRowsByOccurrenceThenEventId() {
         Instant occurredAt = Instant.parse("2026-07-16T10:00:00Z");
         append(pending("evt-b", occurredAt));
         append(pending("evt-a", occurredAt));
@@ -86,9 +86,9 @@ class JpaOutboxMessageStoreTest {
         failedDue.setNextRetryAt(Instant.now().minusSeconds(1));
         append(failedDue);
 
-        List<OutboxMessage> dispatchable = inTransactionResult(() -> store.findDispatchable(3, Instant.now()));
+        List<OutboxMessage> claimed = inTransactionResult(() -> store.claimDispatchable(3, "node-a"));
 
-        assertThat(dispatchable).extracting(OutboxMessage::getEventId)
+        assertThat(claimed).extracting(OutboxMessage::getEventId)
                 .containsExactly("evt-a", "evt-b", "evt-retry");
     }
 

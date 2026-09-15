@@ -8,6 +8,8 @@
 
 它让业务项目能将领域建模、架构边界和可靠集成落实为代码。核心定义 DDD 概念、架构语义、应用层契约、领域事件、持久化 SPI 和消息 SPI，不依赖特定运行时框架。Spring、Quarkus 与 Helidon 通过平级运行时集成模块装配同一套核心能力。
 
+JFoundry 不是完整的业务应用框架，也不要求应用引入全部模块。它是一个可组合的能力平台：应用按需选择 DDD、持久化、消息、可靠集成和运行时能力，而具体框架适配器始终位于运行时无关核心之外。
+
 ## 为什么是 jfoundry
 
 很多 DDD 项目会在实现中失去原有边界：领域代码引入框架或 ORM API，事务归属不清，Repository 演变为通用查询接口，外部事件也无法可靠投递。`jfoundry` 提供：
@@ -30,7 +32,11 @@
 
 依赖方向始终指向内层。因此运行时集成位于核心之外，而不是每个应用的必需依赖。
 
-在仓库结构中，`jfoundry-core/` 归集运行时无关模块，`jfoundry-runtime/` 归集 Spring、Quarkus 和 Helidon 集成，`jfoundry-boms/` 提供依赖管理。这些目录是源码分组，不是 Maven 聚合模块。
+领域事件与 Outbox 是相互独立的能力：进程内领域事件派发不需要 Outbox，通用 Outbox 也不需要领域事件。
+只有在需要可靠地将领域事件外部化时，应用才选择显式的领域事件 Outbox 组合；可选的持久化桥接层负责保持聚合事件自动收集的便利性，
+同时避免通用持久化与领域事件耦合。
+
+在仓库结构中，`jfoundry-core/` 归集运行时无关模块，`jfoundry-runtime/` 归集 Spring、Quarkus 和 Helidon 集成，`jfoundry-boms/` 提供依赖管理。这些目录是源码分组，不是 Maven 聚合模块。模块数量反映了“能力”和“运行时或实现”两个独立维度，并不意味着应用需要依赖整个仓库。
 
 ![jfoundry 模块架构](docs/i18n/assets/jfoundry-module-architecture.svg)
 
@@ -69,10 +75,25 @@ ArchUnit 规则。CQRS 仍是按需使用的局部模式。
 | 可靠消息 | Transactional Outbox、Inbox 幂等、消息和序列化 SPI |
 | 运行时集成 | Spring Framework 与 Spring Boot 装配；Quarkus 与 Helidon 的 CDI/Jakarta Transactions、JPA 与 Outbox/Inbox 装配 |
 
+## 能力组合
+
+JFoundry 的能力可以独立选择。一个典型应用通常只选择适合自己的路径，而不是引入整个项目：
+
+| 需求 | 典型组合 |
+|------|----------|
+| DDD 建模与架构约束 | 领域与架构能力 |
+| 进程内领域事件 | 领域事件能力，不要求 Outbox |
+| 通用可靠消息 | Outbox 或 Inbox 能力，再选择存储、传输和序列化适配器 |
+| 领域事件可靠外部化 | 领域事件 + Outbox 组合；需要自动收集聚合事件时，再添加可选的持久化桥接层 |
+| 聚合持久化 | 持久化契约，以及 JPA 或 MyBatis-Plus 实现 |
+| 运行时装配 | 对应的 Spring、Quarkus 或 Helidon 集成 |
+
+这种组合方式保持了默认接入的轻量，同时允许应用在明确选择后获得面向生产的可靠集成能力。
+
 ## 选择路径
 
 - **选择能力**：先从[能力目录](docs/i18n/zh/capabilities/index.md)开始，将业务需求映射到受支持运行时的依赖入口。
-- **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/repository-vs-read-contracts.md)。
+- **架构与建模**：从[接入指南](docs/i18n/zh/integration/getting-started.md)开始，选择[架构风格](docs/i18n/zh/framework/architecture-styles.md)，并阅读[建模约定](docs/i18n/zh/modeling/index.md)。
 - **聚合持久化**：先阅读[聚合持久化](docs/i18n/zh/capabilities/aggregate-persistence.md)，再选择适合项目的平级实现：[MyBatis-Plus](docs/i18n/zh/implementations/mybatis-plus.md) 或 [JPA](docs/i18n/zh/implementations/jpa.md)。
 - **Web**：先阅读[Web](docs/i18n/zh/capabilities/web.md)，再选择 RFC 9457 Problem Details 或运行时专属的 HTTP 服务端与 REST Client 诊断日志。
 - **消息传输**：通过[消息传输](docs/i18n/zh/capabilities/message-delivery.md)选择直接使用的 Kafka、RabbitMQ、RocketMQ 或应用自有传输适配器。
@@ -178,7 +199,9 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### 建模
 
+- [建模](docs/i18n/zh/modeling/index.md)
 - [值对象规范](docs/i18n/zh/modeling/value-object.md)
+- [领域事件](docs/i18n/zh/modeling/domain-event.md)
 - [Repository 与读侧契约迁移指南](docs/i18n/zh/modeling/repository-vs-read-contracts.md)
 
 ### 发布与兼容

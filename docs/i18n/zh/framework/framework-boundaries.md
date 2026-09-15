@@ -13,8 +13,8 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 区域 | 模块 |
 |------|------|
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
-| 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-domain-event-externalization-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-inbox-core` |
-| 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
+| 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-domain-event-outbox-core`、`jfoundry-inbox-core` |
+| 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-domain-event-persistence-bridge`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
 | 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
@@ -38,6 +38,13 @@ Spring Boot 自动配置模块与启动器仍按能力划分。
 `jfoundry-transaction-quarkus-*`、`jfoundry-domain-event-quarkus-*` 与
 `jfoundry-persistence-quarkus-*` runtime/deployment 配对；Helidon 使用没有 deployment 构件的
 `jfoundry-transaction-helidon`、`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon`。
+
+领域事件、持久化和 Outbox 是相互独立的能力。`jfoundry-domain-event-core` 负责进程内事实及其派发生命周期；
+`jfoundry-persistence-core` 只暴露与事件无关的 `AggregatePersistenceObserver` 持久化成功观察钩子；
+`jfoundry-outbox-core` 负责通用消息状态机、存储契约、派发、重试、恢复和清理。可选的
+`jfoundry-domain-event-persistence-bridge` 将持久化成功适配到 `DomainEventContext`，因此应用仍可自动收集事件，
+而通用持久化不必依赖领域事件。可选的 `jfoundry-domain-event-outbox-core` 将选定领域事件映射为稳定集成消息，
+再通过通用 Outbox 契约追加。
 
 ## 放置规则
 
@@ -85,9 +92,16 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## 可靠消息边界
 
-`jfoundry-outbox-core` 拥有消息模型、存储契约、派发服务、重试/退避契约和状态机。
+`jfoundry-outbox-core` 拥有通用消息模型、存储契约、派发服务、重试/退避契约和状态机，不依赖领域事件。
 
-`jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步、scheduled Outbox 触发器和 Spring 运行时中的领域事件记录。
+`jfoundry-domain-event-outbox-core` 只拥有可选的领域事件到 Outbox 映射：外部化规则、路由、载荷映射和
+`DomainEventOutboxRecorder`。它不替代通用 Outbox 状态机，也不是进程内领域事件分发的必要模块。
+
+`jfoundry-domain-event-persistence-bridge` 是聚合持久化成功与领域事件收集之间的可选适配器，不是持久化核心，
+通用持久化不依赖它。
+
+`jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步和 scheduled Outbox 触发器。
+可选的领域事件到 Outbox 派发器位于 `jfoundry-domain-event-outbox-spring`；只有应用同时需要两项能力时才显式组合。
 
 `jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties`
 及关联属性位于这里，因为属性绑定属于 Boot 职责。
@@ -100,7 +114,7 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## 合并验证
 
-所有变更必须通过 Pull Request 进入 `main`，并使用 GitHub 的 `Rebase and merge` 策略；不允许直接推送。始终执行的 `Merge gate` 是必需状态检查。仅文档变更只有在文档验证成功时才可通过；任何代码变更都要求现有全部 CI 任务成功，包括运行时中间件和原生镜像验证。运行时任务被跳过、取消或失败都不能满足门禁要求。
+所有变更必须通过 Pull Request 进入 `main`，并使用 GitHub 的 `Squash and merge` 策略；不允许直接推送。压缩提交的标题使用 Pull Request 标题。始终执行的 `Merge gate` 是必需状态检查。仅文档变更运行文档检查，并跳过仓库元数据、Dependency Review 以及完整的 Java、运行时和原生镜像矩阵。代码变更则要求仓库元数据、Pull Request 中的 Dependency Review，以及现有全部 CI 任务成功，包括运行时中间件和原生镜像验证。必需任务被跳过、取消或失败都不能满足门禁要求。
 
 贡献者应在推送分支前运行与所改能力对应的本地 CI 对齐阶段。本地验证可以缩短反馈时间，但不能替代服务端门禁。
 

@@ -8,7 +8,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.jandex.AnnotationTransformation;
 import org.jboss.jandex.DotName;
 import org.jfoundry.application.ApplicationService;
-import org.jfoundry.infrastructure.event.quarkus.CdiDomainEventDispatcher;
+import org.jfoundry.infrastructure.event.quarkus.DelegatingCdiDomainEventDispatcher;
+import org.jfoundry.infrastructure.event.quarkus.DelegatingDomainEventDispatchCoordinator;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventContext;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatch;
 import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventDispatchInterceptor;
@@ -20,9 +21,26 @@ import java.util.List;
 class DomainEventProcessor {
 
     @BuildStep
+    AdditionalBeanBuildItem registerCdiDomainEventDispatcher() {
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClass(DelegatingCdiDomainEventDispatcher.class)
+                .setUnremovable()
+                .setDefaultScope(DotName.createSimple(ApplicationScoped.class.getName()))
+                .build();
+    }
+
+    @BuildStep
+    AdditionalBeanBuildItem registerDomainEventDispatchCoordinator() {
+        return AdditionalBeanBuildItem.builder()
+                .addBeanClass(DelegatingDomainEventDispatchCoordinator.class)
+                .setUnremovable()
+                .setDefaultScope(DotName.createSimple(ApplicationScoped.class.getName()))
+                .build();
+    }
+
+    @BuildStep
     AdditionalBeanBuildItem registerDomainEventScopeAndContext() {
         return AdditionalBeanBuildItem.builder()
-                .addBeanClass(CdiDomainEventDispatcher.class)
                 .addBeanClass(QuarkusDomainEventScope.class)
                 .addBeanClass(QuarkusDomainEventContext.class)
                 .setUnremovable()

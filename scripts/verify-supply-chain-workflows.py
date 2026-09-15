@@ -35,15 +35,35 @@ def values(value: object) -> list[str]:
 
 
 def verify_ci(root: Path) -> None:
-    config = load(root / ".github/workflows/ci.yml", ".github/workflows/ci.yml Documentation checks")
+    prefix = ".github/workflows/ci.yml"
+    config = load(root / ".github/workflows/ci.yml", prefix)
     jobs = config.get("jobs")
-    steps = jobs.get("docs", {}).get("steps") if isinstance(jobs, dict) and isinstance(jobs.get("docs"), dict) else None
+    if not isinstance(jobs, dict):
+        fail(f"{prefix}: jobs must be a mapping")
+
+    docs = jobs.get("docs")
+    docs_steps = docs.get("steps") if isinstance(docs, dict) else None
+    docs_commands = [step.get("run") for step in docs_steps if isinstance(step, dict) and "run" in step] \
+        if isinstance(docs_steps, list) else None
+    if docs_commands != ["bash scripts/verify-docs.sh"]:
+        fail(f"{prefix} Documentation checks must run only: bash scripts/verify-docs.sh")
+
+    metadata = jobs.get("metadata")
+    steps = metadata.get("steps") if isinstance(metadata, dict) else None
+    if not isinstance(metadata, dict) or metadata.get("needs") != "changes" \
+            or metadata.get("if") != "needs.changes.outputs.run_full == 'true'":
+        fail(f"{prefix} Repository metadata checks must require full changes")
     required = ["bash scripts/verify-compatibility-matrix.sh", "bash scripts/verify-compatibility-matrix-test.sh"]
     if not isinstance(steps, list) or any(step.get("run") not in required for step in [] if isinstance(step, dict)):
-        fail(f".github/workflows/ci.yml Documentation checks must run: {required[0]}")
+        fail(f"{prefix} Repository metadata checks must run: {required[0]}")
     for command in required:
         if not any(isinstance(step, dict) and step.get("run") == command for step in steps):
-            fail(f".github/workflows/ci.yml Documentation checks must run: {command}")
+            fail(f"{prefix} Repository metadata checks must run: {command}")
+
+    dependency_review = jobs.get("dependency-review")
+    if not isinstance(dependency_review, dict) or dependency_review.get("needs") != "changes" \
+            or dependency_review.get("if") != "github.event_name == 'pull_request' && needs.changes.outputs.run_full == 'true'":
+        fail(f"{prefix} Dependency Review must require full pull-request changes")
 
 
 def verify_dependabot(root: Path) -> None:
@@ -72,6 +92,7 @@ def verify_dependabot(root: Path) -> None:
         "jfoundry-spring-boot-platform": {"patterns": expected_cooldown["include"][:3], "update-types": ["patch", "minor"]},
         "jfoundry-quarkus-platform": {"patterns": expected_cooldown["include"][3:], "update-types": ["patch", "minor"]},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
+        "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
     if list(groups) != list(expected_groups):
         fail(f"{prefix}: Maven groups must be ordered as {', '.join(expected_groups)}")
@@ -81,9 +102,19 @@ def verify_dependabot(root: Path) -> None:
                 fail(f"{prefix}: jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
             if name == "jfoundry-quarkus-platform":
                 fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
-            fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
+            if name == "jfoundry-maven-patches":
+                fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
+            fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
+    if maven[0].get("rebase-strategy") != "disabled":
+        fail(f"{prefix}: Maven updates must disable automatic rebasing")
     if "ignore" in maven[0]:
         fail(f"{prefix}: Maven updates must not define ignore rules")
+    expected_directories = ["/", "/jfoundry-boms/*"]
+    directories = maven[0].get("directories")
+    if isinstance(directories, list) and "/jfoundry-runtime/*" in directories:
+        fail(f"{prefix}: Maven updates must not scan /jfoundry-runtime/*")
+    if directories != expected_directories or "directory" in maven[0]:
+        fail(f"{prefix}: Maven updates must explicitly scan / and /jfoundry-boms/*")
     actions = [update for update in updates if update.get("package-ecosystem") == "github-actions"]
     if len(actions) != 1 or actions[0].get("groups") != {"github-codeql-action": {"patterns": ["github/codeql-action/*"]}}:
         fail(f"{prefix}: GitHub Actions groups are invalid")
@@ -141,7 +172,7 @@ def verify_auto_merge(root: Path) -> None:
     if merges[0] <= eligibility_index or " ".join(str(merge.get("if", "")).split()) != "steps.scope.outputs.is_maven_update == 'true' && steps.eligibility.outputs.is_patch_update == 'true'":
         fail(f"{prefix}: merge must require Maven-only scope and patch eligibility")
     run = str(merge.get("run", ""))
-    if not re.search(r'--repo\s+"?\$\{REPOSITORY\}"?', run) or not re.search(r"(?:^|\s)--auto(?:\s|$)", run) or not re.search(r"(?:^|\s)--rebase(?:\s|$)", run) or merge.get("env", {}).get("REPOSITORY") != "${{ github.repository }}":
+    if not re.search(r'--repo\s+"?\$\{REPOSITORY\}"?', run) or not re.search(r"(?:^|\s)--auto(?:\s|$)", run) or not re.search(r"(?:^|\s)--squash(?:\s|$)", run) or merge.get("env", {}).get("REPOSITORY") != "${{ github.repository }}":
         fail(f"{prefix}: merge command is invalid")
 
 

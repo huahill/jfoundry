@@ -100,6 +100,11 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isFalse();
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+        assertThat(importedBoms(foundation)).contains(
+                new Coordinate("org.jmolecules", "jmolecules-bom", "${jmolecules.version}"));
+        assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-archunit")).isFalse();
+        assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-jackson3")).isFalse();
+        assertThat(property(foundation, "jmolecules-integrations.version")).isNull();
 
         assertThat(managesDependency(boot, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();

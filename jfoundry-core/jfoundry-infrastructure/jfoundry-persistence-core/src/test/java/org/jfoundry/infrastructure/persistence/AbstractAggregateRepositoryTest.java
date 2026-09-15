@@ -1,8 +1,6 @@
 package org.jfoundry.infrastructure.persistence;
 
-import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
-import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.ddd.types.Identifier;
 import org.junit.jupiter.api.Test;
 
@@ -16,18 +14,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AbstractAggregateRepositoryTest {
 
     @Test
-    void addRegistersAggregateOnlyAfterCompletePersistence() {
+    void addNotifiesObserverOnlyAfterCompletePersistence() {
         List<String> operations = new ArrayList<>();
         TestRepository repository = repository(operations);
         TestAggregate aggregate = TestAggregate.create("one");
 
         repository.add(aggregate);
 
-        assertThat(operations).containsExactly("add:one", "register:one");
+        assertThat(operations).containsExactly("add:one", "observe:one");
     }
 
     @Test
-    void failedAddDoesNotRegisterAggregate() {
+    void failedAddDoesNotNotifyObserver() {
         List<String> operations = new ArrayList<>();
         TestRepository repository = repository(operations);
         repository.failAdd = true;
@@ -69,14 +67,33 @@ class AbstractAggregateRepositoryTest {
     }
 
     @Test
-    void batchPersistsEveryCompleteAggregateBeforeRegisteringAnyAggregate() {
+    void batchPersistsEveryCompleteAggregateBeforeNotifyingAnyObserver() {
         List<String> operations = new ArrayList<>();
         TestRepository repository = repository(operations);
 
         repository.addAll(List.of(TestAggregate.create("one"), TestAggregate.create("two")));
 
         assertThat(operations).containsExactly(
-                "add:one", "add:two", "register:one", "register:two");
+                "add:one", "add:two", "observe:one", "observe:two");
+    }
+
+    @Test
+    void addDoesNotNotifyWhenPersistenceObserverIsMissing() {
+        List<String> operations = new ArrayList<>();
+        TestRepository repository = new TestRepository(operations);
+
+        repository.add(TestAggregate.create("one"));
+
+        assertThat(operations).containsExactly("add:one");
+    }
+
+    @Test
+    void setAggregatePersistenceObserverRejectsNull() {
+        TestRepository repository = new TestRepository(new ArrayList<>());
+
+        assertThatThrownBy(() -> repository.setAggregatePersistenceObserver(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("AggregatePersistenceObserver must not be null.");
     }
 
     @Test
@@ -90,12 +107,12 @@ class AbstractAggregateRepositoryTest {
         repository.remove(aggregate);
 
         assertThat(operations).containsExactly(
-                "find:one", "modify:one", "register:one", "remove:one", "register:one");
+                "find:one", "modify:one", "observe:one", "remove:one", "observe:one");
     }
 
     private static TestRepository repository(List<String> operations) {
         TestRepository repository = new TestRepository(operations);
-        repository.setDomainEventContext(new RecordingContext(operations));
+        repository.setAggregatePersistenceObserver(new RecordingContext(operations));
         return repository;
     }
 
@@ -146,7 +163,7 @@ class AbstractAggregateRepositoryTest {
         }
     }
 
-    private static final class RecordingContext implements DomainEventContext {
+    private static final class RecordingContext implements AggregatePersistenceObserver {
 
         private final List<String> operations;
 
@@ -155,9 +172,9 @@ class AbstractAggregateRepositoryTest {
         }
 
         @Override
-        public void register(EventRecordable aggregate) {
+        public void afterPersisted(org.jmolecules.ddd.types.AggregateRoot<?, ?> aggregate) {
             TestAggregate testAggregate = (TestAggregate) aggregate;
-            operations.add("register:" + testAggregate.getId().value());
+            operations.add("observe:" + testAggregate.getId().value());
         }
     }
 

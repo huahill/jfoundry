@@ -1,8 +1,11 @@
 # Reliable Messaging: Outbox And Inbox
 
-Use Transactional Outbox only when a domain event must reach another process or external system
-reliably. In-process event handling does not require it. Inbox provides consumer-side idempotency
-for a message and consumer combination.
+Transactional Outbox records a broker message in the same database transaction as the business
+change, then dispatches it later. Domain events are an independent in-process fact model; they do
+not require Outbox. See [Domain Events](../modeling/domain-event.md). Compose the two only when a
+captured domain event must reach another process reliably. In-process event handling does not need Outbox. Use `OutboxTemplate` for integration
+messages that are not derived from domain events. Inbox provides consumer-side idempotency for a
+message and consumer combination.
 
 For direct broker publication and transport selection, see [Message Delivery](message-delivery.md).
 Reliable messaging composes that selected transport with Outbox recording and optional Inbox
@@ -17,7 +20,8 @@ the capability; it does not identify a complete Outbox solution.
 
 | Decision | Purpose | Spring Boot selection |
 |---|---|---|
-| Outbox capability | Records, externalizes, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
+| Outbox capability | Records generic integration messages, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
+| Domain Event Outbox composition | Maps selected Domain Events to generic Outbox messages | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | Store adapter | Persists `OutboxMessageStore` records | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application implementation |
 | Dispatch trigger / scheduling adapter | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application trigger |
 | Message transport | Sends the claimed payload | A broker-specific `jfoundry-messaging-*-spring-boot-starter` or an application `MessageSender` |
@@ -32,6 +36,14 @@ transitively, so an application does not declare it again. That dependency is Sp
 convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
 port and `*OutboxTrigger` stays the scheduling adapter.
 
+The explicit Domain Event Outbox composition is separate from both capabilities. The Spring
+combination starter includes Domain Event, generic Outbox, the persistence bridge, and the Domain
+Event Outbox auto-configuration. Quarkus and Helidon expose the equivalent explicit modules
+`jfoundry-domain-event-outbox-quarkus-runtime` and `jfoundry-domain-event-outbox-helidon`; their
+generic Outbox modules do not register Domain Event beans. A Domain Event-only application therefore
+does not get an Outbox recorder, and a generic Outbox-only application does not get a Domain Event
+context or dispatcher.
+
 Runtime-specific `*OutboxTrigger` types are scheduling adapters. `OutboxDispatcher` remains the
 dispatch service port that they invoke.
 
@@ -40,6 +52,10 @@ If an application directly constructed the old `ScheduledOutboxDispatcher`,
 those call sites to the matching `*OutboxTrigger` classes.
 
 ## Event Flow
+
+The flow below is the optional composition: captured domain events become Outbox rows. Outbox
+itself does not require a domain event; `OutboxTemplate` records explicit integration messages on
+the same store and dispatcher path.
 
 ```text
 aggregate explicitly records domain event
@@ -61,7 +77,9 @@ contract with `@Externalized` to serialize that event directly. For a versioned 
 provide a `DomainEventExternalizer<E>` bean: it maps an automatically captured domain event to zero or
 more `ExternalizedEvent` values, and the framework serializes and appends them in the current
 transaction. Each mapped value supplies a stable `payloadType`, payload, topic, key, and optional
-aggregate metadata; the source event supplies the Outbox event id and occurrence time.
+aggregate metadata. The source event supplies the origin event id and `occurredAt`; each
+mapped Outbox row receives its own `event_id`. For `@Externalized` events, the stored and
+on-wire `payloadType` is the destination topic.
 
 A matching externalizer takes precedence over `@Externalized`, including when it deliberately returns
 no messages, so a domain event is never written twice through both paths. When no externalizer matches,
@@ -72,8 +90,9 @@ synchronously.
 
 ## Payload Contract
 
-Treat `payloadType` as a stable contract name rather than a Java class name. Consumers should
-deserialize the envelope into their own versioned contract. Select a payload serializer that keeps
+Treat `payloadType` as a stable contract name rather than a Java class name. Dispatch copies that
+contract name onto the envelope header `jfoundry.payload-type`; consumers should deserialize from
+that envelope contract, not from a Java class name. Select a payload serializer that keeps
 the wire format portable and does not expose JVM type names.
 
 ## Outbox State Machine
@@ -135,8 +154,8 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 |------|-------|
 | JPA Outbox and Inbox stores, including database-specific Inbox claiming | [JPA](../implementations/jpa.md) |
 | MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| Quarkus Outbox runtime, automatic domain-event externalization, and Kafka delivery | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox runtime, automatic domain-event externalization, and Kafka or RabbitMQ delivery | [Helidon MP](../implementations/helidon.md) |
+| Quarkus Outbox runtime and Kafka delivery, with optional Domain Event Outbox composition | [Quarkus](../implementations/quarkus.md) |
+| Helidon MP Outbox runtime and Kafka or RabbitMQ delivery, with optional Domain Event Outbox composition | [Helidon MP](../implementations/helidon.md) |
 | Spring Boot capability assembly and dispatcher configuration | [Spring Boot](../implementations/spring-boot.md) |
 
 Use [Spring Boot Auto-configuration](../reference/spring-boot-autoconfiguration.md) as the lookup

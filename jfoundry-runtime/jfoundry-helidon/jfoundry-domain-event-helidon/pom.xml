@@ -26,10 +26,6 @@
             <artifactId>jfoundry-domain-event-jta</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.helidon.microprofile.cdi</groupId>
             <artifactId>helidon-microprofile-cdi</artifactId>
         </dependency>

@@ -16,10 +16,6 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain-event-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-messaging-core</artifactId>
         </dependency>
         <dependency>

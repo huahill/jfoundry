@@ -105,8 +105,8 @@ class ClaimDispatchableConcurrencyTest {
                 .containsExactlyInAnyOrder("pending-1", "pending-2", "pending-3");
     }
 
-    /// Claim must include retry-due FAILED rows, matching {@code findDispatchable}
-    /// candidate semantics. Otherwise, failed retries starve after switching to claim mode.
+    /// Claim must include retry-due FAILED rows. Candidate semantics are PENDING plus
+    /// retry-due FAILED. Otherwise, failed retries starve after switching to claim mode.
     @Test
     void claimDispatchableAlsoTakesRetryDueFailed() {
         repository.append(pendingMessage("pending-1"));

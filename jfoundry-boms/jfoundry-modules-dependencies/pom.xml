@@ -4,7 +4,7 @@
 
   <groupId>io.github.xfoundries</groupId>
   <artifactId>jfoundry-modules-dependencies</artifactId>
-  <version>1.6.0-SNAPSHOT</version>
+  <version>1.7.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>jfoundry-modules-dependencies</name>
   <description>Dependency management BOM for jfoundry modules.</description>
@@ -15,7 +15,7 @@
     <connection>${jfoundry.release.scm.connection}</connection>
     <developerConnection>${jfoundry.release.scm.developerConnection}</developerConnection>
     <url>${jfoundry.release.scm.url}</url>
-    <tag>v1.5.0</tag>
+    <tag>v1.6.0</tag>
   </scm>
   <properties>
     <project.build.outputTimestamp>2026-08-28T08:08:36Z</project.build.outputTimestamp>
@@ -88,7 +88,7 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
-        <artifactId>jfoundry-domain-event-externalization-core</artifactId>
+        <artifactId>jfoundry-domain-event-outbox-core</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -111,6 +111,11 @@
         <artifactId>jfoundry-infrastructure</artifactId>
         <version>${project.version}</version>
         <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
@@ -165,6 +170,11 @@
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-domain-event-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -278,6 +288,16 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-persistence-helidon</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -318,7 +338,27 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-quarkus-deployment</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
@@ -438,6 +478,11 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-lock-spring-boot-autoconfigure</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -499,6 +544,11 @@
       <dependency>
         <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-domain-event-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring-boot-starter</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

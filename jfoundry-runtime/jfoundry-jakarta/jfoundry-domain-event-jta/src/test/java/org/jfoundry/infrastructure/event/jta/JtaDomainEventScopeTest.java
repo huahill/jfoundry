@@ -4,6 +4,8 @@ import jakarta.transaction.Status;
 import jakarta.transaction.Synchronization;
 import jakarta.transaction.TransactionSynchronizationRegistry;
 import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class JtaDomainEventScopeTest {
 
@@ -25,22 +28,56 @@ class JtaDomainEventScopeTest {
     }
 
     @Test
-    void makesOutboxEventsAvailableBeforeTransactionCompletionAndDispatchesLocalEventsAfterCommit() throws Exception {
+    void rejectsRegisteredAggregatesOutsideScope() {
+        JtaDomainEventScope scope = new JtaDomainEventScope(new RecordingTransactionSynchronizationRegistry());
+        RecordingAggregate aggregate = new RecordingAggregate(new TestEvent("outside"));
+
+        assertThatThrownBy(() -> scope.register(aggregate))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Domain events can only be registered inside an @ApplicationService invocation.");
+
+        assertThat(scope.drainEvents()).isEmpty();
+        assertThat(aggregate.drainCount()).isZero();
+    }
+
+    @Test
+    void leavesNoBoundScopeAfterFailure() {
+        JtaDomainEventScope scope = new JtaDomainEventScope(new RecordingTransactionSynchronizationRegistry());
+        RecordingAggregate failed = new RecordingAggregate(new TestEvent("failed"));
+        RecordingAggregate later = new RecordingAggregate(new TestEvent("later"));
+
+        assertThatThrownBy(() -> scope.invoke(new DefaultDomainEventDispatchCoordinator(List.of()), outermost -> {
+            scope.register(failed);
+            throw new IllegalStateException("boom");
+        })).isInstanceOf(IllegalStateException.class);
+
+        assertThatThrownBy(() -> scope.register(later))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Domain events can only be registered inside an @ApplicationService invocation.");
+
+        assertThat(scope.drainEvents()).isEmpty();
+        assertThat(failed.drainCount()).isZero();
+        assertThat(later.drainCount()).isZero();
+    }
+
+    @Test
+    void dispatchesOutboxBeforeCompletionAndInProcessAfterCommit() throws Exception {
         RecordingTransactionSynchronizationRegistry transactionRegistry =
                 new RecordingTransactionSynchronizationRegistry();
         transactionRegistry.activate();
         JtaDomainEventScope scope = new JtaDomainEventScope(transactionRegistry);
         RecordingBeforeCommitDispatcher outbox = new RecordingBeforeCommitDispatcher();
         RecordingAfterCommitDispatcher local = new RecordingAfterCommitDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(outbox, local));
 
-        scope.invoke(List.of(outbox, local), outermost -> {
+        scope.invoke(coordinator, outermost -> {
             scope.register(new RecordingAggregate(new TestEvent("confirmed")));
 
-            outbox.dispatch(scope.drainEvents());
-            assertThat(outbox.events).extracting(event -> ((TestEvent) event).name())
-                    .containsExactly("confirmed");
+            assertThat(outbox.events).isEmpty();
             assertThat(local.events).isEmpty();
 
+            scope.dispatchBeforeCommit();
             transactionRegistry.beforeCompletion();
             assertThat(outbox.events).extracting(event -> ((TestEvent) event).name())
                     .containsExactly("confirmed");
@@ -59,6 +96,7 @@ class JtaDomainEventScopeTest {
     private static final class RecordingAggregate implements EventRecordable {
 
         private final List<DomainEvent> events;
+        private int drainCount;
 
         private RecordingAggregate(DomainEvent event) {
             this.events = new ArrayList<>(List.of(event));
@@ -66,9 +104,14 @@ class JtaDomainEventScopeTest {
 
         @Override
         public List<DomainEvent> drainEvents() {
+            drainCount++;
             List<DomainEvent> drained = List.copyOf(events);
             events.clear();
             return drained;
+        }
+
+        int drainCount() {
+            return drainCount;
         }
     }
 

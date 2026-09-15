@@ -18,7 +18,8 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` adapter, selected after Boot creates `KafkaOperations` | Outbox store |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` adapter | Outbox store |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` adapter | Outbox store |
-| `jfoundry-outbox-spring-boot-starter` | Outbox core, `OutboxTemplate`, domain-event externalization, scheduled dispatch integration | Outbox table store, JobRunr |
+| `jfoundry-outbox-spring-boot-starter` | Generic Outbox core, `OutboxTemplate`, scheduled dispatch integration | Domain Event, Outbox table store, JobRunr |
+| `jfoundry-domain-event-outbox-spring-boot-starter` | Domain Event, generic Outbox, persistence bridge, and Domain Event-to-Outbox auto-configuration | — |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox capability plus the JPA `OutboxMessageStore` adapter | Database migration execution |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox capability plus the MyBatis-Plus `OutboxMessageStore` adapter | Database migration execution |
 | `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox capability plus the JobRunr `OutboxTrigger` | Outbox table store |
@@ -57,7 +58,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | Retention for `DEAD_LETTERED` rows. |
 | `jfoundry.outbox.cleanup.batch-size` | `1000` | Maximum rows deleted per cleanup batch. |
 
-`DomainEventOutboxRecorderAutoConfiguration` injects every application `DomainEventExternalizer<?>`
+`DomainEventOutboxRecorderAutoConfiguration` (from the explicit Domain Event Outbox auto-configuration module) injects every application `DomainEventExternalizer<?>`
 bean into the default recorder. Applications normally provide these mappings without replacing
 `DomainEventOutboxRecorder`; a custom recorder remains an explicit full replacement.
 
@@ -68,13 +69,14 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `TransactionRunnerAutoConfiguration` | `SpringTransactionRunner` | `TransactionRunner` and `TransactionTemplate` are available, Spring Boot has configured a `PlatformTransactionManager`, and no existing `TransactionRunner` exists. |
 | `DistributedLockAutoConfiguration` | `LockExecutor`, optional Redisson `DistributedLockClient`, optional `@DistributedLock` advisor | `jfoundry-lock-core` is present. Redisson adapter requires `RedissonClient`; annotation advisor requires `DistributedLockClient` and annotation support enabled. |
 | `MicrometerObservationAutoConfiguration` | Micrometer advisor for original JFoundry operation beans | An `ObservationRegistry` is available (provided by Actuator when using the observability starter); Micrometer Observation and Spring AOP are present; plus at least one eligible Outbox, Inbox, or lock operation bean. |
-| `DomainEventPersistenceAutoConfiguration` | Repository `DomainEventContext` injector | `DomainEventContext` and `AbstractAggregateRepository` are on the classpath. |
+| `DomainEventPersistenceAutoConfiguration` | Optional persistence bridge injector | `DomainEventContext`, `AggregatePersistenceObserverAware`, and `DomainEventAggregatePersistenceObserver` are on the classpath; the explicit bridge is therefore present. |
 | `PersistenceFailureAutoConfiguration` | Default Spring `PersistenceFailureTranslator` and repository injector | `AbstractAggregateRepository`, Spring data-access exceptions, and `jfoundry-persistence-spring` are present; no user-defined translator. |
 | `AggregatePersistenceContextAutoConfiguration` | Transaction-bound `AggregatePersistenceContext` and aware-repository injector | Persistence context SPI, Spring transaction support, and `jfoundry-persistence-spring` are present; no user-defined context. |
 | `AuditStampingAutoConfiguration` | UTC `Clock`, empty `AuditActorProvider`, and `AuditStamping` | `jfoundry-persistence-core` is present; an application `Clock`, actor provider, or audit service takes precedence. |
 | `MybatisPlusAuditAutoConfiguration` | `MybatisPlusAuditMetaObjectHandler` | MyBatis-Plus and the JFoundry MyBatis-Plus adapter are present, `AuditStamping` is available, and no application `MetaObjectHandler` exists. |
-| `DomainEventDispatchAutoConfiguration` | `DomainEventScope`, `DomainEventContext`, dispatch interceptor, Spring event dispatcher, optional Outbox dispatcher | Application service and dispatcher types are present; dispatch properties allow the selected path. |
-| `DomainEventOutboxRecorderAutoConfiguration` | `PayloadSerializer`, `OutboxTemplate`, externalization resolvers, `DomainEventOutboxRecorder` | Outbox store and serializer dependencies are available; no user-defined replacement for each bean. |
+| `DomainEventDispatchAutoConfiguration` | `DomainEventScope`, `DomainEventContext`, dispatch interceptor, Spring event dispatcher | Application service and dispatcher types are present; dispatch properties allow the selected path. |
+| `OutboxTemplateAutoConfiguration` | `PayloadSerializer`, `OutboxTemplate` | Jackson, an Outbox store, and no user-defined replacement for each bean are available. |
+| `DomainEventOutboxRecorderAutoConfiguration` | Externalization resolvers, `DomainEventOutboxRecorder`, optional Domain Event Outbox dispatcher | The explicit Domain Event Outbox auto-configuration is selected and the required Outbox store/serializer dependencies are available; no user-defined replacement for each bean. |
 | `KafkaMessageSenderAutoConfiguration` | `SpringKafkaMessageSender` | `KafkaOperations` class and bean exist; no existing `MessageSender`. |
 | `RabbitMessageSenderAutoConfiguration` | `SpringRabbitMessageSender` | `RabbitTemplate` class and `RabbitOperations` bean exist; no existing `MessageSender`. |
 | `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | RocketMQ producer class and `MQProducer` bean exist; no existing `MessageSender`. |

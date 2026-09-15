@@ -1,6 +1,7 @@
 package org.jfoundry.infrastructure.persistence.jpa;
 
 import jakarta.persistence.EntityManager;
+import org.jfoundry.application.ApplicationService;
 import org.jfoundry.infrastructure.persistence.jpa.support.GraphOrder;
 import org.jfoundry.infrastructure.persistence.jpa.support.GraphOrderEntity;
 import org.jfoundry.infrastructure.persistence.jpa.support.GraphOrderId;
@@ -29,19 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GraphOrderRepositorySpringTransactionIntegrationTest {
 
     @Autowired
-    private GraphOrderRepository repository;
+    private EntityManager entityManager;
 
     @Autowired
-    private EntityManager entityManager;
+    private GraphOrderApplicationService applicationService;
 
     @Test
     void usesTransactionBoundPersistenceContextInjectedByAutoConfiguration() {
-        GraphOrderId id = new GraphOrderId("SPRING-GRAPH-1");
-        repository.add(GraphOrder.create(id, List.of("A", "B")));
-        GraphOrder loaded = repository.findById(id);
-        loaded.replaceLines(List.of("B", "C"));
-
-        repository.modify(loaded);
+        GraphOrderId id = applicationService.persistAndModify();
 
         GraphOrderEntity entity = entityManager.find(GraphOrderEntity.class, id.value());
         assertThat(entity.lineSkus()).containsExactlyInAnyOrder("B", "C");
@@ -55,6 +51,29 @@ class GraphOrderRepositorySpringTransactionIntegrationTest {
         @Bean
         GraphOrderRepository graphOrderRepository(EntityManager entityManager) {
             return new GraphOrderRepository(entityManager, new GraphOrderMapper());
+        }
+
+        @Bean
+        GraphOrderApplicationService graphOrderApplicationService(GraphOrderRepository repository) {
+            return new GraphOrderApplicationService(repository);
+        }
+    }
+
+    @ApplicationService
+    public static class GraphOrderApplicationService {
+
+        private final GraphOrderRepository repository;
+        public GraphOrderApplicationService(GraphOrderRepository repository) {
+            this.repository = repository;
+        }
+
+        public GraphOrderId persistAndModify() {
+            GraphOrderId id = new GraphOrderId("SPRING-GRAPH-1");
+            repository.add(GraphOrder.create(id, List.of("A", "B")));
+            GraphOrder loaded = repository.findById(id);
+            loaded.replaceLines(List.of("B", "C"));
+            repository.modify(loaded);
+            return id;
         }
     }
 

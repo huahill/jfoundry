@@ -209,7 +209,7 @@ class MySqlOutboxStoreIT {
 
         store.append(OutboxMessages.pending("evt-large", "topic", "key", payload));
 
-        OutboxMessage loaded = store.findDispatchable(1, Instant.now()).get(0);
+        OutboxMessage loaded = store.claimDispatchable(1, "test").get(0);
         assertThat(loaded.getPayloadJson()).isEqualTo(payload);
     }
 }

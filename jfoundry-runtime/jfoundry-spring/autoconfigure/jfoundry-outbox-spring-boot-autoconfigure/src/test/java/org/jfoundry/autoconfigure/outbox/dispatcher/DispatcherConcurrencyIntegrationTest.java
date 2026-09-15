@@ -37,9 +37,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// assert that each record is passed to MessageSender.send only once. Multi-instance mutual
 /// exclusion is guaranteed by claimDispatchable atomicity, not by application-side idempotency.
 /// <p>
-/// If the dispatcher is changed back to {@code findDispatchable}, which is a read-only SELECT and
-/// does not atomically claim records, both pods will read the same PENDING batch and send will be
-/// called 2N times. This test would fail.
+/// If the dispatcher is changed back to a non-claiming SELECT, which does not atomically claim
+/// records, both pods will read the same PENDING batch and send will be called 2N times. This
+/// test would fail.
 /// <p>
 /// Test isolation: uses a dedicated H2 database name {@code jfoundry-dispatcher-concurrency-test}
 /// and sets automatic dispatcher mode to none, avoiding competition between the auto-configured

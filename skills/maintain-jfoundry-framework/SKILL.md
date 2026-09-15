@@ -29,7 +29,7 @@ When framework docs, examples, or test fixtures mention DDD modeling concepts, k
 7. Run the narrowest Maven verification first, then broader verification when public APIs, starters, auto-configuration, or cross-module behavior changed.
 8. Call out compatibility impact when changing public APIs, starter dependencies, configuration properties, table schemas, event routing, or state transitions.
 9. For runtime, starter, dependency-scope, Native Image, or infrastructure-adapter changes, select and run the matching local CI stage from `references/testing.md`; `mvn test` alone does not validate AOT or Native Image classpaths.
-10. Submit framework changes through a short-lived branch and pull request. The server-side `Merge gate` is authoritative; integrate only after it succeeds, using `Rebase and merge` to preserve linear history.
+10. Submit framework changes through a short-lived branch and pull request. The server-side `Merge gate` is authoritative; integrate only after it succeeds, using `Squash and merge` to keep `main` linear. The squash commit subject is the pull request title.
 
 ## Cross-Runtime Consistency
 
@@ -89,6 +89,8 @@ Prefer current repository documents and code over memory:
 - `../../docs/i18n/en/framework/architecture-styles.md`
 - `../../docs/i18n/en/framework/archunit-rules.md`
 - `../../docs/i18n/en/capabilities/reliable-messaging.md`
+- `../../docs/i18n/en/modeling/index.md`
+- `../../docs/i18n/en/modeling/domain-event.md`
 - `../../docs/i18n/en/modeling/repository-vs-read-contracts.md`
 - `docs/release/compatibility.md`
 - `AGENTS.md` for repository-wide language, SQL template, and project skill policy

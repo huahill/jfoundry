@@ -110,6 +110,6 @@ Use the [Capability Catalog](../capabilities/index.md) to select aggregate persi
 Web, messaging, Outbox/Inbox, distributed locks, or observability. Each capability page lists the
 matching entry points and current support scope for every runtime.
 
-Before implementation, continue with
-[Repository and Read-side Contracts](../modeling/repository-vs-read-contracts.md). Before production
-adoption, review [Adoption Readiness and Validated Scope](adoption-readiness.md).
+Before implementation, continue with [Modeling](../modeling/index.md) for value objects, domain
+events, and repository contracts. Before production adoption, review
+[Adoption Readiness and Validated Scope](adoption-readiness.md).

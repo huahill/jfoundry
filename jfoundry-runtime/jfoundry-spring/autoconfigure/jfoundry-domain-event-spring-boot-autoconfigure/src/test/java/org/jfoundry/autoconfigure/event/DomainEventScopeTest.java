@@ -1,5 +1,8 @@
 package org.jfoundry.autoconfigure.event;
 
+import org.jfoundry.application.event.BeforeCommitDomainEventDispatcher;
+import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
+import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
 import org.jfoundry.domain.event.EventRecordable;
 import org.jmolecules.event.types.DomainEvent;
@@ -24,10 +27,12 @@ class DomainEventScopeTest {
     }
 
     @Test
-    void ignoresRegisteredAggregatesOutsideScope() {
+    void rejectsRegisteredAggregatesOutsideScope() {
         RecordingAggregate aggregate = new RecordingAggregate(new TestDomainEvent("outside"));
 
-        scope.register(aggregate);
+        assertThatThrownBy(() -> scope.register(aggregate))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Domain events can only be registered inside an @ApplicationService invocation.");
 
         assertThat(scope.drainEvents()).isEmpty();
         assertThat(aggregate.drainCount()).isZero();
@@ -80,7 +85,9 @@ class DomainEventScopeTest {
             throw new IllegalStateException("boom");
         })).isInstanceOf(IllegalStateException.class);
 
-        scope.register(later);
+        assertThatThrownBy(() -> scope.register(later))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Domain events can only be registered inside an @ApplicationService invocation.");
 
         assertThat(scope.drainEvents()).isEmpty();
         assertThat(failed.drainCount()).isZero();
@@ -88,22 +95,41 @@ class DomainEventScopeTest {
     }
 
     @Test
-    void dispatchesRegisteredEventsBeforeTransactionCommit() throws Throwable {
+    void dispatchesOutboxBeforeCommitAndInProcessAfterCommit() throws Throwable {
         RecordingAggregate aggregate = new RecordingAggregate(new TestDomainEvent("transactional"));
-        List<DomainEvent> dispatchedEvents = new ArrayList<>();
-        DomainEventDispatcher dispatcher = dispatchedEvents::addAll;
+        RecordingBeforeCommitDispatcher outbox = new RecordingBeforeCommitDispatcher();
+        RecordingDispatcher local = new RecordingDispatcher();
+        DomainEventDispatchCoordinator coordinator =
+                new DefaultDomainEventDispatchCoordinator(List.of(outbox, local));
 
         TransactionSynchronizationManager.initSynchronization();
         TransactionSynchronizationManager.setActualTransactionActive(true);
         try {
-            scope.invoke(dispatcher, outermost -> {
+            scope.invoke(coordinator, outermost -> {
                 scope.register(aggregate);
 
-                assertThat(dispatchedEvents).isEmpty();
+                assertThat(outbox.events).isEmpty();
+                assertThat(local.events).isEmpty();
                 TransactionSynchronizationManager.getSynchronizations()
                         .forEach(synchronization -> synchronization.beforeCommit(false));
 
-                assertThat(dispatchedEvents)
+                assertThat(outbox.events)
+                        .extracting(event -> ((TestDomainEvent) event).name())
+                        .containsExactly("transactional");
+                assertThat(local.events).isEmpty();
+
+                TransactionSynchronizationManager.getSynchronizations()
+                        .forEach(TransactionSynchronization::afterCommit);
+
+                assertThat(local.events)
+                        .extracting(event -> ((TestDomainEvent) event).name())
+                        .containsExactly("transactional");
+
+                TransactionSynchronizationManager.getSynchronizations()
+                        .forEach(synchronization ->
+                                synchronization.afterCompletion(TransactionSynchronization.STATUS_COMMITTED));
+
+                assertThat(local.events)
                         .extracting(event -> ((TestDomainEvent) event).name())
                         .containsExactly("transactional");
                 return null;
@@ -132,6 +158,20 @@ class DomainEventScopeTest {
         int drainCount() {
             return drainCount;
         }
+    }
+
+    private static class RecordingDispatcher implements DomainEventDispatcher {
+
+        final List<DomainEvent> events = new ArrayList<>();
+
+        @Override
+        public void dispatch(List<? extends DomainEvent> events) {
+            this.events.addAll(events);
+        }
+    }
+
+    private static final class RecordingBeforeCommitDispatcher extends RecordingDispatcher
+            implements BeforeCommitDomainEventDispatcher {
     }
 
     private record TestDomainEvent(String name) implements DomainEvent {

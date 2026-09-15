@@ -51,7 +51,7 @@ class PayloadCapacityTest {
 
         // No exception — column type accepts 1MB payloads.
         assertThat(entry.getEventId()).isEqualTo("evt-big");
-        assertThat(repository.findDispatchable(100, Instant.now()))
+        assertThat(repository.claimDispatchable(100, "test"))
                 .extracting(OutboxMessage::getEventId)
                 .contains("evt-big");
         // Sanity: verify the persisted payload is intact (OutboxMessageStatus used only

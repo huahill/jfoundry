@@ -10,17 +10,13 @@
     <description>
         DDD aggregate persistence support: storage-neutral repository lifecycle,
         AggregateData, and DataMapper contracts. Concrete adapters extend this
-        module without pulling in runtime or messaging concerns.
+        module without pulling in runtime, messaging, or domain-event dispatch.
     </description>
 
     <dependencies>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
 
         <dependency>

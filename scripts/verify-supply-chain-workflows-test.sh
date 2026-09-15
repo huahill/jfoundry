@@ -41,7 +41,9 @@ write_compliant_dependabot() {
 version: 2
 updates:
   - package-ecosystem: maven
-    directory: /
+    directories:
+      - "/"
+      - "/jfoundry-boms/*"
     schedule:
       interval: weekly
     cooldown:
@@ -61,6 +63,7 @@ updates:
         - org.springframework.boot:spring-boot-dependencies
         - org.springframework.boot:spring-boot-starter-parent
         - org.springframework.boot:spring-boot-maven-plugin
+    rebase-strategy: disabled
     groups:
       jfoundry-spring-boot-platform:
         patterns:
@@ -78,6 +81,9 @@ updates:
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
+      jfoundry-maven-minors:
+        patterns: ["*"]
+        update-types: [minor]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -143,7 +149,7 @@ jobs:
             echo "is_patch_update=false" >> "${GITHUB_OUTPUT}"
           fi
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.eligibility.outputs.is_patch_update == 'true'
@@ -151,7 +157,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 }
 
@@ -211,13 +217,21 @@ jobs:
   docs:
     name: Documentation checks
     steps:
+      - name: Verify documentation
+        run: bash scripts/verify-docs.sh
+  metadata:
+    name: Repository metadata checks
+    needs: changes
+    if: needs.changes.outputs.run_full == 'true'
+    steps:
       - name: Verify compatibility matrix
         run: bash scripts/verify-compatibility-matrix.sh
       - name: Test compatibility matrix verification
         run: bash scripts/verify-compatibility-matrix-test.sh
   dependency-review:
     name: Dependency Review
-    if: github.event_name == 'pull_request'
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.run_full == 'true'
     permissions:
       contents: read
       pull-requests: read
@@ -387,6 +401,31 @@ YAML
 assert_accepts "${temp_dir}"
 
 write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0].pop("directories", None)
+config["updates"][0]["directory"] = "/"
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+HEREDOC
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan / and /jfoundry-boms/*"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["directories"].append("/jfoundry-runtime/*")
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+HEREDOC
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must not scan /jfoundry-runtime/*"
+
+write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
 import sys
 from pathlib import Path
@@ -394,10 +433,22 @@ import yaml
 path = Path(sys.argv[1])
 config = yaml.safe_load(path.read_text())
 groups = config["updates"][0]["groups"]
-config["updates"][0]["groups"] = {name: groups[name] for name in ["jfoundry-maven-patches", "jfoundry-spring-boot-platform", "jfoundry-quarkus-platform"]}
+config["updates"][0]["groups"] = {name: groups[name] for name in ["jfoundry-maven-patches", "jfoundry-spring-boot-platform", "jfoundry-quarkus-platform", "jfoundry-maven-minors"]}
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven groups must be ordered as jfoundry-spring-boot-platform, jfoundry-quarkus-platform, jfoundry-maven-patches, jfoundry-maven-minors"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0].pop("rebase-strategy", None)
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must disable automatic rebasing"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
@@ -915,7 +966,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -924,8 +975,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -986,7 +1037,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -995,8 +1046,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1042,7 +1093,7 @@ jobs:
           fi
           echo "is_maven_update=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1051,8 +1102,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1114,7 +1165,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1122,7 +1173,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
-        run: gh pr merge "${PR_NUMBER}" --auto --rebase
+        run: gh pr merge "${PR_NUMBER}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1189,7 +1240,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1198,8 +1249,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1271,7 +1322,7 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: >-
           steps.scope.outputs.is_maven_update == 'true' &&
           steps.dependency_policy.outputs.is_dependency_policy == 'false'
@@ -1280,8 +1331,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1348,15 +1399,15 @@ jobs:
               ;;
           esac
 
-      - name: Enable rebase auto-merge
+      - name: Enable squash auto-merge
         if: steps.scope.outputs.is_maven_update == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         # The legacy verifier below still checks this prior command form as a literal string.
-        # gh pr merge "${PR_NUMBER}" --auto --rebase
-        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --rebase
+        # gh pr merge "${PR_NUMBER}" --auto --squash
+        run: gh pr merge "${PR_NUMBER}" --repo "${REPOSITORY}" --auto --squash
 YAML
 assert_rejects "${temp_dir}"
 
@@ -1398,6 +1449,11 @@ assert_rejects "${temp_dir}"
 write_compliant_dependabot
 write_compliant_auto_merge_workflow
 replace_in_auto_merge_workflow $'GH_TOKEN: ${{ github.token }}' $'GH_TOKEN: ${{ secrets[\'GITHUB_TOKEN\'] }}'
+assert_rejects "${temp_dir}"
+
+write_compliant_dependabot
+write_compliant_auto_merge_workflow
+replace_in_auto_merge_workflow "--squash" "--rebase"
 assert_rejects "${temp_dir}"
 
 cat > "${temp_dir}/.github/workflows/snapshot.yml" <<'YAML'
@@ -1453,7 +1509,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix.sh" not in line))
 PY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix.sh"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Repository metadata checks must run: bash scripts/verify-compatibility-matrix.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 cp "${temp_dir}/.github/workflows/ci.yml" "${temp_dir}/.github/workflows/ci.yml.bak"
@@ -1463,7 +1519,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 path.write_text("".join(line for line in path.read_text().splitlines(True) if "bash scripts/verify-compatibility-matrix-test.sh" not in line))
 PY
-assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Documentation checks must run: bash scripts/verify-compatibility-matrix-test.sh"
+assert_rejects_with_message "${temp_dir}" ".github/workflows/ci.yml Repository metadata checks must run: bash scripts/verify-compatibility-matrix-test.sh"
 mv "${temp_dir}/.github/workflows/ci.yml.bak" "${temp_dir}/.github/workflows/ci.yml"
 
 rm "${temp_dir}/.github/dependabot.yml"

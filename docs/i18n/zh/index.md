@@ -38,7 +38,9 @@
 
 ## 建模
 
+- [建模](modeling/index.md)
 - [值对象规范](modeling/value-object.md)
+- [领域事件](modeling/domain-event.md)
 - [Repository 与读侧契约迁移指南](modeling/repository-vs-read-contracts.md)
 
 ## 发布与兼容

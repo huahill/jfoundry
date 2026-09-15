@@ -22,8 +22,8 @@ it does not own CDI registration or a container lifecycle. Spring uses `runtime/
 | Area | Modules |
 |------|---------|
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
-| Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-domain-event-externalization-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-inbox-core` |
-| Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
+| Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-domain-event-outbox-core`, `jfoundry-inbox-core` |
+| Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-domain-event-persistence-bridge`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
 | Shared Jakarta adapters | `jfoundry-http-jaxrs`, `jfoundry-web-jaxrs`, `jfoundry-restclient-jaxrs`, `jfoundry-transaction-jta`, `jfoundry-domain-event-jta` |
 | Spring runtime integration | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime/jfoundry-spring/starters/*` |
@@ -50,6 +50,15 @@ in both Jakarta runtimes. Quarkus uses matching `jfoundry-transaction-quarkus-*`
 `jfoundry-domain-event-quarkus-*`, and `jfoundry-persistence-quarkus-*` runtime/deployment pairs.
 Helidon uses `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and
 `jfoundry-persistence-helidon` without deployment artifacts.
+
+Domain Event, Persistence, and Outbox are independent capabilities. `jfoundry-domain-event-core`
+models the in-process fact and dispatch lifecycle; `jfoundry-persistence-core` exposes only the
+event-neutral `AggregatePersistenceObserver` completion hook; and `jfoundry-outbox-core` owns the
+generic message state machine, store contract, dispatch, retry, recovery, and cleanup. The optional
+`jfoundry-domain-event-persistence-bridge` adapts successful persistence to `DomainEventContext` so
+applications keep automatic event collection without coupling generic Persistence to Domain Event.
+The optional `jfoundry-domain-event-outbox-core` maps selected Domain Events to stable integration
+messages and appends them through the generic Outbox contract.
 
 ## Placement Rules
 
@@ -129,11 +138,19 @@ lifecycle that cannot yet express a sound static contract.
 
 ## Reliable Messaging Boundary
 
-`jfoundry-outbox-core` owns the message model, store contract, dispatch service, retry/backoff
-contract, and state machine.
+`jfoundry-outbox-core` owns the generic message model, store contract, dispatch service, retry/backoff
+contract, and state machine. It does not depend on Domain Event.
 
-`jfoundry-outbox-spring` owns Spring runtime integration such as transaction synchronization,
-scheduled Outbox triggers, and domain-event recording in a Spring runtime.
+`jfoundry-domain-event-outbox-core` owns only the optional Domain Event-to-Outbox mapping: externalization
+rules, routing, payload mapping, and `DomainEventOutboxRecorder`. It does not replace the generic Outbox
+state machine and it is not required for in-process Domain Event dispatch.
+
+`jfoundry-domain-event-persistence-bridge` is an optional adapter between successful aggregate persistence
+and Domain Event collection. It is not a persistence core and generic persistence does not depend on it.
+
+`jfoundry-outbox-spring` owns Spring runtime integration such as transaction synchronization and
+scheduled Outbox triggers. `jfoundry-domain-event-outbox-spring` owns the optional Domain Event-to-Outbox
+dispatcher. The explicit combination is selected only when an application needs both capabilities.
 
 `jfoundry-outbox-spring-boot-autoconfigure` owns Outbox configuration properties, conditions, and bean
 wiring. `OutboxDispatcherProperties` and related properties live there because property binding is
@@ -154,11 +171,12 @@ The capability state model and SQL-template policy belong in [Reliable Messaging
 
 ## Merge Verification
 
-All changes enter `main` through a pull request and GitHub's `Rebase and merge` strategy; direct pushes are
-not permitted. The always-running `Merge gate` is the required status check. It accepts a documentation-only
-change only when documentation verification succeeds. For any code change, it requires every existing CI job,
-including runtime middleware and Native Image verification, to succeed. A skipped, cancelled, or failed runtime
-job does not satisfy the gate.
+All changes enter `main` through a pull request and GitHub's `Squash and merge` strategy; direct pushes are
+not permitted. The squash commit subject is the pull request title. The always-running `Merge gate` is the
+required status check. Documentation-only changes run the documentation checks and skip repository metadata,
+Dependency Review, and the full Java/runtime matrix. For any code change, it requires repository metadata,
+Dependency Review for pull requests, and every existing CI job, including runtime middleware and Native Image
+verification, to succeed. A skipped, cancelled, or failed required job does not satisfy the gate.
 
 Contributors should run the CI-equivalent stage for the capability they change before pushing a branch. Local
 verification reduces feedback time but cannot replace the server-side gate.
