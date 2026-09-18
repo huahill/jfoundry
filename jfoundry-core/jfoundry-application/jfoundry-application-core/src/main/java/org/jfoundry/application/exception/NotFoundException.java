@@ -12,4 +12,10 @@ public class NotFoundException extends ApplicationException {
     public NotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    /// Creates a not-found failure identified by a stable message code with interpolation arguments.
+    /// The code is resolved to caller-facing text at the HTTP boundary through message catalogs.
+    public NotFoundException(String code, Object... args) {
+        super(code, args);
+    }
 }

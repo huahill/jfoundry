@@ -375,7 +375,10 @@ for the six JFoundry application and domain exceptions: `InvalidArgumentExceptio
 standard Jakarta REST failures with statuses `400`, `404`, `405`, `406`, `413`, `415`, and `503`.
 
 Responses contain the shared `type`, `title`, `status`, and `detail` fields; `type` is the stable
-machine-readable problem identifier. The adapter preserves non-entity headers supplied by the source
+machine-readable problem identifier. Problem messages localize through classpath `messages*.properties`
+bundles first and the framework `jfoundry-problems` catalog second, keyed by the request's
+`Accept-Language`; see [Web](../capabilities/web.md) for the code-and-arguments contract. The adapter
+preserves non-entity headers supplied by the source
 Jakarta REST response, including `Allow` when it is present. It does not infer headers that Quarkus
 does not provide. Unknown exceptions and other HTTP statuses retain normal Quarkus behavior instead
 of being converted into a JFoundry error.

@@ -159,7 +159,10 @@ PostgreSQL/JTA middleware verification.
 `jfoundry-web-helidon` maps JFoundry application and domain exceptions to RFC 9457
 `application/problem+json` JAX-RS responses. It keeps Helidon's ordinary handling for unknown
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
-general JAX-RS error policy. The runtime-neutral contract and the dependency choices for all
+general JAX-RS error policy. Problem messages localize through classpath `messages*.properties`
+bundles first and the framework `jfoundry-problems` catalog second, keyed by the request's
+`Accept-Language`; see [Web](../capabilities/web.md) for the code-and-arguments contract. The
+runtime-neutral contract and the dependency choices for all
 supported runtimes are in [Web](../capabilities/web.md).
 
 It does not configure security. A Helidon security adapter that owns authentication and authorization

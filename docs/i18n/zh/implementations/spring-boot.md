@@ -121,7 +121,7 @@ Outbox 装配包含四项独立决策：能力、存储、派发触发方式和�
 
 ## Web、锁与替换
 
-Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
+Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。问题消息先通过 Spring 的 `MessageSource` 本地化，再回退到框架的 `jfoundry-problems` 消息包，locale 取自 Spring 的 locale 上下文；code 与参数契约见[Web](../capabilities/web.md)。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
 
 对于目录支持的 Spring MVC 客户端错误，JFoundry 保留目录中稳定的 `type` 和 `status`，同时使用 Spring
 Framework 针对具体异常生成的 `title` 和 `detail`，包括 `MessageSource` 本地化结果。例如，缺少请求参数时会

@@ -22,6 +22,12 @@ public final class RequestValidationProblem {
 
     /// Creates a request validation problem from caller-facing validation errors.
     public static ProblemDescriptor create(List<? extends Error> errors) {
+        return create(errors, java.util.Locale.ROOT, ProblemMessageResolver.unresolved());
+    }
+
+    /// Creates a request validation problem with localized title and detail.
+    public static ProblemDescriptor create(List<? extends Error> errors, java.util.Locale locale,
+            ProblemMessageResolver messages) {
         Objects.requireNonNull(errors, "errors must not be null");
         List<Map<String, String>> renderedErrors = errors.stream()
                 .map(error -> Objects.requireNonNull(error, "errors must not contain null"))
@@ -30,9 +36,11 @@ public final class RequestValidationProblem {
                 .toList();
         return new ProblemDescriptor(
                 TYPE,
-                "Request validation failed",
+                messages.resolve("problem.request-validation.title", locale, List.of())
+                        .orElse("Request validation failed"),
                 400,
-                "The request failed validation. See 'errors' for details.",
+                messages.resolve("problem.request-validation.detail", locale, List.of())
+                        .orElse("The request failed validation. See 'errors' for details."),
                 Map.of("errors", renderedErrors));
     }
 

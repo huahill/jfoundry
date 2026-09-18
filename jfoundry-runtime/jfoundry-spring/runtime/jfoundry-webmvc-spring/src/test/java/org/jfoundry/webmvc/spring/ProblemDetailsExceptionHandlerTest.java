@@ -9,8 +9,10 @@ import org.jfoundry.application.exception.InvalidArgumentException;
 import org.jfoundry.application.exception.NotFoundException;
 import org.jfoundry.domain.exception.DomainRuleViolationException;
 import org.jfoundry.domain.exception.DomainStateException;
+import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
+import org.jfoundry.problem.ProblemMessageResolver;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.hibernate.validator.messageinterpolation.ParameterMessageInterpolator;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -275,6 +277,31 @@ class ProblemDetailsExceptionHandlerTest {
             ProblemDetail problem = (ProblemDetail) response.getBody();
             assertThat(problem.getTitle()).isEqualTo("请求方法不受支持");
             assertThat(problem.getDetail()).isEqualTo("当前资源不支持该请求方法。");
+        } finally {
+            LocaleContextHolder.resetLocaleContext();
+        }
+    }
+
+    @Test
+    void localizesCodedDomainExceptionsAndSetsContentLanguage() {
+        var messages = new StaticMessageSource();
+        messages.addMessage("order.quota-exceeded", Locale.SIMPLIFIED_CHINESE, "配额已超出：当前 {0}");
+        var problemMessages = ProblemMessageResolver.composite(
+                new MessageSourceProblemMessageResolver(messages), ProblemMessageResolver.framework());
+        var localized = new ProblemDetailsExceptionHandler(
+                new CompositeProblemMapper(List.of(), problemMessages, LocaleContextHolder::getLocale),
+                problemMessages);
+        LocaleContextHolder.setLocale(Locale.SIMPLIFIED_CHINESE);
+
+        try {
+            ResponseEntity<ProblemDetail> response = localized.handleDomainRuleViolation(
+                    new DomainRuleViolationException("order.quota-exceeded", 2));
+
+            assertThat(response.getStatusCode().value()).isEqualTo(422);
+            assertThat(response.getHeaders().getContentLanguage()).isEqualTo(Locale.SIMPLIFIED_CHINESE);
+            assertThat(response.getBody()).isNotNull();
+            assertThat(response.getBody().getTitle()).isEqualTo("违反领域规则");
+            assertThat(response.getBody().getDetail()).isEqualTo("配额已超出：当前 2");
         } finally {
             LocaleContextHolder.resetLocaleContext();
         }

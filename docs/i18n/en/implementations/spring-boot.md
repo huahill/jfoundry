@@ -180,7 +180,9 @@ end of each dispatch; arbitrary async worker threads require the application's c
 
 The Web MVC starter is an inbound adapter. It owns the shared RFC 9457 contract for supported
 jfoundry exceptions, application `ProblemMapper` mappings, and `ProblemCatalog`-supported Spring MVC HTTP
-failures; domain and application code must not select HTTP statuses directly. Other Spring MVC
+failures; domain and application code must not select HTTP statuses directly. Problem messages localize
+through Spring's `MessageSource` first and the framework `jfoundry-problems` catalog second, keyed by
+Spring's locale context; see [Web](../capabilities/web.md) for the code-and-arguments contract. Other Spring MVC
 failures retain Spring's original status and problem response. The auto-configuration runs before
 Spring Boot's Web MVC problem-details configuration, so enabling `spring.mvc.problemdetails.enabled`
 does not introduce a competing handler. It intentionally does not configure authentication or
