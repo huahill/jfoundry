@@ -127,8 +127,8 @@ throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
 ```
 
 `detail` 按以下顺序解析：先查应用消息包中的 code，查不到则使用语言无关的异常消息。框架自身的标题和
-通用兜底文案从随 `jfoundry-web` 发布的 `jfoundry-problems` 消息包解析（英文根包加简体中文包）；缺失
-翻译时回退到英文根包。参数必须是非空的 `String`、`Number` 或 `Boolean` 值。
+通用兜底文案从随 `jfoundry-web` 发布的 `jfoundry-problems*.properties` 消息包解析（英文根包加简体中文
+包）；缺失翻译时回退到英文根包。参数必须是非空的 `String`、`Number` 或 `Boolean` 值。
 
 消息包查找方式因运行时而异：
 
@@ -139,7 +139,8 @@ throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
 
 按具体 locale 解析出的响应会携带 `Content-Language` 头。没有偏好语言时使用英文根包文案，不输出该
 头。针对 Native Image，`jfoundry-web` 附带资源配置，使 `jfoundry-problems*.properties` 和
-`messages*.properties` 消息包在原生镜像中保持可达。
+`messages*.properties` 消息包在原生镜像中保持可达；`jfoundry-web-helidon` 会注册其异常映射器
+所需的请求头代理。
 
 两个限制是有意为之：
 

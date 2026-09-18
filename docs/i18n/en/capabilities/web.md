@@ -152,9 +152,9 @@ RFC 9457 extension members so clients can also render their own text:
 
 `detail` resolves in this order: the message code in the application catalog, then the
 language-independent exception message. Framework titles and generic fallback details resolve from
-the `jfoundry-problems` bundle that ships inside `jfoundry-web` (English root plus Simplified
-Chinese); a missing translation falls back to the root English bundle. Arguments must be non-null
-`String`, `Number`, or `Boolean` values.
+the `jfoundry-problems*.properties` bundles that ship inside `jfoundry-web` (English root plus
+Simplified Chinese); a missing translation falls back to the root English bundle. Arguments must
+be non-null `String`, `Number`, or `Boolean` values.
 
 Catalog lookup differs by runtime:
 
@@ -167,7 +167,8 @@ Catalog lookup differs by runtime:
 Responses resolved for a concrete locale carry a `Content-Language` header. When no locale is
 preferred, root English text is used and no header is added. For Native Image, `jfoundry-web` ships
 a resource configuration that keeps both `jfoundry-problems*.properties` and `messages*.properties`
-bundles reachable.
+bundles reachable, and `jfoundry-web-helidon` registers the request-header proxy used by its
+exception mappers.
 
 Two limits are deliberate:
 
