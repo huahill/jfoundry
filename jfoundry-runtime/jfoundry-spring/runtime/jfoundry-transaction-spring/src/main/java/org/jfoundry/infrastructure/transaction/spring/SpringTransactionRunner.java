@@ -22,7 +22,7 @@ public class SpringTransactionRunner implements TransactionRunner {
     }
 
     @Override
-    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
         Objects.requireNonNull(options, "options must not be null");
         Objects.requireNonNull(callback, "callback must not be null");
 
@@ -32,18 +32,7 @@ public class SpringTransactionRunner implements TransactionRunner {
         options.name().ifPresent(template::setName);
         options.timeout().ifPresent(timeout -> template.setTimeout(Math.toIntExact(timeout.toSeconds())));
 
-        try {
-            return template.execute(status -> {
-                try {
-                    return callback.execute();
-                } catch (Exception ex) {
-                    status.setRollbackOnly();
-                    throw new TransactionCallbackException(ex);
-                }
-            });
-        } catch (TransactionCallbackException ex) {
-            throw ex.original;
-        }
+        return template.execute(status -> callback.execute());
     }
 
     private static int toSpringPropagation(TransactionPropagation propagation) {
@@ -55,15 +44,5 @@ public class SpringTransactionRunner implements TransactionRunner {
             case NOT_SUPPORTED -> TransactionDefinition.PROPAGATION_NOT_SUPPORTED;
             case NEVER -> TransactionDefinition.PROPAGATION_NEVER;
         };
-    }
-
-    private static final class TransactionCallbackException extends RuntimeException {
-
-        private final Exception original;
-
-        private TransactionCallbackException(Exception original) {
-            super(original);
-            this.original = original;
-        }
     }
 }

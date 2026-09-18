@@ -39,7 +39,7 @@ public class DomainEventExternalizationResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String externalize() throws Exception {
+    public String externalize() {
         String eventId = applicationService.handle();
         return transactionRunner.call(() -> {
             List<?> rows = entityManager.createNativeQuery("""

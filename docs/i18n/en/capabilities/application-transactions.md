@@ -2,7 +2,9 @@
 
 `TransactionRunner` is jfoundry's primary contract for application-layer transaction boundaries. Use
 it when application orchestration needs an explicit transaction block without depending on Spring
-`TransactionTemplate`:
+`TransactionTemplate`. Callbacks and `run` / `call` do not declare checked exceptions; runtime
+exceptions propagate unchanged. Translate adapter-level checked failures such as `SQLException`
+before they enter the callback.
 
 ```java
 transactionRunner.run(TransactionOptions.builder()

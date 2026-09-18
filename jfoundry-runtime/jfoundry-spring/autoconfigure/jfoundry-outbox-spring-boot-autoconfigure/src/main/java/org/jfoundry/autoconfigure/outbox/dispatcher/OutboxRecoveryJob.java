@@ -60,23 +60,11 @@ public class OutboxRecoveryJob {
 
     private <T> T inNewTransaction(TransactionCallback<T> callback) {
         if (transactionRunner == null) {
-            try {
-                return callback.execute();
-            } catch (RuntimeException exception) {
-                throw exception;
-            } catch (Exception exception) {
-                throw new IllegalStateException("Outbox recovery failed", exception);
-            }
+            return callback.execute();
         }
-        try {
-            return transactionRunner.call(TransactionOptions.builder()
-                    .name("jfoundry-outbox-recovery")
-                    .propagation(TransactionPropagation.REQUIRES_NEW)
-                    .build(), callback);
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IllegalStateException("Outbox recovery transaction failed", exception);
-        }
+        return transactionRunner.call(TransactionOptions.builder()
+                .name("jfoundry-outbox-recovery")
+                .propagation(TransactionPropagation.REQUIRES_NEW)
+                .build(), callback);
     }
 }

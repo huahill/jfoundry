@@ -7,8 +7,6 @@ import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionPropagation;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -33,8 +31,8 @@ class HelidonTransactionRunnerTest {
         HelidonTransactionRunner runner = new HelidonTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
-            throw new IOException("write failed");
-        })).isInstanceOf(IOException.class);
+            throw new IllegalStateException("write failed");
+        })).isInstanceOf(IllegalStateException.class);
 
         assertThat(transactionManager.begins).isZero();
         assertThat(transactionManager.rollbackOnlyMarks).isEqualTo(1);

@@ -137,7 +137,7 @@ class HelidonOutboxDispatchProducerTest {
     private static final class NoOpTransactionRunner implements TransactionRunner {
 
         @Override
-        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
             return callback.execute();
         }
     }
@@ -147,7 +147,7 @@ class HelidonOutboxDispatchProducerTest {
         private final java.util.List<TransactionOptions> options = new java.util.ArrayList<>();
 
         @Override
-        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
             this.options.add(options);
             return callback.execute();
         }

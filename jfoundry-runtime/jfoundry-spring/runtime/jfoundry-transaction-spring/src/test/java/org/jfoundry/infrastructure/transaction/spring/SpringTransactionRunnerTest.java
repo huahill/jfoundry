@@ -8,7 +8,6 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
-import java.io.IOException;
 import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -17,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class SpringTransactionRunnerTest {
 
     @Test
-    void mapsTransactionOptionsToSpringTransactionTemplate() throws Exception {
+    void mapsTransactionOptionsToSpringTransactionTemplate() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         SpringTransactionRunner runner = new SpringTransactionRunner(transactionManager);
 
@@ -39,14 +38,14 @@ class SpringTransactionRunnerTest {
     }
 
     @Test
-    void rollsBackAndRethrowsOriginalCheckedException() {
+    void rollsBackAndRethrowsOriginalRuntimeException() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         SpringTransactionRunner runner = new SpringTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
-            throw new IOException("write failed");
+            throw new IllegalStateException("write failed");
         }))
-                .isInstanceOf(IOException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("write failed");
 
         assertThat(transactionManager.commits).isZero();

@@ -20,7 +20,7 @@ public class QuarkusTransactionRunner implements TransactionRunner {
     }
 
     @Override
-    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
         return this.delegate.call(options, callback);
     }
 }

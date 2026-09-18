@@ -37,7 +37,7 @@ public class OutboxJpaResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String persistAndRead() throws Exception {
+    public String persistAndRead() {
         String eventId = UUID.randomUUID().toString();
         transactionRunner.run(() -> outboxMessageStore.append(OutboxMessage.newPending(
                 eventId,
@@ -60,7 +60,7 @@ public class OutboxJpaResource {
     @GET
     @Path("/dispatch")
     @Produces(MediaType.TEXT_PLAIN)
-    public String persistAndDispatch() throws Exception {
+    public String persistAndDispatch() {
         String eventId = UUID.randomUUID().toString();
         transactionRunner.run(() -> outboxMessageStore.append(OutboxMessage.newPending(
                 eventId,
