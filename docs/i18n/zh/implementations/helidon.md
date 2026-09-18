@@ -137,7 +137,9 @@ RabbitMQ 适配器会在首次发送时惰性连接，并为每次发布打开�
 
 `jfoundry-web-helidon` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
-适配器不替代应用通用的 JAX-RS 错误策略。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)。
+适配器不替代应用通用的 JAX-RS 错误策略。问题消息先查 classpath 上的 `messages*.properties`，再回退到
+框架的 `jfoundry-problems` 消息包，locale 取自请求的 `Accept-Language`；code 与参数契约见
+[Web](../capabilities/web.md)。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)。
 
 它不配置安全能力。拥有认证和授权语义的 Helidon 安全适配器可使用
 `ProblemDetailsRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。扩展字段在各运行时适配器中会保留

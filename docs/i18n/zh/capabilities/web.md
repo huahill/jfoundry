@@ -102,6 +102,52 @@ Spring MVC 通过常规 Web MVC 集成获得校验能力。Quarkus 应用必须�
 `quarkus-hibernate-validator`；JFoundry 只在检测到该 capability 时注册映射器。Helidon MP 应用必须添加
 `helidon-microprofile-bean-validation`。应用仍需自行选择用于反序列化请求体的 JSON provider。
 
+### 问题消息国际化
+
+问题响应可以在不把表现层关注点带进领域层和应用核心的前提下实现国际化。预期的失败可以用稳定的
+消息 code 加插值参数来构造，而不是一句成品文案；HTTP 边界在响应时按请求 locale 从消息包中解析该
+code：
+
+```java
+throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
+```
+
+日志消息保持语言无关（`order.quota-exceeded [2, 2]`）。在边界处，框架解析 code、按 `MessageFormat`
+插值参数，并把 `code` 与 `args` 作为 RFC 9457 扩展成员输出，客户端也可以据此自行渲染文案：
+
+```json
+{
+  "type": "urn:jfoundry:problem:domain-rule-violation",
+  "title": "违反领域规则",
+  "status": 422,
+  "detail": "配额已超出：当前 2，上限 2",
+  "code": "order.quota-exceeded",
+  "args": [2, 2]
+}
+```
+
+`detail` 按以下顺序解析：先查应用消息包中的 code，查不到则使用语言无关的异常消息。框架自身的标题和
+通用兜底文案从随 `jfoundry-web` 发布的 `jfoundry-problems` 消息包解析（英文根包加简体中文包）；缺失
+翻译时回退到英文根包。参数必须是非空的 `String`、`Number` 或 `Boolean` 值。
+
+消息包查找方式因运行时而异：
+
+- Spring MVC 先通过 Spring 的 `MessageSource` 解析，因此应用的 code 可以直接放在标准的
+  `messages*.properties` 消息包中，然后再查框架消息包。locale 来自 Spring 的 locale 上下文。
+- Quarkus REST 与 Helidon MP 先查 classpath 上的 `messages*.properties`，再查框架消息包。locale 来自
+  `Accept-Language`。
+
+按具体 locale 解析出的响应会携带 `Content-Language` 头。没有偏好语言时使用英文根包文案，不输出该
+头。针对 Native Image，`jfoundry-web` 附带资源配置，使 `jfoundry-problems*.properties` 和
+`messages*.properties` 消息包在原生镜像中保持可达。
+
+两个限制是有意为之：
+
+- 单 `String` 参数的构造器始终表示字面量消息，因此 code 形态至少携带一个插值参数；确实没有参数的
+  code 需要显式传入空的 `Object[]`。
+- `ExternalAccessException` 默认保持屏蔽语义：只有经过评审的 public-detail code 构造器才会向调用方
+  暴露 code 和参数。
+
 ### 明确边界
 
 - 未知异常和受支持状态集合之外的 HTTP 失败会保留运行时原有处理。此能力不是应用的通用异常策略。

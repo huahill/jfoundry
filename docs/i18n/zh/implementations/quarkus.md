@@ -326,7 +326,9 @@ Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-
 `DomainStateException`。它还会为状态码为 `400`、`404`、`405`、`406`、`413`、`415` 和 `503`
 的标准 Jakarta REST 失败渲染共享契约。
 
-响应包含共享的 `type`、`title`、`status` 和 `detail` 字段；`type` 是稳定的机器可读问题标识。适配器会保留源
+响应包含共享的 `type`、`title`、`status` 和 `detail` 字段；`type` 是稳定的机器可读问题标识。问题消息先查
+classpath 上的 `messages*.properties`，再回退到框架的 `jfoundry-problems` 消息包，locale 取自请求的
+`Accept-Language`；code 与参数契约见[Web](../capabilities/web.md)。适配器会保留源
 Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它不会推断 Quarkus 未提供的响应头。未知异常
 和其他 HTTP 状态会继续使用正常的 Quarkus 行为，而不会被转换成 JFoundry 错误。
 

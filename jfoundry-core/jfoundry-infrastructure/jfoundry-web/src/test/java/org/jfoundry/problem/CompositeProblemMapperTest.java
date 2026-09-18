@@ -36,6 +36,20 @@ class CompositeProblemMapperTest {
     }
 
     @Test
+    void localizesTheDefaultMappingAndInternalErrorFallbackForTheSuppliedLocale() {
+        CompositeProblemMapper mapper = new CompositeProblemMapper(java.util.List.of(),
+                ProblemMessageResolver.framework(), () -> java.util.Locale.SIMPLIFIED_CHINESE);
+
+        ProblemDescriptor mapped = mapper.map(new InvalidArgumentException("pageSize is invalid")).orElseThrow();
+        assertThat(mapped.title()).isEqualTo("参数无效");
+
+        ProblemDescriptor internalError = mapper.map(new IllegalStateException("secret")).orElseThrow();
+        assertThat(internalError.type()).hasToString("urn:jfoundry:problem:internal-error");
+        assertThat(internalError.title()).isEqualTo("服务器内部错误");
+        assertThat(internalError.detail()).isEqualTo("服务器处理请求时出错。");
+    }
+
+    @Test
     void keepsExtensionsImmutableAndProtectsReservedRfcMembers() {
         ProblemDescriptor descriptor = new ProblemDescriptor(
                 URI.create("urn:jfoundry:problem:test"), "Test", 400, "Test detail", Map.of("retryable", false));

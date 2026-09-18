@@ -124,6 +124,58 @@ Spring MVC obtains validation through its normal Web MVC integration. A Quarkus 
 Helidon MP application must add `helidon-microprofile-bean-validation`. Applications also remain
 responsible for selecting the JSON provider used to deserialize request bodies.
 
+### Localized Problem Messages
+
+Problem responses can be localized without carrying presentation concerns into the domain or
+application core. Expected failures accept a stable message code with interpolation arguments instead
+of a finished sentence, and the HTTP boundary resolves that code against message catalogs using the
+request locale:
+
+```java
+throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
+```
+
+The log message stays language-independent (`order.quota-exceeded [2, 2]`). At the boundary, the code
+is resolved, the arguments are interpolated with `MessageFormat`, and `code` and `args` are added as
+RFC 9457 extension members so clients can also render their own text:
+
+```json
+{
+  "type": "urn:jfoundry:problem:domain-rule-violation",
+  "title": "Domain rule violation",
+  "status": 422,
+  "detail": "Quota exceeded: current 2, limit 2",
+  "code": "order.quota-exceeded",
+  "args": [2, 2]
+}
+```
+
+`detail` resolves in this order: the message code in the application catalog, then the
+language-independent exception message. Framework titles and generic fallback details resolve from
+the `jfoundry-problems` bundle that ships inside `jfoundry-web` (English root plus Simplified
+Chinese); a missing translation falls back to the root English bundle. Arguments must be non-null
+`String`, `Number`, or `Boolean` values.
+
+Catalog lookup differs by runtime:
+
+- Spring MVC resolves through Spring's `MessageSource` first, so application codes can live in the
+  standard `messages*.properties` bundles, and then through the framework catalog. The locale comes
+  from Spring's locale context.
+- Quarkus REST and Helidon MP resolve classpath `messages*.properties` bundles first, then the
+  framework catalog. The locale comes from `Accept-Language`.
+
+Responses resolved for a concrete locale carry a `Content-Language` header. When no locale is
+preferred, root English text is used and no header is added. For Native Image, `jfoundry-web` ships
+a resource configuration that keeps both `jfoundry-problems*.properties` and `messages*.properties`
+bundles reachable.
+
+Two limits are deliberate:
+
+- A single-`String` constructor always means a literal message, so a code carries at least one
+  interpolation argument; use an explicit empty `Object[]` for a code without arguments.
+- `ExternalAccessException` stays masked by default: only its reviewed public-detail code
+  constructor exposes codes and arguments to callers.
+
 ### Deliberate Boundaries
 
 - Unknown exceptions and HTTP failures outside the supported status set retain the runtime's normal

@@ -34,6 +34,18 @@ class RequestValidationProblemTest {
     }
 
     @Test
+    void resolvesLocalizedTitleAndDetail() {
+        ProblemDescriptor problem = RequestValidationProblem.create(
+                List.of(RequestValidationProblem.Error.forRequest("must not be blank")),
+                java.util.Locale.SIMPLIFIED_CHINESE, ProblemMessageResolver.framework());
+
+        assertThat(problem.title()).isEqualTo("请求校验失败");
+        assertThat(problem.detail()).isEqualTo("请求未通过校验，具体原因请参见 errors 成员。");
+        assertThat(problem.extensions().get("errors"))
+                .isEqualTo(List.of(Map.of("detail", "must not be blank")));
+    }
+
+    @Test
     void percentEncodesJsonPointerUriFragments() {
         ProblemDescriptor problem = RequestValidationProblem.create(List.of(
                 RequestValidationProblem.Error.atPath(List.of("metadata", "a b%c", "中文"), "is invalid")));
