@@ -2,7 +2,6 @@ package org.jfoundry.application.transaction;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -47,16 +46,4 @@ class TransactionOptionsTest {
                 .withMessage("timeout must not be null");
     }
 
-    @Test
-    void transactionCallbacksMayThrowCheckedExceptions() {
-        TransactionCallback<String> callback = () -> {
-            throw new IOException("import failed");
-        };
-        TransactionAction action = () -> {
-            throw new IOException("cleanup failed");
-        };
-
-        assertThat(callback).isNotNull();
-        assertThat(action).isNotNull();
-    }
 }

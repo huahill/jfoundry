@@ -22,7 +22,7 @@ public class TransactionResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String execute() throws Exception {
+    public String execute() {
         return transactionRunner.call(() -> "committed");
     }
 }

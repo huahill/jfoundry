@@ -8,5 +8,5 @@ package org.jfoundry.application.transaction;
 @FunctionalInterface
 public interface TransactionCallback<T> {
 
-    T execute() throws Exception;
+    T execute();
 }

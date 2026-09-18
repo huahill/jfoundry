@@ -104,7 +104,7 @@ class InboxTemplateTest {
         private boolean inTransaction;
 
         @Override
-        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
             this.options.add(options);
             inTransaction = true;
             try {

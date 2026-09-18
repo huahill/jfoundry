@@ -21,7 +21,7 @@ public class JtaTransactionRunner implements TransactionRunner {
     }
 
     @Override
-    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
         Objects.requireNonNull(options, "options must not be null");
         Objects.requireNonNull(callback, "callback must not be null");
 
@@ -32,26 +32,36 @@ public class JtaTransactionRunner implements TransactionRunner {
             throw new UnsupportedOperationException("Jakarta Transactions does not support transaction names");
         }
 
+        try {
+            return dispatch(options, callback::execute);
+        } catch (RuntimeException | Error exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new IllegalStateException("Jakarta transaction failed", exception);
+        }
+    }
+
+    private <T> T dispatch(TransactionOptions options, JtaAction<T> action) throws Exception {
         return switch (options.propagation()) {
             case REQUIRED -> isTransactionActive()
-                    ? callInExistingTransaction(callback)
-                    : callInNewTransaction(options, callback);
-            case REQUIRES_NEW -> callInNewTransactionSuspendingExisting(options, callback);
+                    ? callInExistingTransaction(action)
+                    : callInNewTransaction(options, action);
+            case REQUIRES_NEW -> callInNewTransactionSuspendingExisting(options, action);
             case SUPPORTS -> isTransactionActive()
-                    ? callInExistingTransaction(callback)
-                    : callback.execute();
-            case MANDATORY -> callInMandatoryTransaction(callback);
-            case NOT_SUPPORTED -> callSuspendingExisting(callback);
-            case NEVER -> callWithoutTransaction(callback);
+                    ? callInExistingTransaction(action)
+                    : action.execute();
+            case MANDATORY -> callInMandatoryTransaction(action);
+            case NOT_SUPPORTED -> callSuspendingExisting(action);
+            case NEVER -> callWithoutTransaction(action);
         };
     }
 
     private <T> T callInNewTransactionSuspendingExisting(
-            TransactionOptions options, TransactionCallback<T> callback) throws Exception {
-        return callSuspendingExisting(() -> callInNewTransaction(options, callback));
+            TransactionOptions options, JtaAction<T> action) throws Exception {
+        return callSuspendingExisting(() -> callInNewTransaction(options, action));
     }
 
-    private <T> T callInNewTransaction(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+    private <T> T callInNewTransaction(TransactionOptions options, JtaAction<T> action) throws Exception {
         boolean timeoutConfigured = false;
         boolean transactionStarted = false;
         Throwable failure = null;
@@ -62,7 +72,7 @@ public class JtaTransactionRunner implements TransactionRunner {
             }
             transactionManager.begin();
             transactionStarted = true;
-            T result = callback.execute();
+            T result = action.execute();
             transactionManager.commit();
             return result;
         } catch (Exception | Error ex) {
@@ -82,31 +92,31 @@ public class JtaTransactionRunner implements TransactionRunner {
         }
     }
 
-    private <T> T callInExistingTransaction(TransactionCallback<T> callback) throws Exception {
+    private <T> T callInExistingTransaction(JtaAction<T> action) throws Exception {
         try {
-            return callback.execute();
+            return action.execute();
         } catch (Exception | Error ex) {
             runCleanupPreserving(ex, transactionManager::setRollbackOnly);
             throw ex;
         }
     }
 
-    private <T> T callInMandatoryTransaction(TransactionCallback<T> callback) throws Exception {
+    private <T> T callInMandatoryTransaction(JtaAction<T> action) throws Exception {
         if (!isTransactionActive()) {
             throw new IllegalStateException("Transaction propagation MANDATORY requires an active transaction");
         }
-        return callInExistingTransaction(callback);
+        return callInExistingTransaction(action);
     }
 
-    private <T> T callSuspendingExisting(TransactionCallback<T> callback) throws Exception {
+    private <T> T callSuspendingExisting(JtaAction<T> action) throws Exception {
         if (!isTransactionActive()) {
-            return callback.execute();
+            return action.execute();
         }
 
         Transaction suspended = transactionManager.suspend();
         Throwable failure = null;
         try {
-            return callback.execute();
+            return action.execute();
         } catch (Exception | Error ex) {
             failure = ex;
             throw ex;
@@ -119,11 +129,11 @@ public class JtaTransactionRunner implements TransactionRunner {
         }
     }
 
-    private <T> T callWithoutTransaction(TransactionCallback<T> callback) throws Exception {
+    private <T> T callWithoutTransaction(JtaAction<T> action) throws Exception {
         if (isTransactionActive()) {
             throw new IllegalStateException("Transaction propagation NEVER does not allow an active transaction");
         }
-        return callback.execute();
+        return action.execute();
     }
 
     private boolean isTransactionActive() throws Exception {
@@ -145,6 +155,11 @@ public class JtaTransactionRunner implements TransactionRunner {
                 failure.addSuppressed(cleanupFailure);
             }
         }
+    }
+
+    @FunctionalInterface
+    private interface JtaAction<T> {
+        T execute() throws Exception;
     }
 
     @FunctionalInterface

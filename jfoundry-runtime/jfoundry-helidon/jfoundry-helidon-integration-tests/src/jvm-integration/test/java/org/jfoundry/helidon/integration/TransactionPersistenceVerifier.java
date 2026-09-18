@@ -20,7 +20,7 @@ public class TransactionPersistenceVerifier {
         this.transactionRunner = transactionRunner;
     }
 
-    int persistAndCount() throws Exception {
+    int persistAndCount() {
         transactionRunner.run(() -> entityManager.persist(new TransactionVerificationRecord()));
         return transactionRunner.call(() -> entityManager.createQuery(
                         "select count(record) from TransactionVerificationRecord record", Long.class)

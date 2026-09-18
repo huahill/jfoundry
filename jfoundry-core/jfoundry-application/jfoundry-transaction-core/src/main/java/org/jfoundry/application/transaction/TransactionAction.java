@@ -6,5 +6,5 @@ package org.jfoundry.application.transaction;
 @FunctionalInterface
 public interface TransactionAction {
 
-    void execute() throws Exception;
+    void execute();
 }
