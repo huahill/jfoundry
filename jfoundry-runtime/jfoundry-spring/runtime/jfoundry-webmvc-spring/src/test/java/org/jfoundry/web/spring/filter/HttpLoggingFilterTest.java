@@ -166,6 +166,7 @@ class HttpLoggingFilterTest {
         request.addHeader("AUTHORIZATION", "Bearer request-secret");
         request.addHeader("X-Service-Token", "request-token");
         request.addHeader("Cookie", "session=request-cookie");
+        request.addHeader("User-Agent", "Mozilla/5.0");
         var response = new MockHttpServletResponse();
         var filter = new HttpLoggingFilter(HttpLoggingLevel.HEADERS, () -> true, nanos(0, 1_000_000));
 
@@ -177,10 +178,32 @@ class HttpLoggingFilterTest {
 
         assertThat(messages()).noneMatch(message -> message.contains("request-secret")
                         || message.contains("request-token") || message.contains("request-cookie")
-                        || message.contains("response-cookie") || message.contains("response-key"))
+                        || message.contains("response-cookie") || message.contains("response-key")
+                        || message.contains("Mozilla/5.0"))
                 .anyMatch(message -> message.contains("AUTHORIZATION=[<redacted>]"))
-                .anyMatch(message -> message.contains("Set-Cookie=[<redacted>]"))
-                .anyMatch(message -> message.contains("Vendor-Api-Key=[<redacted>]"));
+                .noneMatch(message -> message.contains("User-Agent") || message.contains("Set-Cookie")
+                        || message.contains("Vendor-Api-Key") || message.contains("Cookie="));
+    }
+
+    @Test
+    void configuredIncludedHeadersCanIncludeEveryHeaderAfterRedaction() throws Exception {
+        var request = request(new byte[0]);
+        request.addHeader("AUTHORIZATION", "Bearer request-secret");
+        request.addHeader("User-Agent", "Mozilla/5.0");
+        var response = new MockHttpServletResponse();
+        var filter = new HttpLoggingFilter(HttpLoggingLevel.HEADERS, HttpLoggingFormat.INLINE, ignored -> false,
+                List.of("*"), () -> true, nanos(0, 1_000_000));
+
+        filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+            var httpResponse = (jakarta.servlet.http.HttpServletResponse) actualResponse;
+            httpResponse.setHeader("Set-Cookie", "session=response-cookie");
+        });
+
+        assertThat(messages()).noneMatch(message -> message.contains("request-secret")
+                        || message.contains("response-cookie"))
+                .anyMatch(message -> message.contains("AUTHORIZATION=[<redacted>]"))
+                .anyMatch(message -> message.contains("User-Agent=[Mozilla/5.0]"))
+                .anyMatch(message -> message.contains("Set-Cookie=[<redacted>]"));
     }
 
     @Test

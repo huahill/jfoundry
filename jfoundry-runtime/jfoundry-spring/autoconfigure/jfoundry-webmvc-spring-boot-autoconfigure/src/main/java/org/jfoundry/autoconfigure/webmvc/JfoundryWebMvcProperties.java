@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /// Spring Boot properties for inbound JFoundry Web MVC integrations.
@@ -38,6 +39,8 @@ public class JfoundryWebMvcProperties {
 
         private List<String> excludedPaths = List.of("/actuator/health/**");
 
+        private List<String> includedHeaders = List.copyOf(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+
         /// Returns the detail recorded for inbound Servlet HTTP logs.
         public HttpLoggingLevel getLevel() {
             return level;
@@ -66,6 +69,16 @@ public class JfoundryWebMvcProperties {
         /// Sets application paths excluded from inbound Servlet HTTP logs.
         public void setExcludedPaths(List<String> excludedPaths) {
             this.excludedPaths = excludedPaths;
+        }
+
+        /// Returns header names included in inbound HTTP logs.
+        public List<String> getIncludedHeaders() {
+            return includedHeaders;
+        }
+
+        /// Sets header names included in inbound HTTP logs. The configured list replaces the default.
+        public void setIncludedHeaders(List<String> includedHeaders) {
+            this.includedHeaders = includedHeaders;
         }
     }
 

@@ -2,6 +2,7 @@ package org.jfoundry.http.spring;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -36,23 +37,34 @@ public final class HttpLoggingSupport {
         return HttpLoggingPolicy.withoutQuery(uri);
     }
 
-    /// Returns an immutable header description with sensitive values replaced.
+    /// Returns an immutable header description limited to the default diagnostic names.
     public static Map<String, List<String>> describeHeaders(
             MultiValueMap<String, String> headers) {
-        Objects.requireNonNull(headers, "headers must not be null");
-        var described = new LinkedHashMap<String, List<String>>();
-        headers.forEach((name, values) -> described.put(name,
-                isSensitiveHeader(name) ? List.of(REDACTED) : List.copyOf(values)));
-        return Map.copyOf(described);
+        return HttpLoggingPolicy.describeHeaders(headers);
     }
 
-    /// Returns an immutable Spring HTTP header description with sensitive values replaced.
+    /// Returns an immutable header description limited to `includedHeaders`.
+    public static Map<String, List<String>> describeHeaders(
+            MultiValueMap<String, String> headers, Collection<String> includedHeaders) {
+        return HttpLoggingPolicy.describeHeaders(headers, includedHeaders);
+    }
+
+    /// Returns an immutable Spring HTTP header description limited to the default diagnostic names.
     public static Map<String, List<String>> describeHeaders(HttpHeaders headers) {
+        return HttpLoggingPolicy.describeHeaders(asMap(headers));
+    }
+
+    /// Returns an immutable Spring HTTP header description limited to `includedHeaders`.
+    public static Map<String, List<String>> describeHeaders(HttpHeaders headers,
+            Collection<String> includedHeaders) {
+        return HttpLoggingPolicy.describeHeaders(asMap(headers), includedHeaders);
+    }
+
+    private static Map<String, List<String>> asMap(HttpHeaders headers) {
         Objects.requireNonNull(headers, "headers must not be null");
-        var described = new LinkedHashMap<String, List<String>>();
-        headers.headerSet().forEach(entry -> described.put(entry.getKey(),
-                isSensitiveHeader(entry.getKey()) ? List.of(REDACTED) : List.copyOf(entry.getValue())));
-        return Map.copyOf(described);
+        var copy = new LinkedHashMap<String, List<String>>();
+        headers.headerSet().forEach(entry -> copy.put(entry.getKey(), entry.getValue()));
+        return copy;
     }
 
     /// Returns whether a header name is covered by the shared sensitive-value policy.

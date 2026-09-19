@@ -21,6 +21,9 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     /// Configuration key for inbound Helidon MP REST logging layout.
     public static final String SERVER_LOGGING_FORMAT = "jfoundry.web.helidon.logging.format";
 
+    /// Configuration key for inbound Helidon MP REST included headers.
+    public static final String SERVER_LOGGING_INCLUDED_HEADERS = "jfoundry.web.helidon.logging.included-headers";
+
     private static final System.Logger LOG = System.getLogger(HttpLoggingProvider.class.getName());
 
     /// Creates a provider that reads the current MicroProfile configuration for each request.
@@ -29,7 +32,7 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     }
 
     HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, infoEnabled, nanoTime,
+        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, SERVER_LOGGING_INCLUDED_HEADERS, infoEnabled, nanoTime,
                 message -> LOG.log(System.Logger.Level.INFO, message));
     }
 }

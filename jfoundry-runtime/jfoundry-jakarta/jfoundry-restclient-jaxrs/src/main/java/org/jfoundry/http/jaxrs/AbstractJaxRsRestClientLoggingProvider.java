@@ -28,6 +28,9 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
     /// Configuration key for outbound MicroProfile REST Client logging layout.
     public static final String LOGGING_FORMAT = "jfoundry.web.rest-client.logging.format";
 
+    /// Configuration key for outbound MicroProfile REST Client included headers.
+    public static final String LOGGING_INCLUDED_HEADERS = "jfoundry.web.rest-client.logging.included-headers";
+
     private static final String CLIENT_STATE = AbstractJaxRsRestClientLoggingProvider.class.getName() + ".STATE";
     private static final String REQUEST_BODY = AbstractJaxRsRestClientLoggingProvider.class.getName() + ".REQUEST_BODY";
     private static final String RESPONSE_BODY = AbstractJaxRsRestClientLoggingProvider.class.getName() + ".RESPONSE_BODY";
@@ -50,11 +53,13 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
             return;
         }
         var format = configuredFormat(LOGGING_FORMAT);
+        var includedHeaders = configuredIncludedHeaders(LOGGING_INCLUDED_HEADERS);
         var state = new ClientState(request.getMethod(), HttpLoggingPolicy.withoutQuery(request.getUri()),
-                level, format, nanoTime());
+                level, format, includedHeaders, nanoTime());
         request.setProperty(CLIENT_STATE, state);
         logAll(HttpLogFormatter.request(format, HttpLoggingSide.CLIENT, state.method(), state.uri(),
-                level.includesHeaders() ? HttpLoggingPolicy.describeHeaders(request.getStringHeaders()) : null));
+                level.includesHeaders()
+                        ? HttpLoggingPolicy.describeHeaders(request.getStringHeaders(), includedHeaders) : null));
         if (level.includesBodies()) {
             var body = bodyLog(request.getMediaType(), description -> logAll(HttpLogFormatter.requestBody(
                     format, HttpLoggingSide.CLIENT, state.method(), state.uri(), description)));
@@ -74,7 +79,7 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
         logAll(HttpLogFormatter.response(state.format(), HttpLoggingSide.CLIENT, state.method(), state.uri(),
                 response.getStatus(), null, elapsedMillis(state.startedAt()),
                 state.level().includesHeaders()
-                        ? HttpLoggingPolicy.describeHeaders(response.getHeaders()) : null,
+                        ? HttpLoggingPolicy.describeHeaders(response.getHeaders(), state.includedHeaders()) : null,
                 null));
         if (state.level().includesBodies()) {
             var body = bodyLog(response.getMediaType(), description -> logAll(HttpLogFormatter.responseBody(
@@ -100,7 +105,7 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
     }
 
     private record ClientState(String method, String uri, HttpLoggingLevel level, HttpLoggingFormat format,
-            long startedAt) {
+            java.util.List<String> includedHeaders, long startedAt) {
     }
 
     private void logAll(java.util.List<String> messages) {

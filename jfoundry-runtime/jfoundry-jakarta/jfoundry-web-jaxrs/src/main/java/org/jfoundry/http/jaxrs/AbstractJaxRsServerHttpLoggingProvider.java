@@ -30,16 +30,21 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
 
     private final String loggingFormat;
 
+    private final String loggingIncludedHeaders;
+
     /// Creates the shared server provider implementation.
     protected AbstractJaxRsServerHttpLoggingProvider(
             String loggingLevel,
             String loggingFormat,
+            String loggingIncludedHeaders,
             BooleanSupplier infoEnabled,
             LongSupplier nanoTime,
             InfoLogger logger) {
         super(infoEnabled, nanoTime, logger);
         this.loggingLevel = java.util.Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
         this.loggingFormat = java.util.Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
+        this.loggingIncludedHeaders = java.util.Objects.requireNonNull(loggingIncludedHeaders,
+                "loggingIncludedHeaders must not be null");
     }
 
     @Override
@@ -52,11 +57,13 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
             return;
         }
         var format = configuredFormat(this.loggingFormat);
+        var includedHeaders = configuredIncludedHeaders(this.loggingIncludedHeaders);
         var state = new ServerState(request.getMethod(), HttpLoggingPolicy.withoutQuery(
-                request.getUriInfo().getRequestUri()), level, format, nanoTime());
+                request.getUriInfo().getRequestUri()), level, format, includedHeaders, nanoTime());
         request.setProperty(SERVER_STATE, state);
         logAll(HttpLogFormatter.request(format, HttpLoggingSide.SERVER, state.method(), state.uri(),
-                level.includesHeaders() ? HttpLoggingPolicy.describeHeaders(request.getHeaders()) : null));
+                level.includesHeaders()
+                        ? HttpLoggingPolicy.describeHeaders(request.getHeaders(), includedHeaders) : null));
         if (level.includesBodies()) {
             var body = bodyLog(request.getMediaType(), description -> logAll(HttpLogFormatter.requestBody(
                     format, HttpLoggingSide.SERVER, state.method(), state.uri(), description)));
@@ -76,7 +83,8 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         logAll(HttpLogFormatter.response(state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(),
                 response.getStatus(), null, elapsedMillis(state.startedAt()),
                 state.level().includesHeaders()
-                        ? HttpLoggingPolicy.describeHeaders(response.getStringHeaders()) : null,
+                        ? HttpLoggingPolicy.describeHeaders(response.getStringHeaders(), state.includedHeaders())
+                        : null,
                 null));
         if (state.level().includesBodies()) {
             var body = bodyLog(response.getMediaType(), description -> logAll(HttpLogFormatter.responseBody(
@@ -100,7 +108,7 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
     }
 
     private record ServerState(String method, String uri, HttpLoggingLevel level, HttpLoggingFormat format,
-            long startedAt) {
+            java.util.List<String> includedHeaders, long startedAt) {
     }
 
     private void logAll(java.util.List<String> messages) {

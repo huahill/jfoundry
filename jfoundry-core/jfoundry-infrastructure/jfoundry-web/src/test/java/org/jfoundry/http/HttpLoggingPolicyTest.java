@@ -19,17 +19,38 @@ class HttpLoggingPolicyTest {
     }
 
     @Test
-    void redactsSensitiveHeadersAndReturnsAnImmutableDescription() {
+    void describesOnlyTheDefaultDiagnosticHeadersAndRedactsSensitiveValues() {
         var headers = new LinkedHashMap<String, List<?>>();
         headers.put("Authorization", List.of("Bearer secret"));
+        headers.put("Content-Type", List.of("application/json"));
+        headers.put("User-Agent", List.of("Mozilla/5.0"));
         headers.put("X-Trace-Id", List.of(42));
 
         var described = HttpLoggingPolicy.describeHeaders(headers);
 
         assertThat(described).containsEntry("Authorization", List.of("<redacted>"))
-                .containsEntry("X-Trace-Id", List.of("42"));
+                .containsEntry("Content-Type", List.of("application/json"))
+                .doesNotContainKeys("User-Agent", "X-Trace-Id");
         assertThatThrownBy(() -> described.put("Other", List.of("value")))
                 .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void configuredIncludedHeadersReplaceTheDefaultAndWildcardIncludesEveryHeader() {
+        var headers = new LinkedHashMap<String, List<?>>();
+        headers.put("Authorization", List.of("Bearer secret"));
+        headers.put("User-Agent", List.of("Mozilla/5.0"));
+        headers.put("X-Trace-Id", List.of("trace-1"));
+
+        assertThat(HttpLoggingPolicy.describeHeaders(headers, List.of("user-agent", "x-trace-id")))
+                .containsOnlyKeys("User-Agent", "X-Trace-Id")
+                .containsEntry("User-Agent", List.of("Mozilla/5.0"))
+                .containsEntry("X-Trace-Id", List.of("trace-1"));
+        assertThat(HttpLoggingPolicy.describeHeaders(headers, List.of("*")))
+                .containsEntry("Authorization", List.of("<redacted>"))
+                .containsEntry("User-Agent", List.of("Mozilla/5.0"))
+                .containsEntry("X-Trace-Id", List.of("trace-1"));
+        assertThat(HttpLoggingPolicy.describeHeaders(headers, List.of())).isEmpty();
     }
 
     @Test

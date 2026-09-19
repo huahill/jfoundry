@@ -19,6 +19,12 @@
       "description": "Ant-style application paths excluded from inbound Servlet HTTP logs. The configured list replaces the default."
     },
     {
+      "name": "jfoundry.web.mvc.logging.included-headers",
+      "type": "java.util.List<java.lang.String>",
+      "defaultValue": ["accept", "authorization", "content-type", "content-length", "location", "x-request-id"],
+      "description": "Header names included in inbound Servlet HTTP logs when HEADERS or FULL is enabled. The configured list replaces the default. Use * to include every header after redaction."
+    },
+    {
       "name": "jfoundry.web.mvc.request-correlation.enabled",
       "type": "java.lang.Boolean",
       "defaultValue": true,

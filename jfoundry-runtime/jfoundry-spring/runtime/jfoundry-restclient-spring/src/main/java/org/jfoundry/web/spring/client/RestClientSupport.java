@@ -1,6 +1,7 @@
 package org.jfoundry.web.spring.client;
 
 import org.jfoundry.http.HttpLoggingFormat;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 
@@ -14,6 +15,7 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.net.http.HttpTimeoutException;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -38,12 +40,18 @@ public final class RestClientSupport {
     /// Configures a `RestClient` builder with safe response handling, logging detail, and layout.
     public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel,
             HttpLoggingFormat loggingFormat) {
+        return configure(builder, loggingLevel, loggingFormat, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+    }
+
+    /// Configures a `RestClient` builder with safe response handling, logging detail, layout, and included headers.
+    public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel,
+            HttpLoggingFormat loggingFormat, Collection<String> includedHeaders) {
         var configuredBuilder = Objects.requireNonNull(builder, "builder must not be null")
                 .defaultStatusHandler(new HttpResponseErrorHandler());
         var level = Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
         var format = Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
         if (level != HttpLoggingLevel.NONE) {
-            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level, format));
+            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level, format, includedHeaders));
         }
         return configuredBuilder;
     }

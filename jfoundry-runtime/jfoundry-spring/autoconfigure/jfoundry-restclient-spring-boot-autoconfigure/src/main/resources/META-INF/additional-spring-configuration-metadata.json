@@ -18,6 +18,12 @@
       "type": "org.jfoundry.http.HttpLoggingFormat",
       "defaultValue": "HUMAN",
       "description": "Outbound RestClient logging layout: HUMAN for Feign-style --> request and <-- response lines, with bodies on one line; INLINE for one-line key=value events."
+    },
+    {
+      "name": "jfoundry.web.rest-client.logging.included-headers",
+      "type": "java.util.List<java.lang.String>",
+      "defaultValue": ["accept", "authorization", "content-type", "content-length", "location", "x-request-id"],
+      "description": "Header names included in outbound RestClient logs when HEADERS or FULL is enabled. The configured list replaces the default. Use * to include every header after redaction."
     }
   ]
 }
