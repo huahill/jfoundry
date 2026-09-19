@@ -9,10 +9,17 @@ import java.util.Objects;
 ///
 /// Adapters decide *when* to log and *which* details the configured {@link HttpLoggingLevel} allows.
 /// This type only shapes those details as either compact `INLINE` records or Feign-style `HUMAN`
-/// lines. Each returned string is one log record; adapters must emit them separately.
+/// lines. Each returned string is one log record; adapters must emit them separately. `HUMAN`
+/// prefixes request lines with `-->` and response lines with `<--`, and keeps JSON bodies on a
+/// single line so large payloads do not explode into many records. Concurrent exchanges can still
+/// interleave; the logger's thread or MDC prefix is what groups a request together.
 public final class HttpLogFormatter {
 
     private static final String EMPTY_BODY = "<empty>";
+
+    private static final String REQUEST_MARK = "--> ";
+
+    private static final String RESPONSE_MARK = "<-- ";
 
     private HttpLogFormatter() {
     }
@@ -30,9 +37,8 @@ public final class HttpLogFormatter {
         Objects.requireNonNull(side, "side must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
             var lines = new ArrayList<String>();
-            lines.add("HTTP " + side.label() + " request");
-            lines.add(method + " " + uri);
-            addHumanHeaders(lines, headers);
+            lines.add(REQUEST_MARK + method + " " + uri);
+            addHumanHeaders(lines, REQUEST_MARK, headers);
             return List.copyOf(lines);
         }
         var messages = new ArrayList<String>(2);
@@ -60,11 +66,7 @@ public final class HttpLogFormatter {
             return List.of();
         }
         if (format == HttpLoggingFormat.HUMAN) {
-            var lines = new ArrayList<String>();
-            lines.add("HTTP " + side.label() + " request body");
-            lines.add(method + " " + uri);
-            addBodyLines(lines, body);
-            return List.copyOf(lines);
+            return List.of(REQUEST_MARK + method + " " + uri + " [body]", REQUEST_MARK + body);
         }
         return List.of("HTTP " + side.label() + " request body: method=" + method + ", uri=" + uri
                 + ", body=" + body);
@@ -86,11 +88,7 @@ public final class HttpLogFormatter {
             return List.of();
         }
         if (format == HttpLoggingFormat.HUMAN) {
-            var lines = new ArrayList<String>();
-            lines.add("HTTP " + side.label() + " response body");
-            lines.add(method + " " + uri + " -> " + status);
-            addBodyLines(lines, body);
-            return List.copyOf(lines);
+            return List.of(RESPONSE_MARK + method + " " + uri + " " + status + " [body]", RESPONSE_MARK + body);
         }
         return List.of("HTTP " + side.label() + " response body: method=" + method + ", uri=" + uri
                 + ", status=" + status + ", body=" + body);
@@ -114,15 +112,14 @@ public final class HttpLogFormatter {
         Objects.requireNonNull(side, "side must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
             var lines = new ArrayList<String>();
-            lines.add("HTTP " + side.label() + " response");
-            var summary = method + " " + uri + " -> " + status + " (" + durationMillis + "ms";
+            var summary = RESPONSE_MARK + method + " " + uri + " " + status + " (" + durationMillis + "ms";
             if (completion != null) {
                 summary += ", " + completion;
             }
             lines.add(summary + ")");
-            addHumanHeaders(lines, headers);
+            addHumanHeaders(lines, RESPONSE_MARK, headers);
             if (!isBlankHumanBody(body)) {
-                addBodyLines(lines, body);
+                lines.add(RESPONSE_MARK + body);
             }
             return List.copyOf(lines);
         }
@@ -159,14 +156,13 @@ public final class HttpLogFormatter {
         Objects.requireNonNull(side, "side must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
             var lines = new ArrayList<String>();
-            lines.add("HTTP " + side.label() + " request failed");
-            var summary = method + " " + uri + " (" + durationMillis + "ms";
+            var summary = REQUEST_MARK + method + " " + uri + " failed (" + durationMillis + "ms";
             if (completion != null) {
                 summary += ", " + completion;
             }
             lines.add(summary + ")");
             if (exceptionType != null) {
-                lines.add(exceptionType);
+                lines.add(REQUEST_MARK + exceptionType);
             }
             return List.copyOf(lines);
         }
@@ -187,7 +183,7 @@ public final class HttpLogFormatter {
     public static List<String> responseMetadataUnavailable(HttpLoggingFormat format, String method, String uri) {
         Objects.requireNonNull(format, "format must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
-            return List.of("HTTP client response metadata could not be read", method + " " + uri);
+            return List.of(RESPONSE_MARK + method + " " + uri + " [metadata unavailable]");
         }
         return List.of("HTTP client response metadata could not be read for logging: method=" + method
                 + ", uri=" + uri);
@@ -198,75 +194,13 @@ public final class HttpLogFormatter {
             HttpLoggingFormat format, String method, String uri, Object status) {
         Objects.requireNonNull(format, "format must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
-            return List.of("HTTP client response body could not be read", method + " " + uri + " -> " + status);
+            return List.of(RESPONSE_MARK + method + " " + uri + " " + status + " [body unavailable]");
         }
         return List.of("HTTP client response body could not be read for logging: method=" + method + ", uri="
                 + uri + ", status=" + status);
     }
 
-    static String prettyJson(String json) {
-        if (json == null || json.isEmpty()) {
-            return json;
-        }
-        var first = json.charAt(0);
-        if (first != '{' && first != '[') {
-            return json;
-        }
-        var out = new StringBuilder(json.length() + 32);
-        var indent = 0;
-        var inString = false;
-        var escape = false;
-        for (var index = 0; index < json.length(); index++) {
-            var current = json.charAt(index);
-            if (inString) {
-                out.append(current);
-                if (escape) {
-                    escape = false;
-                } else if (current == '\\') {
-                    escape = true;
-                } else if (current == '"') {
-                    inString = false;
-                }
-                continue;
-            }
-            switch (current) {
-                case '"' -> {
-                    inString = true;
-                    out.append(current);
-                }
-                case '{', '[' -> {
-                    out.append(current);
-                    var next = nextNonWhitespace(json, index + 1);
-                    if (next >= 0 && ((current == '{' && json.charAt(next) == '}')
-                            || (current == '[' && json.charAt(next) == ']'))) {
-                        out.append(json.charAt(next));
-                        index = next;
-                    } else {
-                        indent++;
-                        newline(out, indent);
-                    }
-                }
-                case '}', ']' -> {
-                    indent = Math.max(0, indent - 1);
-                    newline(out, indent);
-                    out.append(current);
-                }
-                case ',' -> {
-                    out.append(current);
-                    newline(out, indent);
-                }
-                case ':' -> out.append(": ");
-                default -> {
-                    if (!Character.isWhitespace(current)) {
-                        out.append(current);
-                    }
-                }
-            }
-        }
-        return out.toString();
-    }
-
-    private static void addHumanHeaders(List<String> lines, Map<String, List<String>> headers) {
+    private static void addHumanHeaders(List<String> lines, String mark, Map<String, List<String>> headers) {
         if (headers == null || headers.isEmpty()) {
             return;
         }
@@ -275,31 +209,12 @@ public final class HttpLogFormatter {
                 .forEach(entry -> {
                     var value = entry.getValue() == null || entry.getValue().isEmpty()
                             ? "" : String.join(", ", entry.getValue());
-                    lines.add(entry.getKey() + ": " + value);
+                    lines.add(mark + entry.getKey() + ": " + value);
                 });
-    }
-
-    private static void addBodyLines(List<String> lines, String body) {
-        for (var line : prettyJson(body).split("\n", -1)) {
-            lines.add(line);
-        }
     }
 
     private static boolean isBlankHumanBody(String body) {
         return body == null || body.isEmpty() || EMPTY_BODY.equals(body);
     }
 
-    private static int nextNonWhitespace(String json, int start) {
-        for (var index = start; index < json.length(); index++) {
-            if (!Character.isWhitespace(json.charAt(index))) {
-                return index;
-            }
-        }
-        return -1;
-    }
-
-    private static void newline(StringBuilder out, int indent) {
-        out.append('\n');
-        out.append("  ".repeat(indent));
-    }
 }

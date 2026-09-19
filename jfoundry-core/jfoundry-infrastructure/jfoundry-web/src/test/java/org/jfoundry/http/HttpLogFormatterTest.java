@@ -31,18 +31,16 @@ class HttpLogFormatterTest {
     void humanRequestPutsEachHeaderOnItsOwnLine() {
         assertThat(HttpLogFormatter.request(HttpLoggingFormat.HUMAN, HttpLoggingSide.SERVER, "GET",
                 "https://service.test/orders", HEADERS)).containsExactly(
-                "HTTP server request",
-                "GET https://service.test/orders",
-                "Accept: application/json, text/plain",
-                "Authorization: <redacted>");
+                "--> GET https://service.test/orders",
+                "--> Accept: application/json, text/plain",
+                "--> Authorization: <redacted>");
     }
 
     @Test
     void humanRequestOmitsHeaderSectionWhenHeadersAreAbsent() {
         assertThat(HttpLogFormatter.request(HttpLoggingFormat.HUMAN, HttpLoggingSide.CLIENT, "POST",
                 "https://downstream.test/login", null)).containsExactly(
-                "HTTP client request",
-                "POST https://downstream.test/login");
+                "--> POST https://downstream.test/login");
     }
 
     @Test
@@ -55,16 +53,12 @@ class HttpLogFormatterTest {
     }
 
     @Test
-    void humanPrettyPrintsJsonRequestBodies() {
+    void humanKeepsJsonRequestBodiesOnOneLine() {
         assertThat(HttpLogFormatter.requestBody(HttpLoggingFormat.HUMAN, HttpLoggingSide.CLIENT, "POST",
                 "https://downstream.test/login",
                 "{\"account\":\"rdcopen\",\"password\":\"<redacted>\"}")).containsExactly(
-                "HTTP client request body",
-                "POST https://downstream.test/login",
-                "{",
-                "  \"account\": \"rdcopen\",",
-                "  \"password\": \"<redacted>\"",
-                "}");
+                "--> POST https://downstream.test/login [body]",
+                "--> {\"account\":\"rdcopen\",\"password\":\"<redacted>\"}");
     }
 
     @Test
@@ -88,42 +82,21 @@ class HttpLogFormatterTest {
         assertThat(HttpLogFormatter.response(HttpLoggingFormat.HUMAN, HttpLoggingSide.SERVER, "GET",
                 "https://service.test/orders", 200, "complete", 64, HEADERS,
                 "{\"page\":1,\"items\":[{\"name\":\"Ada\"}]}")).containsExactly(
-                "HTTP server response",
-                "GET https://service.test/orders -> 200 (64ms, complete)",
-                "Accept: application/json, text/plain",
-                "Authorization: <redacted>",
-                "{",
-                "  \"page\": 1,",
-                "  \"items\": [",
-                "    {",
-                "      \"name\": \"Ada\"",
-                "    }",
-                "  ]",
-                "}");
+                "<-- GET https://service.test/orders 200 (64ms, complete)",
+                "<-- Accept: application/json, text/plain",
+                "<-- Authorization: <redacted>",
+                "<-- {\"page\":1,\"items\":[{\"name\":\"Ada\"}]}");
     }
 
     @Test
     void humanFailureKeepsExceptionAndDurationReadable() {
         assertThat(HttpLogFormatter.failure(HttpLoggingFormat.HUMAN, HttpLoggingSide.SERVER, "POST",
                 "https://service.test/orders", "failed", "java.io.IOException", 12)).containsExactly(
-                "HTTP server request failed",
-                "POST https://service.test/orders (12ms, failed)",
-                "java.io.IOException");
+                "--> POST https://service.test/orders failed (12ms, failed)",
+                "--> java.io.IOException");
         assertThat(HttpLogFormatter.failure(HttpLoggingFormat.INLINE, HttpLoggingSide.CLIENT, "GET",
                 "https://downstream.test/orders/42", null, "java.io.IOException", 7))
                 .containsExactly("HTTP client request failed: method=GET, uri=https://downstream.test/orders/42, "
                         + "exception=java.io.IOException, duration=7ms");
-    }
-
-    @Test
-    void prettyJsonKeepsEmptyContainersAndEscapedQuotesOnOneConceptualBlock() {
-        assertThat(HttpLogFormatter.prettyJson("{}")).isEqualTo("{}");
-        assertThat(HttpLogFormatter.prettyJson("[]")).isEqualTo("[]");
-        assertThat(HttpLogFormatter.prettyJson("{\"note\":\"say \\\"{hi}\\\"\"}")).isEqualTo("""
-                {
-                  "note": "say \\"{hi}\\""
-                }""");
-        assertThat(HttpLogFormatter.prettyJson("<truncated at 8192 bytes>"))
-                .isEqualTo("<truncated at 8192 bytes>");
     }
 }

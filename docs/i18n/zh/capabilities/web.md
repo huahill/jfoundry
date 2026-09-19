@@ -218,8 +218,9 @@ API key。`FULL` 再额外记录 JSON body；JSON body 会执行嵌套字段脱�
 保留 8 KiB，非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
 改变 HTTP 处理。
 
-布局与明细相互独立。启用日志后默认使用 `HUMAN`：按 Feign 的方式输出，请求行、每个 header、JSON 的每一行
-都是一条独立日志。`INLINE` 保留历史的单行 `key=value` 事件。入站布局使用上表中的 `logging.format` 配置项，出站布局使用
+布局与明细相互独立。启用日志后默认使用 `HUMAN`：按 Feign 的方式输出，请求行以 `-->` 开头，响应行以 `<--` 开头，
+JSON body 仍保持在一行。并发请求仍可能交错，需要靠 logger 的线程名或 MDC 来归组。`INLINE` 保留历史的单行
+`key=value` 事件。入站布局使用上表中的 `logging.format` 配置项，出站布局使用
 `jfoundry.web.rest-client.logging.format`。`HUMAN` 会省略空 body，`INLINE` 仍输出 `<empty>`。
 
 入站 `duration` 的计时在同步完成或运行时的终态响应阶段结束，不表示调用方已经收到全部流式字节。客户端

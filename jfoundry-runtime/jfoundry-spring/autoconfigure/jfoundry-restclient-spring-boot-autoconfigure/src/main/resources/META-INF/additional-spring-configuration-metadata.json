@@ -17,7 +17,7 @@
       "name": "jfoundry.web.rest-client.logging.format",
       "type": "org.jfoundry.http.HttpLoggingFormat",
       "defaultValue": "HUMAN",
-      "description": "Outbound RestClient logging layout: HUMAN for Feign-style one log record per line; INLINE for one-line key=value events."
+      "description": "Outbound RestClient logging layout: HUMAN for Feign-style --> request and <-- response lines, with bodies on one line; INLINE for one-line key=value events."
     }
   ]
 }

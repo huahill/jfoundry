@@ -148,23 +148,15 @@ class HttpLoggingFilterTest {
         });
 
         assertThat(messages()).containsExactly(
-                "HTTP server request",
-                "POST https://service.test/orders",
-                "Authorization: <redacted>",
-                "Content-Type: application/json",
-                "HTTP server request body",
-                "POST https://service.test/orders",
-                "{",
-                "  \"reason\": \"retry\",",
-                "  \"password\": \"<redacted>\"",
-                "}",
-                "HTTP server response",
-                "POST https://service.test/orders -> 200 (25ms, complete)",
-                "Content-Type: application/json",
-                "X-Request-Id: req-1",
-                "{",
-                "  \"ok\": true",
-                "}");
+                "--> POST https://service.test/orders",
+                "--> Authorization: <redacted>",
+                "--> Content-Type: application/json",
+                "--> POST https://service.test/orders [body]",
+                "--> {\"reason\":\"retry\",\"password\":\"<redacted>\"}",
+                "<-- POST https://service.test/orders 200 (25ms, complete)",
+                "<-- Content-Type: application/json",
+                "<-- X-Request-Id: req-1",
+                "<-- {\"ok\":true}");
         assertThat(messages()).noneMatch(message -> message.contains("request-secret") || message.contains("秘密"));
     }
 

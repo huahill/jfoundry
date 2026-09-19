@@ -264,10 +264,12 @@ malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
 
 Layout is independent of detail. `HUMAN` is the default once logging is enabled. It emits Feign-style
-console output: one log record per request line, header, or pretty-printed JSON line. `INLINE` keeps the
-historical one-line `key=value` events. Configure inbound layout with the runtime
-`logging.format` property above, and outbound layout with `jfoundry.web.rest-client.logging.format`.
-Empty bodies are omitted in `HUMAN` and retained as `<empty>` in `INLINE`.
+console output: request lines start with `-->`, response lines start with `<--`, and JSON bodies stay
+on a single line. Concurrent exchanges can still interleave; use the logger thread or MDC prefix to
+group a request. `INLINE` keeps the historical one-line `key=value` events. Configure inbound layout
+with the runtime `logging.format` property above, and outbound layout with
+`jfoundry.web.rest-client.logging.format`. Empty bodies are omitted in `HUMAN` and retained as
+`<empty>` in `INLINE`.
 
 Inbound `duration` timing ends at synchronous completion or the runtime's terminal response phase; it does
 not measure when the caller receives all streamed bytes. Client `duration` timing ends when response headers
