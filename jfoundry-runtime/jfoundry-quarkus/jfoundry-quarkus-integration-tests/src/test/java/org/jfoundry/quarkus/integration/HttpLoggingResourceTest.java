@@ -135,8 +135,10 @@ class HttpLoggingResourceTest {
         @Override
         public Map<String, String> getConfigOverrides() {
             return Map.of(
-                    "jfoundry.web.quarkus.logging-level", "FULL",
-                    "jfoundry.web.rest-client.logging-level", "FULL",
+                    "jfoundry.web.quarkus.logging.level", "FULL",
+                    "jfoundry.web.quarkus.logging.format", "INLINE",
+                    "jfoundry.web.rest-client.logging.level", "FULL",
+                    "jfoundry.web.rest-client.logging.format", "INLINE",
                     "quarkus.log.category.\"org.jfoundry.http.quarkus\".level", "INFO");
         }
     }

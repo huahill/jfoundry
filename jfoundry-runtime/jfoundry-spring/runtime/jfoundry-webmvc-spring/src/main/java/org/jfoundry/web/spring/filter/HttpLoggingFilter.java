@@ -32,7 +32,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
+import org.jfoundry.http.HttpLogFormatter;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingSide;
 import org.jfoundry.http.spring.HttpLoggingSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,29 +55,48 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private final HttpLoggingLevel level;
 
+    private final HttpLoggingFormat format;
+
     private final Predicate<HttpServletRequest> excludedRequest;
 
     private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
-    /// Creates a filter with the requested logging detail.
+    /// Creates a filter with the requested logging detail and human-readable layout.
     public HttpLoggingFilter(HttpLoggingLevel level) {
-        this(level, request -> false, LOG::isInfoEnabled, System::nanoTime);
+        this(level, HttpLoggingFormat.HUMAN, request -> false, LOG::isInfoEnabled, System::nanoTime);
     }
 
-    /// Creates a filter with the requested logging detail and request exclusion predicate.
+    /// Creates a filter with the requested logging detail and layout.
+    public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format) {
+        this(level, format, request -> false, LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    /// Creates a filter with the requested logging detail, human-readable layout, and request exclusion predicate.
     public HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest) {
-        this(level, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
+        this(level, HttpLoggingFormat.HUMAN, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    /// Creates a filter with the requested logging detail, layout, and request exclusion predicate.
+    public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format,
+            Predicate<HttpServletRequest> excludedRequest) {
+        this(level, format, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, request -> false, infoEnabled, nanoTime);
+        this(level, HttpLoggingFormat.INLINE, request -> false, infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        this(level, HttpLoggingFormat.INLINE, excludedRequest, infoEnabled, nanoTime);
+    }
+
+    HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
+            BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
+        this.format = Objects.requireNonNull(format, "format must not be null");
         this.excludedRequest = Objects.requireNonNull(excludedRequest, "excludedRequest must not be null");
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
@@ -111,7 +133,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         var state = (RequestState) request.getAttribute(STATE_ATTRIBUTE);
         if (state == null) {
-            state = new RequestState(request, response, this.level, this.nanoTime);
+            state = new RequestState(request, response, this.level, this.format, this.nanoTime);
             request.setAttribute(STATE_ATTRIBUTE, state);
             state.logRequest(request);
         }
@@ -146,6 +168,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         private final HttpLoggingLevel level;
 
+        private final HttpLoggingFormat format;
+
         private final LongSupplier nanoTime;
 
         private final long startedAt;
@@ -160,23 +184,22 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 Collections.newSetFromMap(new IdentityHashMap<>()));
 
         private RequestState(HttpServletRequest request, HttpServletResponse response, HttpLoggingLevel level,
-                LongSupplier nanoTime) {
+                HttpLoggingFormat format, LongSupplier nanoTime) {
             this.method = request.getMethod();
             this.uri = requestUri(request);
             this.response = response;
             this.requestContentType = request.getContentType();
             this.level = level;
+            this.format = format;
             this.nanoTime = nanoTime;
             this.startedAt = nanoTime.getAsLong();
             this.requestBody = new BodyCapture(request.getContentLengthLong() <= 0);
         }
 
         private void logRequest(HttpServletRequest request) {
-            safely(() -> LOG.info("HTTP server request: method={}, uri={}", this.method, this.uri));
-            if (this.level.includesHeaders()) {
-                safely(() -> LOG.info("HTTP server request headers: method={}, uri={}, headers={}",
-                        this.method, this.uri, HttpLoggingSupport.describeHeaders(requestHeaders(request))));
-            }
+            logAll(HttpLogFormatter.request(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
+                    this.level.includesHeaders()
+                            ? HttpLoggingSupport.describeHeaders(requestHeaders(request)) : null));
         }
 
         private void logResponse(String completion) {
@@ -186,20 +209,14 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             this.responseBody.markComplete();
             logRequestBody();
             var status = this.response.getStatus();
-            safely(() -> LOG.info(
-                    "HTTP server response: method={}, uri={}, status={}, completion={}, duration={}ms",
-                    this.method, this.uri, status, completion, elapsedMillis()));
-            if (this.level.includesHeaders()) {
-                safely(() -> LOG.info("HTTP server response headers: method={}, uri={}, status={}, headers={}",
-                        this.method, this.uri, status,
-                        HttpLoggingSupport.describeHeaders(responseHeaders(this.response))));
-            }
-            if (this.level.includesBodies()) {
-                safely(() -> LOG.info("HTTP server response body: method={}, uri={}, status={}, body={}",
-                        this.method, this.uri, status,
-                        HttpLoggingSupport.describeBody(this.response.getContentType(),
-                                this.responseBody.bytes(), this.responseBody.complete(), this.responseBody.truncated())));
-            }
+            logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.SERVER, this.method, this.uri, status,
+                    completion, elapsedMillis(),
+                    this.level.includesHeaders()
+                            ? HttpLoggingSupport.describeHeaders(responseHeaders(this.response)) : null,
+                    this.level.includesBodies()
+                            ? HttpLoggingSupport.describeBody(this.response.getContentType(),
+                                    this.responseBody.bytes(), this.responseBody.complete(),
+                                    this.responseBody.truncated()) : null));
         }
 
         private void logFailure(Throwable exception, String completion) {
@@ -207,9 +224,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 return;
             }
             logRequestBody();
-            safely(() -> LOG.info(
-                    "HTTP server request failed: method={}, uri={}, completion={}, exception={}, duration={}ms",
-                    this.method, this.uri, completion, exception.getClass().getName(), elapsedMillis()));
+            logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
+                    completion, exception.getClass().getName(), elapsedMillis()));
         }
 
         private void logAsyncFailure(Throwable exception, String completion) {
@@ -218,9 +234,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                     return;
                 }
                 logRequestBody();
-                safely(() -> LOG.info(
-                        "HTTP server request failed: method={}, uri={}, completion={}, duration={}ms",
-                        this.method, this.uri, completion, elapsedMillis()));
+                logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
+                        completion, null, elapsedMillis()));
             } else {
                 logFailure(exception, completion);
             }
@@ -228,9 +243,9 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         private void logRequestBody() {
             if (this.level.includesBodies()) {
-                safely(() -> LOG.info("HTTP server request body: method={}, uri={}, body={}",
-                        this.method, this.uri, HttpLoggingSupport.describeBody(this.requestContentType,
-                                this.requestBody.bytes(), this.requestBody.complete(), this.requestBody.truncated())));
+                logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
+                        HttpLoggingSupport.describeBody(this.requestContentType, this.requestBody.bytes(),
+                                this.requestBody.complete(), this.requestBody.truncated())));
             }
         }
 
@@ -583,6 +598,12 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
         var headers = new LinkedMultiValueMap<String, String>();
         response.getHeaderNames().forEach(name -> headers.put(name, response.getHeaders(name).stream().toList()));
         return headers;
+    }
+
+    private static void logAll(java.util.List<String> messages) {
+        for (var message : messages) {
+            safely(() -> LOG.info("{}", message));
+        }
     }
 
     private static void safely(Runnable logging) {

@@ -1,5 +1,6 @@
 package org.jfoundry.web.spring.client;
 
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 
@@ -28,12 +29,21 @@ public final class RestClientSupport {
     }
 
     /// Configures a `RestClient` builder with safe response handling and the selected HTTP logging detail.
+    ///
+    /// The layout defaults to {@link HttpLoggingFormat#HUMAN}.
     public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel) {
+        return configure(builder, loggingLevel, HttpLoggingFormat.HUMAN);
+    }
+
+    /// Configures a `RestClient` builder with safe response handling, logging detail, and layout.
+    public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel,
+            HttpLoggingFormat loggingFormat) {
         var configuredBuilder = Objects.requireNonNull(builder, "builder must not be null")
                 .defaultStatusHandler(new HttpResponseErrorHandler());
         var level = Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
+        var format = Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
         if (level != HttpLoggingLevel.NONE) {
-            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level));
+            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level, format));
         }
         return configuredBuilder;
     }

@@ -12,8 +12,11 @@ import jakarta.ws.rs.ext.ReaderInterceptor;
 import jakarta.ws.rs.ext.ReaderInterceptorContext;
 import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
+import org.jfoundry.http.HttpLogFormatter;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.HttpLoggingPolicy;
+import org.jfoundry.http.HttpLoggingSide;
 
 /// Shared server-side JAX-RS HTTP logging provider for Jakarta-based runtimes.
 public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJaxRsHttpLoggingSupport
@@ -25,14 +28,18 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
 
     private final String loggingLevel;
 
+    private final String loggingFormat;
+
     /// Creates the shared server provider implementation.
     protected AbstractJaxRsServerHttpLoggingProvider(
             String loggingLevel,
+            String loggingFormat,
             BooleanSupplier infoEnabled,
             LongSupplier nanoTime,
             InfoLogger logger) {
         super(infoEnabled, nanoTime, logger);
         this.loggingLevel = java.util.Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
+        this.loggingFormat = java.util.Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
     }
 
     @Override
@@ -44,18 +51,15 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         if (level == HttpLoggingLevel.NONE) {
             return;
         }
+        var format = configuredFormat(this.loggingFormat);
         var state = new ServerState(request.getMethod(), HttpLoggingPolicy.withoutQuery(
-                request.getUriInfo().getRequestUri()), level, nanoTime());
+                request.getUriInfo().getRequestUri()), level, format, nanoTime());
         request.setProperty(SERVER_STATE, state);
-        safely(() -> info("HTTP server request: method={0}, uri={1}", state.method(), state.uri()));
-        if (level.includesHeaders()) {
-            safely(() -> info("HTTP server request headers: method={0}, uri={1}, headers={2}",
-                    state.method(), state.uri(), HttpLoggingPolicy.describeHeaders(request.getHeaders())));
-        }
+        logAll(HttpLogFormatter.request(format, HttpLoggingSide.SERVER, state.method(), state.uri(),
+                level.includesHeaders() ? HttpLoggingPolicy.describeHeaders(request.getHeaders()) : null));
         if (level.includesBodies()) {
-            var body = bodyLog(request.getMediaType(), description -> info(
-                    "HTTP server request body: method={0}, uri={1}, body={2}",
-                    state.method(), state.uri(), description));
+            var body = bodyLog(request.getMediaType(), description -> logAll(HttpLogFormatter.requestBody(
+                    format, HttpLoggingSide.SERVER, state.method(), state.uri(), description)));
             request.setProperty(REQUEST_BODY, body);
             if (!request.hasEntity()) {
                 completeAndLog(body);
@@ -69,17 +73,15 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         if (state == null) {
             return;
         }
-        safely(() -> info("HTTP server response: method={0}, uri={1}, status={2}, duration={3}ms",
-                state.method(), state.uri(), response.getStatus(), elapsedMillis(state.startedAt())));
-        if (state.level().includesHeaders()) {
-            safely(() -> info("HTTP server response headers: method={0}, uri={1}, status={2}, headers={3}",
-                    state.method(), state.uri(), response.getStatus(),
-                    HttpLoggingPolicy.describeHeaders(response.getStringHeaders())));
-        }
+        logAll(HttpLogFormatter.response(state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(),
+                response.getStatus(), null, elapsedMillis(state.startedAt()),
+                state.level().includesHeaders()
+                        ? HttpLoggingPolicy.describeHeaders(response.getStringHeaders()) : null,
+                null));
         if (state.level().includesBodies()) {
-            var body = bodyLog(response.getMediaType(), description -> info(
-                    "HTTP server response body: method={0}, uri={1}, status={2}, body={3}",
-                    state.method(), state.uri(), response.getStatus(), description));
+            var body = bodyLog(response.getMediaType(), description -> logAll(HttpLogFormatter.responseBody(
+                    state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(), response.getStatus(),
+                    description)));
             request.setProperty(RESPONSE_BODY, body);
             if (!response.hasEntity()) {
                 completeAndLog(body);
@@ -97,6 +99,13 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         aroundWriteTo(context, RESPONSE_BODY);
     }
 
-    private record ServerState(String method, String uri, HttpLoggingLevel level, long startedAt) {
+    private record ServerState(String method, String uri, HttpLoggingLevel level, HttpLoggingFormat format,
+            long startedAt) {
+    }
+
+    private void logAll(java.util.List<String> messages) {
+        for (var message : messages) {
+            safely(() -> info(message));
+        }
     }
 }

@@ -177,12 +177,14 @@ server-error handling. Applications that accept JSON request bodies must also se
 provider, such as `jersey-media-json-binding` for JSON-B.
 
 The same Web module registers a JAX-RS request/response filter and reader/writer interceptors for
-diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging-level`, defaulting to `NONE`.
+diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging.level`, defaulting to `NONE`.
+Layout uses `jfoundry.web.helidon.logging.format`, defaulting to `HUMAN`.
 Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. This integration is verified on the JVM.
+`jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
+defaulting to `HUMAN`. This integration is verified on the JVM.
 Helidon's supported 4.5.x REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.

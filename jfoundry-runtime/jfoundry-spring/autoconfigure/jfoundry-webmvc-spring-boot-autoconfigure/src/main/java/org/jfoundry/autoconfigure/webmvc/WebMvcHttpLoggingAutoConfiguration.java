@@ -38,13 +38,13 @@ public class WebMvcHttpLoggingAutoConfiguration {
     @ConditionalOnMissingFilterBean(HttpLoggingFilter.class)
     public FilterRegistrationBean<HttpLoggingFilter> jfoundryHttpLoggingFilterRegistration(
             JfoundryWebMvcProperties properties) {
-        var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLoggingLevel(),
-                excludedRequest(properties.getLoggingExcludedPaths())));
+        var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLogging().getLevel(),
+                properties.getLogging().getFormat(), excludedRequest(properties.getLogging().getExcludedPaths())));
         registration.setName("jfoundryHttpLoggingFilter");
         registration.setOrder(DEFAULT_FILTER_ORDER);
         registration.setAsyncSupported(true);
         registration.setDispatcherTypes(EnumSet.of(DispatcherType.REQUEST, DispatcherType.ASYNC, DispatcherType.ERROR));
-        registration.setEnabled(properties.getLoggingLevel() != HttpLoggingLevel.NONE);
+        registration.setEnabled(properties.getLogging().getLevel() != HttpLoggingLevel.NONE);
         return registration;
     }
 

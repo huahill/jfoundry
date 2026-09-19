@@ -151,11 +151,12 @@ JSON 标量、数组和对象类型。
 选择 Jersey JSON provider，例如用于 JSON-B 的 `jersey-media-json-binding`。
 
 同一 Web 模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
-`jfoundry.web.helidon.logging-level`，默认值为 `NONE`。启用后的事件通过
+`jfoundry.web.helidon.logging.level`，默认值为 `NONE`。布局使用 `jfoundry.web.helidon.logging.format`，默认值为 `HUMAN`。启用后的事件通过
 `org.jfoundry.http.helidon.HttpLoggingProvider` 以 `INFO` 输出。
 
 `jfoundry-restclient-helidon` 会引入 `helidon-microprofile-rest-client`，并把 JFoundry provider 自动注册到每个
-MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。
+MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging.level`，默认值为 `NONE`，布局使用
+`jfoundry.web.rest-client.logging.format`，默认值为 `HUMAN`。
 该集成已通过 JVM 验证。受支持的 Helidon 4.5.x REST Client 原生镜像 substitution 与当前 GraalVM 25
 基线不兼容，因此原生 REST Client 日志暂不属于发布支持声明。当前不支持 Spring `WebClient`。
 

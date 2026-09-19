@@ -8,7 +8,6 @@ import org.jfoundry.http.jaxrs.AbstractJaxRsServerHttpLoggingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.MessageFormat;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
@@ -18,8 +17,11 @@ import java.util.function.LongSupplier;
 @Priority(Priorities.USER - 200)
 public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingProvider {
 
-    /// Configuration key for inbound Quarkus REST logging.
-    public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.quarkus.logging-level";
+    /// Configuration key for inbound Quarkus REST logging detail.
+    public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.quarkus.logging.level";
+
+    /// Configuration key for inbound Quarkus REST logging layout.
+    public static final String SERVER_LOGGING_FORMAT = "jfoundry.web.quarkus.logging.format";
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingProvider.class);
 
@@ -29,7 +31,6 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     }
 
     HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(SERVER_LOGGING_LEVEL, infoEnabled, nanoTime,
-                (message, arguments) -> LOG.info(MessageFormat.format(message, arguments)));
+        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, infoEnabled, nanoTime, LOG::info);
     }
 }

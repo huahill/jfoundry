@@ -1,6 +1,5 @@
 package org.jfoundry.http.quarkus;
 
-import java.text.MessageFormat;
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
@@ -19,6 +18,6 @@ public final class RestClientHttpLoggingProvider extends AbstractJaxRsRestClient
     }
 
     RestClientHttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(infoEnabled, nanoTime, (message, arguments) -> LOG.info(MessageFormat.format(message, arguments)));
+        super(infoEnabled, nanoTime, LOG::info);
     }
 }

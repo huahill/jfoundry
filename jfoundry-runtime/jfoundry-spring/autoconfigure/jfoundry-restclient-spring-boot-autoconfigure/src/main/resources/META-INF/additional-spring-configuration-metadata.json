@@ -8,10 +8,16 @@
   ],
   "properties": [
     {
-      "name": "jfoundry.web.rest-client.logging-level",
+      "name": "jfoundry.web.rest-client.logging.level",
       "type": "org.jfoundry.http.HttpLoggingLevel",
       "defaultValue": "NONE",
       "description": "Outbound RestClient logging detail: NONE, BASIC, HEADERS, or FULL. Logging is emitted at INFO when enabled."
+    },
+    {
+      "name": "jfoundry.web.rest-client.logging.format",
+      "type": "org.jfoundry.http.HttpLoggingFormat",
+      "defaultValue": "HUMAN",
+      "description": "Outbound RestClient logging layout: HUMAN for Feign-style one log record per line; INLINE for one-line key=value events."
     }
   ]
 }
