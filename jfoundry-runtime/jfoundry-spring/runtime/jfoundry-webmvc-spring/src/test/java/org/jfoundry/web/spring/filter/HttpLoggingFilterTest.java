@@ -14,6 +14,7 @@ import ch.qos.logback.core.read.ListAppender;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletException;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -123,6 +124,48 @@ class HttpLoggingFilterTest {
                         + "completion=complete, duration=25ms");
         assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(messages()).noneMatch(message -> message.contains("access_token"));
+    }
+
+    @Test
+    void humanFormatEmitsOneLogRecordPerLine() throws Exception {
+        var requestBytes = "{\"reason\":\"retry\",\"password\":\"秘密\"}".getBytes(StandardCharsets.UTF_8);
+        var responseBytes = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);
+        var request = request(requestBytes);
+        request.addHeader("Authorization", "Bearer request-secret");
+        request.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        var response = new MockHttpServletResponse();
+        var filter = new HttpLoggingFilter(HttpLoggingLevel.FULL, HttpLoggingFormat.HUMAN, ignored -> false,
+                () -> true, nanos(0, 25_000_000));
+
+        filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+            actualRequest.getInputStream().readAllBytes();
+            var httpResponse = (jakarta.servlet.http.HttpServletResponse) actualResponse;
+            httpResponse.setStatus(200);
+            httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            httpResponse.setHeader("X-Request-Id", "req-1");
+            actualResponse.getOutputStream().write(responseBytes);
+            actualResponse.flushBuffer();
+        });
+
+        assertThat(messages()).containsExactly(
+                "HTTP server request",
+                "POST https://service.test/orders",
+                "Authorization: <redacted>",
+                "Content-Type: application/json",
+                "HTTP server request body",
+                "POST https://service.test/orders",
+                "{",
+                "  \"reason\": \"retry\",",
+                "  \"password\": \"<redacted>\"",
+                "}",
+                "HTTP server response",
+                "POST https://service.test/orders -> 200 (25ms, complete)",
+                "Content-Type: application/json",
+                "X-Request-Id: req-1",
+                "{",
+                "  \"ok\": true",
+                "}");
+        assertThat(messages()).noneMatch(message -> message.contains("request-secret") || message.contains("秘密"));
     }
 
     @Test

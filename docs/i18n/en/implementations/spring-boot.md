@@ -231,36 +231,38 @@ exceptions, as described in their implementation guides.
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
 `HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLevel` from
+become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLevel` and `HttpLoggingFormat` from
 `org.jfoundry.http`, Spring's logging support from `org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
 the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
 locations have no forwarding aliases.
 
 Spring Boot applications can use `jfoundry-restclient-spring-boot-starter` and set
-`jfoundry.web.rest-client.logging-level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
-`NONE`. Applications that create a builder directly with `RestClient.builder()` must select the level
-with `RestClientSupport.configure(builder, HttpLoggingLevel)`. The outbound `duration` field uses an `ms` suffix,
-such as `duration=30ms`, and a monotonic clock from execution-chain entry until response headers arrive or execution
+`jfoundry.web.rest-client.logging.level` to `NONE`, `BASIC`, `HEADERS`, or `FULL`; its default is
+`NONE`. Layout uses `jfoundry.web.rest-client.logging.format`, defaulting to `HUMAN`; set `INLINE` to keep
+one-line `key=value` events. Applications that create a builder directly with `RestClient.builder()` must select the level
+with `RestClientSupport.configure(builder, HttpLoggingLevel)` and may pass `HttpLoggingFormat` as a third argument. The outbound `duration` field uses an `ms` suffix,
+such as `duration=30ms` in `INLINE` layout, and a monotonic clock from execution-chain entry until response headers arrive or execution
 fails. Response-body
 consumption and decoding occur outside that boundary.
 
 `jfoundry-webmvc-spring-boot-starter` auto-configures `HttpLoggingFilter` for Servlet applications.
-`jfoundry.web.mvc.logging-level` defaults to `NONE`, so upgrades do not silently increase access-log
-volume. Enabled registration covers `REQUEST`, `ASYNC`, and `ERROR`, supports async processing, and
+`jfoundry.web.mvc.logging.level` defaults to `NONE`, so upgrades do not silently increase access-log
+volume. `jfoundry.web.mvc.logging.format` defaults to `HUMAN` once logging is enabled. Enabled registration covers `REQUEST`, `ASYNC`, and `ERROR`, supports async processing, and
 defaults to `Ordered.HIGHEST_PRECEDENCE + 20`, before Spring Security's normal registration. An
 application-provided `HttpLoggingFilter` or `FilterRegistrationBean<HttpLoggingFilter>` replaces this
 default when forwarding, tracing, or security topology requires another order.
 
 The auto-configured filter excludes `/actuator/health/**` by default, including liveness and readiness
-probes. Set `jfoundry.web.mvc.logging-excluded-paths` to a list of Ant-style application paths to replace
+probes. Set `jfoundry.web.mvc.logging.excluded-paths` to a list of Ant-style application paths to replace
 the default list; include `/actuator/health/**` in that list when adding exclusions while retaining the
 health exclusion. Matching removes the Servlet context and servlet paths before evaluating a pattern.
 
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
 complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at
 most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
-directions emit categorized request, headers, body, and response events at `INFO`, always remove URI queries,
-redact sensitive headers and nested JSON fields, and omit unsafe body representations. These logs supplement rather than replace Micrometer
+directions emit request, headers, body, and response details at `INFO`, always remove URI queries,
+redact sensitive headers and nested JSON fields, and omit unsafe body representations. `HUMAN` renders
+those details as Feign-style one-record-per-line output; `INLINE` keeps compact one-line events. These logs supplement rather than replace Micrometer
 metrics/traces and application-owned business audit events.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that

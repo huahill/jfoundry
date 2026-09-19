@@ -217,8 +217,8 @@ by the integration with `RestClientSupport.configure(builder)`, then execute tha
 only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
 safe failure kind while retaining the original exception as its cause for server-side diagnostics.
 
-The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` from
-`org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
+The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` and
+`HttpLoggingFormat` from `org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
 `HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
 `RestClient` facade and translated exceptions from `org.jfoundry.web.spring.client`. These replace the
 old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
@@ -226,8 +226,9 @@ remains in `org.jfoundry.web.spring`.
 
 Outbound logging defaults to `NONE`. Applications can select all four levels through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use
-`jfoundry.web.rest-client.logging-level`, also defaulting to `NONE`. The client `duration` field, emitted with an
-`ms` suffix such as `duration=30ms`, starts immediately before `ClientHttpRequestExecution.execute(...)` and ends
+`jfoundry.web.rest-client.logging.level`, also defaulting to `NONE`. Layout is selected separately with
+`jfoundry.web.rest-client.logging.format`, defaulting to `HUMAN`. The client `duration` field, emitted with an
+`ms` suffix such as `duration=30ms` in `INLINE` layout, starts immediately before `ClientHttpRequestExecution.execute(...)` and ends
 when response headers are
 available or execution fails. It excludes response-body consumption and decoding and is not
 end-to-end latency.
@@ -236,31 +237,37 @@ The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFi
 Helidon register equivalent JAX-RS providers through their Web modules. Inbound logging is
 disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, or `FULL` to enable it:
 
-| Runtime | Inbound property | Default |
-|---|---|---|
-| Spring MVC | `jfoundry.web.mvc.logging-level` | `NONE` |
-| Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
-| Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
+| Runtime | Inbound detail | Inbound layout | Default detail |
+|---|---|---|---|
+| Spring MVC | `jfoundry.web.mvc.logging.level` | `jfoundry.web.mvc.logging.format` | `NONE` |
+| Quarkus REST | `jfoundry.web.quarkus.logging.level` | `jfoundry.web.quarkus.logging.format` | `NONE` |
+| Helidon MP REST | `jfoundry.web.helidon.logging.level` | `jfoundry.web.helidon.logging.format` | `NONE` |
 
 Spring MVC excludes `/actuator/health/**` from inbound logging by default. Configure
-`jfoundry.web.mvc.logging-excluded-paths` with Ant-style application paths to replace that default and add
+`jfoundry.web.mvc.logging.excluded-paths` with Ant-style application paths to replace that default and add
 more exclusions. Matching removes the Servlet context and servlet paths first, so
 `/api/actuator/health/liveness` is matched as `/actuator/health/liveness` when `/api` is the
 configured servlet path.
 
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring applications can also select
+`jfoundry.web.rest-client.logging.level`, defaulting to `NONE`. Spring applications can also select
 the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.
 JFoundry does not currently integrate Spring `WebClient`; reactive calls are outside this contract.
 
-All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records separate request and
-response events with query-free method/URI, status, and a `duration` field with an `ms` suffix without body wrappers.
+All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records request and
+response events with query-free method/URI, status, and duration without body wrappers.
 `HEADERS` adds
-separate request-header and response-header events after case-insensitive redaction of
+redacted request and response headers after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
-nested-field redaction as separate request-body and response-body events and retains at most 8 KiB; non-JSON,
+nested-field redaction and retains at most 8 KiB; non-JSON,
 malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
+
+Layout is independent of detail. `HUMAN` is the default once logging is enabled. It emits Feign-style
+console output: one log record per request line, header, or pretty-printed JSON line. `INLINE` keeps the
+historical one-line `key=value` events. Configure inbound layout with the runtime
+`logging.format` property above, and outbound layout with `jfoundry.web.rest-client.logging.format`.
+Empty bodies are omitted in `HUMAN` and retained as `<empty>` in `INLINE`.
 
 Inbound `duration` timing ends at synchronous completion or the runtime's terminal response phase; it does
 not measure when the caller receives all streamed bytes. Client `duration` timing ends when response headers

@@ -37,9 +37,11 @@
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | 当 Spring 事件适配器存在时，开启 Spring `ApplicationEventPublisher` 派发。 |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | 当存在 `DomainEventOutboxRecorder` Bean 时，开启 Outbox 领域事件派发。 |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
-| `jfoundry.web.rest-client.logging-level` | `NONE` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
-| `jfoundry.web.mvc.logging-level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用后的事件以 `INFO` 输出。 |
-| `jfoundry.web.mvc.logging-excluded-paths` | `/actuator/health/**` | 从入站 Servlet HTTP 日志中排除的 Ant 风格应用内路径；配置列表会替换默认值。 |
+| `jfoundry.web.rest-client.logging.level` | `NONE` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
+| `jfoundry.web.rest-client.logging.format` | `HUMAN` | 为出站 `RestClient` 日志选择 `HUMAN`（Feign 风格，一行一条）或 `INLINE` 单行 `key=value` 事件。 |
+| `jfoundry.web.mvc.logging.level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用后的事件以 `INFO` 输出。 |
+| `jfoundry.web.mvc.logging.format` | `HUMAN` | 为入站 Servlet HTTP 日志选择 `HUMAN`（Feign 风格，一行一条）或 `INLINE` 单行 `key=value` 事件。 |
+| `jfoundry.web.mvc.logging.excluded-paths` | `/actuator/health/**` | 从入站 Servlet HTTP 日志中排除的 Ant 风格应用内路径；配置列表会替换默认值。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |

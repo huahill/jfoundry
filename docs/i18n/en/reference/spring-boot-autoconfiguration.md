@@ -39,9 +39,11 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.domain.event.dispatch.spring.enabled` | `true` | Enables Spring `ApplicationEventPublisher` dispatch when the Spring event adapter is present. |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | Enables Outbox-backed domain event dispatch when a `DomainEventOutboxRecorder` bean exists. |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
-| `jfoundry.web.rest-client.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
-| `jfoundry.web.mvc.logging-level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled events are emitted at `INFO`. |
-| `jfoundry.web.mvc.logging-excluded-paths` | `/actuator/health/**` | Ant-style application paths excluded from inbound Servlet HTTP logs. A configured list replaces the default. |
+| `jfoundry.web.rest-client.logging.level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |
+| `jfoundry.web.rest-client.logging.format` | `HUMAN` | Selects `HUMAN` Feign-style one log record per line, or `INLINE` one-line `key=value` events, for outbound `RestClient` logs. |
+| `jfoundry.web.mvc.logging.level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` inbound Servlet HTTP logging. Enabled events are emitted at `INFO`. |
+| `jfoundry.web.mvc.logging.format` | `HUMAN` | Selects `HUMAN` Feign-style one log record per line, or `INLINE` one-line `key=value` events, for inbound Servlet HTTP logs. |
+| `jfoundry.web.mvc.logging.excluded-paths` | `/actuator/health/**` | Ant-style application paths excluded from inbound Servlet HTTP logs. A configured list replaces the default. |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |

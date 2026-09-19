@@ -15,8 +15,11 @@ import java.util.function.LongSupplier;
 @Priority(Priorities.USER - 200)
 public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingProvider {
 
-    /// Configuration key for inbound Helidon MP REST logging.
-    public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.helidon.logging-level";
+    /// Configuration key for inbound Helidon MP REST logging detail.
+    public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.helidon.logging.level";
+
+    /// Configuration key for inbound Helidon MP REST logging layout.
+    public static final String SERVER_LOGGING_FORMAT = "jfoundry.web.helidon.logging.format";
 
     private static final System.Logger LOG = System.getLogger(HttpLoggingProvider.class.getName());
 
@@ -26,7 +29,7 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     }
 
     HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(SERVER_LOGGING_LEVEL, infoEnabled, nanoTime,
-                (message, arguments) -> LOG.log(System.Logger.Level.INFO, message, arguments));
+        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, infoEnabled, nanoTime,
+                message -> LOG.log(System.Logger.Level.INFO, message));
     }
 }

@@ -181,42 +181,46 @@ Ant 风格 `*`、`**`、`?` pattern；Spring 会先移除 Servlet context path�
 只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。
 
-API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 位于 `org.jfoundry.http`，Spring 专属的
+API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 与 `HttpLoggingFormat` 位于 `org.jfoundry.http`，Spring 专属的
 `HttpLoggingSupport` 位于 `org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，
 `RestClient` 外观与转换后的异常位于 `org.jfoundry.web.spring.client`。这些新位置替代原来的
 `org.jfoundry.web.spring` 位置，不提供兼容别名；`ProblemDetailRenderer` 仍位于原包。
 
 出站日志默认使用 `NONE`。应用可通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择四种级别；
 Spring Boot 管理的 builder 使用同样默认值为 `NONE` 的
-`jfoundry.web.rest-client.logging-level`。客户端 `duration` 字段以 `duration=30ms` 形式输出，计时从调用
+`jfoundry.web.rest-client.logging.level`。布局通过 `jfoundry.web.rest-client.logging.format` 选择，默认值为 `HUMAN`。客户端 `duration` 字段在 `INLINE` 布局下以 `duration=30ms` 形式输出，计时从调用
 `ClientHttpRequestExecution.execute(...)` 前开始，到响应 header 可用或执行失败时结束，不包含响应 body
 消费与解码，也不是端到端延迟。
 
 Web MVC 启动器还通过 `HttpLoggingFilter` 提供入站 Servlet 日志。Quarkus 与 Helidon 的 Web 运行时模块会
 注册等价的 JAX-RS provider。入站日志默认关闭，可通过对应运行时的配置项选择 `BASIC`、`HEADERS` 或 `FULL`：
 
-| 运行时 | 入站配置项 | 默认值 |
-|---|---|---|
-| Spring MVC | `jfoundry.web.mvc.logging-level` | `NONE` |
-| Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
-| Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
+| 运行时 | 入站明细 | 入站布局 | 默认明细 |
+|---|---|---|---|
+| Spring MVC | `jfoundry.web.mvc.logging.level` | `jfoundry.web.mvc.logging.format` | `NONE` |
+| Quarkus REST | `jfoundry.web.quarkus.logging.level` | `jfoundry.web.quarkus.logging.format` | `NONE` |
+| Helidon MP REST | `jfoundry.web.helidon.logging.level` | `jfoundry.web.helidon.logging.format` | `NONE` |
 
 Spring MVC 默认从入站日志中排除 `/actuator/health/**`。应用可通过
-`jfoundry.web.mvc.logging-excluded-paths` 配置 Ant 风格的应用内路径，以替换默认列表并增加更多排除项。
+`jfoundry.web.mvc.logging.excluded-paths` 配置 Ant 风格的应用内路径，以替换默认列表并增加更多排除项。
 匹配前会先移除 Servlet context path 与 servlet path，因此 servlet path 为 `/api` 时，
 `/api/actuator/health/liveness` 会按 `/actuator/health/liveness` 进行匹配。
 
 Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
-`jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。Spring 应用也可以通过
+`jfoundry.web.rest-client.logging.level`，默认值为 `NONE`。Spring 应用也可以通过
 `RestClientSupport.configure(builder, HttpLoggingLevel)` 为手工 builder 选择级别。JFoundry 当前不集成
 Spring `WebClient`，响应式调用不属于此契约。
 
-所有运行时都以 `INFO` 输出 HTTP 交换事件，`NONE` 会将其关闭。`BASIC` 分别记录 request 与 response 事件，
-包含移除 query 后的 method/URI、状态和带 `ms` 后缀的 `duration` 字段，且不创建 body 包装器。`HEADERS` 额外记录独立的 request
-header 与 response header 事件，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
-API key。`FULL` 再额外记录独立的 request body 与 response body 事件；JSON body 会执行嵌套字段脱敏，最多
+所有运行时都以 `INFO` 输出 HTTP 交换事件，`NONE` 会将其关闭。`BASIC` 记录 request 与 response 事件，
+包含移除 query 后的 method/URI、状态和耗时，且不创建 body 包装器。`HEADERS` 额外记录脱敏后的 request
+与 response header，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
+API key。`FULL` 再额外记录 JSON body；JSON body 会执行嵌套字段脱敏，最多
 保留 8 KiB，非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
 改变 HTTP 处理。
+
+布局与明细相互独立。启用日志后默认使用 `HUMAN`：按 Feign 的方式输出，请求行、每个 header、JSON 的每一行
+都是一条独立日志。`INLINE` 保留历史的单行 `key=value` 事件。入站布局使用上表中的 `logging.format` 配置项，出站布局使用
+`jfoundry.web.rest-client.logging.format`。`HUMAN` 会省略空 body，`INLINE` 仍输出 `<empty>`。
 
 入站 `duration` 的计时在同步完成或运行时的终态响应阶段结束，不表示调用方已经收到全部流式字节。客户端
 `duration` 的计时在响应 header 可用时结束，不包含后续 body 消费与解码。Jakarta REST 客户端过滤器没有可移植的

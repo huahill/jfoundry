@@ -407,12 +407,13 @@ threads need an explicit Quarkus context-propagation mechanism.
 ## HTTP Diagnostic Logging
 
 `jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer
-interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging-level`; it defaults to
-`NONE`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
+interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging.level`; it defaults to
+`NONE`. Layout uses `jfoundry.web.quarkus.logging.format`, defaulting to `HUMAN`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
 
 Add `jfoundry-restclient-quarkus-runtime` for outbound logging. It includes the Quarkus MicroProfile
 REST Client extension and registers the provider with every REST Client builder. Outbound logging
-uses `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring `WebClient` is not
+uses `jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
+defaulting to `HUMAN`. Spring `WebClient` is not
 supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are

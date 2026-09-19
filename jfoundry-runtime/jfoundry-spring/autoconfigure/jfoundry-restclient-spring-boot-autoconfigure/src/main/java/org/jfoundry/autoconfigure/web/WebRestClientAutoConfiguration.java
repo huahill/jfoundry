@@ -19,6 +19,7 @@ public class WebRestClientAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "jfoundryWebRestClientCustomizer")
     public RestClientCustomizer jfoundryWebRestClientCustomizer(JfoundryWebProperties properties) {
-        return builder -> RestClientSupport.configure(builder, properties.getRestClient().getLoggingLevel());
+        return builder -> RestClientSupport.configure(builder, properties.getRestClient().getLogging().getLevel(),
+                properties.getRestClient().getLogging().getFormat());
     }
 }

@@ -25,7 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = NativeSmokeApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = {
-                "jfoundry.web.mvc.logging-level=BASIC",
+                "jfoundry.web.mvc.logging.level=BASIC",
+                "jfoundry.web.mvc.logging.format=INLINE",
                 "logging.level.org.jfoundry.web.spring.filter.HttpLoggingFilter=INFO"
         })
 class HttpLoggingWebMvcIntegrationTest {

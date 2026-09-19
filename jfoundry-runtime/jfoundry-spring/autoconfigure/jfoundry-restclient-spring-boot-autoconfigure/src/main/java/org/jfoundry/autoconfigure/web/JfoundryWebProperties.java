@@ -1,5 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -17,16 +18,39 @@ public class JfoundryWebProperties {
     /// Outbound `RestClient` properties.
     public static class RestClient {
 
-        private HttpLoggingLevel loggingLevel = HttpLoggingLevel.NONE;
+        private final Logging logging = new Logging();
+
+        /// Returns outbound HTTP logging properties.
+        public Logging getLogging() {
+            return logging;
+        }
+    }
+
+    /// Outbound `RestClient` logging properties.
+    public static class Logging {
+
+        private HttpLoggingLevel level = HttpLoggingLevel.NONE;
+
+        private HttpLoggingFormat format = HttpLoggingFormat.HUMAN;
 
         /// Returns the detail recorded for outbound `RestClient` HTTP logs.
-        public HttpLoggingLevel getLoggingLevel() {
-            return loggingLevel;
+        public HttpLoggingLevel getLevel() {
+            return level;
         }
 
         /// Sets the detail recorded for outbound `RestClient` HTTP logs.
-        public void setLoggingLevel(HttpLoggingLevel loggingLevel) {
-            this.loggingLevel = loggingLevel;
+        public void setLevel(HttpLoggingLevel level) {
+            this.level = level;
+        }
+
+        /// Returns the layout used for outbound `RestClient` HTTP logs.
+        public HttpLoggingFormat getFormat() {
+            return format;
+        }
+
+        /// Sets the layout used for outbound `RestClient` HTTP logs.
+        public void setFormat(HttpLoggingFormat format) {
+            this.format = format;
         }
     }
 }

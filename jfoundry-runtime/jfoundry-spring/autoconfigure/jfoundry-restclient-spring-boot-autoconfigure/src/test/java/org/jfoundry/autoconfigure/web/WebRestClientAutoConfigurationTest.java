@@ -1,5 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,10 @@ class WebRestClientAutoConfigurationTest {
     @Test
     void disablesLoggingByDefault() {
         contextRunner.run(context -> {
-            assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLoggingLevel())
+            assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLogging().getLevel())
                     .isEqualTo(HttpLoggingLevel.NONE);
+            assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLogging().getFormat())
+                    .isEqualTo(HttpLoggingFormat.HUMAN);
             RestClient.Builder builder = RestClient.builder();
             context.getBean(RestClientCustomizer.class).customize(builder);
             AtomicReference<List<ClientHttpRequestInterceptor>> interceptors = new AtomicReference<>();
@@ -39,20 +42,32 @@ class WebRestClientAutoConfigurationTest {
     @Test
     void bindsConfiguredLoggingLevelAndAppliesItToRestClientBuilder() {
         contextRunner
-                .withPropertyValues("jfoundry.web.rest-client.logging-level=FULL")
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=FULL")
                 .run(context -> {
-                    assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLoggingLevel())
+                    assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLogging().getLevel())
                             .isEqualTo(HttpLoggingLevel.FULL);
-                    assertThat(configuredInterceptor(context)).extracting(interceptor ->
-                            ReflectionTestUtils.getField(interceptor, "level"))
-                            .isEqualTo(HttpLoggingLevel.FULL);
+                    var interceptor = configuredInterceptor(context);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "level")).isEqualTo(HttpLoggingLevel.FULL);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "format")).isEqualTo(HttpLoggingFormat.HUMAN);
+                });
+    }
+
+    @Test
+    void bindsConfiguredLoggingFormatToRestClientBuilder() {
+        contextRunner
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=HEADERS",
+                        "jfoundry.web.rest-client.logging.format=INLINE")
+                .run(context -> {
+                    var interceptor = configuredInterceptor(context);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "level")).isEqualTo(HttpLoggingLevel.HEADERS);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "format")).isEqualTo(HttpLoggingFormat.INLINE);
                 });
     }
 
     @Test
     void appliesConfiguredLoggingLevelToBootManagedBuilder() {
         contextRunner
-                .withPropertyValues("jfoundry.web.rest-client.logging-level=HEADERS")
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=HEADERS")
                 .run(context -> assertThat(configuredInterceptor(context.getBean(RestClient.Builder.class)))
                         .extracting(interceptor -> ReflectionTestUtils.getField(interceptor, "level"))
                         .isEqualTo(HttpLoggingLevel.HEADERS));
@@ -61,7 +76,7 @@ class WebRestClientAutoConfigurationTest {
     @Test
     void disablesTheInterceptorWhenConfiguredAsNone() {
         contextRunner
-                .withPropertyValues("jfoundry.web.rest-client.logging-level=NONE")
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=NONE")
                 .run(context -> {
                     RestClient.Builder builder = RestClient.builder();
                     context.getBean(RestClientCustomizer.class).customize(builder);
