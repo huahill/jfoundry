@@ -249,6 +249,12 @@ more exclusions. Matching removes the Servlet context and servlet paths first, s
 `/api/actuator/health/liveness` is matched as `/actuator/health/liveness` when `/api` is the
 configured servlet path.
 
+`HEADERS` and `FULL` log a diagnostic header subset by default: `accept`, `authorization`,
+`content-type`, `content-length`, `location`, and `x-request-id`. Configure
+`jfoundry.web.mvc.logging.included-headers`, `jfoundry.web.rest-client.logging.included-headers`,
+`jfoundry.web.quarkus.logging.included-headers`, or `jfoundry.web.helidon.logging.included-headers`
+to replace that default. Use `*` to include every header after redaction.
+
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
 `jfoundry.web.rest-client.logging.level`, defaulting to `NONE`. Spring applications can also select
 the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.
@@ -256,8 +262,7 @@ JFoundry does not currently integrate Spring `WebClient`; reactive calls are out
 
 All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records request and
 response events with query-free method/URI, status, and duration without body wrappers.
-`HEADERS` adds
-redacted request and response headers after case-insensitive redaction of
+`HEADERS` adds the configured header subset after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
 nested-field redaction and retains at most 8 KiB; non-JSON,
 malformed, incomplete, and oversized bodies

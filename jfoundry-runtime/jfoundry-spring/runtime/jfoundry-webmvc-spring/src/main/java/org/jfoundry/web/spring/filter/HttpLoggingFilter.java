@@ -11,6 +11,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +37,7 @@ import jakarta.servlet.http.HttpServletResponseWrapper;
 import org.jfoundry.http.HttpLogFormatter;
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.http.HttpLoggingSide;
 import org.jfoundry.http.spring.HttpLoggingSupport;
 import org.slf4j.Logger;
@@ -59,45 +62,65 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private final Predicate<HttpServletRequest> excludedRequest;
 
+    private final List<String> includedHeaders;
+
     private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
     /// Creates a filter with the requested logging detail and human-readable layout.
     public HttpLoggingFilter(HttpLoggingLevel level) {
-        this(level, HttpLoggingFormat.HUMAN, request -> false, LOG::isInfoEnabled, System::nanoTime);
+        this(level, HttpLoggingFormat.HUMAN, request -> false, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                LOG::isInfoEnabled, System::nanoTime);
     }
 
     /// Creates a filter with the requested logging detail and layout.
     public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format) {
-        this(level, format, request -> false, LOG::isInfoEnabled, System::nanoTime);
+        this(level, format, request -> false, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, LOG::isInfoEnabled,
+                System::nanoTime);
     }
 
     /// Creates a filter with the requested logging detail, human-readable layout, and request exclusion predicate.
     public HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest) {
-        this(level, HttpLoggingFormat.HUMAN, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
+        this(level, HttpLoggingFormat.HUMAN, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                LOG::isInfoEnabled, System::nanoTime);
     }
 
     /// Creates a filter with the requested logging detail, layout, and request exclusion predicate.
     public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format,
             Predicate<HttpServletRequest> excludedRequest) {
-        this(level, format, excludedRequest, LOG::isInfoEnabled, System::nanoTime);
+        this(level, format, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, LOG::isInfoEnabled,
+                System::nanoTime);
+    }
+
+    /// Creates a filter with the requested logging detail, layout, exclusions, and included headers.
+    public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format,
+            Predicate<HttpServletRequest> excludedRequest, Collection<String> includedHeaders) {
+        this(level, format, excludedRequest, includedHeaders, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, HttpLoggingFormat.INLINE, request -> false, infoEnabled, nanoTime);
+        this(level, HttpLoggingFormat.INLINE, request -> false, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, HttpLoggingFormat.INLINE, excludedRequest, infoEnabled, nanoTime);
+        this(level, HttpLoggingFormat.INLINE, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        this(level, format, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
+    }
+
+    HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
+            Collection<String> includedHeaders, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
         this.format = Objects.requireNonNull(format, "format must not be null");
         this.excludedRequest = Objects.requireNonNull(excludedRequest, "excludedRequest must not be null");
+        this.includedHeaders = List.copyOf(Objects.requireNonNull(includedHeaders, "includedHeaders must not be null"));
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
@@ -199,7 +222,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
         private void logRequest(HttpServletRequest request) {
             logAll(HttpLogFormatter.request(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
                     this.level.includesHeaders()
-                            ? HttpLoggingSupport.describeHeaders(requestHeaders(request)) : null));
+                            ? HttpLoggingSupport.describeHeaders(requestHeaders(request), this.includedHeaders) : null));
         }
 
         private void logResponse(String completion) {
@@ -212,7 +235,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.SERVER, this.method, this.uri, status,
                     completion, elapsedMillis(),
                     this.level.includesHeaders()
-                            ? HttpLoggingSupport.describeHeaders(responseHeaders(this.response)) : null,
+                            ? HttpLoggingSupport.describeHeaders(responseHeaders(this.response), this.includedHeaders) : null,
                     this.level.includesBodies()
                             ? HttpLoggingSupport.describeBody(this.response.getContentType(),
                                     this.responseBody.bytes(), this.responseBody.complete(),

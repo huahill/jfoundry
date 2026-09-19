@@ -39,7 +39,8 @@ public class WebMvcHttpLoggingAutoConfiguration {
     public FilterRegistrationBean<HttpLoggingFilter> jfoundryHttpLoggingFilterRegistration(
             JfoundryWebMvcProperties properties) {
         var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLogging().getLevel(),
-                properties.getLogging().getFormat(), excludedRequest(properties.getLogging().getExcludedPaths())));
+                properties.getLogging().getFormat(), excludedRequest(properties.getLogging().getExcludedPaths()),
+                properties.getLogging().getIncludedHeaders()));
         registration.setName("jfoundryHttpLoggingFilter");
         registration.setOrder(DEFAULT_FILTER_ORDER);
         registration.setAsyncSupported(true);

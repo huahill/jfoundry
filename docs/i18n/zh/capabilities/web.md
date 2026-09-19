@@ -206,14 +206,20 @@ Spring MVC 默认从入站日志中排除 `/actuator/health/**`。应用可通�
 匹配前会先移除 Servlet context path 与 servlet path，因此 servlet path 为 `/api` 时，
 `/api/actuator/health/liveness` 会按 `/actuator/health/liveness` 进行匹配。
 
+`HEADERS` 与 `FULL` 默认只记录诊断用 header 子集：`accept`、`authorization`、`content-type`、
+`content-length`、`location` 和 `x-request-id`。可通过
+`jfoundry.web.mvc.logging.included-headers`、`jfoundry.web.rest-client.logging.included-headers`、
+`jfoundry.web.quarkus.logging.included-headers` 或 `jfoundry.web.helidon.logging.included-headers`
+替换该默认列表。使用 `*` 可在脱敏后输出全部 header。
+
 Spring `RestClient` 与 MicroProfile REST Client 的出站日志统一使用
 `jfoundry.web.rest-client.logging.level`，默认值为 `NONE`。Spring 应用也可以通过
 `RestClientSupport.configure(builder, HttpLoggingLevel)` 为手工 builder 选择级别。JFoundry 当前不集成
 Spring `WebClient`，响应式调用不属于此契约。
 
 所有运行时都以 `INFO` 输出 HTTP 交换事件，`NONE` 会将其关闭。`BASIC` 记录 request 与 response 事件，
-包含移除 query 后的 method/URI、状态和耗时，且不创建 body 包装器。`HEADERS` 额外记录脱敏后的 request
-与 response header，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
+包含移除 query 后的 method/URI、状态和耗时，且不创建 body 包装器。`HEADERS` 额外记录配置的 header
+子集，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
 API key。`FULL` 再额外记录 JSON body；JSON body 会执行嵌套字段脱敏，最多
 保留 8 KiB，非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
 改变 HTTP 处理。

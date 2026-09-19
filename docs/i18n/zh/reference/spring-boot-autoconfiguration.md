@@ -39,9 +39,11 @@
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | 改写 MyBatis-Plus Outbox 物理表名。业务应用必须自行建表。 |
 | `jfoundry.web.rest-client.logging.level` | `NONE` | 为 Spring Boot 管理的出站 `RestClient.Builder` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL` 日志级别。 |
 | `jfoundry.web.rest-client.logging.format` | `HUMAN` | 为出站 `RestClient` 日志选择 `HUMAN`（Feign 风格：`-->` 请求、`<--` 响应，body 仍一行）或 `INLINE` 单行 `key=value` 事件。 |
+| `jfoundry.web.rest-client.logging.included-headers` | `accept`、`authorization`、`content-type`、`content-length`、`location`、`x-request-id` | `HEADERS` 或 `FULL` 时出站 `RestClient` 日志包含的 header 名；配置列表会替换默认值。使用 `*` 可在脱敏后输出全部 header。 |
 | `jfoundry.web.mvc.logging.level` | `NONE` | 为入站 Servlet HTTP 日志选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`；启用后的事件以 `INFO` 输出。 |
 | `jfoundry.web.mvc.logging.format` | `HUMAN` | 为入站 Servlet HTTP 日志选择 `HUMAN`（Feign 风格：`-->` 请求、`<--` 响应，body 仍一行）或 `INLINE` 单行 `key=value` 事件。 |
 | `jfoundry.web.mvc.logging.excluded-paths` | `/actuator/health/**` | 从入站 Servlet HTTP 日志中排除的 Ant 风格应用内路径；配置列表会替换默认值。 |
+| `jfoundry.web.mvc.logging.included-headers` | `accept`、`authorization`、`content-type`、`content-length`、`location`、`x-request-id` | `HEADERS` 或 `FULL` 时入站 Servlet HTTP 日志包含的 header 名；配置列表会替换默认值。使用 `*` 可在脱敏后输出全部 header。 |
 | `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
 | `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
