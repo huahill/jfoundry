@@ -156,7 +156,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         var state = (RequestState) request.getAttribute(STATE_ATTRIBUTE);
         if (state == null) {
-            state = new RequestState(request, response, this.level, this.format, this.nanoTime);
+            state = new RequestState(request, response, this.level, this.format, this.includedHeaders, this.nanoTime);
             request.setAttribute(STATE_ATTRIBUTE, state);
             state.logRequest(request);
         }
@@ -193,6 +193,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         private final HttpLoggingFormat format;
 
+        private final List<String> includedHeaders;
+
         private final LongSupplier nanoTime;
 
         private final long startedAt;
@@ -207,13 +209,14 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 Collections.newSetFromMap(new IdentityHashMap<>()));
 
         private RequestState(HttpServletRequest request, HttpServletResponse response, HttpLoggingLevel level,
-                HttpLoggingFormat format, LongSupplier nanoTime) {
+                HttpLoggingFormat format, List<String> includedHeaders, LongSupplier nanoTime) {
             this.method = request.getMethod();
             this.uri = requestUri(request);
             this.response = response;
             this.requestContentType = request.getContentType();
             this.level = level;
             this.format = format;
+            this.includedHeaders = includedHeaders;
             this.nanoTime = nanoTime;
             this.startedAt = nanoTime.getAsLong();
             this.requestBody = new BodyCapture(request.getContentLengthLong() <= 0);
