@@ -222,10 +222,15 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             this.requestBody = new BodyCapture(request.getContentLengthLong() <= 0);
         }
 
+        private boolean requestEnded;
+
         private void logRequest(HttpServletRequest request) {
             logAll(HttpLogFormatter.request(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
                     this.level.includesHeaders()
                             ? HttpLoggingSupport.describeHeaders(requestHeaders(request), this.includedHeaders) : null));
+            if (!this.level.includesBodies()) {
+                endRequest();
+            }
         }
 
         private void logResponse(String completion) {
@@ -234,6 +239,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             }
             this.responseBody.markComplete();
             logRequestBody();
+            endRequest();
             var status = this.response.getStatus();
             logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.SERVER, this.method, this.uri, status,
                     completion, elapsedMillis(),
@@ -243,6 +249,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                             ? HttpLoggingSupport.describeBody(this.response.getContentType(),
                                     this.responseBody.bytes(), this.responseBody.complete(),
                                     this.responseBody.truncated()) : null));
+            logAll(HttpLogFormatter.end(this.format, false));
         }
 
         private void logFailure(Throwable exception, String completion) {
@@ -250,6 +257,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 return;
             }
             logRequestBody();
+            endRequest();
             logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
                     completion, exception.getClass().getName(), elapsedMillis()));
         }
@@ -260,11 +268,20 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                     return;
                 }
                 logRequestBody();
+                endRequest();
                 logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
                         completion, null, elapsedMillis()));
             } else {
                 logFailure(exception, completion);
             }
+        }
+
+        private void endRequest() {
+            if (this.requestEnded) {
+                return;
+            }
+            this.requestEnded = true;
+            logAll(HttpLogFormatter.end(this.format, true));
         }
 
         private void logRequestBody() {

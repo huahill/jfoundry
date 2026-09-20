@@ -65,12 +65,17 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
                 level.includesHeaders()
                         ? HttpLoggingPolicy.describeHeaders(request.getHeaders(), includedHeaders) : null));
         if (level.includesBodies()) {
-            var body = bodyLog(request.getMediaType(), description -> logAll(HttpLogFormatter.requestBody(
-                    format, HttpLoggingSide.SERVER, state.method(), state.uri(), description)));
+            var body = bodyLog(request.getMediaType(), description -> {
+                logAll(HttpLogFormatter.requestBody(
+                        format, HttpLoggingSide.SERVER, state.method(), state.uri(), description));
+                logAll(HttpLogFormatter.end(format, true));
+            });
             request.setProperty(REQUEST_BODY, body);
             if (!request.hasEntity()) {
                 completeAndLog(body);
             }
+        } else {
+            logAll(HttpLogFormatter.end(format, true));
         }
     }
 
@@ -87,13 +92,18 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
                         : null,
                 null));
         if (state.level().includesBodies()) {
-            var body = bodyLog(response.getMediaType(), description -> logAll(HttpLogFormatter.responseBody(
-                    state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(), response.getStatus(),
-                    description)));
+            var body = bodyLog(response.getMediaType(), description -> {
+                logAll(HttpLogFormatter.responseBody(
+                        state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(), response.getStatus(),
+                        description));
+                logAll(HttpLogFormatter.end(state.format(), false));
+            });
             request.setProperty(RESPONSE_BODY, body);
             if (!response.hasEntity()) {
                 completeAndLog(body);
             }
+        } else {
+            logAll(HttpLogFormatter.end(state.format(), false));
         }
     }
 

@@ -11,8 +11,9 @@ import java.util.Objects;
 /// This type only shapes those details as either compact `INLINE` records or Feign-style `HUMAN`
 /// lines. Each returned string is one log record; adapters must emit them separately. `HUMAN`
 /// prefixes request lines with `-->` and response lines with `<--`, and keeps JSON bodies on a
-/// single line so large payloads do not explode into many records. Concurrent exchanges can still
-/// interleave; the logger's thread or MDC prefix is what groups a request together.
+/// single line so large payloads do not explode into many records. The request start line carries
+/// method and URI; later HUMAN lines in the same block do not repeat them. Concurrent exchanges can
+/// still interleave; the logger's thread or MDC prefix is what groups a request together.
 public final class HttpLogFormatter {
 
     private static final String EMPTY_BODY = "<empty>";
@@ -66,7 +67,7 @@ public final class HttpLogFormatter {
             return List.of();
         }
         if (format == HttpLoggingFormat.HUMAN) {
-            return List.of(REQUEST_MARK + method + " " + uri + " [body]", REQUEST_MARK + body);
+            return List.of(REQUEST_MARK + body);
         }
         return List.of("HTTP " + side.label() + " request body: method=" + method + ", uri=" + uri
                 + ", body=" + body);
@@ -88,7 +89,7 @@ public final class HttpLogFormatter {
             return List.of();
         }
         if (format == HttpLoggingFormat.HUMAN) {
-            return List.of(RESPONSE_MARK + method + " " + uri + " " + status + " [body]", RESPONSE_MARK + body);
+            return List.of(RESPONSE_MARK + body);
         }
         return List.of("HTTP " + side.label() + " response body: method=" + method + ", uri=" + uri
                 + ", status=" + status + ", body=" + body);
@@ -112,7 +113,7 @@ public final class HttpLogFormatter {
         Objects.requireNonNull(side, "side must not be null");
         if (format == HttpLoggingFormat.HUMAN) {
             var lines = new ArrayList<String>();
-            var summary = RESPONSE_MARK + method + " " + uri + " " + status + " (" + durationMillis + "ms";
+            var summary = RESPONSE_MARK + status + " (" + durationMillis + "ms";
             if (completion != null) {
                 summary += ", " + completion;
             }
@@ -141,6 +142,17 @@ public final class HttpLogFormatter {
                     + ", status=" + status + ", body=" + body);
         }
         return List.copyOf(messages);
+    }
+
+    /// Renders the HUMAN block closer for a request (`true`) or response (`false`).
+    ///
+    /// `INLINE` emits nothing because each event is already self-contained.
+    public static List<String> end(HttpLoggingFormat format, boolean request) {
+        Objects.requireNonNull(format, "format must not be null");
+        if (format != HttpLoggingFormat.HUMAN) {
+            return List.of();
+        }
+        return List.of((request ? REQUEST_MARK : RESPONSE_MARK) + "END HTTP");
     }
 
     /// Renders a failed exchange as one or more log records.

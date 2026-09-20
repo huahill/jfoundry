@@ -61,12 +61,17 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
                 level.includesHeaders()
                         ? HttpLoggingPolicy.describeHeaders(request.getStringHeaders(), includedHeaders) : null));
         if (level.includesBodies()) {
-            var body = bodyLog(request.getMediaType(), description -> logAll(HttpLogFormatter.requestBody(
-                    format, HttpLoggingSide.CLIENT, state.method(), state.uri(), description)));
+            var body = bodyLog(request.getMediaType(), description -> {
+                logAll(HttpLogFormatter.requestBody(
+                        format, HttpLoggingSide.CLIENT, state.method(), state.uri(), description));
+                logAll(HttpLogFormatter.end(format, true));
+            });
             request.setProperty(REQUEST_BODY, body);
             if (!request.hasEntity()) {
                 completeAndLog(body);
             }
+        } else {
+            logAll(HttpLogFormatter.end(format, true));
         }
     }
 
@@ -82,15 +87,20 @@ public abstract class AbstractJaxRsRestClientLoggingProvider extends AbstractJax
                         ? HttpLoggingPolicy.describeHeaders(response.getHeaders(), state.includedHeaders()) : null,
                 null));
         if (state.level().includesBodies()) {
-            var body = bodyLog(response.getMediaType(), description -> logAll(HttpLogFormatter.responseBody(
-                    state.format(), HttpLoggingSide.CLIENT, state.method(), state.uri(), response.getStatus(),
-                    description)));
+            var body = bodyLog(response.getMediaType(), description -> {
+                logAll(HttpLogFormatter.responseBody(
+                        state.format(), HttpLoggingSide.CLIENT, state.method(), state.uri(), response.getStatus(),
+                        description));
+                logAll(HttpLogFormatter.end(state.format(), false));
+            });
             if (response.hasEntity()) {
                 request.setProperty(RESPONSE_BODY, body);
                 response.setEntityStream(capturingInputStream(response.getEntityStream(), body));
             } else {
                 completeAndLog(body);
             }
+        } else {
+            logAll(HttpLogFormatter.end(state.format(), false));
         }
     }
 
