@@ -92,18 +92,23 @@ messages and appends them through the generic Outbox contract.
 
 ## Dependency Management Boundaries
 
-`jfoundry-foundation-dependencies` owns only runtime-neutral libraries and test utilities. A component
-family may have neutral coordinates in Foundation while its runtime-specific starters, deployment
-artifacts, or Native Image integrations remain outside it. For example, Foundation manages the neutral
-MyBatis-Plus, JobRunr, Redisson, and jMolecules coordinates, but it does not manage their Spring-specific
-artifacts.
+`jfoundry-foundation-dependencies` owns only runtime-neutral libraries and test utilities that the
+selected runtime platform BOM does not already manage. A component family may have neutral coordinates
+in Foundation while its runtime-specific starters, deployment artifacts, or Native Image integrations
+remain outside it. For example, Foundation manages the neutral MyBatis-Plus, JobRunr, Redisson, and
+jMolecules coordinates, but it does not manage their Spring-specific artifacts.
+
+Foundation must not re-declare platform stacks already owned by Spring Boot, Quarkus, or Helidon BOMs,
+including JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ clients, Hibernate,
+and JDBC drivers. Those versions follow the selected runtime. The root `jfoundry-parent` may import JUnit, Jackson, and OpenTelemetry BOMs for compiling JFoundry itself.
+It must not pin those GAs directly, or Maven would override the nearer runtime BOM.
 
 Each runtime BOM owns its own ecosystem: `jfoundry-spring-boot-dependencies` owns Spring Boot and
 Spring-specific integration coordinates, `jfoundry-quarkus-dependencies` owns Quarkus coordinates, and
 `jfoundry-helidon-dependencies` owns Helidon coordinates. Runtime BOMs remain independent and must not
 import Foundation or another runtime BOM. A runtime BOM may carry a narrow, documented compatibility
 override when its official platform BOM would otherwise break a Foundation-managed neutral component;
-the Helidon Jackson annotations alignment is one such exception.
+the Helidon Jackson annotations override is one such exception.
 
 Test dependencies follow the same boundary. Core modules may use runtime-neutral JUnit, AssertJ, Mockito,
 H2, or native persistence-framework test support. Tests that bootstrap Spring, Quarkus, or Helidon belong

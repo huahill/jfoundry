@@ -47,7 +47,8 @@ capabilities it needs:
   `jfoundry-dependencies`.
 
 Runtime BOMs manage platform ecosystem versions only. They do not add runtime capabilities to the
-classpath, manage JFoundry module versions, or import Foundation. Applications still select each
+classpath, manage JFoundry module versions, or import Foundation. Foundation supplies only
+runtime-neutral coordinates the platform BOM does not already own. Applications still select each
 starter, adapter, database, and broker explicitly.
 
 ## Validated Capability Scope
@@ -76,8 +77,8 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
   supported JFoundry stack.
 - Foundation manages `org.javassist:javassist` because RocketMQ's transitive Reflections line otherwise
   selects an older POM that produces Maven 4 model warnings.
-- `jfoundry-helidon-dependencies` aligns Jackson annotations with Foundation's Jackson 3 line and keeps
-  the `groovy-all` override required by Maven release dependency validation. The owning BOM contains
+- `jfoundry-helidon-dependencies` keeps a Helidon-local Jackson annotations override and the
+  `groovy-all` override required by Maven release dependency validation. The owning BOM contains
   the exact override versions.
 
 These exceptions are dependency-management decisions, not claims that JFoundry supplies an adapter for

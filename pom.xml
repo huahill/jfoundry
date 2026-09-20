@@ -63,6 +63,23 @@
         <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
         <argLine/>
         <mockito.javaagent.argLine/>
+
+        <!-- Versions for framework-neutral module parents; do not pin these GAs here. -->
+        <junit-jupiter.version>6.1.3</junit-jupiter.version>
+        <jackson3.version>3.2.2</jackson3.version>
+        <mockito.version>5.23.0</mockito.version>
+        <byte-buddy.version>1.18.14</byte-buddy.version>
+        <assertj.version>3.27.7</assertj.version>
+        <slf4j.version>2.0.19</slf4j.version>
+        <opentelemetry.version>1.66.0</opentelemetry.version>
+        <kafka-clients.version>4.3.1</kafka-clients.version>
+        <rabbitmq-amqp-client.version>5.36.0</rabbitmq-amqp-client.version>
+        <rocketmq-client.version>5.5.1</rocketmq-client.version>
+        <hibernate.version>7.4.9.Final</hibernate.version>
+        <h2.version>2.5.250</h2.version>
+        <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
+        <postgresql.version>42.7.13</postgresql.version>
+        <snakeyaml.version>2.7</snakeyaml.version>
     </properties>
 
     <subprojects>
@@ -94,7 +111,98 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <!-- Imported BOMs so nearer runtime BOMs still win for Spring/Quarkus/Helidon modules. -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit-jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>tools.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson3.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>${opentelemetry.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-core</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy-agent</artifactId>
+                <version>${byte-buddy.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>${kafka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.rabbitmq</groupId>
+                <artifactId>amqp-client</artifactId>
+                <version>${rabbitmq-amqp-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${rocketmq-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.orm</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql-connector-j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

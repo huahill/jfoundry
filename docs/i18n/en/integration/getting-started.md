@@ -37,7 +37,8 @@ optional pattern for genuine command/query asymmetry, not a third primary style.
 Every external application must have `jfoundry-dependencies` in its dependency management. It is the
 public JFoundry BOM for core modules, architecture modules, and framework-neutral adapters. The
 supported `jfoundry-spring-boot-parent` imports it for applications that do not use Spring Cloud; other applications
-must import it explicitly. It belongs in `<dependencyManagement>` and is not a runtime dependency:
+must import it explicitly. It belongs in `<dependencyManagement>` and is not a runtime dependency.
+It does not re-declare JUnit, Jackson, or other stacks already owned by the selected runtime platform BOM:
 
 ```xml
 <dependencyManagement>

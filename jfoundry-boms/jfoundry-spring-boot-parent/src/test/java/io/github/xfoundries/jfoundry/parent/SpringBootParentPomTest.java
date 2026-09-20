@@ -37,7 +37,38 @@ class SpringBootParentPomTest {
         Document document = document(Path.of("..", "..", "pom.xml"));
 
         assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"));
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
+                new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
+                new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"),
+                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"));
+    }
+
+    @Test
+    void frameworkBuildParentDoesNotPinJacksonOrJunitCoordinates() throws Exception {
+        Document document = document(Path.of("..", "..", "pom.xml"));
+
+        assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
+        assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
+        assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isFalse();
+        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+    }
+
+    @Test
+    void foundationDoesNotManageSelectedRuntimePlatformStacks() throws Exception {
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+
+        assertThat(importedBoms(foundation)).containsExactly(
+                new Coordinate("org.jmolecules", "jmolecules-bom", "${jmolecules.version}"));
+        assertThat(managesDependency(foundation, "tools.jackson.core", "jackson-databind")).isFalse();
+        assertThat(managesDependency(foundation, "org.junit.jupiter", "junit-jupiter")).isFalse();
+        assertThat(managesDependency(foundation, "org.mockito", "mockito-core")).isFalse();
+        assertThat(managesDependency(foundation, "org.slf4j", "slf4j-api")).isFalse();
+        assertThat(managesDependency(foundation, "io.opentelemetry", "opentelemetry-api")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(foundation, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(foundation, "com.h2database", "h2")).isFalse();
+        assertThat(managesDependency(foundation, "org.hibernate.orm", "hibernate-core")).isFalse();
     }
 
     @Test
@@ -111,6 +142,10 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
+        assertThat(managesDependency(boot, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(boot, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(boot, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));

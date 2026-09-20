@@ -11,7 +11,9 @@ Every external application must have `jfoundry-dependencies` in dependency manag
 versions for JFoundry core, architecture, and framework-neutral adapter modules. The JFoundry Boot
 parent imports it automatically; other applications must import it explicitly. It belongs in
 `<dependencyManagement>` and is not a runtime dependency. A Spring runtime BOM manages Spring
-platform versions only; it does not replace the core JFoundry BOM.
+platform versions only; it does not replace the core JFoundry BOM. Foundation, imported through
+`jfoundry-dependencies`, does not re-declare JUnit, Jackson, Mockito, or other stacks already
+owned by the selected Spring Boot parent.
 
 ## Spring Boot
 
