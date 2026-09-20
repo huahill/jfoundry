@@ -37,23 +37,18 @@ class SpringBootParentPomTest {
         Document document = document(Path.of("..", "..", "pom.xml"));
 
         assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"));
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
+                new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
+                new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"));
     }
 
     @Test
-    void frameworkBuildParentManagesInternalPlatformStacks() throws Exception {
+    void frameworkBuildParentDoesNotPinJacksonOrJunitCoordinates() throws Exception {
         Document document = document(Path.of("..", "..", "pom.xml"));
 
-        assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isTrue();
-        assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isTrue();
-        assertThat(managesDependency(document, "org.mockito", "mockito-core")).isTrue();
-        assertThat(managesDependency(document, "org.slf4j", "slf4j-api")).isTrue();
-        assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isTrue();
-        assertThat(managesDependency(document, "org.apache.kafka", "kafka-clients")).isTrue();
-        assertThat(managesDependency(document, "com.rabbitmq", "amqp-client")).isTrue();
+        assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
+        assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
         assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
-        assertThat(managesDependency(document, "org.hibernate.orm", "hibernate-core")).isTrue();
-        assertThat(managesDependency(document, "com.h2database", "h2")).isTrue();
     }
 
     @Test

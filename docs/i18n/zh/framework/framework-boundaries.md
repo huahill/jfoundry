@@ -66,7 +66,7 @@ Spring Boot 自动配置模块与启动器仍按能力划分。
 
 `jfoundry-foundation-dependencies` 只管理运行时无关、且选定运行时平台 BOM 尚未管理的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、JobRunr、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
 
-Foundation 不得再声明 Spring Boot、Quarkus 或 Helidon 平台 BOM 已经管理的栈，包括 JUnit、Mockito、Jackson、SLF4J、OpenTelemetry、Kafka/RabbitMQ/RocketMQ 客户端、Hibernate 和 JDBC 驱动。这些版本跟随选定运行时。仓库内部的 `jfoundry-parent` 可以在编译 JFoundry 自身时管理它们；该 Parent 不是面向使用方的 BOM。
+Foundation 不得再声明 Spring Boot、Quarkus 或 Helidon 平台 BOM 已经管理的栈，包括 JUnit、Mockito、Jackson、SLF4J、OpenTelemetry、Kafka/RabbitMQ/RocketMQ 客户端、Hibernate 和 JDBC 驱动。这些版本跟随选定运行时。根 `jfoundry-parent` 可以导入 JUnit 和 Jackson BOM 以便编译 JFoundry 自身。它不得直接钉死这些 GA，否则会覆盖更近的运行时 BOM。
 
 各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。若官方平台 BOM 会破坏 Foundation 所管理的运行时无关组件，运行时 BOM 可以提供范围严格且已记录原因的兼容性覆盖；Helidon 的 Jackson annotations 覆盖即属于此类例外。
 

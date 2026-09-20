@@ -100,8 +100,8 @@ jMolecules coordinates, but it does not manage their Spring-specific artifacts.
 
 Foundation must not re-declare platform stacks already owned by Spring Boot, Quarkus, or Helidon BOMs,
 including JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ clients, Hibernate,
-and JDBC drivers. Those versions follow the selected runtime. The repository's internal `jfoundry-parent`
-may manage them for compiling JFoundry itself; that parent is not a consumer BOM.
+and JDBC drivers. Those versions follow the selected runtime. The root `jfoundry-parent` may import JUnit and Jackson BOMs for compiling JFoundry itself.
+It must not pin those GAs directly, or Maven would override the nearer runtime BOM.
 
 Each runtime BOM owns its own ecosystem: `jfoundry-spring-boot-dependencies` owns Spring Boot and
 Spring-specific integration coordinates, `jfoundry-quarkus-dependencies` owns Quarkus coordinates, and
