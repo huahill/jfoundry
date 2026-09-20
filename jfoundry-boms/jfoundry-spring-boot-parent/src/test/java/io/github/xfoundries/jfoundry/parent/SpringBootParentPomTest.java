@@ -39,7 +39,8 @@ class SpringBootParentPomTest {
         assertThat(importedBoms(document)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
                 new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
-                new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"));
+                new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"),
+                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"));
     }
 
     @Test
@@ -48,6 +49,7 @@ class SpringBootParentPomTest {
 
         assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
         assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
+        assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isFalse();
         assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
     }
 
