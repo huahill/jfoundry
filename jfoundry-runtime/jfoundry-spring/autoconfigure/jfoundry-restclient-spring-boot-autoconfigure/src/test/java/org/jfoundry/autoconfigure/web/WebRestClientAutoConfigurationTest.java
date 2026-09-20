@@ -2,6 +2,7 @@ package org.jfoundry.autoconfigure.web;
 
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.http.spring.client.HttpLoggingInterceptor;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -62,6 +63,24 @@ class WebRestClientAutoConfigurationTest {
                     assertThat(ReflectionTestUtils.getField(interceptor, "level")).isEqualTo(HttpLoggingLevel.HEADERS);
                     assertThat(ReflectionTestUtils.getField(interceptor, "format")).isEqualTo(HttpLoggingFormat.INLINE);
                 });
+    }
+
+    @Test
+    void bindsDefaultAndConfiguredIncludedHeadersToRestClientBuilder() {
+        contextRunner
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=HEADERS")
+                .run(context -> {
+                    var interceptor = configuredInterceptor(context);
+                    assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLogging()
+                            .getIncludedHeaders()).isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "includedHeaders"))
+                            .isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+                });
+        contextRunner
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=HEADERS",
+                        "jfoundry.web.rest-client.logging.included-headers[0]=*")
+                .run(context -> assertThat(ReflectionTestUtils.getField(configuredInterceptor(context),
+                        "includedHeaders")).isEqualTo(java.util.List.of("*")));
     }
 
     @Test

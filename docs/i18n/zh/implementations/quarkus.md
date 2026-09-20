@@ -359,7 +359,9 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 出站日志需要添加 `jfoundry-restclient-quarkus-runtime`。它会引入 Quarkus MicroProfile REST Client
 扩展，并把 provider 自动注册到每个 REST Client builder。出站日志使用
 `jfoundry.web.rest-client.logging.level`，默认值为 `NONE`，布局使用
-`jfoundry.web.rest-client.logging.format`，默认值为 `HUMAN`。该适配器不支持 Spring `WebClient`。
+`jfoundry.web.rest-client.logging.format`，默认值为 `HUMAN`。入站 included-headers 使用
+`jfoundry.web.quarkus.logging.included-headers`，出站使用 `jfoundry.web.rest-client.logging.included-headers`；
+配置列表会替换诊断默认值，`*` 可在脱敏后输出全部 header。该适配器不支持 Spring `WebClient`。
 
 所有 URI 都会移除 query、user info 与 fragment。敏感 header 和嵌套 JSON 字段以不区分大小写的方式脱敏，
 `FULL` 最多保留 8 KiB。客户端时长在响应 header 到达时结束，响应 body 日志在消费或关闭后出现。Jakarta REST

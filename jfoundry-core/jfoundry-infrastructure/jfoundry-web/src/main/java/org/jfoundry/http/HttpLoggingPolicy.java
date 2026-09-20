@@ -2,12 +2,15 @@ package org.jfoundry.http;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /// Defines the runtime-neutral security limits for JFoundry HTTP diagnostic logging.
 public final class HttpLoggingPolicy {
@@ -17,6 +20,20 @@ public final class HttpLoggingPolicy {
 
     /// Replacement used for sensitive values.
     public static final String REDACTED = "<redacted>";
+
+    /// Marker that includes every header after redaction.
+    public static final String ALL_HEADERS = "*";
+
+    /// Default request and response headers retained at `HEADERS` and `FULL`.
+    ///
+    /// A configured list replaces this default. `{@value #ALL_HEADERS}` includes every header.
+    public static final List<String> DEFAULT_INCLUDED_HEADERS = List.of(
+            "accept",
+            "authorization",
+            "content-type",
+            "content-length",
+            "location",
+            "x-request-id");
 
     private static final Set<String> SENSITIVE_HEADERS = Set.of(
             "authorization", "proxy_authorization", "cookie", "set_cookie", "x_api_key", "api_key",
@@ -39,13 +56,28 @@ public final class HttpLoggingPolicy {
         }
     }
 
-    /// Returns an immutable header description with sensitive values replaced.
+    /// Returns an immutable header description limited to the default diagnostic names.
     public static Map<String, List<String>> describeHeaders(Map<String, ? extends List<?>> headers) {
+        return describeHeaders(headers, DEFAULT_INCLUDED_HEADERS);
+    }
+
+    /// Returns an immutable header description limited to `includedHeaders`.
+    ///
+    /// A configured list replaces the default. `{@value #ALL_HEADERS}` includes every header. Sensitive
+    /// values are still replaced.
+    public static Map<String, List<String>> describeHeaders(Map<String, ? extends List<?>> headers,
+            Collection<String> includedHeaders) {
         Objects.requireNonNull(headers, "headers must not be null");
+        var included = includedHeaderNames(includedHeaders);
         var described = new LinkedHashMap<String, List<String>>();
-        headers.forEach((name, values) -> described.put(name, isSensitiveHeader(name)
-                ? List.of(REDACTED)
-                : values.stream().map(String::valueOf).toList()));
+        headers.forEach((name, values) -> {
+            if (name == null || !included.test(name)) {
+                return;
+            }
+            described.put(name, isSensitiveHeader(name)
+                    ? List.of(REDACTED)
+                    : values.stream().map(String::valueOf).toList());
+        });
         return Map.copyOf(described);
     }
 
@@ -63,6 +95,19 @@ public final class HttpLoggingPolicy {
         return SENSITIVE_JSON_FIELDS.contains(normalized) || normalized.contains("password")
                 || normalized.contains("secret") || normalized.contains("token")
                 || normalized.endsWith("api_key") || normalized.contains("credential");
+    }
+
+    private static Predicate<String> includedHeaderNames(Collection<String> includedHeaders) {
+        var names = includedHeaders == null ? DEFAULT_INCLUDED_HEADERS : includedHeaders;
+        var allowed = names.stream()
+                .filter(Objects::nonNull)
+                .map(name -> name.trim().toLowerCase(Locale.ROOT))
+                .filter(name -> !name.isEmpty())
+                .collect(Collectors.toUnmodifiableSet());
+        if (allowed.contains(ALL_HEADERS)) {
+            return name -> true;
+        }
+        return name -> allowed.contains(name.toLowerCase(Locale.ROOT));
     }
 
     private static String normalize(String name) {

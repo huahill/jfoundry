@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -12,6 +14,7 @@ import java.util.function.LongSupplier;
 import org.jfoundry.http.HttpLogFormatter;
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.http.HttpLoggingSide;
 import org.jfoundry.http.spring.HttpLoggingSupport;
 import org.slf4j.Logger;
@@ -36,28 +39,43 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private final HttpLoggingFormat format;
 
+    private final List<String> includedHeaders;
+
     private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
 
     /// Creates an interceptor with the requested logging detail and human-readable layout.
     public HttpLoggingInterceptor(HttpLoggingLevel level) {
-        this(level, HttpLoggingFormat.HUMAN, LOG::isInfoEnabled, System::nanoTime);
+        this(level, HttpLoggingFormat.HUMAN, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, LOG::isInfoEnabled,
+                System::nanoTime);
     }
 
     /// Creates an interceptor with the requested logging detail and layout.
     public HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format) {
-        this(level, format, LOG::isInfoEnabled, System::nanoTime);
+        this(level, format, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    /// Creates an interceptor with the requested logging detail, layout, and included headers.
+    public HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format,
+            Collection<String> includedHeaders) {
+        this(level, format, includedHeaders, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingInterceptor(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, HttpLoggingFormat.INLINE, infoEnabled, nanoTime);
+        this(level, HttpLoggingFormat.INLINE, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
     }
 
     HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format, BooleanSupplier infoEnabled,
             LongSupplier nanoTime) {
+        this(level, format, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
+    }
+
+    HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format, Collection<String> includedHeaders,
+            BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
         this.format = Objects.requireNonNull(format, "format must not be null");
+        this.includedHeaders = List.copyOf(Objects.requireNonNull(includedHeaders, "includedHeaders must not be null"));
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
@@ -86,7 +104,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private void logRequest(HttpRequest request, byte[] body, String method, String uri) {
         logAll(HttpLogFormatter.request(this.format, HttpLoggingSide.CLIENT, method, uri,
-                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(request.getHeaders()) : null));
+                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(request.getHeaders(), this.includedHeaders) : null));
         if (this.level.includesBodies()) {
             logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.CLIENT, method, uri,
                     HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)));
@@ -119,7 +137,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         }
         logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.CLIENT, method, uri, status, null,
                 durationMillis,
-                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(response.getHeaders()) : null,
+                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(response.getHeaders(), this.includedHeaders) : null,
                 null));
         return status;
     }

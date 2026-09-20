@@ -413,7 +413,9 @@ interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging.level
 Add `jfoundry-restclient-quarkus-runtime` for outbound logging. It includes the Quarkus MicroProfile
 REST Client extension and registers the provider with every REST Client builder. Outbound logging
 uses `jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
-defaulting to `HUMAN`. Spring `WebClient` is not
+defaulting to `HUMAN`. Included headers use `jfoundry.web.quarkus.logging.included-headers` inbound
+and `jfoundry.web.rest-client.logging.included-headers` outbound; a configured list replaces the
+diagnostic default, and `*` includes every header after redaction. Spring `WebClient` is not
 supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are

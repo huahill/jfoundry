@@ -184,7 +184,9 @@ Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
 `jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
-defaulting to `HUMAN`. This integration is verified on the JVM.
+defaulting to `HUMAN`. Included headers use `jfoundry.web.helidon.logging.included-headers` inbound
+and `jfoundry.web.rest-client.logging.included-headers` outbound; a configured list replaces the
+diagnostic default, and `*` includes every header after redaction. This integration is verified on the JVM.
 Helidon's supported 4.5.x REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.

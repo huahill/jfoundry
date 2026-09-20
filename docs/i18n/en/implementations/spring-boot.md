@@ -256,6 +256,9 @@ The auto-configured filter excludes `/actuator/health/**` by default, including 
 probes. Set `jfoundry.web.mvc.logging.excluded-paths` to a list of Ant-style application paths to replace
 the default list; include `/actuator/health/**` in that list when adding exclusions while retaining the
 health exclusion. Matching removes the Servlet context and servlet paths before evaluating a pattern.
+`HEADERS` and `FULL` include a diagnostic header subset by default; set
+`jfoundry.web.mvc.logging.included-headers` or `jfoundry.web.rest-client.logging.included-headers`
+to replace it, or use `*` to include every header after redaction.
 
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
 complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at

@@ -5,6 +5,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,6 +19,7 @@ import jakarta.ws.rs.ext.WriterInterceptorContext;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 
 /// Shared mechanics for server and client JAX-RS HTTP logging providers.
 ///
@@ -50,6 +52,16 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
 
     protected final HttpLoggingFormat configuredFormat(String name) {
         return configuredEnum(name, HttpLoggingFormat.class, HttpLoggingFormat.HUMAN);
+    }
+
+    protected final List<String> configuredIncludedHeaders(String name) {
+        try {
+            return ConfigProvider.getConfig().getOptionalValues(name, String.class)
+                    .orElse(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+        } catch (RuntimeException exception) {
+            safely(() -> info("HTTP logging configuration could not be read: property=" + name));
+            return HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS;
+        }
     }
 
     private <T extends Enum<T>> T configuredEnum(String name, Class<T> type, T defaultValue) {

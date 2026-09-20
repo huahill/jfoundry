@@ -1,10 +1,12 @@
 package org.jfoundry.autoconfigure.webmvc;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import jakarta.servlet.DispatcherType;
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -49,6 +51,18 @@ class WebMvcHttpLoggingAutoConfigurationTest {
                             .isEqualTo(HttpLoggingFormat.INLINE);
                     assertThat(format(registration(context))).isEqualTo(HttpLoggingFormat.INLINE);
                 });
+    }
+
+    @Test
+    void bindsDefaultAndConfiguredIncludedHeadersOntoTheFilter() {
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=HEADERS").run(context -> {
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getIncludedHeaders())
+                    .isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+            assertThat(includedHeaders(registration(context))).isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+        });
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=HEADERS",
+                "jfoundry.web.mvc.logging.included-headers[0]=*")
+                .run(context -> assertThat(includedHeaders(registration(context))).containsExactly("*"));
     }
 
     @Test
@@ -217,6 +231,11 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     private static HttpLoggingFormat format(FilterRegistrationBean<HttpLoggingFilter> registration) {
         return (HttpLoggingFormat) ReflectionTestUtils.getField(registration.getFilter(), "format");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> includedHeaders(FilterRegistrationBean<HttpLoggingFilter> registration) {
+        return (List<String>) ReflectionTestUtils.getField(registration.getFilter(), "includedHeaders");
     }
 
     @Configuration(proxyBeanMethods = false)
