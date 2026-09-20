@@ -267,7 +267,7 @@ complete, error, or timeout. Tee wrappers forward request and response bytes imm
 most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
 directions emit request, headers, body, and response details at `INFO`, always remove URI queries,
 redact sensitive headers and nested JSON fields, and omit unsafe body representations. `HUMAN` renders
-those details as Feign-style `-->` / `<--` lines with bodies on one line; `INLINE` keeps compact one-line events. These logs supplement rather than replace Micrometer
+those details as Feign-style `-->` / `<--` blocks: method and URI appear only on the request start line, bodies stay on one line, and each side closes with `END HTTP`; `INLINE` keeps compact one-line events. These logs supplement rather than replace Micrometer
 metrics/traces and application-owned business audit events.
 
 Redisson locking is optional. Use it only when a use case needs cross-instance coordination that

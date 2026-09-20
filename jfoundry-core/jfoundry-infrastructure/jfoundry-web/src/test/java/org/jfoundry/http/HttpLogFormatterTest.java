@@ -57,7 +57,6 @@ class HttpLogFormatterTest {
         assertThat(HttpLogFormatter.requestBody(HttpLoggingFormat.HUMAN, HttpLoggingSide.CLIENT, "POST",
                 "https://downstream.test/login",
                 "{\"account\":\"rdcopen\",\"password\":\"<redacted>\"}")).containsExactly(
-                "--> POST https://downstream.test/login [body]",
                 "--> {\"account\":\"rdcopen\",\"password\":\"<redacted>\"}");
     }
 
@@ -82,10 +81,18 @@ class HttpLogFormatterTest {
         assertThat(HttpLogFormatter.response(HttpLoggingFormat.HUMAN, HttpLoggingSide.SERVER, "GET",
                 "https://service.test/orders", 200, "complete", 64, HEADERS,
                 "{\"page\":1,\"items\":[{\"name\":\"Ada\"}]}")).containsExactly(
-                "<-- GET https://service.test/orders 200 (64ms, complete)",
+                "<-- 200 (64ms, complete)",
                 "<-- Accept: application/json, text/plain",
                 "<-- Authorization: <redacted>",
                 "<-- {\"page\":1,\"items\":[{\"name\":\"Ada\"}]}");
+    }
+
+    @Test
+    void humanEndClosesRequestAndResponseBlocks() {
+        assertThat(HttpLogFormatter.end(HttpLoggingFormat.HUMAN, true)).containsExactly("--> END HTTP");
+        assertThat(HttpLogFormatter.end(HttpLoggingFormat.HUMAN, false)).containsExactly("<-- END HTTP");
+        assertThat(HttpLogFormatter.end(HttpLoggingFormat.INLINE, true)).isEmpty();
+        assertThat(HttpLogFormatter.end(HttpLoggingFormat.INLINE, false)).isEmpty();
     }
 
     @Test

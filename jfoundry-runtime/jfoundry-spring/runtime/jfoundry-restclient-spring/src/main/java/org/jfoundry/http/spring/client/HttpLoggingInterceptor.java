@@ -109,6 +109,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.CLIENT, method, uri,
                     HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)));
         }
+        logAll(HttpLogFormatter.end(this.format, true));
     }
 
     private static String requestMethod(HttpRequest request) {
@@ -133,12 +134,18 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             status = response.getStatusCode().value();
         } catch (IOException | RuntimeException exception) {
             logAll(HttpLogFormatter.responseMetadataUnavailable(this.format, method, uri));
+            if (!this.level.includesBodies()) {
+                logAll(HttpLogFormatter.end(this.format, false));
+            }
             return null;
         }
         logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.CLIENT, method, uri, status, null,
                 durationMillis,
                 this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(response.getHeaders(), this.includedHeaders) : null,
                 null));
+        if (!this.level.includesBodies()) {
+            logAll(HttpLogFormatter.end(this.format, false));
+        }
         return status;
     }
 
@@ -159,6 +166,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private final HttpLoggingFormat format;
 
         private BodyLoggingInputStream body;
+
+        private boolean closed;
 
         private LoggingClientHttpResponse(HttpLoggingFormat format, ClientHttpResponse delegate, String method,
                 String uri, Integer status) {
@@ -195,6 +204,11 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         @Override
         public void close() {
+            if (this.closed) {
+                this.delegate.close();
+                return;
+            }
+            this.closed = true;
             logUnconsumedErrorBody();
             if (this.body != null) {
                 this.body.logBody();
@@ -204,6 +218,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
                         HttpLoggingSupport.describeBody(this.delegate.getHeaders().getContentType(),
                                 new byte[0], false, false)));
             }
+            logAll(HttpLogFormatter.end(this.format, false));
             this.delegate.close();
         }
 
