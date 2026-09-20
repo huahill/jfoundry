@@ -15,11 +15,15 @@ create a published parent or inheritance boundary.
   line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
 - `jfoundry-foundation-dependencies` manages low-level, runtime-neutral dependency versions and
-  coordinates. It does not manage runtime starters, deployment artifacts, or runtime-specific Native
-  Image integrations.
+  coordinates that the selected runtime platform BOM does not already own. It does not manage
+  runtime starters, deployment artifacts, runtime-specific Native Image integrations, or platform
+  stacks such as JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ clients,
+  Hibernate, and JDBC drivers.
 - `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
   foundation and module BOMs and is the required JFoundry BOM for every external application.
+  Applications with a platform parent still import it; Foundation no longer fights that parent for
+  JUnit or Jackson versions.
 - `jfoundry-spring-boot-dependencies`, `jfoundry-spring-cloud-dependencies`,
   `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` are standalone runtime BOMs.
   They do not import `jfoundry-dependencies` or `jfoundry-foundation-dependencies`; they manage only
@@ -35,14 +39,14 @@ BOMs.
 An external application using either Spring parent does not import JFoundry BOMs directly. An
 application using another parent imports exactly one matching runtime BOM before
 `jfoundry-dependencies`; Maven applies the first imported management entry, so this preserves the
-runtime platform's tested constraints while Foundation supplies components the platform does not manage.
+runtime platform's tested constraints while Foundation supplies only components the platform does not manage.
 Do not make a runtime BOM implicitly carry JFoundry module versions, and do not use `jfoundry-parent`
 outside this repository. The Boot-only and Cloud Spring runtime BOMs are mutually exclusive. The
 former combined Spring runtime coordinate is intentionally removed without a compatibility alias.
 
 Runtime BOM overrides must be exceptional, platform-local, and documented with the upstream reason and
 validation scope. The Helidon `groovy-all` release-validation override and its Jackson annotations
-alignment with Foundation's Jackson 3 line are examples; neither is a general dependency-management
+override are examples; neither is a general dependency-management
 pattern.
 
 ## Runtime Platform Ecosystem Scope

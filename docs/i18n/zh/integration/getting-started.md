@@ -30,7 +30,8 @@ JFoundry 落地指导。
 
 所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理。它是 JFoundry 公共 BOM，用于管理核心模块、架构模块和
 框架无关适配器的版本；使用 `jfoundry-spring-boot-parent` 时由该 Parent 自动导入，否则应用需要显式导入。它放在
-`<dependencyManagement>` 中，不是运行时依赖：
+`<dependencyManagement>` 中，不是运行时依赖。它不会再声明选定运行时平台 BOM 已经管理的 JUnit、Jackson
+等平台栈：
 
 ```xml
 <dependencyManagement>

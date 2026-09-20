@@ -6,7 +6,8 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理，它管理 JFoundry 核心、架构和框架无关适配器的版本。
 使用 JFoundry Boot Parent 时由 Parent 自动导入，否则应用需要显式导入。它属于 `<dependencyManagement>`，不是运行时
-依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。
+依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。通过 `jfoundry-dependencies` 导入的 Foundation
+不会再声明选定 Spring Boot Parent 已经管理的 JUnit、Jackson、Mockito 等平台栈。
 
 ## Spring Boot
 

@@ -28,7 +28,6 @@
     <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
     <!-- Imported BOMs -->
     <jmolecules.version>2025.0.2</jmolecules.version>
-    <junit-jupiter.version>6.1.3</junit-jupiter.version>
 
     <!-- Domain modeling and architecture -->
     <archunit.version>1.5.0</archunit.version>
@@ -47,16 +46,9 @@
     <microprofile-config.version>3.1.1</microprofile-config.version>
     <parsson.version>1.1.9</parsson.version>
 
-    <!-- Persistence and database integration -->
+    <!-- Persistence -->
     <mybatis-plus.version>3.5.17</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
-    <hibernate.version>7.4.9.Final</hibernate.version>
-    <h2.version>2.5.250</h2.version>
-    <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
-    <postgresql.version>42.7.13</postgresql.version>
-
-    <!-- Serialization and data binding -->
-    <jackson3.version>3.2.2</jackson3.version>
 
     <!-- Mapping and code generation -->
     <mapstruct.version>1.6.3</mapstruct.version>
@@ -71,26 +63,16 @@
     <!-- Caching -->
     <caffeine.version>3.2.4</caffeine.version>
 
-    <!-- Messaging and background jobs -->
+    <!-- Runtime-neutral jobs, cache, and optional MQTT -->
     <jobrunr.version>8.8.2</jobrunr.version>
-    <kafka-clients.version>4.3.1</kafka-clients.version>
     <mqttv3.version>1.2.5</mqttv3.version>
-    <rabbitmq-amqp-client.version>5.36.0</rabbitmq-amqp-client.version>
     <redisson.version>4.7.0</redisson.version>
-    <rocketmq-client.version>5.5.1</rocketmq-client.version>
 
-    <!-- Runtime utilities -->
+    <!-- Compatibility overrides for runtime-neutral clients -->
     <javassist.version>3.33.0-GA</javassist.version>
-    <opentelemetry.version>1.66.0</opentelemetry.version>
-    <slf4j.version>2.0.19</slf4j.version>
-    <snakeyaml.version>2.7</snakeyaml.version>
 
-    <!-- Testing -->
+    <!-- Runtime-neutral test infrastructure -->
     <awaitility.version>4.3.0</awaitility.version>
-    <assertj.version>3.27.7</assertj.version>
-    <byte-buddy.version>1.18.14</byte-buddy.version>
-    <mockito.version>5.23.0</mockito.version>
-    <junit-platform.version>6.1.3</junit-platform.version>
     <testcontainers.version>1.21.4</testcontainers.version>
   </properties>
   <dependencyManagement>
@@ -103,14 +85,6 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>org.junit</groupId>
-        <artifactId>junit-bom</artifactId>
-        <version>${junit-jupiter.version}</version>
-        <type>pom</type>
-        <scope>import</scope>
-      </dependency>
-
       <!-- Domain modeling and architecture -->
       <dependency>
         <groupId>com.tngtech.archunit</groupId>
@@ -169,7 +143,7 @@
         <version>${parsson.version}</version>
       </dependency>
 
-      <!-- Persistence and database integration -->
+      <!-- Persistence -->
       <dependency>
         <groupId>com.baomidou</groupId>
         <artifactId>mybatis-plus-annotation</artifactId>
@@ -195,34 +169,6 @@
         <artifactId>jakarta.persistence-api</artifactId>
         <version>${jakarta-persistence.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.hibernate.orm</groupId>
-        <artifactId>hibernate-core</artifactId>
-        <version>${hibernate.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.h2database</groupId>
-        <artifactId>h2</artifactId>
-        <version>${h2.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.mysql</groupId>
-        <artifactId>mysql-connector-j</artifactId>
-        <version>${mysql-connector-j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.postgresql</groupId>
-        <artifactId>postgresql</artifactId>
-        <version>${postgresql.version}</version>
-      </dependency>
-
-      <!-- Serialization and data binding -->
-      <dependency>
-        <groupId>tools.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson3.version}</version>
-      </dependency>
-
       <!-- Mapping and code generation -->
       <dependency>
         <groupId>org.mapstruct</groupId>
@@ -269,7 +215,7 @@
         <version>${caffeine.version}</version>
       </dependency>
 
-      <!-- Messaging and background jobs -->
+      <!-- Runtime-neutral jobs, cache, and optional MQTT -->
       <dependency>
         <groupId>org.eclipse.paho</groupId>
         <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
@@ -281,98 +227,23 @@
         <version>${jobrunr.version}</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka-clients</artifactId>
-        <version>${kafka-clients.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.rocketmq</groupId>
-        <artifactId>rocketmq-client</artifactId>
-        <version>${rocketmq-client.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>com.rabbitmq</groupId>
-        <artifactId>amqp-client</artifactId>
-        <version>${rabbitmq-amqp-client.version}</version>
-      </dependency>
-      <dependency>
         <groupId>org.redisson</groupId>
         <artifactId>redisson</artifactId>
         <version>${redisson.version}</version>
       </dependency>
 
-      <!-- Runtime utilities -->
-      <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-api</artifactId>
-        <version>${opentelemetry.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-sdk</artifactId>
-        <version>${opentelemetry.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.opentelemetry</groupId>
-        <artifactId>opentelemetry-sdk-testing</artifactId>
-        <version>${opentelemetry.version}</version>
-      </dependency>
+      <!-- Compatibility overrides for runtime-neutral clients -->
       <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>${javassist.version}</version>
       </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-simple</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.yaml</groupId>
-        <artifactId>snakeyaml</artifactId>
-        <version>${snakeyaml.version}</version>
-      </dependency>
 
-      <!-- Testing -->
+      <!-- Runtime-neutral test infrastructure -->
       <dependency>
         <groupId>org.awaitility</groupId>
         <artifactId>awaitility</artifactId>
         <version>${awaitility.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.assertj</groupId>
-        <artifactId>assertj-core</artifactId>
-        <version>${assertj.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mockito</groupId>
-        <artifactId>mockito-core</artifactId>
-        <version>${mockito.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy</artifactId>
-        <version>${byte-buddy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>net.bytebuddy</groupId>
-        <artifactId>byte-buddy-agent</artifactId>
-        <version>${byte-buddy.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.jupiter</groupId>
-        <artifactId>junit-jupiter</artifactId>
-        <version>${junit-jupiter.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.junit.platform</groupId>
-        <artifactId>junit-platform-launcher</artifactId>
-        <version>${junit-platform.version}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
