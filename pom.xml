@@ -75,7 +75,7 @@
         <kafka-clients.version>4.3.1</kafka-clients.version>
         <rabbitmq-amqp-client.version>5.36.0</rabbitmq-amqp-client.version>
         <rocketmq-client.version>5.5.1</rocketmq-client.version>
-        <hibernate.version>7.4.9.Final</hibernate.version>
+        <hibernate.version>7.4.10.Final</hibernate.version>
         <h2.version>2.5.250</h2.version>
         <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
         <postgresql.version>42.7.13</postgresql.version>
