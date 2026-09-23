@@ -61,7 +61,7 @@
     <commons-text.version>1.15.0</commons-text.version>
 
     <!-- Caching -->
-    <caffeine.version>3.2.4</caffeine.version>
+    <caffeine.version>3.3.0</caffeine.version>
 
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
     <jobrunr.version>8.8.2</jobrunr.version>
