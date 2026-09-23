@@ -34,7 +34,7 @@ public abstract class AbstractAggregateRepository<
     }
 
     /// Loads and restores one complete aggregate, returning null when it does not exist.
-    protected abstract T doFindById(ID id);
+    protected abstract @Nullable T doFindById(ID id);
 
     /// Persists one complete new aggregate.
     protected abstract void doAdd(T aggregate);
@@ -46,7 +46,7 @@ public abstract class AbstractAggregateRepository<
     protected abstract void doRemove(T aggregate);
 
     @Override
-    public T findById(ID id) {
+    public @Nullable T findById(ID id) {
         if (id == null) {
             throw new IllegalArgumentException("Aggregate id must not be null.");
         }

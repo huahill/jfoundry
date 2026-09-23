@@ -7,8 +7,10 @@ import org.jfoundry.application.inbox.InboxMessage;
 import org.jfoundry.application.inbox.InboxMessageStatus;
 
 import java.time.Instant;
+import org.jspecify.annotations.NullUnmarked;
 
 @TableName("jfoundry_inbox_message")
+@NullUnmarked
 public class InboxMessageData {
 
     @TableId(type = IdType.ASSIGN_UUID)

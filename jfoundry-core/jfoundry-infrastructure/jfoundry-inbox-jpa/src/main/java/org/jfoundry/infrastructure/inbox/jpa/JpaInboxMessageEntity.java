@@ -11,11 +11,13 @@ import org.jfoundry.application.inbox.InboxMessageStatus;
 
 import java.time.Instant;
 import java.util.UUID;
+import org.jspecify.annotations.NullUnmarked;
 
 /// Jakarta Persistence mapping for a single Inbox message.
 @Entity
 @Table(name = "jfoundry_inbox_message", uniqueConstraints =
         @UniqueConstraint(name = "uk_inbox_consumer_message", columnNames = {"consumer_name", "message_id"}))
+@NullUnmarked
 public class JpaInboxMessageEntity {
 
     @Id

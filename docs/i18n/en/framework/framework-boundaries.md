@@ -128,18 +128,23 @@ workflow self-check make removal or weakening of this gate visible in CI.
 
 ## Java Nullness Contracts
 
-Domain and Application packages use JSpecify `@NullMarked` to make reference types non-null by default.
+Domain, Application, and selected Infrastructure public contracts use JSpecify `@NullMarked` to make
+reference types non-null by default. The selected Infrastructure surface is persistence lookup and
+request-correlation. Runtime assembly, auto-configuration, deployment processors, and integration-test
+packages stay unmarked unless they expose a public nullable contract.
+
 Public API positions that legitimately accept or return `null` use `@Nullable`; examples include a missing
-aggregate from `AggregateRepository.findById`, optional message routing keys, and optional Outbox/Inbox
-state. The mutable `InboxMessage` and `OutboxMessage` persistence carriers remain `@NullUnmarked` at the
-class boundary because their no-argument construction and mapper hydration create a temporarily incomplete
-object. Their stable optional properties are still annotated explicitly.
+aggregate from `AggregateRepository.findById`, optional message routing keys, optional request-correlation
+input, and optional Outbox/Inbox state. Lookups that already return `Optional` keep that shape instead of
+`null`. Mutable persistence carriers such as `InboxMessage`, `OutboxMessage`, and JPA/MyBatis mapping types
+remain `@NullUnmarked` at the class boundary because their no-argument construction and mapper hydration
+create a temporarily incomplete object. Their stable optional properties are still annotated explicitly.
 
 These annotations are Java static-analysis metadata. They do not perform runtime validation and do not
 replace constructor checks, `Objects.requireNonNull`, domain invariants, or Jakarta Validation at an HTTP or
-container boundary. New Domain and Application packages should be `@NullMarked`; use `@Nullable` only when
-`null` is part of the supported contract, and use `@NullUnmarked` only as a narrow migration boundary for a
-lifecycle that cannot yet express a sound static contract.
+container boundary. New Domain, Application, persistence, and request-correlation packages should be
+`@NullMarked`; use `@Nullable` only when `null` is part of the supported contract, and use `@NullUnmarked`
+only as a narrow migration boundary for a lifecycle that cannot yet express a sound static contract.
 
 ## Reliable Messaging Boundary
 
@@ -199,5 +204,5 @@ verification reduces feedback time but cannot replace the server-side gate.
   lifecycle, configuration, logging, build-time, and Native Image behavior.
 - Foundation manages only runtime-neutral coordinates; each runtime BOM owns its matching ecosystem.
 - Core tests do not obtain runtime test frameworks through broad starter dependencies.
-- Domain and Application packages declare Java nullness defaults with JSpecify and explicitly annotate
+- Domain, Application, persistence, and request-correlation packages declare Java nullness defaults with JSpecify and explicitly annotate
   supported nullable API positions.

@@ -2,6 +2,7 @@ package org.jfoundry.http.correlation;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /// Validated identifier used to correlate one inbound HTTP request.
 public record RequestCorrelationId(String value) {
@@ -15,12 +16,12 @@ public record RequestCorrelationId(String value) {
     }
 
     /// Parses an identifier using the default maximum length.
-    public static Optional<RequestCorrelationId> parse(String value) {
+    public static Optional<RequestCorrelationId> parse(@Nullable String value) {
         return parse(value, DEFAULT_MAXIMUM_LENGTH);
     }
 
     /// Parses an identifier using the caller's bounded maximum length.
-    public static Optional<RequestCorrelationId> parse(String value, int maximumLength) {
+    public static Optional<RequestCorrelationId> parse(@Nullable String value, int maximumLength) {
         if (maximumLength < 1 || maximumLength > DEFAULT_MAXIMUM_LENGTH) {
             throw new IllegalArgumentException("maximumLength must be between 1 and 64");
         }
