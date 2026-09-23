@@ -9,6 +9,7 @@ import org.jfoundry.application.inbox.InboxMessageStore;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /// Jakarta Persistence implementation of the Inbox persistence SPI.
 public final class JpaInboxMessageStore implements InboxMessageStore {
@@ -124,7 +125,7 @@ public final class JpaInboxMessageStore implements InboxMessageStore {
                 ? InboxClaim.duplicate() : InboxClaim.inProgress();
     }
 
-    private InboxMessageStatus statusOf(String messageId, String consumerName) {
+    private @Nullable InboxMessageStatus statusOf(String messageId, String consumerName) {
         return entityManager.createQuery("""
                 select e.status from JpaInboxMessageEntity e
                  where e.messageId = :messageId and e.consumerName = :consumerName

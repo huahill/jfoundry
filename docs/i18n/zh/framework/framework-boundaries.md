@@ -81,16 +81,20 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## Java 空值契约
 
-领域层和应用层包使用 JSpecify `@NullMarked`，默认把引用类型声明为非空。公共 API 中确实支持
-`null` 的位置使用 `@Nullable`，例如 `AggregateRepository.findById` 查询不到聚合、可选的消息路由键，
-以及 Outbox/Inbox 的可选状态。可变的 `InboxMessage` 与 `OutboxMessage` 存储载体在类边界保留
-`@NullUnmarked`：它们通过无参构造和映射器分阶段填充，在这一过程中对象会暂时处于不完整状态；其中稳定的
-可空属性仍显式标注。
+领域层、应用层，以及选定的基础设施公共契约使用 JSpecify `@NullMarked`，默认把引用类型声明为非空。
+选定的基础设施面是持久化查找和请求关联。运行时装配、自动配置、部署处理器和集成测试包默认不标记，
+除非它们暴露公共的可空契约。
+
+公共 API 中确实支持 `null` 的位置使用 `@Nullable`，例如 `AggregateRepository.findById` 查询不到聚合、
+可选的消息路由键、可选的请求关联输入，以及 Outbox/Inbox 的可选状态。已经返回 `Optional` 的查找保持
+该形状，而不是改回 `null`。可变的 `InboxMessage`、`OutboxMessage` 以及 JPA/MyBatis 映射类型在类边界
+保留 `@NullUnmarked`：它们通过无参构造和映射器分阶段填充，在这一过程中对象会暂时处于不完整状态；
+其中稳定的可空属性仍显式标注。
 
 这些注解只为 Java 静态分析提供元数据，不执行运行时校验，也不替代构造器检查、
-`Objects.requireNonNull`、领域不变式或 HTTP/容器边界的 Jakarta Validation。新增领域层和应用层包应使用
-`@NullMarked`；只有当 `null` 确实属于受支持契约时才使用 `@Nullable`；`@NullUnmarked` 仅限于暂时无法
-表达可靠静态契约的特定生命周期迁移边界。
+`Objects.requireNonNull`、领域不变式或 HTTP/容器边界的 Jakarta Validation。新增领域层、应用层、
+持久化和请求关联包应使用 `@NullMarked`；只有当 `null` 确实属于受支持契约时才使用 `@Nullable`；
+`@NullUnmarked` 仅限于暂时无法表达可靠静态契约的特定生命周期迁移边界。
 
 ## 可靠消息边界
 
@@ -132,4 +136,4 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
   构建期与原生镜像行为。
 - Foundation 只管理运行时无关坐标；各运行时 BOM 管理与自身匹配的生态。
 - core 测试不得通过宽泛的启动器依赖间接获得运行时测试框架。
-- 领域层和应用层包使用 JSpecify 声明 Java 空值默认规则，并显式标注受支持的可空 API 位置。
+- 领域层、应用层、持久化和请求关联包使用 JSpecify 声明 Java 空值默认规则，并显式标注受支持的可空 API 位置。

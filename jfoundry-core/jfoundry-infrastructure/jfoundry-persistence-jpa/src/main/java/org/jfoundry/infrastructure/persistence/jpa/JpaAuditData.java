@@ -5,9 +5,11 @@ import jakarta.persistence.MappedSuperclass;
 import org.jfoundry.infrastructure.persistence.AuditStamp;
 
 import java.time.Instant;
+import org.jspecify.annotations.NullUnmarked;
 
 /// Jakarta Persistence mapped superclass for technical audit snapshot fields.
 @MappedSuperclass
+@NullUnmarked
 public abstract class JpaAuditData {
 
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -11,6 +11,7 @@ import org.jfoundry.http.correlation.RequestCorrelationOptions;
 
 import java.io.IOException;
 import java.util.function.Supplier;
+import org.jspecify.annotations.Nullable;
 
 /// Shared request-correlation lifecycle for Jakarta REST runtimes.
 public abstract class AbstractJaxRsRequestCorrelationProvider
@@ -18,13 +19,13 @@ public abstract class AbstractJaxRsRequestCorrelationProvider
 
     public static final int PRIORITY = Priorities.USER - 300;
 
-    private final Supplier<RequestCorrelationOptions> optionsSupplier;
+    private final Supplier<@Nullable RequestCorrelationOptions> optionsSupplier;
     private static final String OPTIONS = AbstractJaxRsRequestCorrelationProvider.class.getName() + ".OPTIONS";
     private static final String PREVIOUS_CONTEXT = AbstractJaxRsRequestCorrelationProvider.class.getName()
             + ".PREVIOUS_CONTEXT";
 
     /// Creates a provider using a runtime-owned options supplier.
-    protected AbstractJaxRsRequestCorrelationProvider(Supplier<RequestCorrelationOptions> optionsSupplier) {
+    protected AbstractJaxRsRequestCorrelationProvider(Supplier<@Nullable RequestCorrelationOptions> optionsSupplier) {
         this.optionsSupplier = java.util.Objects.requireNonNull(optionsSupplier,
                 "optionsSupplier must not be null");
     }

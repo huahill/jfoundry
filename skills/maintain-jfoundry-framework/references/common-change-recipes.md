@@ -59,3 +59,12 @@
 3. Put conditional bean wiring and configuration properties in the matching capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure`.
 4. Add or update a Spring Boot starter only when users need an explicit dependency entry point.
 5. Add runtime adapter tests and auto-configuration condition tests.
+
+## Add JSpecify Nullness
+
+1. Keep Domain, Application, persistence, and request-correlation packages `@NullMarked`. Do not blanket-mark runtime assembly, auto-configuration, deployment processors, or integration tests.
+2. Inherit `org.jspecify:jspecify` from the Domain, Application, Infrastructure, or Architecture aggregator when the module sits there. Add it only to a runtime module that itself exposes a nullable public contract.
+3. Annotate supported `null` API positions with `@Nullable`. Keep existing `Optional` return types for "absent result" lookups such as `RequestCorrelationId.parse`; do not replace those with `null`.
+4. Use `@NullUnmarked` only for staged lifecycle types such as `InboxMessage`, `OutboxMessage`, and JPA/MyBatis mapping objects.
+5. Add a focused `JSpecifyNullnessTest` when introducing a new public nullable contract.
+6. Update `docs/i18n/en/framework/framework-boundaries.md` and the matching Chinese page when the nullness policy itself changes.

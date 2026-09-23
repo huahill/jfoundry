@@ -2,6 +2,7 @@ package org.jfoundry.infrastructure.persistence;
 
 import java.io.Serializable;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /// Base class for aggregate root persistence data objects.
 /// <p>
@@ -14,13 +15,13 @@ import java.util.Objects;
 /// @param <ID> persistence identifier type, which must be serializable
 public abstract class AggregateData<ID extends Serializable> {
 
-    private ID id;
+    private @Nullable ID id;
 
-    public ID getId() {
+    public @Nullable ID getId() {
         return id;
     }
 
-    public void setId(ID id) {
+    public void setId(@Nullable ID id) {
         this.id = id;
     }
 
@@ -36,7 +37,7 @@ public abstract class AggregateData<ID extends Serializable> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
