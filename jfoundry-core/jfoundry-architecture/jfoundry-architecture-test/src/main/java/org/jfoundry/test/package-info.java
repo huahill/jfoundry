@@ -5,4 +5,5 @@
  * ({@link org.jfoundry.test.InMemoryRepository}) and test fixtures that play the infrastructure
  * role in business-side test suites.
  */
+@org.jspecify.annotations.NullMarked
 package org.jfoundry.test;

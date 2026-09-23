@@ -2,13 +2,14 @@ package org.jfoundry.infrastructure.persistence;
 
 import java.time.Instant;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /// Technical audit metadata stored with a persistence snapshot.
 public record AuditStamp(
         Instant createdAt,
-        String createdBy,
+        @Nullable String createdBy,
         Instant lastModifiedAt,
-        String lastModifiedBy) {
+        @Nullable String lastModifiedBy) {
 
     public AuditStamp {
         Objects.requireNonNull(createdAt, "createdAt must not be null");

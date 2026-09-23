@@ -10,6 +10,13 @@
     <description>Technical adapters for persistence, messaging brokers, outbox stores, and inbox stores.</description>
     <packaging>pom</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+    </dependencies>
+
     <subprojects>
         <subproject>jfoundry-web</subproject>
         <subproject>jfoundry-persistence-core</subproject>

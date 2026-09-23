@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import org.jspecify.annotations.Nullable;
 
 /// MyBatis-Plus persistence base for an aggregate whose root is represented by one data object.
 /// <p>
@@ -42,10 +43,10 @@ public abstract class MybatisPlusAggregateRepository<
     protected final BaseMapper<D> mapper;
     private final Function<T, D> toRootData;
     private final Function<ID, K> toDataId;
-    private final DataMapper<T, ID, D, K> dataMapper;
-    private final Class<D> dataType;
+    private final @Nullable DataMapper<T, ID, D, K> dataMapper;
+    private final @Nullable Class<D> dataType;
     private final PersistenceStateKey<VersionState> versionKey;
-    private AggregatePersistenceContext persistenceContext;
+    private @Nullable AggregatePersistenceContext persistenceContext;
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
@@ -55,8 +56,8 @@ public abstract class MybatisPlusAggregateRepository<
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
-            DataMapper<T, ID, D, K> dataMapper,
-            Class<D> dataType) {
+            @Nullable DataMapper<T, ID, D, K> dataMapper,
+            @Nullable Class<D> dataType) {
         this(mapper, dataMapper::toData, dataMapper::toDataId, dataMapper, dataType);
     }
 
@@ -103,12 +104,12 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     @Override
-    protected T doFindById(ID id) {
+    protected @Nullable T doFindById(ID id) {
         return loadAggregate(id, dataMapper()::toEntity);
     }
 
     /// Loads the root data, restores the complete aggregate, and then tracks persistence state.
-    protected final T loadAggregate(ID id, Function<D, T> restorer) {
+    protected final @Nullable T loadAggregate(ID id, Function<D, T> restorer) {
         Objects.requireNonNull(restorer, "Aggregate restorer must not be null.");
         D data = mapper.selectById(toDataId.apply(id));
         if (data == null) {
