@@ -44,9 +44,12 @@ def main() -> None:
             project = ET.parse(path).getroot()
         except ET.ParseError as error:
             fail(f"{path.relative_to(root)} is not valid XML: {error}")
+        relative_path = str(path.relative_to(root))
+        parent_relative_path = child_text(child(project, "parent"), "relativePath")
+        if path != pom_paths[0] and parent_relative_path in {"../../pom.xml", "../pom.xml"}:
+            continue
         version = child_text(project, "version")
         scm_tag = child_text(child(project, "scm"), "tag")
-        relative_path = str(path.relative_to(root))
         if not version:
             fail(f"{relative_path} must declare a direct project version")
         if not scm_tag:

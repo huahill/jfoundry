@@ -33,11 +33,11 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   Keep one Maven update block pointed at `/` and `/jfoundry-boms/*` so plugin
   pins and consumer BOMs stay in scope. Do not scan `/jfoundry-runtime/*`:
   those aggregators use Maven 4.1 inferred parents and `${project.version}`
-  imports, which Dependabot cannot evaluate. Runtime aggregator version
-  properties remain duplicate pins of the corresponding consumer BOM; platform
-  upgrades follow the BOM, then update the aggregator property in the same
-  change. Do not dual-write `<modules>` to compensate, and do not glob every
-  leaf module.
+  imports, which Dependabot cannot evaluate. Keep Quarkus plugin and processor
+  pins on `jfoundry-quarkus-build` under `jfoundry-boms/`, next to the consumer
+  BOM, so the `jfoundry-quarkus-platform` group can update both in one pull
+  request. The Quarkus runtime aggregator must not redeclare `quarkus.version`.
+  Do not dual-write `<modules>` to compensate, and do not glob every leaf module.
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
@@ -55,7 +55,8 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   an atomic publication guarantee. Other Maven dependencies retain the normal Dependabot timing.
 - Grouping does not prove that every coordinate in a platform has published the same version.
   Repository POM contracts require the Spring Boot parent to match the consumer BOM and the Quarkus
-  build tools to match the consumer BOM. An incomplete platform update therefore fails the `Merge
+  build parent to match the consumer BOM. The Quarkus runtime aggregator must not declare
+  `quarkus.version`. An incomplete platform update therefore fails the `Merge
   gate` instead of changing the supported baseline. Helidon has one platform version source in its
   consumer BOM and does not need a multi-coordinate group.
 - Only Maven-only patch pull requests may be queued for squash auto-merge, and they merge only after

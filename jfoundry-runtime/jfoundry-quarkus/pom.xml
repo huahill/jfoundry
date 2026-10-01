@@ -5,7 +5,7 @@
     <modelVersion>4.1.0</modelVersion>
 
     <parent>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../../jfoundry-boms/jfoundry-quarkus-build/pom.xml</relativePath>
     </parent>
 
     <artifactId>jfoundry-quarkus</artifactId>
@@ -13,10 +13,6 @@
 
     <name>jfoundry-quarkus</name>
     <description>Quarkus runtime integration for jfoundry framework-neutral contracts.</description>
-
-    <properties>
-        <quarkus.version>3.39.4</quarkus.version>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
