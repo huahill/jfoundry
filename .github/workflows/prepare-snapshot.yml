@@ -50,9 +50,7 @@ jobs:
           fi
 
           current_version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           if [[ "${current_version}" == *-SNAPSHOT || "${current_version}" == *-* ]]; then
             echo "Skipping non-stable development source: ${current_version}"

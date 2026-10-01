@@ -9,7 +9,7 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
 ## Prerequisites
 
 - Java 25.
-- The checked-in Maven Wrapper, currently Maven `4.0.0-rc-6` with Consumer POM transformation enabled.
+- The checked-in Maven Wrapper, currently Maven `4.0.0-rc-7` with Consumer POM transformation enabled.
 - Maven 4 for the project build, Maven 4.1 model checks, and release Consumer POM verification.
 - Apache Maven `3.9.16` for the final Maven Central `deploy` lifecycle. Maven 3 is not a supported
   JFoundry source-build runtime; it is used only as the Central publication compatibility runtime.
@@ -109,7 +109,7 @@ verification cannot remain green by sharing a stale hardcoded version with its t
 POM metadata verification also requires each non-SNAPSHOT independent BOM or parent SCM tag to match
 the project version; the next minor SNAPSHOT line retains the immediately preceding stable tag.
 
-Maven 4.0.0-rc-6 remains the project build and Consumer POM verification runtime because the repository
+Maven 4.0.0-rc-7 remains the project build and Consumer POM verification runtime because the repository
 uses the Maven 4.1.0 model. Maven 3.9.16 remains intentionally isolated to the final Central publication
 step. Because Maven 3 must parse the project before it can honor `altDeploymentRepository`, it runs from
 the temporary publication tree rather than from the Maven 4.1 source tree. The source tree keeps the

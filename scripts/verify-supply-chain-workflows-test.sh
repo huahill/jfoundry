@@ -290,9 +290,7 @@ jobs:
     steps:
       - run: |
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           case "${version}" in
             *-SNAPSHOT)

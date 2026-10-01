@@ -187,7 +187,7 @@ def main() -> None:
         ".github/workflows/codeql.yml": ["security-events: write", "github/codeql-action/init", "github/codeql-action/analyze", "language: java-kotlin", "build-mode: manual", "language: actions", "build-mode: none", "build-mode: ${{ matrix.build-mode }}", "actions/setup-java", "java-version: 25", "-pl '!jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests'"],
         ".github/workflows/ci.yml": ["name: Dependency Review", "actions/dependency-review-action", "fail-on-severity: high", "needs.dependency-review.result", "Test Consumer POM verification", "bash scripts/verify-consumer-pom-test.sh", "Verify release POM metadata", "bash scripts/verify-release-pom-metadata.sh", "bash scripts/verify-maven-4-model.sh", "bash scripts/verify-maven-4-model-test.sh", "bash scripts/set-maven-reactor-version-test.sh", "bash scripts/verify-release-pom-metadata-test.sh", "Verify reactor Consumer POMs", '-Dmaven.repo.local="${consumer_pom_repository}" install', 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"', '"$(pwd)/mvnw"', "bash scripts/verify-dependency-boundaries.sh", "bash scripts/verify-dependency-boundaries-test.sh"],
         ".github/workflows/release.yml": ["actions/upload-artifact", "release-evidence"],
-        ".github/workflows/snapshot.yml": ["sed -n 's/^\\[INFO\\] \\[stdout\\] //p'", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'"],
+        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'"],
         ".github/workflows/prepare-snapshot.yml": ["workflow_run:", "workflows:", "- Release", "git tag --points-at", "contents: write", "pull-requests: write", "scripts/set-maven-reactor-version.py", "git push --set-upstream origin", "gh pr create"],
     }
     verify_ci(root)
@@ -207,6 +207,8 @@ def main() -> None:
     snapshot_source = (root / ".github/workflows/snapshot.yml").read_text(encoding="utf-8")
     if "-DforceStdout | tail -n 1" in snapshot_source:
         fail(".github/workflows/snapshot.yml must not use bare Maven 4 version extraction")
+    if "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'" in snapshot_source:
+        fail(".github/workflows/snapshot.yml must not parse Maven output with the 4.0.0-rc-6 stdout prefix")
     print(f"Supply-chain workflow verification passed: {root}")
 
 
