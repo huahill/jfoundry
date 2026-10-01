@@ -88,6 +88,7 @@
         <subproject>jfoundry-boms/jfoundry-spring-boot-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-spring-cloud-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-quarkus-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-quarkus-build</subproject>
         <subproject>jfoundry-boms/jfoundry-helidon-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-spring-boot-parent</subproject>
