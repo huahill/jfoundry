@@ -48,9 +48,7 @@ jobs:
       - name: Verify immutable release source
         run: |
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           test "${{ inputs.release_tag }}" = "v${version}"
           test -z "$(git status --porcelain)"
@@ -63,9 +61,7 @@ jobs:
       - name: Verify Maven Central Consumer POMs
         run: |
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           bash scripts/verify-consumer-pom.sh /tmp/repository "${version}" mvn ./mvnw
       - name: Verify Dependabot security alerts

@@ -29,7 +29,7 @@ must not combine the Boot-only and Cloud runtime BOMs.
 | Runtime Java | 25 |
 | Native Image | GraalVM 25 |
 | Maven source descriptor model | 4.1.0 (Maven 4-only XML model) |
-| Maven wrapper and Consumer POM verification | 4.0.0-rc-6 (Maven 4-only model/build validation) |
+| Maven wrapper and Consumer POM verification | 4.0.0-rc-7 (Maven 4-only model/build validation) |
 | Maven Central deploy runtime | Apache Maven 3.9.16 |
 | Maven 3 source-build compatibility | Not supported; deploy-only compatibility runtime |
 | Maven 3 publication-tree conversion | Python 3 standard library; disposable release-only tree |
@@ -89,6 +89,10 @@ every library managed by a runtime platform.
 Maven 4 can report imported-BOM model warnings for supported runtime ecosystems. Release acceptance
 requires successful package and consumer-POM resolution; it does not require a warning-free effective
 model while Maven 4 remains experimental.
+
+Maven 4.0.0-rc-7 quiet mode writes the distribution version to standard output before a forced
+expression result. Release and snapshot workflows resolve `project.version` through
+`scripts/maven-project-version.sh`, which ignores that line and the older `[INFO] [stdout]` prefix.
 
 Quarkus 3.39.x test bootstrap cannot currently load the Maven 4.1 `subprojects` workspace model,
 so the Quarkus CDI unit-test stage remains blocked by

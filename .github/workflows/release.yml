@@ -50,9 +50,7 @@ jobs:
           git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
 
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           test "${{ inputs.release_tag }}" = "v${version}"
           case "${version}" in
@@ -136,9 +134,7 @@ jobs:
             -Dgpg.passphrase="${GPG_PASSPHRASE}" install
 
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
             "$(pwd)/mvnw"
