@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex">
   <diagram id="jfoundry-module-architecture" name="JFoundry repository architecture">
-    <mxGraphModel dx="1600" dy="1100" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1600" dy="1120" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1120" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -48,13 +48,13 @@
         </mxCell>
 
         <mxCell id="bom-group" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 6;strokeWidth=2;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=17;fontStyle=1;align=left;verticalAlign=top;spacingTop=14;spacingLeft=24;container=0;pointerEvents=0;" value="jfoundry-boms/   source grouping (no aggregator POM)" vertex="1">
-          <mxGeometry height="210" width="1480" x="60" y="850" as="geometry" />
+          <mxGeometry height="230" width="1480" x="60" y="850" as="geometry" />
         </mxCell>
         <mxCell id="core-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Core dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;jfoundry-dependencies&lt;br&gt;foundation and modules BOMs" vertex="1">
-          <mxGeometry height="105" width="650" x="90" y="925" as="geometry" />
+          <mxGeometry height="125" width="650" x="90" y="925" as="geometry" />
         </mxCell>
-        <mxCell id="runtime-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Runtime dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Boot / Spring Cloud / Quarkus / Helidon BOMs&lt;br&gt;jfoundry-spring-boot-parent" vertex="1">
-          <mxGeometry height="105" width="650" x="860" y="925" as="geometry" />
+        <mxCell id="runtime-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Runtime dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Boot / Spring Cloud / Quarkus / Helidon BOMs&lt;br&gt;jfoundry-spring-boot-parent&lt;br&gt;jfoundry-quarkus-build (internal)" vertex="1">
+          <mxGeometry height="125" width="650" x="860" y="925" as="geometry" />
         </mxCell>
 
         <mxCell id="e-application-domain" edge="1" parent="1" source="application" target="domain" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeWidth=2;strokeColor=#16A34A;fontColor=#166534;fontSize=11;labelBackgroundColor=#FFFFFF;exitX=0;exitY=0.42;exitDx=0;exitDy=0;entryX=1;entryY=0.42;entryDx=0;entryDy=0;endArrow=block;endFill=1;" value="depends on">
