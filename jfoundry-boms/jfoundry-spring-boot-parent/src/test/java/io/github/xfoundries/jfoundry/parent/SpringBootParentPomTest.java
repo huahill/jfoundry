@@ -176,15 +176,26 @@ class SpringBootParentPomTest {
     }
 
     @Test
-    void quarkusRuntimeBuildMatchesTheConsumerBomPlatformVersion() throws Exception {
+    void quarkusRuntimeBuildUsesTheBuildParentAndConsumerBomPlatformVersion() throws Exception {
         Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus", "pom.xml"));
         Document bom = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
-        String runtimeVersion = childText(child(runtime.getDocumentElement(), "properties"), "quarkus.version");
-        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
 
-        assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(property(runtime, "quarkus.version")).isNull();
+        assertThat(childText(child(runtime.getDocumentElement(), "parent"), "relativePath"))
+                .isEqualTo("../../jfoundry-boms/jfoundry-quarkus-build/pom.xml");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
+
+        Document build = document(Path.of("..", "jfoundry-quarkus-build", "pom.xml"));
+        String buildVersion = childText(child(build.getDocumentElement(), "properties"), "quarkus.version");
+        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
+        assertThat(buildVersion).as("Quarkus build parent and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(childText(child(build.getDocumentElement(), "parent"), "relativePath"))
+                .isEqualTo("../../pom.xml");
+        assertThat(managedPlugins(build)).contains(
+                new Coordinate("io.quarkus", "quarkus-maven-plugin", "${quarkus.version}"),
+                new Coordinate("io.quarkus", "quarkus-extension-maven-plugin", "${quarkus.version}"));
+        assertThat(managesDependency(build, "io.quarkus", "quarkus-extension-processor")).isTrue();
     }
 
     @Test
@@ -225,6 +236,24 @@ class SpringBootParentPomTest {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         return factory.newDocumentBuilder().parse(path.toFile());
+    }
+
+    private List<Coordinate> managedPlugins(Document document) {
+        Element build = child(document.getDocumentElement(), "build");
+        Element pluginManagement = build == null ? null : child(build, "pluginManagement");
+        if (pluginManagement == null) {
+            return List.of();
+        }
+        Element plugins = child(pluginManagement, "plugins");
+        List<Coordinate> managed = new ArrayList<>();
+        for (Element plugin : children(plugins, "plugin")) {
+            Element groupId = child(plugin, "groupId");
+            managed.add(new Coordinate(
+                    groupId == null ? "org.apache.maven.plugins" : groupId.getTextContent(),
+                    childText(plugin, "artifactId"),
+                    childText(plugin, "version")));
+        }
+        return managed;
     }
 
     private List<Coordinate> importedBoms(Document document) {

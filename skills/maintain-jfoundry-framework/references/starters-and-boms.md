@@ -12,6 +12,9 @@ create a published parent or inheritance boundary.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
   the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
   `jfoundry-dependencies`.
+- `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
+  pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
+  BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
 - Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
   line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
