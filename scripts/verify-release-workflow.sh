@@ -76,7 +76,8 @@ require_text "Verify complete CI"
 require_text 'test "${{ inputs.release_tag }}" = "v${version}"'
 require_text 'test -z "$(git status --porcelain)"'
 require_text "bash scripts/verify-release-pom-metadata.sh"
-require_count "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'" 2
+require_count "bash scripts/maven-project-version.sh" 2
+forbid_text "sed -n 's/^\\[INFO\\] \\[stdout\\] //p'"
 require_text "gh run view"
 require_text "actions: read"
 require_text "contents: write"

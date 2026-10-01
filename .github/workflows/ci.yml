@@ -136,6 +136,7 @@ jobs:
 
       - name: Test release governance verifiers
         run: |
+          bash scripts/maven-project-version-test.sh
           bash scripts/verify-release-workflow-test.sh
           bash scripts/verify-release-sbom-test.sh
           bash scripts/verify-supply-chain-workflows-test.sh
@@ -394,9 +395,7 @@ jobs:
           consumer_pom_repository="${RUNNER_TEMP}/jfoundry-consumer-pom-repository"
           ./mvnw -B -DskipTests -Dmaven.repo.local="${consumer_pom_repository}" install
           version="$(
-            ./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout |
-              sed -n 's/^\[INFO\] \[stdout\] //p' |
-              tail -n 1
+            bash scripts/maven-project-version.sh
           )"
           bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}" \
             "$(pwd)/mvnw"
