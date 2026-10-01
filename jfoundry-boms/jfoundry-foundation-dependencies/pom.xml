@@ -30,7 +30,7 @@
     <jmolecules.version>2025.0.2</jmolecules.version>
 
     <!-- Domain modeling and architecture -->
-    <archunit.version>1.5.0</archunit.version>
+    <archunit.version>1.5.1</archunit.version>
 
     <!-- Validation -->
     <jakarta-validation.version>3.1.1</jakarta-validation.version>
