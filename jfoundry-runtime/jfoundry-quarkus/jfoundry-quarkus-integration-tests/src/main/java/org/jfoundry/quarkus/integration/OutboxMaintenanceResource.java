@@ -38,7 +38,7 @@ public class OutboxMaintenanceResource {
     @GET
     @Path("/recover")
     @Produces(MediaType.TEXT_PLAIN)
-    public String recoverStuckDispatching() throws Exception {
+    public String recoverStuckDispatching() {
         String eventId = UUID.randomUUID().toString();
         transactionRunner.run(() -> outboxMessageStore.append(newMessage(eventId, Instant.EPOCH)));
         transactionRunner.run(() -> {
@@ -70,7 +70,7 @@ public class OutboxMaintenanceResource {
     @GET
     @Path("/cleanup")
     @Produces(MediaType.TEXT_PLAIN)
-    public String cleanUpTerminalMessages() throws Exception {
+    public String cleanUpTerminalMessages() {
         String publishedEventId = UUID.randomUUID().toString();
         String deadLetteredEventId = UUID.randomUUID().toString();
         Instant occurredAt = Instant.now().minus(Duration.ofDays(2));

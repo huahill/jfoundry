@@ -23,7 +23,7 @@ public class JpaAggregateRepositoryResource {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
-    public String persistAndModify() throws Exception {
+    public String persistAndModify() {
         return applicationService.persistAndModify();
     }
 
@@ -41,7 +41,7 @@ public class JpaAggregateRepositoryResource {
             this.repository = repository;
         }
 
-        String persistAndModify() throws Exception {
+        String persistAndModify() {
             String orderId = UUID.randomUUID().toString();
             transactionRunner.run(() -> repository.add(QuarkusJpaOrder.create(orderId)));
             transactionRunner.run(() -> {

@@ -37,7 +37,38 @@ class SpringBootParentPomTest {
         Document document = document(Path.of("..", "..", "pom.xml"));
 
         assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"));
+                new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
+                new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
+                new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"),
+                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"));
+    }
+
+    @Test
+    void frameworkBuildParentDoesNotPinJacksonOrJunitCoordinates() throws Exception {
+        Document document = document(Path.of("..", "..", "pom.xml"));
+
+        assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
+        assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
+        assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isFalse();
+        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+    }
+
+    @Test
+    void foundationDoesNotManageSelectedRuntimePlatformStacks() throws Exception {
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+
+        assertThat(importedBoms(foundation)).containsExactly(
+                new Coordinate("org.jmolecules", "jmolecules-bom", "${jmolecules.version}"));
+        assertThat(managesDependency(foundation, "tools.jackson.core", "jackson-databind")).isFalse();
+        assertThat(managesDependency(foundation, "org.junit.jupiter", "junit-jupiter")).isFalse();
+        assertThat(managesDependency(foundation, "org.mockito", "mockito-core")).isFalse();
+        assertThat(managesDependency(foundation, "org.slf4j", "slf4j-api")).isFalse();
+        assertThat(managesDependency(foundation, "io.opentelemetry", "opentelemetry-api")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(foundation, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(foundation, "com.h2database", "h2")).isFalse();
+        assertThat(managesDependency(foundation, "org.hibernate.orm", "hibernate-core")).isFalse();
     }
 
     @Test
@@ -111,6 +142,10 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
+        assertThat(managesDependency(boot, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(boot, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(boot, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
@@ -141,15 +176,26 @@ class SpringBootParentPomTest {
     }
 
     @Test
-    void quarkusRuntimeBuildMatchesTheConsumerBomPlatformVersion() throws Exception {
+    void quarkusRuntimeBuildUsesTheBuildParentAndConsumerBomPlatformVersion() throws Exception {
         Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-quarkus", "pom.xml"));
         Document bom = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
-        String runtimeVersion = childText(child(runtime.getDocumentElement(), "properties"), "quarkus.version");
-        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
 
-        assertThat(runtimeVersion).as("Quarkus runtime and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(property(runtime, "quarkus.version")).isNull();
+        assertThat(childText(child(runtime.getDocumentElement(), "parent"), "relativePath"))
+                .isEqualTo("../../jfoundry-boms/jfoundry-quarkus-build/pom.xml");
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-quarkus-dependencies", "${project.version}"));
+
+        Document build = document(Path.of("..", "jfoundry-quarkus-build", "pom.xml"));
+        String buildVersion = childText(child(build.getDocumentElement(), "properties"), "quarkus.version");
+        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
+        assertThat(buildVersion).as("Quarkus build parent and consumer BOM versions").isEqualTo(bomVersion);
+        assertThat(childText(child(build.getDocumentElement(), "parent"), "relativePath"))
+                .isEqualTo("../../pom.xml");
+        assertThat(managedPlugins(build)).contains(
+                new Coordinate("io.quarkus", "quarkus-maven-plugin", "${quarkus.version}"),
+                new Coordinate("io.quarkus", "quarkus-extension-maven-plugin", "${quarkus.version}"));
+        assertThat(managesDependency(build, "io.quarkus", "quarkus-extension-processor")).isTrue();
     }
 
     @Test
@@ -190,6 +236,24 @@ class SpringBootParentPomTest {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
         return factory.newDocumentBuilder().parse(path.toFile());
+    }
+
+    private List<Coordinate> managedPlugins(Document document) {
+        Element build = child(document.getDocumentElement(), "build");
+        Element pluginManagement = build == null ? null : child(build, "pluginManagement");
+        if (pluginManagement == null) {
+            return List.of();
+        }
+        Element plugins = child(pluginManagement, "plugins");
+        List<Coordinate> managed = new ArrayList<>();
+        for (Element plugin : children(plugins, "plugin")) {
+            Element groupId = child(plugin, "groupId");
+            managed.add(new Coordinate(
+                    groupId == null ? "org.apache.maven.plugins" : groupId.getTextContent(),
+                    childText(plugin, "artifactId"),
+                    childText(plugin, "version")));
+        }
+        return managed;
     }
 
     private List<Coordinate> importedBoms(Document document) {

@@ -129,22 +129,10 @@ public class DefaultOutboxDispatchService implements OutboxDispatcher {
 
     private <T> T inNewTransaction(TransactionCallback<T> callback) {
         if (transactionRunner == null) {
-            try {
-                return callback.execute();
-            } catch (RuntimeException exception) {
-                throw exception;
-            } catch (Exception exception) {
-                throw new IllegalStateException("Outbox operation failed", exception);
-            }
+            return callback.execute();
         }
-        try {
-            return transactionRunner.call(TransactionOptions.builder()
-                    .propagation(TransactionPropagation.REQUIRES_NEW)
-                    .build(), callback);
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IllegalStateException("Outbox transaction failed", exception);
-        }
+        return transactionRunner.call(TransactionOptions.builder()
+                .propagation(TransactionPropagation.REQUIRES_NEW)
+                .build(), callback);
     }
 }

@@ -78,4 +78,17 @@ write_fixture "${malformed_fixture}" "1.3.0" 'v${project.version}' "v1.3.0"
 printf '<project>' > "${malformed_fixture}/jfoundry-boms/example-dependencies/pom.xml"
 assert_rejects "${malformed_fixture}"
 
+reactor_internal_fixture="${temp_dir}/reactor-internal"
+write_fixture "${reactor_internal_fixture}" "1.3.0" 'v${project.version}' "v1.3.0"
+mkdir -p "${reactor_internal_fixture}/jfoundry-boms/example-build"
+cat > "${reactor_internal_fixture}/jfoundry-boms/example-build/pom.xml" <<'XML'
+<project>
+  <parent>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+  <artifactId>example-build</artifactId>
+</project>
+XML
+assert_accepts "${reactor_internal_fixture}"
+
 echo "Release POM metadata verification tests passed."

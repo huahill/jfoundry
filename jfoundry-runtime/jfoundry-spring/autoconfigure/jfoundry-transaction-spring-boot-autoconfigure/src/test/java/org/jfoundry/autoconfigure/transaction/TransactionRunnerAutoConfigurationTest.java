@@ -37,7 +37,7 @@ class TransactionRunnerAutoConfigurationTest {
         TransactionRunner userRunner = new TransactionRunner() {
             @Override
             public <T> T call(org.jfoundry.application.transaction.TransactionOptions options,
-                              org.jfoundry.application.transaction.TransactionCallback<T> callback) throws Exception {
+                              org.jfoundry.application.transaction.TransactionCallback<T> callback) {
                 return callback.execute();
             }
         };

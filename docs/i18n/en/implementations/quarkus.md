@@ -375,7 +375,10 @@ for the six JFoundry application and domain exceptions: `InvalidArgumentExceptio
 standard Jakarta REST failures with statuses `400`, `404`, `405`, `406`, `413`, `415`, and `503`.
 
 Responses contain the shared `type`, `title`, `status`, and `detail` fields; `type` is the stable
-machine-readable problem identifier. The adapter preserves non-entity headers supplied by the source
+machine-readable problem identifier. Problem messages localize through classpath `messages*.properties`
+bundles first and the framework `jfoundry-problems` catalog second, keyed by the request's
+`Accept-Language`; see [Web](../capabilities/web.md) for the code-and-arguments contract. The adapter
+preserves non-entity headers supplied by the source
 Jakarta REST response, including `Allow` when it is present. It does not infer headers that Quarkus
 does not provide. Unknown exceptions and other HTTP statuses retain normal Quarkus behavior instead
 of being converted into a JFoundry error.
@@ -404,12 +407,15 @@ threads need an explicit Quarkus context-propagation mechanism.
 ## HTTP Diagnostic Logging
 
 `jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer
-interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging-level`; it defaults to
-`NONE`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
+interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging.level`; it defaults to
+`NONE`. Layout uses `jfoundry.web.quarkus.logging.format`, defaulting to `HUMAN`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
 
 Add `jfoundry-restclient-quarkus-runtime` for outbound logging. It includes the Quarkus MicroProfile
 REST Client extension and registers the provider with every REST Client builder. Outbound logging
-uses `jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring `WebClient` is not
+uses `jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
+defaulting to `HUMAN`. Included headers use `jfoundry.web.quarkus.logging.included-headers` inbound
+and `jfoundry.web.rest-client.logging.included-headers` outbound; a configured list replaces the
+diagnostic default, and `*` includes every header after redaction. Spring `WebClient` is not
 supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are

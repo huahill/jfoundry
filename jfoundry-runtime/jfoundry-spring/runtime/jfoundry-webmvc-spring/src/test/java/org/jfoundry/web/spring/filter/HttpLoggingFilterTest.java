@@ -14,6 +14,7 @@ import ch.qos.logback.core.read.ListAppender;
 import jakarta.servlet.AsyncEvent;
 import jakarta.servlet.AsyncListener;
 import jakarta.servlet.ServletException;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -126,11 +127,47 @@ class HttpLoggingFilterTest {
     }
 
     @Test
+    void humanFormatEmitsOneLogRecordPerLine() throws Exception {
+        var requestBytes = "{\"reason\":\"retry\",\"password\":\"秘密\"}".getBytes(StandardCharsets.UTF_8);
+        var responseBytes = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);
+        var request = request(requestBytes);
+        request.addHeader("Authorization", "Bearer request-secret");
+        request.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        var response = new MockHttpServletResponse();
+        var filter = new HttpLoggingFilter(HttpLoggingLevel.FULL, HttpLoggingFormat.HUMAN, ignored -> false,
+                () -> true, nanos(0, 25_000_000));
+
+        filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+            actualRequest.getInputStream().readAllBytes();
+            var httpResponse = (jakarta.servlet.http.HttpServletResponse) actualResponse;
+            httpResponse.setStatus(200);
+            httpResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            httpResponse.setHeader("X-Request-Id", "req-1");
+            actualResponse.getOutputStream().write(responseBytes);
+            actualResponse.flushBuffer();
+        });
+
+        assertThat(messages()).containsExactly(
+                "--> POST https://service.test/orders",
+                "--> Authorization: <redacted>",
+                "--> Content-Type: application/json",
+                "--> {\"reason\":\"retry\",\"password\":\"<redacted>\"}",
+                "--> END HTTP",
+                "<-- 200 (25ms, complete)",
+                "<-- Content-Type: application/json",
+                "<-- X-Request-Id: req-1",
+                "<-- {\"ok\":true}",
+                "<-- END HTTP");
+        assertThat(messages()).noneMatch(message -> message.contains("request-secret") || message.contains("秘密"));
+    }
+
+    @Test
     void headersAreRedactedCaseInsensitivelyInBothDirections() throws Exception {
         var request = request(new byte[0]);
         request.addHeader("AUTHORIZATION", "Bearer request-secret");
         request.addHeader("X-Service-Token", "request-token");
         request.addHeader("Cookie", "session=request-cookie");
+        request.addHeader("User-Agent", "Mozilla/5.0");
         var response = new MockHttpServletResponse();
         var filter = new HttpLoggingFilter(HttpLoggingLevel.HEADERS, () -> true, nanos(0, 1_000_000));
 
@@ -142,10 +179,32 @@ class HttpLoggingFilterTest {
 
         assertThat(messages()).noneMatch(message -> message.contains("request-secret")
                         || message.contains("request-token") || message.contains("request-cookie")
-                        || message.contains("response-cookie") || message.contains("response-key"))
+                        || message.contains("response-cookie") || message.contains("response-key")
+                        || message.contains("Mozilla/5.0"))
                 .anyMatch(message -> message.contains("AUTHORIZATION=[<redacted>]"))
-                .anyMatch(message -> message.contains("Set-Cookie=[<redacted>]"))
-                .anyMatch(message -> message.contains("Vendor-Api-Key=[<redacted>]"));
+                .noneMatch(message -> message.contains("User-Agent") || message.contains("Set-Cookie")
+                        || message.contains("Vendor-Api-Key") || message.contains("Cookie="));
+    }
+
+    @Test
+    void configuredIncludedHeadersCanIncludeEveryHeaderAfterRedaction() throws Exception {
+        var request = request(new byte[0]);
+        request.addHeader("AUTHORIZATION", "Bearer request-secret");
+        request.addHeader("User-Agent", "Mozilla/5.0");
+        var response = new MockHttpServletResponse();
+        var filter = new HttpLoggingFilter(HttpLoggingLevel.HEADERS, HttpLoggingFormat.INLINE, ignored -> false,
+                List.of("*"), () -> true, nanos(0, 1_000_000));
+
+        filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+            var httpResponse = (jakarta.servlet.http.HttpServletResponse) actualResponse;
+            httpResponse.setHeader("Set-Cookie", "session=response-cookie");
+        });
+
+        assertThat(messages()).noneMatch(message -> message.contains("request-secret")
+                        || message.contains("response-cookie"))
+                .anyMatch(message -> message.contains("AUTHORIZATION=[<redacted>]"))
+                .anyMatch(message -> message.contains("User-Agent=[Mozilla/5.0]"))
+                .anyMatch(message -> message.contains("Set-Cookie=[<redacted>]"));
     }
 
     @Test

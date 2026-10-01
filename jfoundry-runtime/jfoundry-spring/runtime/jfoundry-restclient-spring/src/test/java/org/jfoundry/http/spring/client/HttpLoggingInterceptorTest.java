@@ -14,6 +14,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,6 +75,47 @@ class HttpLoggingInterceptorTest {
     void stopCapturingLogs() {
         logger.detachAppender(logs);
         logs.stop();
+    }
+
+    @Test
+    void humanFormatClosesRequestAndResponseBlocksWithoutRepeatingUri() throws IOException {
+        var response = new TrackingResponse(HttpStatus.OK, "accepted");
+        var interceptor = new HttpLoggingInterceptor(HttpLoggingLevel.BASIC, HttpLoggingFormat.HUMAN, () -> true,
+                nanos(10_000_000L, 34_999_999L));
+
+        var actual = interceptor.intercept(REQUEST, new byte[0], (request, body) -> response);
+
+        assertThat(actual).isSameAs(response);
+        assertThat(messages()).containsExactly(
+                "--> GET https://downstream.test/orders/42",
+                "--> END HTTP",
+                "<-- 200 (24ms)",
+                "<-- END HTTP");
+    }
+
+    @Test
+    void humanFullLogsBodyThenClosesEachBlock() throws IOException {
+        var response = new TrackingResponse(HttpStatus.OK, "{\"result\":\"accepted\"}");
+        response.headers().setContentType(MediaType.APPLICATION_JSON);
+        var interceptor = new HttpLoggingInterceptor(HttpLoggingLevel.FULL, HttpLoggingFormat.HUMAN, () -> true,
+                nanos(0, 1_000_000));
+
+        var actual = interceptor.intercept(REQUEST, "{\"password\":\"hidden\"}".getBytes(),
+                (request, body) -> response);
+        assertThat(new String(actual.getBody().readAllBytes(), StandardCharsets.UTF_8))
+                .isEqualTo("{\"result\":\"accepted\"}");
+        actual.close();
+
+        assertThat(messages()).containsExactly(
+                "--> GET https://downstream.test/orders/42",
+                "--> Authorization: <redacted>",
+                "--> Content-Type: application/json",
+                "--> {\"password\":\"<redacted>\"}",
+                "--> END HTTP",
+                "<-- 200 (1ms)",
+                "<-- Content-Type: application/json",
+                "<-- {\"result\":\"accepted\"}",
+                "<-- END HTTP");
     }
 
     @Test

@@ -8,6 +8,8 @@ import jakarta.validation.Path.MethodNode;
 import jakarta.validation.Path.ParameterNode;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
@@ -25,6 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /// Groups the precise Jakarta REST exception mappers used for JFoundry problem responses.
 public final class ProblemDetailsExceptionMappers {
@@ -32,10 +35,15 @@ public final class ProblemDetailsExceptionMappers {
     private ProblemDetailsExceptionMappers() {
     }
 
-    private abstract static class JFoundryExceptionMapper<E extends Exception> implements ExceptionMapper<E> {
+    abstract static class JFoundryExceptionMapper<E extends Exception> implements ExceptionMapper<E> {
+
+        @Context
+        HttpHeaders requestHeaders;
+
         @Override
         public final Response toResponse(E exception) {
-            return ProblemDetailsResponses.forException(exception);
+            return ProblemDetailsResponses.forException(exception,
+                    ProblemDetailsResponses.requestLocale(requestHeaders));
         }
     }
 
@@ -54,14 +62,20 @@ public final class ProblemDetailsExceptionMappers {
     @Provider
     @Priority(Priorities.USER - 100)
     public static final class RequestValidationMapper implements ExceptionMapper<ConstraintViolationException> {
+
+        @Context
+        HttpHeaders requestHeaders;
+
         @Override
         public Response toResponse(ConstraintViolationException exception) {
             if (!isResourceRequestValidation(exception)) {
                 throw exception;
             }
+            Locale locale = ProblemDetailsResponses.requestLocale(requestHeaders);
             return ProblemDetailsResponses.forProblem(RequestValidationProblem.create(
                     JakartaRequestValidationErrors.from(exception.getConstraintViolations(),
-                            ProblemDetailsExceptionMappers::isRequestDocumentViolation)));
+                            ProblemDetailsExceptionMappers::isRequestDocumentViolation), locale,
+                    ProblemDetailsResponses.MESSAGES), locale);
         }
     }
     @Provider
@@ -69,11 +83,16 @@ public final class ProblemDetailsExceptionMappers {
 
     @Provider
     public static final class WebApplicationMapper implements ExceptionMapper<WebApplicationException> {
+
+        @Context
+        HttpHeaders requestHeaders;
+
         @Override
         public Response toResponse(WebApplicationException exception) {
             Response source = exception.getResponse();
             return ProblemCatalog.supportsHttpStatus(source.getStatus())
-                    ? ProblemDetailsResponses.forHttpStatus(source.getStatus(), source.getHeaders())
+                    ? ProblemDetailsResponses.forHttpStatus(source.getStatus(), source.getHeaders(),
+                            ProblemDetailsResponses.requestLocale(requestHeaders))
                     : source;
         }
     }

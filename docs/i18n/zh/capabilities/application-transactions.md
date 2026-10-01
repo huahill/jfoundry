@@ -1,6 +1,6 @@
 # 应用事务
 
-`TransactionRunner` 是 jfoundry 的应用层事务边界契约。当应用编排需要显式事务代码块，但不希望依赖 Spring `TransactionTemplate` 时，可以直接使用：
+`TransactionRunner` 是 jfoundry 的应用层事务边界契约。当应用编排需要显式事务代码块，但不希望依赖 Spring `TransactionTemplate` 时，可以直接使用。回调与 `run` / `call` 都不声明受检异常；运行时异常原样传播。适配器里的 `SQLException` 等受检失败应在进入回调前翻译。
 
 ```java
 transactionRunner.run(TransactionOptions.builder()

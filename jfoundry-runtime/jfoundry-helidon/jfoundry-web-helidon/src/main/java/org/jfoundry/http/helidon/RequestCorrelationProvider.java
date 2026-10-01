@@ -9,6 +9,7 @@ import org.jfoundry.http.correlation.RequestCorrelationId;
 import org.jfoundry.http.correlation.RequestCorrelationOptions;
 import org.jfoundry.http.jaxrs.AbstractJaxRsRequestCorrelationProvider;
 import org.jfoundry.http.jaxrs.RequestCorrelationPathMatcher;
+import org.jspecify.annotations.Nullable;
 
 /// Registers inbound request correlation with Helidon MP.
 @Provider
@@ -24,7 +25,7 @@ public final class RequestCorrelationProvider extends AbstractJaxRsRequestCorrel
         super(RequestCorrelationProvider::configuredOptions);
     }
 
-    private static RequestCorrelationOptions configuredOptions() {
+    private static @Nullable RequestCorrelationOptions configuredOptions() {
         var config = ConfigProvider.getConfig();
         if (!config.getOptionalValue(CONFIG_PREFIX + ".enabled", Boolean.class).orElse(true)) {
             return null;

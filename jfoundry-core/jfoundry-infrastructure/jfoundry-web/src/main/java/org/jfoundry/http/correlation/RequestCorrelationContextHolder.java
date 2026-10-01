@@ -1,6 +1,7 @@
 package org.jfoundry.http.correlation;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /// Thread-owned holder for the active request context; adapters must clear it at request completion.
 public final class RequestCorrelationContextHolder {
@@ -14,7 +15,7 @@ public final class RequestCorrelationContextHolder {
         return Optional.ofNullable(CURRENT.get());
     }
 
-    static void install(RequestCorrelationContext context) {
+    static void install(@Nullable RequestCorrelationContext context) {
         if (context == null) {
             CURRENT.remove();
         } else {

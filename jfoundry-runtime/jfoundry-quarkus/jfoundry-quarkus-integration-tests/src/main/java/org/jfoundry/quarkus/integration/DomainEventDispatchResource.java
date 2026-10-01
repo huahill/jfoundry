@@ -62,7 +62,7 @@ public class DomainEventDispatchResource {
     @GET
     @Path("/cdi/transaction")
     @Produces(MediaType.TEXT_PLAIN)
-    public String publishesCdiEventsAfterCommit() throws Exception {
+    public String publishesCdiEventsAfterCommit() {
         cdiObserver.reset();
         transactionRunner.run(applicationService::handle);
         return cdiObserver.observedAggregateIds().toString();

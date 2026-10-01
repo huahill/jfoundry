@@ -137,7 +137,9 @@ RabbitMQ 适配器会在首次发送时惰性连接，并为每次发布打开�
 
 `jfoundry-web-helidon` 会将 JFoundry 应用层与领域层异常映射为 RFC 9457
 `application/problem+json` JAX-RS 响应。未知异常和不相关的 HTTP 失败仍交给 Helidon 原有处理；该
-适配器不替代应用通用的 JAX-RS 错误策略。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)。
+适配器不替代应用通用的 JAX-RS 错误策略。问题消息先查 classpath 上的 `messages*.properties`，再回退到
+框架的 `jfoundry-problems` 消息包，locale 取自请求的 `Accept-Language`；code 与参数契约见
+[Web](../capabilities/web.md)。运行时无关的契约和所有受支持运行时的依赖选择见[Web](../capabilities/web.md)。
 
 它不配置安全能力。拥有认证和授权语义的 Helidon 安全适配器可使用
 `ProblemDetailsRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。扩展字段在各运行时适配器中会保留
@@ -149,11 +151,14 @@ JSON 标量、数组和对象类型。
 选择 Jersey JSON provider，例如用于 JSON-B 的 `jersey-media-json-binding`。
 
 同一 Web 模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
-`jfoundry.web.helidon.logging-level`，默认值为 `NONE`。启用后的事件通过
+`jfoundry.web.helidon.logging.level`，默认值为 `NONE`。布局使用 `jfoundry.web.helidon.logging.format`，默认值为 `HUMAN`。启用后的事件通过
 `org.jfoundry.http.helidon.HttpLoggingProvider` 以 `INFO` 输出。
 
 `jfoundry-restclient-helidon` 会引入 `helidon-microprofile-rest-client`，并把 JFoundry provider 自动注册到每个
-MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging-level`，默认值为 `NONE`。
+MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging.level`，默认值为 `NONE`，布局使用
+`jfoundry.web.rest-client.logging.format`，默认值为 `HUMAN`。
+入站 included-headers 使用 `jfoundry.web.helidon.logging.included-headers`，出站使用
+`jfoundry.web.rest-client.logging.included-headers`；配置列表会替换诊断默认值，`*` 可在脱敏后输出全部 header。
 该集成已通过 JVM 验证。受支持的 Helidon 4.5.x REST Client 原生镜像 substitution 与当前 GraalVM 25
 基线不兼容，因此原生 REST Client 日志暂不属于发布支持声明。当前不支持 Spring `WebClient`。
 

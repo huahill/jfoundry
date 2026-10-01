@@ -10,6 +10,7 @@ import org.jfoundry.application.outbox.OutboxMessageStatus;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.jspecify.annotations.NullUnmarked;
 
 /// MyBatis-Plus persistence data object for the Outbox table.
 /// <p>
@@ -19,6 +20,7 @@ import java.util.Map;
 /// Outbox fields as a MyBatis-Plus entity view, and {@link MybatisPlusOutboxMessageStore} converts
 /// entry ↔ data at the boundary.
 @TableName("jfoundry_outbox_event")
+@NullUnmarked
 public class OutboxData {
 
     @TableId(type = IdType.INPUT)

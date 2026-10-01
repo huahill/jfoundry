@@ -124,6 +124,59 @@ Spring MVC obtains validation through its normal Web MVC integration. A Quarkus 
 Helidon MP application must add `helidon-microprofile-bean-validation`. Applications also remain
 responsible for selecting the JSON provider used to deserialize request bodies.
 
+### Localized Problem Messages
+
+Problem responses can be localized without carrying presentation concerns into the domain or
+application core. Expected failures accept a stable message code with interpolation arguments instead
+of a finished sentence, and the HTTP boundary resolves that code against message catalogs using the
+request locale:
+
+```java
+throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
+```
+
+The log message stays language-independent (`order.quota-exceeded [2, 2]`). At the boundary, the code
+is resolved, the arguments are interpolated with `MessageFormat`, and `code` and `args` are added as
+RFC 9457 extension members so clients can also render their own text:
+
+```json
+{
+  "type": "urn:jfoundry:problem:domain-rule-violation",
+  "title": "Domain rule violation",
+  "status": 422,
+  "detail": "Quota exceeded: current 2, limit 2",
+  "code": "order.quota-exceeded",
+  "args": [2, 2]
+}
+```
+
+`detail` resolves in this order: the message code in the application catalog, then the
+language-independent exception message. Framework titles and generic fallback details resolve from
+the `jfoundry-problems*.properties` bundles that ship inside `jfoundry-web` (English root plus
+Simplified Chinese); a missing translation falls back to the root English bundle. Arguments must
+be non-null `String`, `Number`, or `Boolean` values.
+
+Catalog lookup differs by runtime:
+
+- Spring MVC resolves through Spring's `MessageSource` first, so application codes can live in the
+  standard `messages*.properties` bundles, and then through the framework catalog. The locale comes
+  from Spring's locale context.
+- Quarkus REST and Helidon MP resolve classpath `messages*.properties` bundles first, then the
+  framework catalog. The locale comes from `Accept-Language`.
+
+Responses resolved for a concrete locale carry a `Content-Language` header. When no locale is
+preferred, root English text is used and no header is added. For Native Image, `jfoundry-web` ships
+a resource configuration that keeps both `jfoundry-problems*.properties` and `messages*.properties`
+bundles reachable, and `jfoundry-web-helidon` registers the request-header proxy used by its
+exception mappers.
+
+Two limits are deliberate:
+
+- A single-`String` constructor always means a literal message, so a code carries at least one
+  interpolation argument; use an explicit empty `Object[]` for a code without arguments.
+- `ExternalAccessException` stays masked by default: only its reviewed public-detail code
+  constructor exposes codes and arguments to callers.
+
 ### Deliberate Boundaries
 
 - Unknown exceptions and HTTP failures outside the supported status set retain the runtime's normal
@@ -164,8 +217,8 @@ by the integration with `RestClientSupport.configure(builder)`, then execute tha
 only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
 safe failure kind while retaining the original exception as its cause for server-side diagnostics.
 
-The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` from
-`org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
+The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` and
+`HttpLoggingFormat` from `org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
 `HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
 `RestClient` facade and translated exceptions from `org.jfoundry.web.spring.client`. These replace the
 old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
@@ -173,8 +226,9 @@ remains in `org.jfoundry.web.spring`.
 
 Outbound logging defaults to `NONE`. Applications can select all four levels through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use
-`jfoundry.web.rest-client.logging-level`, also defaulting to `NONE`. The client `duration` field, emitted with an
-`ms` suffix such as `duration=30ms`, starts immediately before `ClientHttpRequestExecution.execute(...)` and ends
+`jfoundry.web.rest-client.logging.level`, also defaulting to `NONE`. Layout is selected separately with
+`jfoundry.web.rest-client.logging.format`, defaulting to `HUMAN`. The client `duration` field, emitted with an
+`ms` suffix such as `duration=30ms` in `INLINE` layout, starts immediately before `ClientHttpRequestExecution.execute(...)` and ends
 when response headers are
 available or execution fails. It excludes response-body consumption and decoding and is not
 end-to-end latency.
@@ -183,31 +237,45 @@ The Web MVC starter also provides inbound Servlet logging through `HttpLoggingFi
 Helidon register equivalent JAX-RS providers through their Web modules. Inbound logging is
 disabled by default with the runtime-specific property; set `BASIC`, `HEADERS`, or `FULL` to enable it:
 
-| Runtime | Inbound property | Default |
-|---|---|---|
-| Spring MVC | `jfoundry.web.mvc.logging-level` | `NONE` |
-| Quarkus REST | `jfoundry.web.quarkus.logging-level` | `NONE` |
-| Helidon MP REST | `jfoundry.web.helidon.logging-level` | `NONE` |
+| Runtime | Inbound detail | Inbound layout | Default detail |
+|---|---|---|---|
+| Spring MVC | `jfoundry.web.mvc.logging.level` | `jfoundry.web.mvc.logging.format` | `NONE` |
+| Quarkus REST | `jfoundry.web.quarkus.logging.level` | `jfoundry.web.quarkus.logging.format` | `NONE` |
+| Helidon MP REST | `jfoundry.web.helidon.logging.level` | `jfoundry.web.helidon.logging.format` | `NONE` |
 
 Spring MVC excludes `/actuator/health/**` from inbound logging by default. Configure
-`jfoundry.web.mvc.logging-excluded-paths` with Ant-style application paths to replace that default and add
+`jfoundry.web.mvc.logging.excluded-paths` with Ant-style application paths to replace that default and add
 more exclusions. Matching removes the Servlet context and servlet paths first, so
 `/api/actuator/health/liveness` is matched as `/actuator/health/liveness` when `/api` is the
 configured servlet path.
 
+`HEADERS` and `FULL` log a diagnostic header subset by default: `accept`, `authorization`,
+`content-type`, `content-length`, `location`, and `x-request-id`. Configure
+`jfoundry.web.mvc.logging.included-headers`, `jfoundry.web.rest-client.logging.included-headers`,
+`jfoundry.web.quarkus.logging.included-headers`, or `jfoundry.web.helidon.logging.included-headers`
+to replace that default. Use `*` to include every header after redaction.
+
 Outbound Spring `RestClient` and MicroProfile REST Client logging use
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. Spring applications can also select
+`jfoundry.web.rest-client.logging.level`, defaulting to `NONE`. Spring applications can also select
 the level for a manual builder through `RestClientSupport.configure(builder, HttpLoggingLevel)`.
 JFoundry does not currently integrate Spring `WebClient`; reactive calls are outside this contract.
 
-All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records separate request and
-response events with query-free method/URI, status, and a `duration` field with an `ms` suffix without body wrappers.
-`HEADERS` adds
-separate request-header and response-header events after case-insensitive redaction of
+All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` records request and
+response events with query-free method/URI, status, and duration without body wrappers.
+`HEADERS` adds the configured header subset after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
-nested-field redaction as separate request-body and response-body events and retains at most 8 KiB; non-JSON,
+nested-field redaction and retains at most 8 KiB; non-JSON,
 malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
+
+Layout is independent of detail. `HUMAN` is the default once logging is enabled. It emits Feign-style
+console output: the request start line carries method and URI, later lines in that block do not repeat
+them, request lines start with `-->`, response lines start with `<--`, JSON bodies stay on a single
+line, and each side closes with `END HTTP`. Concurrent exchanges can still interleave; use the logger
+thread or MDC prefix to group a request. `INLINE` keeps the historical one-line `key=value` events. Configure inbound layout
+with the runtime `logging.format` property above, and outbound layout with
+`jfoundry.web.rest-client.logging.format`. Empty bodies are omitted in `HUMAN` and retained as
+`<empty>` in `INLINE`.
 
 Inbound `duration` timing ends at synchronous completion or the runtime's terminal response phase; it does
 not measure when the caller receives all streamed bytes. Client `duration` timing ends when response headers

@@ -22,21 +22,32 @@ class HttpLoggingSupportTest {
     }
 
     @Test
-    void redactsSensitiveHeadersCaseInsensitivelyAndBySecuritySuffix() {
+    void describesOnlyDefaultDiagnosticHeadersAndRedactsSensitiveValues() {
         var headers = new LinkedMultiValueMap<String, String>();
         headers.put("AUTHORIZATION", List.of("Bearer secret"));
         headers.put("X-Service-Token", List.of("token"));
-        headers.put("Client.Secret", List.of("secret"));
-        headers.put("Vendor-Api-Key", List.of("key"));
         headers.put("Accept", List.of("application/json"));
+        headers.put("User-Agent", List.of("Mozilla/5.0"));
 
         var described = HttpLoggingSupport.describeHeaders(headers);
 
         assertThat(described).containsEntry("AUTHORIZATION", List.of("<redacted>"))
+                .containsEntry("Accept", List.of("application/json"))
+                .doesNotContainKeys("X-Service-Token", "User-Agent");
+    }
+
+    @Test
+    void configuredIncludedHeadersCanIncludeEveryHeaderAfterRedaction() {
+        var headers = new LinkedMultiValueMap<String, String>();
+        headers.put("AUTHORIZATION", List.of("Bearer secret"));
+        headers.put("X-Service-Token", List.of("token"));
+        headers.put("User-Agent", List.of("Mozilla/5.0"));
+
+        var described = HttpLoggingSupport.describeHeaders(headers, List.of("*"));
+
+        assertThat(described).containsEntry("AUTHORIZATION", List.of("<redacted>"))
                 .containsEntry("X-Service-Token", List.of("<redacted>"))
-                .containsEntry("Client.Secret", List.of("<redacted>"))
-                .containsEntry("Vendor-Api-Key", List.of("<redacted>"))
-                .containsEntry("Accept", List.of("application/json"));
+                .containsEntry("User-Agent", List.of("Mozilla/5.0"));
     }
 
     @Test

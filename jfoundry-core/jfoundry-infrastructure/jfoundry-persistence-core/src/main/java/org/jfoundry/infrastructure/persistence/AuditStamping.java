@@ -3,6 +3,7 @@ package org.jfoundry.infrastructure.persistence;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /// Applies consistent technical audit semantics to persistence snapshots.
 public final class AuditStamping {
@@ -28,7 +29,7 @@ public final class AuditStamping {
         return new AuditStamp(existing.createdAt(), existing.createdBy(), clock.instant(), actorId());
     }
 
-    private String actorId() {
+    private @Nullable String actorId() {
         return actorProvider.currentActorId()
                 .filter(actorId -> !actorId.isBlank())
                 .orElse(null);

@@ -64,9 +64,11 @@ Spring Boot 自动配置模块与启动器仍按能力划分。
 
 ## 依赖管理边界
 
-`jfoundry-foundation-dependencies` 只管理运行时无关的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、JobRunr、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
+`jfoundry-foundation-dependencies` 只管理运行时无关、且选定运行时平台 BOM 尚未管理的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、JobRunr、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
 
-各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。若官方平台 BOM 会破坏 Foundation 所管理的运行时无关组件，运行时 BOM 可以提供范围严格且已记录原因的兼容性覆盖；Helidon 的 Jackson annotations 对齐即属于此类例外。
+Foundation 不得再声明 Spring Boot、Quarkus 或 Helidon 平台 BOM 已经管理的栈，包括 JUnit、Mockito、Jackson、SLF4J、OpenTelemetry、Kafka/RabbitMQ/RocketMQ 客户端、Hibernate 和 JDBC 驱动。这些版本跟随选定运行时。根 `jfoundry-parent` 可以导入 JUnit、Jackson 和 OpenTelemetry BOM 以便编译 JFoundry 自身。它不得直接钉死这些 GA，否则会覆盖更近的运行时 BOM。
+
+各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。若官方平台 BOM 会破坏 Foundation 所管理的运行时无关组件，运行时 BOM 可以提供范围严格且已记录原因的兼容性覆盖；Helidon 的 Jackson annotations 覆盖即属于此类例外。
 
 测试依赖遵循同一边界。core 模块可以使用运行时无关的 JUnit、AssertJ、Mockito、H2 或持久化框架原生测试支持。凡是启动 Spring、Quarkus 或 Helidon 的测试，都必须位于对应的直接运行时集成测试模块，并在该模块中声明相应运行时测试栈。
 
@@ -79,16 +81,20 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 ## Java 空值契约
 
-领域层和应用层包使用 JSpecify `@NullMarked`，默认把引用类型声明为非空。公共 API 中确实支持
-`null` 的位置使用 `@Nullable`，例如 `AggregateRepository.findById` 查询不到聚合、可选的消息路由键，
-以及 Outbox/Inbox 的可选状态。可变的 `InboxMessage` 与 `OutboxMessage` 存储载体在类边界保留
-`@NullUnmarked`：它们通过无参构造和映射器分阶段填充，在这一过程中对象会暂时处于不完整状态；其中稳定的
-可空属性仍显式标注。
+领域层、应用层，以及选定的基础设施公共契约使用 JSpecify `@NullMarked`，默认把引用类型声明为非空。
+选定的基础设施面是持久化查找和请求关联。运行时装配、自动配置、部署处理器和集成测试包默认不标记，
+除非它们暴露公共的可空契约。
+
+公共 API 中确实支持 `null` 的位置使用 `@Nullable`，例如 `AggregateRepository.findById` 查询不到聚合、
+可选的消息路由键、可选的请求关联输入，以及 Outbox/Inbox 的可选状态。已经返回 `Optional` 的查找保持
+该形状，而不是改回 `null`。可变的 `InboxMessage`、`OutboxMessage` 以及 JPA/MyBatis 映射类型在类边界
+保留 `@NullUnmarked`：它们通过无参构造和映射器分阶段填充，在这一过程中对象会暂时处于不完整状态；
+其中稳定的可空属性仍显式标注。
 
 这些注解只为 Java 静态分析提供元数据，不执行运行时校验，也不替代构造器检查、
-`Objects.requireNonNull`、领域不变式或 HTTP/容器边界的 Jakarta Validation。新增领域层和应用层包应使用
-`@NullMarked`；只有当 `null` 确实属于受支持契约时才使用 `@Nullable`；`@NullUnmarked` 仅限于暂时无法
-表达可靠静态契约的特定生命周期迁移边界。
+`Objects.requireNonNull`、领域不变式或 HTTP/容器边界的 Jakarta Validation。新增领域层、应用层、
+持久化和请求关联包应使用 `@NullMarked`；只有当 `null` 确实属于受支持契约时才使用 `@Nullable`；
+`@NullUnmarked` 仅限于暂时无法表达可靠静态契约的特定生命周期迁移边界。
 
 ## 可靠消息边界
 
@@ -130,4 +136,4 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
   构建期与原生镜像行为。
 - Foundation 只管理运行时无关坐标；各运行时 BOM 管理与自身匹配的生态。
 - core 测试不得通过宽泛的启动器依赖间接获得运行时测试框架。
-- 领域层和应用层包使用 JSpecify 声明 Java 空值默认规则，并显式标注受支持的可空 API 位置。
+- 领域层、应用层、持久化和请求关联包使用 JSpecify 声明 Java 空值默认规则，并显式标注受支持的可空 API 位置。

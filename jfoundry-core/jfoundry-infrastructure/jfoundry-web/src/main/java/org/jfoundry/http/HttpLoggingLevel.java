@@ -3,7 +3,7 @@ package org.jfoundry.http;
 /// Selects the detail recorded for HTTP client or server diagnostic logs.
 ///
 /// `BASIC` records request and response metadata without accessing either body. `HEADERS` additionally
-/// records redacted headers. `FULL` records redacted and size-limited JSON bodies.
+/// records a redacted diagnostic subset of headers. `FULL` records redacted and size-limited JSON bodies.
 public enum HttpLoggingLevel {
 
     /// Disables HTTP logging.
@@ -12,7 +12,7 @@ public enum HttpLoggingLevel {
     /// Records the HTTP method, query-free URI, response status, duration, and failure metadata.
     BASIC,
 
-    /// Records `BASIC` data and redacted request and response headers.
+    /// Records `BASIC` data and a redacted diagnostic subset of request and response headers.
     HEADERS,
 
     /// Records `HEADERS` data and redacted, size-limited JSON request and response bodies.

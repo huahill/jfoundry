@@ -9,6 +9,11 @@
     <name>jfoundry-web-helidon</name>
     <description>Helidon MP JAX-RS runtime integration for JFoundry web adapters.</description>
     <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+
         <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web</artifactId></dependency>
         <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web-jaxrs</artifactId></dependency>
         <dependency><groupId>io.helidon.microprofile.server</groupId><artifactId>helidon-microprofile-server</artifactId></dependency>

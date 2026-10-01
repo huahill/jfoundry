@@ -46,6 +46,31 @@ class WebMvcProblemDetailAutoConfigurationTest {
     }
 
     @Test
+    void localizesProblemDetailsThroughAnAvailableMessageSource() {
+        org.springframework.context.support.StaticMessageSource messageSource =
+                new org.springframework.context.support.StaticMessageSource();
+        messageSource.addMessage("order.invalid-page-size", java.util.Locale.SIMPLIFIED_CHINESE,
+                "分页大小无效：请求 {0}");
+        org.springframework.context.i18n.LocaleContextHolder.setLocale(java.util.Locale.SIMPLIFIED_CHINESE);
+
+        try {
+            runner.withBean(org.springframework.context.MessageSource.class, () -> messageSource)
+                    .run(context -> assertThat(context.getBean(ProblemDetailsExceptionHandler.class)
+                            .handleInvalidArgument(new InvalidArgumentException("order.invalid-page-size", 500))
+                            .getBody()).isNotNull()
+                            .satisfies(problem -> {
+                                org.springframework.http.ProblemDetail detail =
+                                        (org.springframework.http.ProblemDetail) problem;
+                                org.assertj.core.api.Assertions.assertThat(detail.getTitle()).isEqualTo("参数无效");
+                                org.assertj.core.api.Assertions.assertThat(detail.getDetail())
+                                        .isEqualTo("分页大小无效：请求 500");
+                            }));
+        } finally {
+            org.springframework.context.i18n.LocaleContextHolder.resetLocaleContext();
+        }
+    }
+
+    @Test
     void preventsBootFromRegisteringItsProblemDetailsExceptionHandler() {
         runner.withConfiguration(AutoConfigurations.of(WebMvcAutoConfiguration.class,
                         WebMvcProblemDetailAutoConfiguration.class))

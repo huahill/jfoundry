@@ -1,6 +1,7 @@
 package org.jfoundry.http.correlation;
 
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /// Request-scoped access to the final correlation identifier.
 public interface RequestCorrelationContext {
@@ -16,7 +17,7 @@ public interface RequestCorrelationContext {
     }
 
     /// Installs a context for the current request thread.
-    static void install(RequestCorrelationContext context) {
+    static void install(@Nullable RequestCorrelationContext context) {
         RequestCorrelationContextHolder.install(context);
     }
 

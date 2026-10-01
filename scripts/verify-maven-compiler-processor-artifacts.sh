@@ -73,11 +73,11 @@ verify_spring_metadata \
 verify_spring_metadata \
     'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-restclient-spring-boot-autoconfigure' \
     'jfoundry-restclient-spring-boot-autoconfigure' \
-    'jfoundry.web.rest-client.logging-level'
+    'jfoundry.web.rest-client.logging.level'
 verify_spring_metadata \
     'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-webmvc-spring-boot-autoconfigure' \
     'jfoundry-webmvc-spring-boot-autoconfigure' \
-    'jfoundry.web.mvc.logging-level'
+    'jfoundry.web.mvc.logging.level'
 
 verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-transaction-quarkus-deployment' \

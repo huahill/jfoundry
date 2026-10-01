@@ -161,7 +161,7 @@ class OutboxDispatcherAutoConfigurationTest {
         private int calls;
 
         @Override
-        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) throws Exception {
+        public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
             calls++;
             return callback.execute();
         }

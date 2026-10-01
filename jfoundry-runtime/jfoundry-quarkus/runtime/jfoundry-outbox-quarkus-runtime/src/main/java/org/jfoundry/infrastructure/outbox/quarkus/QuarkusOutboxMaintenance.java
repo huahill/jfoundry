@@ -113,14 +113,8 @@ public class QuarkusOutboxMaintenance {
     }
 
     private <T> T inNewTransaction(TransactionCallback<T> callback) {
-        try {
-            return transactionRunner.call(TransactionOptions.builder()
-                    .propagation(TransactionPropagation.REQUIRES_NEW)
-                    .build(), callback);
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IllegalStateException("Outbox maintenance transaction failed", exception);
-        }
+        return transactionRunner.call(TransactionOptions.builder()
+                .propagation(TransactionPropagation.REQUIRES_NEW)
+                .build(), callback);
     }
 }

@@ -16,7 +16,6 @@ public final class RestClientHttpLoggingProvider extends AbstractJaxRsRestClient
     }
 
     RestClientHttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(infoEnabled, nanoTime,
-                (message, arguments) -> LOG.log(System.Logger.Level.INFO, message, arguments));
+        super(infoEnabled, nanoTime, message -> LOG.log(System.Logger.Level.INFO, message));
     }
 }

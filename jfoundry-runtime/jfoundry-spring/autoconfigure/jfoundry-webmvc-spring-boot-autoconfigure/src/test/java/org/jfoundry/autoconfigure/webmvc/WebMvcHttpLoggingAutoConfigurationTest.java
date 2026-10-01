@@ -1,9 +1,12 @@
 package org.jfoundry.autoconfigure.webmvc;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import jakarta.servlet.DispatcherType;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -28,9 +31,11 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     void defaultsToDisabledNoneRegistration() {
         runner.run(context -> {
             assertThat(context).hasSingleBean(JfoundryWebMvcProperties.class);
-            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingLevel())
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getLevel())
                     .isEqualTo(HttpLoggingLevel.NONE);
-            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingExcludedPaths())
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getFormat())
+                    .isEqualTo(HttpLoggingFormat.HUMAN);
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getExcludedPaths())
                     .containsExactly("/actuator/health/**");
             var registration = registration(context);
             assertThat(registration.isEnabled()).isFalse();
@@ -39,8 +44,30 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     }
 
     @Test
+    void bindsConfiguredLoggingFormatOntoTheFilter() {
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC", "jfoundry.web.mvc.logging.format=INLINE")
+                .run(context -> {
+                    assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getFormat())
+                            .isEqualTo(HttpLoggingFormat.INLINE);
+                    assertThat(format(registration(context))).isEqualTo(HttpLoggingFormat.INLINE);
+                });
+    }
+
+    @Test
+    void bindsDefaultAndConfiguredIncludedHeadersOntoTheFilter() {
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=HEADERS").run(context -> {
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getIncludedHeaders())
+                    .isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+            assertThat(includedHeaders(registration(context))).isEqualTo(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
+        });
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=HEADERS",
+                "jfoundry.web.mvc.logging.included-headers[0]=*")
+                .run(context -> assertThat(includedHeaders(registration(context))).containsExactly("*"));
+    }
+
+    @Test
     void excludesDefaultHealthPathsAfterContextPath() throws Exception {
-        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC")
                 .run(context -> {
                     var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
                     request.setContextPath("/api");
@@ -57,7 +84,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     @Test
     void excludesDefaultHealthPathsAfterServletPath() throws Exception {
-        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC")
                 .run(context -> {
                     var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
                     request.setServletPath("/api");
@@ -74,7 +101,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     @Test
     void logsSpringBootErrorPathAfterServletPath() throws Exception {
-        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC")
                 .run(context -> {
                     var request = new MockHttpServletRequest("GET", "/api/error");
                     request.setServletPath("/api");
@@ -90,11 +117,11 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     @Test
     void applicationExcludedPathsReplaceDefaultsAndCanAddCustomPatterns() throws Exception {
         runner.withPropertyValues(
-                "jfoundry.web.mvc.logging-level=BASIC",
-                "jfoundry.web.mvc.logging-excluded-paths[0]=/internal/**",
-                "jfoundry.web.mvc.logging-excluded-paths[1]=/actuator/health/**")
+                "jfoundry.web.mvc.logging.level=BASIC",
+                "jfoundry.web.mvc.logging.excluded-paths[0]=/internal/**",
+                "jfoundry.web.mvc.logging.excluded-paths[1]=/actuator/health/**")
                 .run(context -> {
-                    assertThat(context.getBean(JfoundryWebMvcProperties.class).getLoggingExcludedPaths())
+                    assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getExcludedPaths())
                             .containsExactly("/internal/**", "/actuator/health/**");
                     var request = new MockHttpServletRequest("GET", "/api/internal/metrics");
                     request.setContextPath("/api");
@@ -110,8 +137,8 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     @Test
     void applicationExcludedPathsReplaceTheDefaultHealthPattern() throws Exception {
         runner.withPropertyValues(
-                "jfoundry.web.mvc.logging-level=BASIC",
-                "jfoundry.web.mvc.logging-excluded-paths[0]=/internal/**")
+                "jfoundry.web.mvc.logging.level=BASIC",
+                "jfoundry.web.mvc.logging.excluded-paths[0]=/internal/**")
                 .run(context -> {
                     var request = new MockHttpServletRequest("GET", "/api/actuator/health/liveness");
                     request.setContextPath("/api");
@@ -128,7 +155,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     void bindsEveryEnabledLevel() {
         for (var level : new HttpLoggingLevel[]{HttpLoggingLevel.BASIC, HttpLoggingLevel.HEADERS,
                 HttpLoggingLevel.FULL}) {
-            runner.withPropertyValues("jfoundry.web.mvc.logging-level=" + level)
+            runner.withPropertyValues("jfoundry.web.mvc.logging.level=" + level)
                     .run(context -> {
                         var registration = registration(context);
                         assertThat(registration.isEnabled()).isTrue();
@@ -139,7 +166,7 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     @Test
     void configuresAsyncDispatchTypesAndDefaultOrder() {
-        runner.withPropertyValues("jfoundry.web.mvc.logging-level=BASIC")
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC")
                 .run(context -> {
                     var registration = registration(context);
                     assertThat(registration.isAsyncSupported()).isTrue();
@@ -200,6 +227,15 @@ class WebMvcHttpLoggingAutoConfigurationTest {
 
     private static HttpLoggingLevel level(FilterRegistrationBean<HttpLoggingFilter> registration) {
         return (HttpLoggingLevel) ReflectionTestUtils.getField(registration.getFilter(), "level");
+    }
+
+    private static HttpLoggingFormat format(FilterRegistrationBean<HttpLoggingFilter> registration) {
+        return (HttpLoggingFormat) ReflectionTestUtils.getField(registration.getFilter(), "format");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static List<String> includedHeaders(FilterRegistrationBean<HttpLoggingFilter> registration) {
+        return (List<String>) ReflectionTestUtils.getField(registration.getFilter(), "includedHeaders");
     }
 
     @Configuration(proxyBeanMethods = false)

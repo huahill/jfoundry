@@ -10,6 +10,7 @@ import org.jfoundry.problem.CompositeProblemMapper;
 import org.jfoundry.problem.ProblemCatalog;
 import org.jfoundry.problem.ProblemDescriptor;
 import org.jfoundry.problem.ProblemMapper;
+import org.jfoundry.problem.ProblemMessageResolver;
 import org.jfoundry.problem.RequestValidationProblem;
 import org.jfoundry.web.spring.ProblemDetailRenderer;
 import org.slf4j.Logger;
@@ -53,13 +54,20 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
     private static final Logger LOG = LoggerFactory.getLogger(ProblemDetailsExceptionHandler.class);
     private static final String SPRING_SECURITY_PACKAGE = "org.springframework.security.";
     private final ProblemMapper problemMapper;
+    private final ProblemMessageResolver problemMessages;
 
     public ProblemDetailsExceptionHandler() {
         this(new CompositeProblemMapper(java.util.List.of()));
     }
 
     public ProblemDetailsExceptionHandler(ProblemMapper problemMapper) {
+        this(problemMapper, ProblemMessageResolver.unresolved());
+    }
+
+    /// Creates a handler that also localizes framework problem strings and exception message codes.
+    public ProblemDetailsExceptionHandler(ProblemMapper problemMapper, ProblemMessageResolver problemMessages) {
         this.problemMapper = java.util.Objects.requireNonNull(problemMapper, "problemMapper must not be null");
+        this.problemMessages = java.util.Objects.requireNonNull(problemMessages, "problemMessages must not be null");
     }
 
     @ExceptionHandler(InvalidArgumentException.class)
@@ -117,9 +125,13 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         return false;
     }
 
-    private static ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
-        return ResponseEntity.status(HttpStatusCode.valueOf(descriptor.status()))
-                .body(ProblemDetailRenderer.render(descriptor));
+    private ResponseEntity<ProblemDetail> problem(ProblemDescriptor descriptor) {
+        ResponseEntity.BodyBuilder response = ResponseEntity.status(HttpStatusCode.valueOf(descriptor.status()));
+        Locale locale = LocaleContextHolder.getLocale();
+        if (!locale.getLanguage().isEmpty()) {
+            response = response.header(HttpHeaders.CONTENT_LANGUAGE, locale.toLanguageTag());
+        }
+        return response.body(ProblemDetailRenderer.render(descriptor));
     }
 
     @Override
@@ -132,7 +144,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         List<RequestValidationProblem.Error> errors = exception.getBindingResult().getAllErrors().stream()
                 .map(error -> validationError(error, locale, requestBody))
                 .toList();
-        ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
+        ProblemDescriptor descriptor = RequestValidationProblem.create(errors, locale, problemMessages);
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
                 HttpStatus.BAD_REQUEST, request);
     }
@@ -152,7 +164,7 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
         exception.getCrossParameterValidationResults().stream()
                 .map(error -> RequestValidationProblem.Error.forRequest(validationDetail(error, locale)))
                 .forEach(errors::add);
-        ProblemDescriptor descriptor = RequestValidationProblem.create(errors);
+        ProblemDescriptor descriptor = RequestValidationProblem.create(errors, locale, problemMessages);
         return super.handleExceptionInternal(exception, ProblemDetailRenderer.render(descriptor), headers,
                 HttpStatus.BAD_REQUEST, request);
     }
@@ -162,10 +174,13 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                                                         HttpHeaders headers,
                                                         HttpStatusCode statusCode,
                                                         WebRequest request) {
+        Locale locale = LocaleContextHolder.getLocale();
         String propertyName = exception.getPropertyName();
         String detail = propertyName == null
-                ? "Failed to convert a request value."
-                : "Failed to convert request value for '" + propertyName + "'.";
+                ? problemMessages.resolve("problem.type-mismatch.request-detail", locale, List.of())
+                        .orElse("Failed to convert a request value.")
+                : problemMessages.resolve("problem.type-mismatch.property-detail", locale, List.of(propertyName))
+                        .orElse("Failed to convert request value for '" + propertyName + "'.");
         ProblemDetail problem = ProblemDetail.forStatusAndDetail(statusCode, detail);
         return super.handleExceptionInternal(exception, problem, headers, statusCode, request);
     }
@@ -181,7 +196,11 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
     private String validationDetail(MessageSourceResolvable error, Locale locale) {
         MessageSource messageSource = getMessageSource();
         String detail = messageSource == null ? error.getDefaultMessage() : messageSource.getMessage(error, locale);
-        return detail == null ? "is invalid" : detail;
+        if (detail != null) {
+            return detail;
+        }
+        return problemMessages.resolve("problem.validation.fallback-detail", locale, List.of())
+                .orElse("is invalid");
     }
 
     private final class RequestValidationVisitor implements HandlerMethodValidationException.Visitor {
@@ -327,7 +346,8 @@ public class ProblemDetailsExceptionHandler extends ResponseEntityExceptionHandl
                 && RequestValidationProblem.TYPE.equals(problemDetail.getType())) {
             return super.createResponseEntity(body, headers, statusCode, request);
         }
-        ProblemDescriptor descriptor = ProblemCatalog.forHttpStatus(statusCode.value());
+        ProblemDescriptor descriptor = ProblemCatalog.forHttpStatus(statusCode.value(),
+                LocaleContextHolder.getLocale(), problemMessages);
         ProblemDetail problem = ProblemDetailRenderer.render(descriptor);
         if (statusCode.is4xxClientError() && body instanceof ProblemDetail springProblem) {
             copySpringProblemDetails(springProblem, problem);

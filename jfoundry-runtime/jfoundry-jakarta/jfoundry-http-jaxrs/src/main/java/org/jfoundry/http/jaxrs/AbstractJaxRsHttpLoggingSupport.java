@@ -5,6 +5,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,7 +17,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.ext.ReaderInterceptorContext;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 
 /// Shared mechanics for server and client JAX-RS HTTP logging providers.
 ///
@@ -44,12 +47,29 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
     }
 
     protected final HttpLoggingLevel configuredLevel(String name) {
+        return configuredEnum(name, HttpLoggingLevel.class, HttpLoggingLevel.NONE);
+    }
+
+    protected final HttpLoggingFormat configuredFormat(String name) {
+        return configuredEnum(name, HttpLoggingFormat.class, HttpLoggingFormat.HUMAN);
+    }
+
+    protected final List<String> configuredIncludedHeaders(String name) {
         try {
-            return ConfigProvider.getConfig().getOptionalValue(name, HttpLoggingLevel.class)
-                    .orElse(HttpLoggingLevel.NONE);
+            return ConfigProvider.getConfig().getOptionalValues(name, String.class)
+                    .orElse(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
         } catch (RuntimeException exception) {
-            safely(() -> info("HTTP logging configuration could not be read: property={0}", name));
-            return HttpLoggingLevel.NONE;
+            safely(() -> info("HTTP logging configuration could not be read: property=" + name));
+            return HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS;
+        }
+    }
+
+    private <T extends Enum<T>> T configuredEnum(String name, Class<T> type, T defaultValue) {
+        try {
+            return ConfigProvider.getConfig().getOptionalValue(name, type).orElse(defaultValue);
+        } catch (RuntimeException exception) {
+            safely(() -> info("HTTP logging configuration could not be read: property=" + name));
+            return defaultValue;
         }
     }
 
@@ -61,8 +81,8 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
         return TimeUnit.NANOSECONDS.toMillis(this.nanoTime.getAsLong() - startedAt);
     }
 
-    protected final void info(String message, Object... arguments) {
-        this.logger.info(message, arguments);
+    protected final void info(String message) {
+        this.logger.info(message);
     }
 
     protected final void safely(Runnable action) {
@@ -121,12 +141,12 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
         }
     }
 
-    /// Runtime-specific bridge for info logging with {@link java.text.MessageFormat} placeholders.
+    /// Runtime-specific bridge for info logging of a fully formatted diagnostic message.
     @FunctionalInterface
     public interface InfoLogger {
 
         /// Writes one info message without affecting HTTP processing when the backend fails.
-        void info(String message, Object... arguments);
+        void info(String message);
     }
 
     protected static final class BodyLog {

@@ -1,16 +1,28 @@
 {
   "properties": [
     {
-      "name": "jfoundry.web.mvc.logging-level",
+      "name": "jfoundry.web.mvc.logging.level",
       "type": "org.jfoundry.http.HttpLoggingLevel",
       "defaultValue": "NONE",
       "description": "Inbound Servlet HTTP logging detail: NONE, BASIC, HEADERS, or FULL. Logging is emitted at INFO when enabled."
     },
     {
-      "name": "jfoundry.web.mvc.logging-excluded-paths",
+      "name": "jfoundry.web.mvc.logging.format",
+      "type": "org.jfoundry.http.HttpLoggingFormat",
+      "defaultValue": "HUMAN",
+      "description": "Inbound Servlet HTTP logging layout: HUMAN for Feign-style --> request and <-- response lines, with bodies on one line and END HTTP closers; INLINE for one-line key=value events."
+    },
+    {
+      "name": "jfoundry.web.mvc.logging.excluded-paths",
       "type": "java.util.List<java.lang.String>",
       "defaultValue": ["/actuator/health/**"],
       "description": "Ant-style application paths excluded from inbound Servlet HTTP logs. The configured list replaces the default."
+    },
+    {
+      "name": "jfoundry.web.mvc.logging.included-headers",
+      "type": "java.util.List<java.lang.String>",
+      "defaultValue": ["accept", "authorization", "content-type", "content-length", "location", "x-request-id"],
+      "description": "Header names included in inbound Servlet HTTP logs when HEADERS or FULL is enabled. The configured list replaces the default. Use * to include every header after redaction."
     },
     {
       "name": "jfoundry.web.mvc.request-correlation.enabled",

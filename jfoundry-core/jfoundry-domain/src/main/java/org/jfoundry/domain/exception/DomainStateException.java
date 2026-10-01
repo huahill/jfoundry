@@ -17,4 +17,10 @@ public class DomainStateException extends DomainException {
     public DomainStateException(String message, Throwable cause) {
         super(message, cause);
     }
+
+    /// Creates a domain-state failure identified by a stable message code with interpolation arguments.
+    /// The code is resolved to caller-facing text at the HTTP boundary through message catalogs.
+    public DomainStateException(String code, Object... args) {
+        super(code, args);
+    }
 }

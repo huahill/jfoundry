@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 /// In-memory repository for application tests.
 /// <p>
@@ -31,7 +32,7 @@ public class InMemoryRepository<T extends AggregateRoot<T, ID> & EventRecordable
     private final Map<ID, T> entities = new HashMap<>();
 
     @Override
-    public T findById(ID id) {
+    public @Nullable T findById(ID id) {
         return entities.get(id);
     }
 

@@ -12,10 +12,12 @@ import org.jfoundry.application.outbox.OutboxMessageStatus;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.jspecify.annotations.NullUnmarked;
 
 /// Jakarta Persistence mapping for a single Outbox message.
 @Entity
 @Table(name = "jfoundry_outbox_event")
+@NullUnmarked
 public class JpaOutboxMessageEntity {
 
     @Id

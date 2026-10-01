@@ -11,6 +11,7 @@ import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 /// Jakarta Persistence repository base for aggregates represented by one entity graph.
 /// <p>
@@ -28,8 +29,8 @@ public abstract class JpaAggregateRepository<
     protected final EntityManager entityManager;
     private final Class<E> entityType;
     private final JpaAggregateMapper<A, ID, E, K> mapper;
-    private final JpaAuditStamping auditStamping;
-    private AggregatePersistenceContext persistenceContext;
+    private final @Nullable JpaAuditStamping auditStamping;
+    private @Nullable AggregatePersistenceContext persistenceContext;
     private final PersistenceStateKey<E> managedEntityKey;
 
     protected JpaAggregateRepository(
@@ -44,7 +45,7 @@ public abstract class JpaAggregateRepository<
             EntityManager entityManager,
             Class<E> entityType,
             JpaAggregateMapper<A, ID, E, K> mapper,
-            JpaAuditStamping auditStamping) {
+            @Nullable JpaAuditStamping auditStamping) {
         this.entityManager = Objects.requireNonNull(entityManager, "EntityManager must not be null.");
         this.entityType = Objects.requireNonNull(entityType, "Entity type must not be null.");
         this.mapper = Objects.requireNonNull(mapper, "JpaAggregateMapper must not be null.");
@@ -69,7 +70,7 @@ public abstract class JpaAggregateRepository<
     }
 
     @Override
-    protected final A doFindById(ID id) {
+    protected final @Nullable A doFindById(ID id) {
         AggregatePersistenceContext context = requirePersistenceContext();
         E entity = entityManager.find(entityType, mapper.toEntityId(id));
         if (entity == null) {

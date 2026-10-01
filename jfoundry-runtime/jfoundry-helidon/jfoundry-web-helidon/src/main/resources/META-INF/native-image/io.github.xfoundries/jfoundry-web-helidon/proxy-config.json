@@ -1,0 +1,11 @@
+[
+  {
+    "condition": {
+      "typeReachable": "jakarta.ws.rs.core.HttpHeaders"
+    },
+    "interfaces": [
+      "jakarta.ws.rs.core.HttpHeaders",
+      "org.glassfish.hk2.api.ProxyCtl"
+    ]
+  }
+]

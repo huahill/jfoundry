@@ -14,6 +14,13 @@
     <name>jfoundry-architecture</name>
     <description>Aggregate module for JFoundry architecture style stereotypes</description>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
+    </dependencies>
+
     <subprojects>
         <subproject>jfoundry-hexagonal</subproject>
         <subproject>jfoundry-onion</subproject>

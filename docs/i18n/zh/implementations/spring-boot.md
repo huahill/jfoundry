@@ -6,7 +6,8 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理，它管理 JFoundry 核心、架构和框架无关适配器的版本。
 使用 JFoundry Boot Parent 时由 Parent 自动导入，否则应用需要显式导入。它属于 `<dependencyManagement>`，不是运行时
-依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。
+依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。通过 `jfoundry-dependencies` 导入的 Foundation
+不会再声明选定 Spring Boot Parent 已经管理的 JUnit、Jackson、Mockito 等平台栈。
 
 ## Spring Boot
 
@@ -121,7 +122,7 @@ Outbox 装配包含四项独立决策：能力、存储、派发触发方式和�
 
 ## Web、锁与替换
 
-Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
+Web MVC 启动器是入端适配器。它为受支持的 jfoundry 异常、应用提供的 `ProblemMapper` 映射以及 `ProblemCatalog` 支持的 Spring MVC HTTP 错误输出共享 RFC 9457 契约；领域和应用代码不应直接选择 HTTP 状态码。问题消息先通过 Spring 的 `MessageSource` 本地化，再回退到框架的 `jfoundry-problems` 消息包，locale 取自 Spring 的 locale 上下文；code 与参数契约见[Web](../capabilities/web.md)。其他 Spring MVC 错误保留 Spring 原有的状态码和问题响应。自动配置先于 Spring Boot 的 Web MVC 问题详情配置执行，因此启用 `spring.mvc.problemdetails.enabled` 不会引入并行的处理器。它不会配置认证或授权。拥有这些语义的安全适配器可使用 `ProblemDetailRenderer.render(...)` 渲染自己的 `401` 或 `403` 描述符。共享契约与能力选择入口见[Web](../capabilities/web.md)。
 
 对于目录支持的 Spring MVC 客户端错误，JFoundry 保留目录中稳定的 `type` 和 `status`，同时使用 Spring
 Framework 针对具体异常生成的 `title` 和 `detail`，包括 `MessageSource` 本地化结果。例如，缺少请求参数时会
@@ -157,31 +158,35 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 `jfoundry-restclient-spring` 为出站 `RestClient` 调用提供显式 Spring 集成。只对拥有该集成的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
 只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
-`HttpRequestException`。`HttpLoggingLevel` 从 `org.jfoundry.http` 导入，Spring 日志支持从
+`HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
 `org.jfoundry.http.spring` 导入，执行链拦截器从
 `org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
 `org.jfoundry.web.spring` 位置不提供转发别名。
 
 Spring Boot 应用可以使用 `jfoundry-restclient-spring-boot-starter`，并通过
-`jfoundry.web.rest-client.logging-level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `NONE`。
+`jfoundry.web.rest-client.logging.level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `NONE`。
+布局通过 `jfoundry.web.rest-client.logging.format` 选择，默认值为 `HUMAN`；需要单行 `key=value` 时设为 `INLINE`。
 直接通过 `RestClient.builder()` 创建 builder 时，仍需使用
-`RestClientSupport.configure(builder, HttpLoggingLevel)`。出站 `duration` 字段以 `duration=30ms` 形式输出，并使用
+`RestClientSupport.configure(builder, HttpLoggingLevel)`，也可传入 `HttpLoggingFormat`。出站 `duration` 字段在 `INLINE` 布局下以 `duration=30ms` 形式输出，并使用
 单调时钟从进入执行链开始计时，到响应 header 到达或执行失败时结束；响应 body 消费与解码不在该边界内。
 
 `jfoundry-webmvc-spring-boot-starter` 会为 Servlet 应用自动配置 `HttpLoggingFilter`。
-`jfoundry.web.mvc.logging-level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后的注册覆盖
+`jfoundry.web.mvc.logging.level` 默认值为 `NONE`，因此升级不会静默增加访问日志量。启用后 `jfoundry.web.mvc.logging.format` 默认值为 `HUMAN`。启用后的注册覆盖
 `REQUEST`、`ASYNC` 与 `ERROR`，支持异步处理，默认顺序为 `Ordered.HIGHEST_PRECEDENCE + 20`，位于 Spring
 Security 常规注册之前。应用可以提供自己的 `HttpLoggingFilter` 或
 `FilterRegistrationBean<HttpLoggingFilter>`，以适配转发、追踪或安全拓扑所需的其他顺序。
 
 自动配置的过滤器默认排除 `/actuator/health/**`，包括 liveness 与 readiness 探针。应用可将
-`jfoundry.web.mvc.logging-excluded-paths` 设置为 Ant 风格的应用内路径列表，以替换默认列表；如需在保留
+`jfoundry.web.mvc.logging.excluded-paths` 设置为 Ant 风格的应用内路径列表，以替换默认列表；如需在保留
 健康检查排除的同时增加其他路径，请在列表中同时保留 `/actuator/health/**`。匹配前会移除 Servlet context path 与 servlet path。
+`HEADERS` 与 `FULL` 默认只包含诊断用 header 子集；可通过
+`jfoundry.web.mvc.logging.included-headers` 或 `jfoundry.web.rest-client.logging.included-headers`
+替换，或使用 `*` 在脱敏后输出全部 header。
 
 入站时长在同步链完成，或异步请求进入 complete、error、timeout 终态时结束。`FULL` 使用 tee 包装器立即转发
-请求与响应字节，并最多保留 8 KiB；该时长不表示客户端何时收到流式响应。两个方向都以 `INFO` 分类输出 request、
-header、body 与 response 事件，始终移除 URI query，并脱敏敏感 header 与嵌套 JSON 字段；不安全的 body
-表示会被省略。这些日志用于补充而不是替代
+请求与响应字节，并最多保留 8 KiB；该时长不表示客户端何时收到流式响应。两个方向都以 `INFO` 输出 request、
+header、body 与 response 明细，始终移除 URI query，并脱敏敏感 header 与嵌套 JSON 字段；不安全的 body
+表示会被省略。`HUMAN` 按 Feign 方式用 `-->` / `<--` 区分请求与响应：method 与 URI 只出现在请求首行，body 仍一行，每一侧以 `END HTTP` 收尾；`INLINE` 保留紧凑的单行事件。这些日志用于补充而不是替代
 Micrometer 指标/追踪与应用拥有的业务审计事件。
 
 Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约束、幂等或本地同步不足以满足该需求时使用。

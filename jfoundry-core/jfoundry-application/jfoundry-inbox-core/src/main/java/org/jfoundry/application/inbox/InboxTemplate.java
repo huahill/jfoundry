@@ -72,15 +72,9 @@ public final class InboxTemplate implements InboxMessageProcessor {
     }
 
     private <T> T inNewTransaction(TransactionCallback<T> callback) {
-        try {
-            return transactionRunner.call(TransactionOptions.builder()
-                    .propagation(TransactionPropagation.REQUIRES_NEW)
-                    .build(), callback);
-        } catch (RuntimeException exception) {
-            throw exception;
-        } catch (Exception exception) {
-            throw new IllegalStateException("Inbox transaction failed", exception);
-        }
+        return transactionRunner.call(TransactionOptions.builder()
+                .propagation(TransactionPropagation.REQUIRES_NEW)
+                .build(), callback);
     }
 
     private static void requireText(String value, String name) {

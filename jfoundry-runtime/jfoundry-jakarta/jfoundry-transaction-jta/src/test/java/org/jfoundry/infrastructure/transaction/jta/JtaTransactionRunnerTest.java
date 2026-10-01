@@ -7,7 +7,6 @@ import org.jfoundry.application.transaction.TransactionOptions;
 import org.jfoundry.application.transaction.TransactionPropagation;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +40,9 @@ class JtaTransactionRunnerTest {
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
-            throw new IOException("write failed");
+            throw new IllegalStateException("write failed");
         }))
-                .isInstanceOf(IOException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("write failed");
 
         assertThat(transactionManager.begins).isZero();
@@ -105,14 +104,14 @@ class JtaTransactionRunnerTest {
     }
 
     @Test
-    void rollsBackAnOwnedTransactionAndRethrowsTheOriginalCheckedException() {
+    void rollsBackAnOwnedTransactionAndRethrowsTheOriginalRuntimeException() {
         RecordingTransactionManager transactionManager = new RecordingTransactionManager();
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
 
         assertThatThrownBy(() -> runner.call(() -> {
-            throw new IOException("write failed");
+            throw new IllegalStateException("write failed");
         }))
-                .isInstanceOf(IOException.class)
+                .isInstanceOf(IllegalStateException.class)
                 .hasMessage("write failed");
 
         assertThat(transactionManager.begins).isEqualTo(1);
@@ -142,7 +141,7 @@ class JtaTransactionRunnerTest {
         transactionManager.rollbackFailure = rollbackFailure;
         transactionManager.timeoutResetFailure = timeoutResetFailure;
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
-        IOException failure = new IOException("write failed");
+        IllegalStateException failure = new IllegalStateException("write failed");
 
         Throwable thrown = catchThrowable(() -> runner.call(TransactionOptions.builder()
                 .timeout(Duration.ofSeconds(12))
@@ -161,7 +160,7 @@ class JtaTransactionRunnerTest {
         RuntimeException cleanupFailure = new IllegalStateException("rollback-only failed");
         transactionManager.rollbackOnlyFailure = cleanupFailure;
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
-        IOException failure = new IOException("write failed");
+        IllegalStateException failure = new IllegalStateException("write failed");
 
         Throwable thrown = catchThrowable(() -> runner.call(() -> {
             throw failure;
@@ -178,7 +177,7 @@ class JtaTransactionRunnerTest {
         RuntimeException cleanupFailure = new IllegalStateException("resume failed");
         transactionManager.resumeFailure = cleanupFailure;
         JtaTransactionRunner runner = new JtaTransactionRunner(transactionManager);
-        IOException failure = new IOException("write failed");
+        IllegalStateException failure = new IllegalStateException("write failed");
 
         Throwable thrown = catchThrowable(() -> runner.call(TransactionOptions.builder()
                 .propagation(TransactionPropagation.NOT_SUPPORTED)

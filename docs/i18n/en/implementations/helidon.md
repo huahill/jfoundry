@@ -159,7 +159,10 @@ PostgreSQL/JTA middleware verification.
 `jfoundry-web-helidon` maps JFoundry application and domain exceptions to RFC 9457
 `application/problem+json` JAX-RS responses. It keeps Helidon's ordinary handling for unknown
 exceptions and unrelated HTTP failures; the adapter is not a replacement for the application's
-general JAX-RS error policy. The runtime-neutral contract and the dependency choices for all
+general JAX-RS error policy. Problem messages localize through classpath `messages*.properties`
+bundles first and the framework `jfoundry-problems` catalog second, keyed by the request's
+`Accept-Language`; see [Web](../capabilities/web.md) for the code-and-arguments contract. The
+runtime-neutral contract and the dependency choices for all
 supported runtimes are in [Web](../capabilities/web.md).
 
 It does not configure security. A Helidon security adapter that owns authentication and authorization
@@ -174,12 +177,16 @@ server-error handling. Applications that accept JSON request bodies must also se
 provider, such as `jersey-media-json-binding` for JSON-B.
 
 The same Web module registers a JAX-RS request/response filter and reader/writer interceptors for
-diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging-level`, defaulting to `NONE`.
+diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging.level`, defaulting to `NONE`.
+Layout uses `jfoundry.web.helidon.logging.format`, defaulting to `HUMAN`.
 Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
 
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses
-`jfoundry.web.rest-client.logging-level`, defaulting to `NONE`. This integration is verified on the JVM.
+`jfoundry.web.rest-client.logging.level`, defaulting to `NONE`, and `jfoundry.web.rest-client.logging.format`,
+defaulting to `HUMAN`. Included headers use `jfoundry.web.helidon.logging.included-headers` inbound
+and `jfoundry.web.rest-client.logging.included-headers` outbound; a configured list replaces the
+diagnostic default, and `*` includes every header after redaction. This integration is verified on the JVM.
 Helidon's supported 4.5.x REST Client
 Native Image substitution is not compatible with the current GraalVM 25 baseline, so Native REST
 Client logging is not a release support claim. Spring `WebClient` is not supported.
