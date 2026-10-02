@@ -90,6 +90,7 @@ jobs:
             "Spring Native Image (Redisson)"
             "Spring Native Image (JobRunr)"
             "Quarkus Native Image"
+            "Quarkus Native Image (Redisson)"
             "Helidon Native Image"
             "Maven 4 compatibility"
             "Merge gate"

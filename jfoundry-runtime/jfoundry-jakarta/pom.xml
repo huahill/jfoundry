@@ -20,5 +20,6 @@
         <subproject>jfoundry-web-jaxrs</subproject>
         <subproject>jfoundry-transaction-jta</subproject>
         <subproject>jfoundry-domain-event-jta</subproject>
+        <subproject>jfoundry-lock-el</subproject>
     </subprojects>
 </project>

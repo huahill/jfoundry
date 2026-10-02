@@ -15,7 +15,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
 | 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-domain-event-outbox-core`、`jfoundry-inbox-core` |
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-domain-event-persistence-bridge`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
-| 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
+| 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta`、`jfoundry-lock-el` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring 集成测试 | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |
@@ -68,7 +68,7 @@ Spring Boot 自动配置模块与启动器仍按能力划分。
 
 Foundation 不得再声明 Spring Boot、Quarkus 或 Helidon 平台 BOM 已经管理的栈，包括 JUnit、Mockito、Jackson、SLF4J、OpenTelemetry、Kafka/RabbitMQ/RocketMQ 客户端、Hibernate 和 JDBC 驱动。这些版本跟随选定运行时。根 `jfoundry-parent` 可以导入 JUnit、Jackson 和 OpenTelemetry BOM 以便编译 JFoundry 自身。它不得直接钉死这些 GA，否则会覆盖更近的运行时 BOM。
 
-各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。若官方平台 BOM 会破坏 Foundation 所管理的运行时无关组件，运行时 BOM 可以提供范围严格且已记录原因的兼容性覆盖；Helidon 的 Jackson annotations 覆盖即属于此类例外。
+各运行时 BOM 分别拥有自己的生态：`jfoundry-spring-boot-dependencies` 管理 Spring Boot 与 Spring 特定集成坐标，`jfoundry-quarkus-dependencies` 管理 Quarkus 坐标，`jfoundry-helidon-dependencies` 管理 Helidon 坐标。运行时 BOM 彼此独立，不得导入 Foundation 或其他运行时 BOM。若官方平台 BOM 会破坏 Foundation 所管理的运行时无关组件，运行时 BOM 可以提供范围严格且已记录原因的兼容性覆盖；Helidon 与 Quarkus 的 Jackson annotations 覆盖，以及 Helidon 对 Testcontainers 核心坐标的覆盖，即属于此类例外。
 
 测试依赖遵循同一边界。core 模块可以使用运行时无关的 JUnit、AssertJ、Mockito、H2 或持久化框架原生测试支持。凡是启动 Spring、Quarkus 或 Helidon 的测试，都必须位于对应的直接运行时集成测试模块，并在该模块中声明相应运行时测试栈。
 

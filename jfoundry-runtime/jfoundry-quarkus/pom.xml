@@ -40,6 +40,7 @@
         <subproject>runtime/jfoundry-outbox-jpa-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-inbox-jpa-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-persistence-jpa-quarkus-runtime</subproject>
+        <subproject>runtime/jfoundry-lock-redisson-quarkus-runtime</subproject>
         <subproject>deployment/jfoundry-transaction-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-domain-event-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-domain-event-persistence-bridge-quarkus-deployment</subproject>
@@ -53,6 +54,7 @@
         <subproject>deployment/jfoundry-outbox-jpa-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-inbox-jpa-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-persistence-jpa-quarkus-deployment</subproject>
+        <subproject>deployment/jfoundry-lock-redisson-quarkus-deployment</subproject>
         <subproject>jfoundry-quarkus-integration-tests</subproject>
     </subprojects>
 </project>

@@ -33,6 +33,8 @@
         <helidon.version>4.5.5</helidon.version>
         <helidon.groovy-all.version>3.0.25</helidon.groovy-all.version>
         <helidon.jackson-annotations.version>2.22</helidon.jackson-annotations.version>
+        <helidon.testcontainers.version>2.0.5</helidon.testcontainers.version>
+        <redisson.version>4.8.0</redisson.version>
     </properties>
 
     <dependencyManagement>
@@ -49,12 +51,28 @@
                 <artifactId>groovy-all</artifactId>
                 <version>${helidon.groovy-all.version}</version>
             </dependency>
+            <!--
+                Helidon 4.5.5 manages Testcontainers 1.21.4. That core brings junit:junit onto the
+                test classpath, and Surefire then treats JUnit Jupiter tags as JUnit 4 categories.
+                The PostgreSQL middleware test is skipped while the build stays green. Pin the core
+                to 2.0.5, which does not depend on JUnit 4. Foundation manages the 2.0 module coordinates.
+            -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${helidon.testcontainers.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.helidon</groupId>
                 <artifactId>helidon-dependencies</artifactId>
                 <version>${helidon.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-helidon-40</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

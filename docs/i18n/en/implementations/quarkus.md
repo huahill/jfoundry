@@ -7,7 +7,7 @@ GraalVM types outside the domain, application, and infrastructure modules.
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
 `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
-`jfoundry-restclient-jaxrs` implementations.
+`jfoundry-restclient-jaxrs` implementations. Distributed-lock annotation keys reuse `jfoundry-lock-el`.
 Quarkus-owned runtime classes remain the public CDI/provider entry points, while deployment modules
 retain Arc registration, augmentation, RESTEasy Reactive integration, and Native Image behavior.
 Applications select the Quarkus runtime modules rather than assembling these shared implementation modules.
@@ -15,7 +15,7 @@ Applications select the Quarkus runtime modules rather than assembling these sha
 ## Dependency Setup
 
 Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
-required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions only;
+required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions and a narrow Jackson annotations compatibility alignment;
 it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
 
@@ -69,6 +69,7 @@ artifact automatically.
 | Kafka or RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` or `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
 | `jfoundry-restclient-spring-boot-starter` | `jfoundry-restclient-quarkus-runtime` |
+| `jfoundry-lock-redisson-spring-boot-starter` | `jfoundry-lock-redisson-quarkus-runtime` and `redisson-quarkus-33` |
 
 ## Supported Scope
 
@@ -81,9 +82,9 @@ Client registration without moving HTTP lifecycle APIs into the core.
 
 MyBatis-Plus aggregate persistence is not a Quarkus composition because this runtime uses JPA.
 RocketMQ delivery is not supported. Quarkus applications compose extensions instead of Spring-style
-starters. Redisson distributed locks and JobRunr remain deferred. Do not add the framework-neutral
-adapters or Spring starters as a substitute; select a custom application adapter only when the
-project owns that integration.
+starters. Redisson locks are an explicit extension: depend on `jfoundry-lock-redisson-quarkus-runtime`
+and set `quarkus.redisson.single-server-config.address`. Inject `LockExecutor`; Quarkus does not
+intercept `@DistributedLock`. JobRunr remains deferred. Do not add a Spring starter as a substitute.
 
 ## Transaction Semantics
 
@@ -456,9 +457,19 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
 
-Use `--stage middleware` or `--stage native` to run one stage. To run all supported runtime checks,
-use `bash scripts/verify-runtime-ci.sh all` with both environment variables set. The general
-`scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
+Use `--stage middleware` or `--stage native` to run one stage. The base native stage does not include
+Redisson. Redis lock verification is separate, so a missing Redisson address cannot break the default
+application:
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
+```
+
+That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile. To run all
+supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment variables
+set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 
@@ -469,4 +480,4 @@ Inbox storage, automatic externalization for explicitly marked events, Kafka and
 optional Outbox dispatch, recovery, and cleanup. It does not assemble MyBatis-Plus because Quarkus
 persistence uses JPA, does not assemble RocketMQ because that broker is not supported on Quarkus, and
 does not publish Spring-style starters because Quarkus applications compose extensions. Redisson
-distributed locks and JobRunr remain deferred.
+locks use `jfoundry-lock-redisson-quarkus-runtime`; JobRunr remains deferred.

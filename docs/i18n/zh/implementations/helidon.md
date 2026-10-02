@@ -5,7 +5,7 @@ CDI/Jakarta 运行时集成，不是 Spring Boot 启动器，也不是 Quarkus �
 JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 
 其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
-`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。Helidon 自有运行时类仍是公开的 CDI/provider
+`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。分布式锁注解的 key 求值复用 `jfoundry-lock-el`。Helidon 自有运行时类仍是公开的 CDI/provider
 入口，并保留 portable extension、服务加载、调度、日志与原生镜像行为。应用应选择 Helidon 运行时模块，
 而不是自行组合这些共享实现模块。
 
@@ -216,7 +216,7 @@ JPA 都不能作为验收结论。精确测试版本记录在[兼容矩阵](../.
 
 ### 本地 CI 对齐验证
 
-使用 Java 25、Docker 和 GraalVM Native Image 在本地运行两个 Helidon CI 阶段：
+使用 Java 25、Docker 和 GraalVM Native Image 在本地运行 Helidon CI 阶段：
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -224,12 +224,13 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh helidon
 ```
 
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。原生阶段会验证受支持的 CDI/Web
-使用方、常规 Problem Details 响应和请求校验响应，但不将原生 JTA 或 JPA 作为验收结论。通用
+使用 `--stage middleware`、`--stage jvm-redisson` 或 `--stage native` 可以只运行一个阶段。
+`jvm-redisson` 阶段会对照 Redis 验证 JVM 上的 Redisson 锁装配。原生阶段会验证受支持的 CDI/Web
+使用方、常规 Problem Details 响应和请求校验响应，但不将原生 JTA、JPA 或 Redisson 作为验收结论。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。
 
 ## 延后集成
 
 Helidon 不提供 RocketMQ 投递。Helidon 的持久化、Outbox 与 Inbox 使用 JPA，而不是 MyBatis-Plus。
-当前仍不提供 Redisson 分布式锁和 JobRunr。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
+JVM 上的 Redisson 分布式锁由 `jfoundry-lock-redisson-helidon` 提供。当前仍不提供 JobRunr，Helidon 原生镜像也不包含 Redisson。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
 只有在所选 Helidon 版本中验证客户端生命周期和投递语义后，才应添加应用自有适配器。

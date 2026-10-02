@@ -6,14 +6,14 @@ JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能�
 类型始终位于 domain、application 和 infrastructure 模块之外。
 
 其中的事务、JTA 领域事件协调与 JAX-RS HTTP 日志分别复用可移植的 `jfoundry-transaction-jta`、
-`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。Quarkus 自有运行时类仍是公开的 CDI/provider
+`jfoundry-domain-event-jta`、`jfoundry-web-jaxrs` 和 `jfoundry-restclient-jaxrs` 实现。分布式锁注解的 key 求值复用 `jfoundry-lock-el`。Quarkus 自有运行时类仍是公开的 CDI/provider
 入口，部署模块继续负责 Arc 注册、增强、RESTEasy Reactive 集成与原生镜像行为。应用应选择 Quarkus
 运行时模块，而不是自行组合这些共享实现模块。
 
 ## 依赖配置
 
 依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加所需的能力扩展。
-`jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
+`jfoundry-quarkus-dependencies` 管理 Quarkus 平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
 ```xml
@@ -64,6 +64,7 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 | Kafka 或 RabbitMQ messaging starter | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` |
 | `jfoundry-webmvc-spring-boot-starter` | `jfoundry-web-quarkus-runtime` |
 | `jfoundry-restclient-spring-boot-starter` | `jfoundry-restclient-quarkus-runtime` |
+| `jfoundry-lock-redisson-spring-boot-starter` | `jfoundry-lock-redisson-quarkus-runtime` 与 `redisson-quarkus-33` |
 
 ## 已支持范围
 
@@ -74,8 +75,9 @@ Quarkus REST 边界，`jfoundry-restclient-quarkus-runtime` 负责出站 REST Cl
 生命周期 API 移入核心。
 
 Quarkus 的持久化、Outbox 与 Inbox 使用 JPA，因此不提供 MyBatis-Plus 组合。Quarkus 不支持 RocketMQ
-投递，也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁和 JobRunr 仍延后。
-不要以运行时无关适配器或 Spring 启动器替代；只有当项目自行拥有该集成时，才选择自定义应用适配器。
+投递，也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁是显式扩展：依赖
+`jfoundry-lock-redisson-quarkus-runtime`，并设置 `quarkus.redisson.single-server-config.address`。
+应用注入 `LockExecutor`；Quarkus 不拦截 `@DistributedLock`。JobRunr 仍延后。不要用 Spring 启动器替代。
 
 ## 事务语义
 
@@ -395,7 +397,16 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
 
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。通用
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。基础原生阶段不包含 Redisson。
+Redis 锁验证是独立阶段，因此缺少 Redisson 地址不会破坏默认应用：
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
+```
+
+该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
 `bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
@@ -405,4 +416,4 @@ bash scripts/verify-runtime-ci.sh quarkus
 诊断日志、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
 Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。
 它不装配 MyBatis-Plus，因为 Quarkus 持久化使用 JPA；不装配 RocketMQ，因为该运行时不支持该消息代理；
-也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁和 JobRunr 仍延后。
+也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁使用 `jfoundry-lock-redisson-quarkus-runtime`；JobRunr 仍延后。

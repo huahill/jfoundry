@@ -3,6 +3,7 @@ package org.jfoundry.infrastructure.lock.spring;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.jfoundry.application.lock.DistributedLock;
+import org.jfoundry.application.lock.LockDurations;
 import org.jfoundry.application.lock.LockExecutor;
 import org.jfoundry.application.lock.LockKey;
 import org.jfoundry.application.lock.LockOptions;
@@ -14,8 +15,6 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.lang.reflect.Method;
-import java.time.Duration;
-import java.util.Locale;
 import java.util.Objects;
 
 /// Spring AOP interceptor that executes {@link DistributedLock} methods through {@link LockExecutor}.
@@ -36,13 +35,12 @@ public class DistributedLockInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
         LockKey key = resolveKey(annotation.key(), invocation);
-        LockOptions options = LockOptions.builder()
-                .waitTime(parseDuration(annotation.waitTime(), "waitTime"))
-                .leaseTime(parseOptionalDuration(annotation.leaseTime(), "leaseTime"))
-                .failureMode(annotation.failureMode())
-                .build();
+        LockOptions.Builder options = LockOptions.builder()
+                .waitTime(LockDurations.required(annotation.waitTime(), "waitTime"))
+                .failureMode(annotation.failureMode());
+        LockDurations.optional(annotation.leaseTime(), "leaseTime").ifPresent(options::leaseTime);
         try {
-            return lockExecutor.execute(key, options, () -> {
+            return lockExecutor.execute(key, options.build(), () -> {
                 try {
                     return invocation.proceed();
                 } catch (Exception ex) {
@@ -93,36 +91,6 @@ public class DistributedLockInterceptor implements MethodInterceptor {
             }
         }
         return context;
-    }
-
-    private static Duration parseOptionalDuration(String value, String attributeName) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        return parseDuration(value, attributeName);
-    }
-
-    private static Duration parseDuration(String value, String attributeName) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(attributeName + " must not be blank");
-        }
-        String normalized = value.trim().toLowerCase(Locale.ROOT);
-        if (normalized.startsWith("p")) {
-            return Duration.parse(value);
-        }
-        if (normalized.endsWith("ms")) {
-            return Duration.ofMillis(Long.parseLong(normalized.substring(0, normalized.length() - 2)));
-        }
-        if (normalized.endsWith("s")) {
-            return Duration.ofSeconds(Long.parseLong(normalized.substring(0, normalized.length() - 1)));
-        }
-        if (normalized.endsWith("m")) {
-            return Duration.ofMinutes(Long.parseLong(normalized.substring(0, normalized.length() - 1)));
-        }
-        if (normalized.endsWith("h")) {
-            return Duration.ofHours(Long.parseLong(normalized.substring(0, normalized.length() - 1)));
-        }
-        return Duration.ofMillis(Long.parseLong(normalized));
     }
 
     private static final class ThrowableInvocationException extends RuntimeException {

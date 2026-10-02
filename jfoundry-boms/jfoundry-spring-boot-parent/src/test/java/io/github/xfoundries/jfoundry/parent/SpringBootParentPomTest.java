@@ -165,6 +165,50 @@ class SpringBootParentPomTest {
     }
 
     @Test
+    void quarkusRuntimeBomOwnsRedissonExtensionsAfterThePlatformImport() throws Exception {
+        Document quarkus = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+        Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
+
+        assertThat(managesDependency(quarkus, "org.redisson", "redisson-quarkus-33")).isTrue();
+        assertThat(managesDependency(quarkus, "org.redisson", "redisson-quarkus-33-deployment")).isTrue();
+        assertThat(managesDependency(quarkus, "org.redisson", "redisson")).isFalse();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-quarkus-33")).isFalse();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-quarkus-33-deployment")).isFalse();
+        assertThat(managesDependency(boot, "org.redisson", "redisson-quarkus-33")).isFalse();
+        assertThat(managesDependency(boot, "org.redisson", "redisson-quarkus-33-deployment")).isFalse();
+        assertThat(childText(child(quarkus.getDocumentElement(), "properties"), "redisson.version"))
+                .isEqualTo(childText(child(foundation.getDocumentElement(), "properties"), "redisson.version"));
+
+        List<String> managed = managedArtifactIds(quarkus);
+        assertThat(managed).containsSubsequence(
+                "jackson-annotations",
+                "quarkus-bom",
+                "redisson-quarkus-33",
+                "redisson-quarkus-33-deployment");
+    }
+
+    @Test
+    void helidonRuntimeBomOwnsTheRedissonIntegrationAfterThePlatformImport() throws Exception {
+        Document helidon = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+        Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
+        Document quarkus = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
+
+        assertThat(managesDependency(helidon, "org.redisson", "redisson-helidon-40")).isTrue();
+        assertThat(managesDependency(helidon, "org.redisson", "redisson")).isFalse();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(managesDependency(boot, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(managesDependency(quarkus, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(childText(child(helidon.getDocumentElement(), "properties"), "redisson.version"))
+                .isEqualTo(childText(child(foundation.getDocumentElement(), "properties"), "redisson.version"));
+
+        assertThat(managedArtifactIds(helidon)).containsSubsequence(
+                "helidon-dependencies",
+                "redisson-helidon-40");
+    }
+
+    @Test
     void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
         Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
@@ -278,6 +322,16 @@ class SpringBootParentPomTest {
                 childText(element, "groupId"),
                 childText(element, "artifactId"),
                 childText(element, "version"));
+    }
+
+    private List<String> managedArtifactIds(Document document) {
+        Element management = child(document.getDocumentElement(), "dependencyManagement");
+        Element dependencies = child(management, "dependencies");
+        List<String> artifactIds = new ArrayList<>();
+        for (Element dependency : children(dependencies, "dependency")) {
+            artifactIds.add(childText(dependency, "artifactId"));
+        }
+        return artifactIds;
     }
 
     private boolean managesDependency(Document document, String groupId, String artifactId) {

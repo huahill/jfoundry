@@ -43,6 +43,9 @@
     <jakarta-rest.version>4.0.0</jakarta-rest.version>
     <jakarta-transaction.version>2.0.1</jakarta-transaction.version>
     <jakarta-cdi.version>4.1.0</jakarta-cdi.version>
+    <jakarta-el.version>5.0.1</jakarta-el.version>
+    <jakarta-interceptor.version>2.1.0</jakarta-interceptor.version>
+    <expressly.version>5.0.0</expressly.version>
     <microprofile-config.version>3.1.2</microprofile-config.version>
     <parsson.version>1.1.9</parsson.version>
 
@@ -66,14 +69,14 @@
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
     <jobrunr.version>9.0.0</jobrunr.version>
     <mqttv3.version>1.2.5</mqttv3.version>
-    <redisson.version>4.7.0</redisson.version>
+    <redisson.version>4.8.0</redisson.version>
 
     <!-- Compatibility overrides for runtime-neutral clients -->
     <javassist.version>3.33.0-GA</javassist.version>
 
     <!-- Runtime-neutral test infrastructure -->
     <awaitility.version>4.3.0</awaitility.version>
-    <testcontainers.version>1.21.4</testcontainers.version>
+    <testcontainers.version>2.0.5</testcontainers.version>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -131,6 +134,21 @@
         <groupId>jakarta.enterprise</groupId>
         <artifactId>jakarta.enterprise.cdi-api</artifactId>
         <version>${jakarta-cdi.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.el</groupId>
+        <artifactId>jakarta.el-api</artifactId>
+        <version>${jakarta-el.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jakarta.interceptor</groupId>
+        <artifactId>jakarta.interceptor-api</artifactId>
+        <version>${jakarta-interceptor.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.expressly</groupId>
+        <artifactId>expressly</artifactId>
+        <version>${expressly.version}</version>
       </dependency>
       <dependency>
         <groupId>org.eclipse.microprofile.config</groupId>
@@ -247,27 +265,32 @@
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>junit-jupiter</artifactId>
+        <artifactId>testcontainers</artifactId>
         <version>${testcontainers.version}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>mysql</artifactId>
+        <artifactId>testcontainers-junit-jupiter</artifactId>
         <version>${testcontainers.version}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>postgresql</artifactId>
+        <artifactId>testcontainers-mysql</artifactId>
         <version>${testcontainers.version}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>kafka</artifactId>
+        <artifactId>testcontainers-postgresql</artifactId>
         <version>${testcontainers.version}</version>
       </dependency>
       <dependency>
         <groupId>org.testcontainers</groupId>
-        <artifactId>rabbitmq</artifactId>
+        <artifactId>testcontainers-kafka</artifactId>
+        <version>${testcontainers.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-rabbitmq</artifactId>
         <version>${testcontainers.version}</version>
       </dependency>
     </dependencies>

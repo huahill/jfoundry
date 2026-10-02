@@ -14,8 +14,32 @@
     <name>jfoundry-helidon</name>
     <description>Helidon MP runtime integration for jfoundry framework-neutral contracts.</description>
 
+    <properties>
+        <!-- Required by the parent Hibernate 7.4.11.Final pin. Helidon 4.5.5 manages older releases. -->
+        <helidon.hibernate.jakarta-persistence.version>3.2.0</helidon.hibernate.jakarta-persistence.version>
+        <helidon.hibernate.jboss-logging.version>3.6.1.Final</helidon.hibernate.jboss-logging.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
+            <!--
+                jfoundry-parent directly manages Hibernate 7.4.11.Final, and a child BOM import cannot
+                replace that direct entry. Helidon 4.5.5 would still downgrade this reactor to
+                jakarta.persistence-api 3.1.0 and jboss-logging 3.5.3.Final. Hibernate 7.4.11.Final
+                requires JPA 3.2.0, including PersistenceUnitTransactionType, and jboss-logging 3.6.1.Final.
+                These build-local overrides are not part of the published Helidon BOM, which still
+                follows Helidon's own Hibernate 6.3 line unless an application selects another version.
+            -->
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>${helidon.hibernate.jakarta-persistence.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.logging</groupId>
+                <artifactId>jboss-logging</artifactId>
+                <version>${helidon.hibernate.jboss-logging.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
                 <artifactId>jfoundry-helidon-dependencies</artifactId>
@@ -58,6 +82,7 @@
         <subproject>jfoundry-inbox-jpa-helidon</subproject>
         <subproject>jfoundry-messaging-kafka-helidon</subproject>
         <subproject>jfoundry-messaging-rabbitmq-helidon</subproject>
+        <subproject>jfoundry-lock-redisson-helidon</subproject>
         <subproject>jfoundry-helidon-integration-tests</subproject>
     </subprojects>
 </project>

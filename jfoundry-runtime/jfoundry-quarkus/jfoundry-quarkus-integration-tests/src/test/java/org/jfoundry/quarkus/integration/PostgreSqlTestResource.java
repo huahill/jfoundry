@@ -1,14 +1,14 @@
 package org.jfoundry.quarkus.integration;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import java.util.Map;
 
 /// Starts PostgreSQL for Quarkus middleware verification and supplies the datasource configuration.
 public final class PostgreSqlTestResource implements QuarkusTestResourceLifecycleManager {
 
-    private final PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:17-alpine");
+    private final PostgreSQLContainer database = new PostgreSQLContainer("postgres:17-alpine");
 
     @Override
     public Map<String, String> start() {

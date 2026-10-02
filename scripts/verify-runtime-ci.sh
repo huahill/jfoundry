@@ -15,7 +15,7 @@ GRAALVM_HOME="${GRAALVM_HOME:-}"
 
 usage() {
     cat <<'EOF'
-Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all>]
+Usage: scripts/verify-runtime-ci.sh <spring|quarkus|helidon|all> [--stage <middleware|jvm-redisson|native|native-mybatis-plus|native-redisson|native-jobrunr|all>]
 
 Runs the selected runtime's CI-equivalent verification. The default stage is all.
 
@@ -191,6 +191,16 @@ verify_quarkus() {
             run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative -Dquarkus.native.container-build=true verify
         fi
     fi
+
+    if [[ "${stage}" == "native-redisson" || "${stage}" == "all" ]]; then
+        run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -am -Pjvm-redisson verify
+        if is_macos; then
+            require_graalvm
+            run_maven "${GRAALVM_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative-redisson verify
+        else
+            run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative-redisson -Dquarkus.native.container-build=true verify
+        fi
+    fi
 }
 
 verify_helidon() {
@@ -200,6 +210,12 @@ verify_helidon() {
         require_java_25
         require_docker
         run_maven "${JAVA_25_HOME}" -pl "${HELIDON_INTEGRATION_MODULE}" -am -Pjvm-integration verify
+    fi
+
+    if [[ "${stage}" == "jvm-redisson" || "${stage}" == "all" ]]; then
+        require_java_25
+        require_docker
+        run_maven "${JAVA_25_HOME}" -pl "${HELIDON_INTEGRATION_MODULE}" -am -Pjvm-redisson verify
     fi
 
     if [[ "${stage}" == "native" || "${stage}" == "all" ]]; then
@@ -221,12 +237,12 @@ main() {
     shift
 
     if [[ $# -gt 0 ]]; then
-        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all>."
+        [[ $# -eq 2 && "$1" == "--stage" ]] || fail "Expected --stage <middleware|jvm-redisson|native|native-mybatis-plus|native-redisson|native-jobrunr|all>."
         stage="$2"
     fi
 
     case "${stage}" in
-        middleware|native|native-mybatis-plus|native-redisson|native-jobrunr|all) ;;
+        middleware|jvm-redisson|native|native-mybatis-plus|native-redisson|native-jobrunr|all) ;;
         *) fail "Unknown stage: ${stage}" ;;
     esac
 
