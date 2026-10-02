@@ -64,7 +64,7 @@
     <caffeine.version>3.3.0</caffeine.version>
 
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
-    <jobrunr.version>8.8.2</jobrunr.version>
+    <jobrunr.version>9.0.0</jobrunr.version>
     <mqttv3.version>1.2.5</mqttv3.version>
     <redisson.version>4.7.0</redisson.version>
 
