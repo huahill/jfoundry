@@ -99,10 +99,11 @@ to keep `main` linear. The squash commit subject is the pull request title, so k
 Commit form. Do not use merge commits or rebase-merge. Local verification accelerates feedback but does not
 replace the server-side merge gate.
 
-Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`, and
-`docs/**`. These paths run documentation checks and the merge gate, but skip repository metadata,
-Dependency Review, Java, runtime, Native Image, Maven compatibility, and CodeQL checks. Changes to
-workflows, scripts, POMs, source code, or maintenance skills remain full-validation changes.
+Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`,
+`docs/**`, and `skills/**`. These paths run documentation checks and the merge gate, but skip
+repository metadata, Dependency Review, Java, runtime, Native Image, Maven compatibility, and CodeQL
+checks. Changes to workflows, scripts, POMs, or source code remain full-validation changes. A pull
+request that mixes a documentation path with any other path still runs the full matrix.
 
 ## Documentation Comments
 

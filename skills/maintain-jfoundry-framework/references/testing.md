@@ -62,7 +62,9 @@ When changing public API, starter dependencies, configuration properties, table 
 
 Every repository change is integrated through a pull request. The GitHub `Merge gate` always runs and is the
 required status check for `main`: documentation-only changes require documentation verification; every other
-change requires the complete existing CI matrix to succeed. A skipped, cancelled, or failed runtime task is
+change requires the complete existing CI matrix to succeed. `skills/**` is documentation-only, together with
+`README.md`, `README_ZH.md`, `AGENTS.md`, and `docs/**`. A change that also touches workflows, scripts, POMs,
+or source code still requires the full matrix. A skipped, cancelled, or failed runtime task is
 not an acceptable result for a code change.
 
 Before pushing a branch, select the narrowest CI-equivalent stage that covers the changed capability:
