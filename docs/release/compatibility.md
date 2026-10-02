@@ -84,6 +84,15 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
 - `jfoundry-helidon-dependencies` keeps a Helidon-local Jackson annotations override and the
   `groovy-all` override required by Maven release dependency validation. The owning BOM contains
   the exact override versions.
+- `jfoundry-helidon-dependencies` also pins `org.testcontainers:testcontainers` to 2.0.5.
+  Helidon 4.5.5 manages Testcontainers 1.21.4, whose core brings `junit:junit` and makes Surefire
+  treat JUnit Jupiter tags as JUnit 4 categories. Foundation manages the Testcontainers 2.0 module
+  coordinates; this override keeps the shared core coordinate on that line.
+- The Helidon reactor keeps `jakarta.persistence-api` 3.2.0 and `jboss-logging` 3.6.1.Final
+  ahead of the Helidon BOM import. `jfoundry-parent` directly pins Hibernate 7.4.11.Final, which a
+  child BOM import cannot replace, while Helidon 4.5.5 would otherwise select JPA 3.1.0 and
+  jboss-logging 3.5.3.Final. The override is build-local and is not published in
+  `jfoundry-helidon-dependencies`.
 
 These exceptions are dependency-management decisions, not claims that JFoundry supplies an adapter for
 every library managed by a runtime platform.

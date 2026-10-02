@@ -5,7 +5,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Named;
 import org.postgresql.ds.PGSimpleDataSource;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import javax.sql.DataSource;
 
@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 @ApplicationScoped
 public class PostgreSqlDataSourceProducer {
 
-    private final PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:17-alpine");
+    private final PostgreSQLContainer database = new PostgreSQLContainer("postgres:17-alpine");
 
     @Produces
     @Named("jfoundry")
