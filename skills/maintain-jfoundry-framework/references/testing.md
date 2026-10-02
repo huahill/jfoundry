@@ -40,6 +40,7 @@ mvn test
 | Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |
 | Quarkus Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
 | Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
+| Helidon JVM Redisson integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-redisson verify` |
 | Helidon Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pnative-image package` |
 | Starter POM | `mvn -pl <starter-module> -am test` or `mvn validate` for dependency shape |
 | Release POM or Consumer POM | `bash scripts/verify-release-pom-metadata-test.sh && bash scripts/verify-release-pom-metadata.sh && bash scripts/verify-consumer-pom-test.sh` |
@@ -71,6 +72,7 @@ Before pushing a branch, select the narrowest CI-equivalent stage that covers th
 | Spring Boot auto-configuration, starter, dependency scope, or AOT hints | `scripts/verify-runtime-ci.sh spring --stage native` |
 | Spring Redisson lock adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-redisson` |
 | Quarkus Redisson lock adapter | `scripts/verify-runtime-ci.sh quarkus --stage native-redisson` |
+| Helidon JVM Redisson lock adapter | `scripts/verify-runtime-ci.sh helidon --stage jvm-redisson` |
 | MyBatis-Plus persistence, Outbox/Inbox store, or Native hints | `scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus` |
 | JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
 | Shared runtime contract or lifecycle behavior | Matching Spring, Quarkus, and Helidon stages |

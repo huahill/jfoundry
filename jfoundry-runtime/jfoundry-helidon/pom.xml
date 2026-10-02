@@ -58,6 +58,7 @@
         <subproject>jfoundry-inbox-jpa-helidon</subproject>
         <subproject>jfoundry-messaging-kafka-helidon</subproject>
         <subproject>jfoundry-messaging-rabbitmq-helidon</subproject>
+        <subproject>jfoundry-lock-redisson-helidon</subproject>
         <subproject>jfoundry-helidon-integration-tests</subproject>
     </subprojects>
 </project>

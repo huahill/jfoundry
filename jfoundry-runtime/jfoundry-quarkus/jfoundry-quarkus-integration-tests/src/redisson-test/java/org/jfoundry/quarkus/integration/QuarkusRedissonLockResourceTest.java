@@ -19,4 +19,13 @@ class QuarkusRedissonLockResourceTest {
                 .statusCode(200)
                 .body(equalTo("{\"locked\":true}"));
     }
+
+    @Test
+    void acquiresAnAnnotatedRedissonLock() {
+        when()
+                .get("/jfoundry/native/redisson/lock/annotated?orderId=42")
+                .then()
+                .statusCode(200)
+                .body(equalTo("{\"locked\":true}"));
+    }
 }

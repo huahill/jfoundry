@@ -189,6 +189,26 @@ class SpringBootParentPomTest {
     }
 
     @Test
+    void helidonRuntimeBomOwnsTheRedissonIntegrationAfterThePlatformImport() throws Exception {
+        Document helidon = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+        Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
+        Document quarkus = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
+
+        assertThat(managesDependency(helidon, "org.redisson", "redisson-helidon-40")).isTrue();
+        assertThat(managesDependency(helidon, "org.redisson", "redisson")).isFalse();
+        assertThat(managesDependency(foundation, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(managesDependency(boot, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(managesDependency(quarkus, "org.redisson", "redisson-helidon-40")).isFalse();
+        assertThat(childText(child(helidon.getDocumentElement(), "properties"), "redisson.version"))
+                .isEqualTo(childText(child(foundation.getDocumentElement(), "properties"), "redisson.version"));
+
+        assertThat(managedArtifactIds(helidon)).containsSubsequence(
+                "helidon-dependencies",
+                "redisson-helidon-40");
+    }
+
+    @Test
     void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
         Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 

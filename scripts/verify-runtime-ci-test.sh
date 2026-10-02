@@ -108,6 +108,11 @@ is_macos() {
 }
 
 CALLS=()
+main helidon --stage jvm-redisson
+assert_contains "maven::-pl ${HELIDON_INTEGRATION_MODULE} -am -Pjvm-redisson verify"
+assert_not_contains "helidon-native-smoke"
+
+CALLS=()
 main quarkus --stage native-redisson
 assert_contains "maven::-pl ${QUARKUS_INTEGRATION_MODULE} -am -Pjvm-redisson verify"
 assert_contains "maven::-pl ${QUARKUS_INTEGRATION_MODULE} -Pnative-redisson -Dquarkus.native.container-build=true verify"
@@ -120,6 +125,8 @@ assert_before "-Pit verify" "spring-native-smoke"
 assert_before "spring-native-smoke" "-Pjvm-integration verify"
 assert_before "spring-native-smoke" "-Pnative-mybatis-plus verify"
 assert_contains "helidon-native-smoke"
+assert_contains "-pl ${HELIDON_INTEGRATION_MODULE} -am -Pjvm-redisson verify"
+assert_before "-pl ${HELIDON_INTEGRATION_MODULE} -am -Pjvm-redisson verify" "helidon-native-smoke"
 assert_contains "-Pjvm-redisson verify"
 assert_contains "-Pnative-redisson -Dquarkus.native.container-build=true verify"
 

@@ -92,7 +92,8 @@ Image integrations, using the same compatible component version when appropriate
 MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule: their neutral artifacts remain in
 Foundation while their Spring-specific artifacts belong in `jfoundry-spring-boot-dependencies`.
 Quarkus Redisson extension coordinates `redisson-quarkus-33` and `redisson-quarkus-33-deployment`
-belong in `jfoundry-quarkus-dependencies`.
+belong in `jfoundry-quarkus-dependencies`. The Helidon integration coordinate `redisson-helidon-40`
+belongs in `jfoundry-helidon-dependencies`.
 Do not re-declare coordinates already managed by an imported BOM unless JFoundry needs an explicit,
 verified version override. Foundation imports `jmolecules-bom` for runtime-neutral jMolecules and
 jMolecules Integrations artifacts such as `jmolecules-archunit` and `jmolecules-jackson3`; keep

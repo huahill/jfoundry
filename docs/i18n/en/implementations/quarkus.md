@@ -7,7 +7,7 @@ GraalVM types outside the domain, application, and infrastructure modules.
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
 `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
-`jfoundry-restclient-jaxrs` implementations.
+`jfoundry-restclient-jaxrs` implementations. Distributed-lock annotation keys reuse `jfoundry-lock-el`.
 Quarkus-owned runtime classes remain the public CDI/provider entry points, while deployment modules
 retain Arc registration, augmentation, RESTEasy Reactive integration, and Native Image behavior.
 Applications select the Quarkus runtime modules rather than assembling these shared implementation modules.

@@ -6,7 +6,7 @@ Keep Helidon, CDI, JTA, JAX-RS, and Hibernate APIs outside domain and applicatio
 
 Its transaction, JTA domain-event coordination, and JAX-RS HTTP logging reuse the portable
 `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-web-jaxrs`, and
-`jfoundry-restclient-jaxrs` implementations.
+`jfoundry-restclient-jaxrs` implementations. Distributed-lock annotation keys reuse `jfoundry-lock-el`.
 Helidon-owned runtime classes remain the public CDI/provider entry points and retain portable-extension,
 service-loading, scheduling, logging, and Native Image behavior. Applications select the Helidon runtime
 modules rather than assembling these shared implementation modules.
@@ -255,7 +255,7 @@ are recorded in the [compatibility matrix](../../../release/compatibility.md).
 
 ### CI-Aligned Local Verification
 
-Run both Helidon CI stages locally with Java 25, Docker, and GraalVM Native Image:
+Run the Helidon CI stages locally with Java 25, Docker, and GraalVM Native Image:
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -263,15 +263,17 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh helidon
 ```
 
-Use `--stage middleware` or `--stage native` to run one stage. The native stage verifies the
-supported CDI/Web consumer, ordinary Problem Details response, and request-validation response; it
-does not claim Native JTA or JPA support. The general `scripts/verify-ci-matrix.sh` remains the
-Docker-free Java 25 baseline.
+Use `--stage middleware`, `--stage jvm-redisson`, or `--stage native` to run one stage. The
+`jvm-redisson` stage verifies the JVM Redisson lock assembly against Redis. The native stage verifies
+the supported CDI/Web consumer, ordinary Problem Details response, and request-validation response; it
+does not claim Native JTA, JPA, or Redisson support. The general `scripts/verify-ci-matrix.sh` remains
+the Docker-free Java 25 baseline.
 
 ## Deferred Integrations
 
 RocketMQ delivery is not a supported Helidon composition. Helidon persistence, Outbox, and Inbox use
-JPA rather than MyBatis-Plus. Redisson distributed locking and JobRunr are not currently provided.
+JPA rather than MyBatis-Plus. JVM Redisson locking is provided by `jfoundry-lock-redisson-helidon`;
+JobRunr is not currently provided, and the Helidon Native Image does not include Redisson.
 Do not reuse Spring or Quarkus runtime adapters in a Helidon application. Add an application-owned
 adapter only when its client lifecycle and delivery semantics are verified for the selected Helidon
 release.
