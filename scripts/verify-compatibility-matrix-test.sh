@@ -56,7 +56,7 @@ write_matrix() {
 | Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
 | Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
-| Quarkus | 3.39.x | `jfoundry-quarkus-dependencies` |
+| Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 MARKDOWN
 }
@@ -74,7 +74,7 @@ content = path.read_text()
 content = content.replace("</properties>", "<spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version></properties>", 1)
 path.write_text(content)
 PY
-    write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.version" "3.39.1"
+    write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.version" "3.40.1"
     write_pom "${fixture}" "jfoundry-helidon-dependencies" "helidon.version" "4.5.3"
     write_matrix "${fixture}"
 }
@@ -95,15 +95,15 @@ assert_accepts "${patch_update_fixture}"
 
 stale_line_fixture="${temp_dir}/stale-line"
 write_fixture "${stale_line_fixture}"
-sed -i.bak 's/| Quarkus | 3.39.x |/| Quarkus | 3.38.x |/' \
+sed -i.bak 's/| Quarkus | 3.40.x |/| Quarkus | 3.38.x |/' \
     "${stale_line_fixture}/docs/release/compatibility.md"
 rm "${stale_line_fixture}/docs/release/compatibility.md.bak"
 assert_rejects_with_message "${stale_line_fixture}" \
-    "Quarkus supported line 3.38.x must match BOM version line 3.39.x"
+    "Quarkus supported line 3.38.x must match BOM version line 3.40.x"
 
 wrong_source_fixture="${temp_dir}/wrong-source"
 write_fixture "${wrong_source_fixture}"
-sed -i.bak 's/| Quarkus | 3.39.x | `jfoundry-quarkus-dependencies` |/| Quarkus | 3.39.x | `other-bom` |/' \
+sed -i.bak 's/| Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |/| Quarkus | 3.40.x | `other-bom` |/' \
     "${wrong_source_fixture}/docs/release/compatibility.md"
 rm "${wrong_source_fixture}/docs/release/compatibility.md.bak"
 assert_rejects_with_message "${wrong_source_fixture}" \
