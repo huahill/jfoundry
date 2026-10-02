@@ -13,7 +13,7 @@ JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能�
 ## 依赖配置
 
 依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加所需的能力扩展。
-`jfoundry-quarkus-dependencies` 只管理 Quarkus 平台生态版本，不管理 JFoundry 模块版本。Quarkus 会通过
+`jfoundry-quarkus-dependencies` 管理 Quarkus 平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
 ```xml

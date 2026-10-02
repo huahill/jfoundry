@@ -49,8 +49,8 @@ outside this repository. The Boot-only and Cloud Spring runtime BOMs are mutuall
 former combined Spring runtime coordinate is intentionally removed without a compatibility alias.
 
 Runtime BOM overrides must be exceptional, platform-local, and documented with the upstream reason and
-validation scope. The Helidon `groovy-all` release-validation override and its Jackson annotations
-override are examples; neither is a general dependency-management
+validation scope. The Helidon `groovy-all` release-validation override and the Helidon and Quarkus
+Jackson annotations overrides are examples; they are not a general dependency-management
 pattern.
 
 ## Runtime Platform Ecosystem Scope

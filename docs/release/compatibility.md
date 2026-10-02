@@ -13,7 +13,7 @@ documentation to patch-level updates.
 | Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
 | Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
-| Quarkus | 3.39.x | `jfoundry-quarkus-dependencies` |
+| Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
 Spring Cloud applications use Spring Boot 4.0.x; the current consumer compatibility check uses Spring
@@ -77,6 +77,10 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
   supported JFoundry stack.
 - Foundation manages `org.javassist:javassist` because RocketMQ's transitive Reflections line otherwise
   selects an older POM that produces Maven 4 model warnings.
+- `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` 2.22 override.
+  Quarkus 3.40.1 manages the Jackson 2 annotation line at 2.21, but Foundation's Jackson 3.2 line
+  requires `com.fasterxml.jackson.core:jackson-annotations` 2.22, including `JsonApplyView`. The
+  override is declared before the Quarkus BOM import because Maven keeps the first managed coordinate.
 - `jfoundry-helidon-dependencies` keeps a Helidon-local Jackson annotations override and the
   `groovy-all` override required by Maven release dependency validation. The owning BOM contains
   the exact override versions.
@@ -94,10 +98,12 @@ Maven 4.0.0-rc-7 quiet mode writes the distribution version to standard output b
 expression result. Release and snapshot workflows resolve `project.version` through
 `scripts/maven-project-version.sh`, which ignores that line and the older `[INFO] [stdout]` prefix.
 
-Quarkus 3.39.x test bootstrap cannot currently load the Maven 4.1 `subprojects` workspace model,
-so the Quarkus CDI unit-test stage remains blocked by
-[Quarkus issue #56270](https://github.com/quarkusio/quarkus/issues/56270) until its Maven 4 support
-is released. This does not affect Maven 4 packaging or the other runtime verification stages.
+Quarkus 3.40.x test bootstrap still cannot load the Maven 4.1 `subprojects` workspace model on
+its own. JFoundry keeps `quarkus-maven-plugin:generate-code-tests` on the affected `@QuarkusTest`
+modules, the workaround accepted when
+[Quarkus issue #56270](https://github.com/quarkusio/quarkus/issues/56270) was closed. Upstream Maven 4
+POM loading is not part of this Quarkus line. This does not affect Maven 4 packaging or the other
+runtime verification stages.
 
 Helidon Native JTA and JPA are not supported. The Native CDI/Web consumer starts and serves JFoundry
 Problem Details responses, but the transaction-manager delegate is not initialized for Native
