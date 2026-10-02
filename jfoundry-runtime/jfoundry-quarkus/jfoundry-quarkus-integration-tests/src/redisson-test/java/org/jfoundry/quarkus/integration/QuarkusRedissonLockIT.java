@@ -2,7 +2,7 @@ package org.jfoundry.quarkus.integration;
 
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
@@ -24,7 +24,7 @@ class QuarkusRedissonLockIT {
                 .as("Redisson Native Image executable")
                 .isTrue();
 
-        try (PostgreSQLContainer<?> database = new PostgreSQLContainer<>("postgres:17-alpine");
+        try (PostgreSQLContainer database = new PostgreSQLContainer("postgres:17-alpine");
                 GenericContainer<?> redis = new GenericContainer<>(DockerImageName.parse("redis:8-alpine"))
                         .withExposedPorts(6379)) {
             database.start();

@@ -1,7 +1,7 @@
 package org.jfoundry.integration.nativeimage.jobrunr;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.postgresql.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -22,7 +22,7 @@ class NativeJobRunrIT {
             "target/jfoundry-spring-jobrunr-native").toAbsolutePath();
 
     @Container
-    static final PostgreSQLContainer<?> postgresql = new PostgreSQLContainer<>("postgres:17-alpine")
+    static final PostgreSQLContainer postgresql = new PostgreSQLContainer("postgres:17-alpine")
             .withDatabaseName("jfoundry")
             .withUsername("jfoundry")
             .withPassword("jfoundry");

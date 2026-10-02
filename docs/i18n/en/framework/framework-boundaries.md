@@ -108,7 +108,7 @@ Spring-specific integration coordinates, `jfoundry-quarkus-dependencies` owns Qu
 `jfoundry-helidon-dependencies` owns Helidon coordinates. Runtime BOMs remain independent and must not
 import Foundation or another runtime BOM. A runtime BOM may carry a narrow, documented compatibility
 override when its official platform BOM would otherwise break a Foundation-managed neutral component;
-the Helidon and Quarkus Jackson annotations overrides are such exceptions.
+the Helidon and Quarkus Jackson annotations overrides, and the Helidon Testcontainers core override, are such exceptions.
 
 Test dependencies follow the same boundary. Core modules may use runtime-neutral JUnit, AssertJ, Mockito,
 H2, or native persistence-framework test support. Tests that bootstrap Spring, Quarkus, or Helidon belong
