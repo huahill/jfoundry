@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 path = Path(sys.argv[1])
 content = path.read_text()
-old = "README.md|README_ZH.md|AGENTS.md|docs/*)"
+old = "README.md|README_ZH.md|AGENTS.md|docs/*|skills/*)"
 if old not in content:
     raise SystemExit("Expected CI whitelist marker")
 path.write_text(content.replace(old, "README.md|README_ZH.md|docs/*)", 1))

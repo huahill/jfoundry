@@ -52,7 +52,7 @@ jobs:
           run_full=false
           while IFS= read -r changed_path; do
             case "$changed_path" in
-              README.md|README_ZH.md|AGENTS.md|docs/*)
+              README.md|README_ZH.md|AGENTS.md|docs/*|skills/*)
                 ;;
               *)
                 run_full=true
