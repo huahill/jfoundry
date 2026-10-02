@@ -15,7 +15,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
 | 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-domain-event-outbox-core`、`jfoundry-inbox-core` |
 | 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-domain-event-persistence-bridge`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
-| 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta` |
+| 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta`、`jfoundry-lock-el` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring 集成测试 | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |

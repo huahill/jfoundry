@@ -17,7 +17,7 @@
 | 直接消息投递 | 应用需要发布到消息代理，但不需要可靠的 Outbox 记录。 | `jfoundry-messaging-spring-boot-starter` 加一个消息代理启动器 | `jfoundry-messaging-kafka-quarkus-runtime` 或 `jfoundry-messaging-rabbitmq-quarkus-runtime` | `jfoundry-messaging-kafka-helidon` 或 `jfoundry-messaging-rabbitmq-helidon` | [消息传输](message-delivery.md) |
 | 可靠消息 | 消息必须事务性记录、延后派发或被幂等处理。 | Outbox 能力加显式选择的存储与发送器，或 Inbox 能力加存储 | `jfoundry-outbox-quarkus-runtime` 或 `jfoundry-inbox-jpa-quarkus-runtime` | `jfoundry-outbox-helidon` 或 `jfoundry-inbox-jpa-helidon` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
 | 领域事件到 Outbox | 选定领域事件必须成为可靠的跨进程集成消息。 | `jfoundry-domain-event-outbox-spring-boot-starter` | `jfoundry-domain-event-outbox-quarkus-runtime` | `jfoundry-domain-event-outbox-helidon` | [可靠消息：Outbox 与 Inbox](reliable-messaging.md) |
-| 分布式锁 | 数据库约束与幂等仍不足时，用例需要跨实例协调。 | `jfoundry-lock-redisson-spring-boot-starter` | `jfoundry-lock-redisson-quarkus-runtime` | 暂未提供 | [分布式锁](distributed-locks.md) |
+| 分布式锁 | 数据库约束与幂等仍不足时，用例需要跨实例协调。 | `jfoundry-lock-redisson-spring-boot-starter` | `jfoundry-lock-redisson-quarkus-runtime` | `jfoundry-lock-redisson-helidon` | [分布式锁](distributed-locks.md) |
 | 可观测性 | 框架操作需要受限维度的指标与追踪，且不能暴露业务标识。 | `jfoundry-observability-spring-boot-starter` | `jfoundry-observability-otel` | `jfoundry-observability-otel` | [可观测性](observability.md) |
 
 “暂未提供”表示 JFoundry 当前没有发布该运行时的装配模块。应用仍可围绕框架无关契约实现自己的外层适配器；这不构成隐含的支持声明。

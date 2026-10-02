@@ -10,7 +10,7 @@ readonly SUCCESS="success"
 readonly SKIPPED="skipped"
 readonly FAILURE="failure"
 readonly REQUIRED_FULL_RESULTS=(
-    "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
+    "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
     "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
     "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
 )
@@ -31,21 +31,21 @@ assert_fails() {
 
 assert_succeeds false false "${SUCCESS}" "${SKIPPED}" "${SKIPPED}" \
     "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
+    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
 assert_fails false false "${FAILURE}" "${SKIPPED}" "${SKIPPED}" \
     "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
+    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
 assert_succeeds false true "${SUCCESS}" "${SKIPPED}" "${SKIPPED}" \
     "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
+    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
 assert_succeeds false true "${SUCCESS}" "${SKIPPED}" "${FAILURE}" \
     "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
+    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
 assert_succeeds true true "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${REQUIRED_FULL_RESULTS[@]}"
 assert_succeeds true false "${SUCCESS}" "${SUCCESS}" "${SKIPPED}" "${REQUIRED_FULL_RESULTS[@]}"
 
 full_results_with_skipped_native=("${REQUIRED_FULL_RESULTS[@]}")
-full_results_with_skipped_native[6]="${SKIPPED}"
+full_results_with_skipped_native[7]="${SKIPPED}"
 assert_fails true true "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${full_results_with_skipped_native[@]}"
 
 full_results_with_failed_test=("${REQUIRED_FULL_RESULTS[@]}")

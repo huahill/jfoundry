@@ -33,6 +33,7 @@
         <helidon.version>4.5.5</helidon.version>
         <helidon.groovy-all.version>3.0.25</helidon.groovy-all.version>
         <helidon.jackson-annotations.version>2.22</helidon.jackson-annotations.version>
+        <redisson.version>4.8.0</redisson.version>
     </properties>
 
     <dependencyManagement>
@@ -55,6 +56,11 @@
                 <version>${helidon.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson-helidon-40</artifactId>
+                <version>${redisson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

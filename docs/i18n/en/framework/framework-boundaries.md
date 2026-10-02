@@ -24,7 +24,7 @@ it does not own CDI registration or a container lifecycle. Spring uses `runtime/
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
 | Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-domain-event-outbox-core`, `jfoundry-inbox-core` |
 | Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-domain-event-persistence-bridge`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
-| Shared Jakarta adapters | `jfoundry-http-jaxrs`, `jfoundry-web-jaxrs`, `jfoundry-restclient-jaxrs`, `jfoundry-transaction-jta`, `jfoundry-domain-event-jta` |
+| Shared Jakarta adapters | `jfoundry-http-jaxrs`, `jfoundry-web-jaxrs`, `jfoundry-restclient-jaxrs`, `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-lock-el` |
 | Spring runtime integration | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime/jfoundry-spring/starters/*` |
 | Spring integration tests | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |

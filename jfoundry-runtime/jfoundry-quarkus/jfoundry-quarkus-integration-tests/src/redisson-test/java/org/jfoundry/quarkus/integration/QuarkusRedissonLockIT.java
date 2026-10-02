@@ -43,20 +43,22 @@ class QuarkusRedissonLockIT {
                     .redirectOutput(Path.of("target/native-redisson-quarkus.log").toFile())
                     .start();
             try {
-                assertThat(awaitLockResult(port)).contains("\"locked\":true");
+                assertThat(awaitLockResult(port, "/jfoundry/native/redisson/lock")).contains("\"locked\":true");
+                assertThat(awaitLockResult(port, "/jfoundry/native/redisson/lock/annotated?orderId=42"))
+                        .contains("\"locked\":true");
             } finally {
                 stop(nativeImage);
             }
         }
     }
 
-    private static String awaitLockResult(int port) throws Exception {
+    private static String awaitLockResult(int port, String path) throws Exception {
         Instant deadline = Instant.now().plus(Duration.ofSeconds(45));
         IOException lastFailure = null;
         while (Instant.now().isBefore(deadline)) {
             try {
                 var connection = (java.net.HttpURLConnection) new java.net.URI(
-                        "http://127.0.0.1:" + port + "/jfoundry/native/redisson/lock")
+                        "http://127.0.0.1:" + port + path)
                         .toURL()
                         .openConnection();
                 connection.setConnectTimeout(1_000);

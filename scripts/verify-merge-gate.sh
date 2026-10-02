@@ -3,8 +3,8 @@
 set -euo pipefail
 
 verify_merge_gate() {
-    if [[ "$#" -ne 18 ]]; then
-        echo "Expected run_full, pull-request flag, plus 16 job results, received $# arguments." >&2
+    if [[ "$#" -ne 19 ]]; then
+        echo "Expected run_full, pull-request flag, plus 17 job results, received $# arguments." >&2
         return 2
     fi
 
@@ -22,6 +22,7 @@ verify_merge_gate() {
         "Spring middleware integration"
         "Quarkus middleware integration"
         "Helidon middleware integration"
+        "Helidon Redisson integration"
         "Spring Native Image"
         "Spring Native Image (MyBatis-Plus)"
         "Spring Native Image (Redisson)"
@@ -63,7 +64,7 @@ verify_merge_gate() {
         return 1
     fi
 
-    for index in {3..15}; do
+    for index in {3..16}; do
         if [[ "${job_results[index]}" != "success" ]]; then
             echo "${job_names[index]} must succeed for code changes, received: ${job_results[index]}" >&2
             return 1
