@@ -60,7 +60,7 @@ describes the stable scope those jobs cover rather than copying transient PASS o
 | Runtime | JVM and middleware scope | Native Image scope |
 |---------|--------------------------|--------------------|
 | Spring | Runtime assembly plus PostgreSQL, MySQL, Kafka, RabbitMQ, RocketMQ, Redis/Redisson, MyBatis-Plus, JPA, Outbox, and Inbox integration paths | Base runtime and Web MVC plus MyBatis-Plus/PostgreSQL, Redisson/Redis, and JobRunr/PostgreSQL capability checks |
-| Quarkus | CDI, JTA, JPA, REST, messaging, Outbox/Inbox, and PostgreSQL runtime wiring | Quarkus consumer startup and runtime smoke path |
+| Quarkus | CDI, JTA, JPA, REST, messaging, Outbox/Inbox, PostgreSQL, and Redis/Redisson runtime wiring | Quarkus consumer startup and runtime smoke path, plus a separate Redisson/Redis capability check |
 | Helidon MP | CDI, JTA, JPA, REST, Outbox/Inbox, scheduling, Problem Details, and PostgreSQL runtime wiring | CDI/Web startup and Problem Details response only |
 
 This matrix does not certify arbitrary downstream dependency graphs, databases, brokers, deployment

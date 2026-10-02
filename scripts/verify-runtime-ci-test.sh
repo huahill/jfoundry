@@ -108,11 +108,20 @@ is_macos() {
 }
 
 CALLS=()
+main quarkus --stage native-redisson
+assert_contains "maven::-pl ${QUARKUS_INTEGRATION_MODULE} -am -Pjvm-redisson verify"
+assert_contains "maven::-pl ${QUARKUS_INTEGRATION_MODULE} -Pnative-redisson -Dquarkus.native.container-build=true verify"
+assert_before "-Pjvm-redisson verify" "-Pnative-redisson -Dquarkus.native.container-build=true verify"
+assert_not_contains "-Pjvm-integration verify"
+
+CALLS=()
 main all
 assert_before "-Pit verify" "spring-native-smoke"
 assert_before "spring-native-smoke" "-Pjvm-integration verify"
 assert_before "spring-native-smoke" "-Pnative-mybatis-plus verify"
 assert_contains "helidon-native-smoke"
+assert_contains "-Pjvm-redisson verify"
+assert_contains "-Pnative-redisson -Dquarkus.native.container-build=true verify"
 
 if (main unknown) >/dev/null 2>&1; then
     echo "Unknown runtime must fail." >&2

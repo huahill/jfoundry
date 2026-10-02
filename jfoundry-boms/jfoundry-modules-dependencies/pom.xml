@@ -453,6 +453,16 @@
       </dependency>
       <dependency>
         <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-lock-redisson-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
+        <artifactId>jfoundry-lock-redisson-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.xfoundries</groupId>
         <artifactId>jfoundry-jpa-spring-boot-support</artifactId>
         <version>${project.version}</version>
       </dependency>

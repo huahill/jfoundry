@@ -44,3 +44,14 @@ For Spring Boot runtime assembly, selected lock-client integration, user overrid
 configuration, see [Spring Boot Runtime Assembly](../implementations/spring-boot.md). The exact
 starter, property, and auto-configuration conditions are in the
 [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md).
+
+## Quarkus
+
+Quarkus applications select `jfoundry-lock-redisson-quarkus-runtime`. Quarkus discovers the matching
+deployment module. The runtime produces `DistributedLockClient` and `LockExecutor` from the
+`RedissonClient` supplied by `redisson-quarkus-33`. Set the Redis address with
+`quarkus.redisson.single-server-config.address`. Quarkus does not intercept `@DistributedLock`;
+inject `LockExecutor` and call it explicitly. Helidon does not provide a Redisson lock assembly.
+
+The base Quarkus Native Image job does not include Redisson. The separate `native-redisson` stage
+verifies the lock against Redis.

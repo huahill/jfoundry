@@ -123,5 +123,9 @@ verify_quarkus_build_steps \
     'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-web-quarkus-deployment' \
     'jfoundry-web-quarkus-deployment' \
     'org.jfoundry.quarkus.web.deployment.ProblemDetailsProcessor'
+verify_quarkus_build_steps \
+    'jfoundry-runtime/jfoundry-quarkus/deployment/jfoundry-lock-redisson-quarkus-deployment' \
+    'jfoundry-lock-redisson-quarkus-deployment' \
+    'org.jfoundry.quarkus.lock.redisson.deployment.RedissonLockProcessor'
 
 echo "Maven compiler processor artifact verification passed."
