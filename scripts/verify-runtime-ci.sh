@@ -191,6 +191,16 @@ verify_quarkus() {
             run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative -Dquarkus.native.container-build=true verify
         fi
     fi
+
+    if [[ "${stage}" == "native-redisson" || "${stage}" == "all" ]]; then
+        run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -am -Pjvm-redisson verify
+        if is_macos; then
+            require_graalvm
+            run_maven "${GRAALVM_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative-redisson verify
+        else
+            run_maven "${JAVA_25_HOME}" -pl "${QUARKUS_INTEGRATION_MODULE}" -Pnative-redisson -Dquarkus.native.container-build=true verify
+        fi
+    fi
 }
 
 verify_helidon() {

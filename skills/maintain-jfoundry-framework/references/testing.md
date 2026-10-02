@@ -69,7 +69,8 @@ Before pushing a branch, select the narrowest CI-equivalent stage that covers th
 | Changed area | Required local preflight |
 | --- | --- |
 | Spring Boot auto-configuration, starter, dependency scope, or AOT hints | `scripts/verify-runtime-ci.sh spring --stage native` |
-| Redisson lock adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-redisson` |
+| Spring Redisson lock adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-redisson` |
+| Quarkus Redisson lock adapter | `scripts/verify-runtime-ci.sh quarkus --stage native-redisson` |
 | MyBatis-Plus persistence, Outbox/Inbox store, or Native hints | `scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus` |
 | JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
 | Shared runtime contract or lifecycle behavior | Matching Spring, Quarkus, and Helidon stages |

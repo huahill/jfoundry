@@ -30,3 +30,9 @@ lockExecutor.execute(
 用例同时需要分布式锁和事务时，应先获取锁，再在临界区内调用 `TransactionRunner`。这样可以避免在等待分布式锁期间提前打开数据库事务。
 
 Spring Boot 运行时装配、所选锁客户端集成、用户覆盖和注解配置见 [Spring Boot 运行时装配](../implementations/spring-boot.md)。精确的启动器、配置项和自动配置条件见 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)。
+
+## Quarkus
+
+Quarkus 应用选择 `jfoundry-lock-redisson-quarkus-runtime`。Quarkus 会自动发现匹配的部署模块。该运行时使用 `redisson-quarkus-33` 提供的 `RedissonClient` 产出 `DistributedLockClient` 和 `LockExecutor`。Redis 地址通过 `quarkus.redisson.single-server-config.address` 配置。Quarkus 不拦截 `@DistributedLock`；应用应注入 `LockExecutor` 并显式调用。Helidon 暂不提供 Redisson 锁装配。
+
+基础 Quarkus 原生镜像任务不包含 Redisson。独立的 `native-redisson` 阶段会对照 Redis 验证这把锁。
