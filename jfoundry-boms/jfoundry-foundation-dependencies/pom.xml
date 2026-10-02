@@ -66,7 +66,7 @@
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
     <jobrunr.version>9.0.0</jobrunr.version>
     <mqttv3.version>1.2.5</mqttv3.version>
-    <redisson.version>4.7.0</redisson.version>
+    <redisson.version>4.8.0</redisson.version>
 
     <!-- Compatibility overrides for runtime-neutral clients -->
     <javassist.version>3.33.0-GA</javassist.version>

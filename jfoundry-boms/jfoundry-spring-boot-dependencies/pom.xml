@@ -32,7 +32,7 @@
         <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
         <mybatis-plus.version>3.5.17</mybatis-plus.version>
         <jobrunr.version>9.0.0</jobrunr.version>
-        <redisson.version>4.7.0</redisson.version>
+        <redisson.version>4.8.0</redisson.version>
     </properties>
     <dependencyManagement>
         <dependencies>
