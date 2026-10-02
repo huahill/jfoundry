@@ -78,19 +78,31 @@ def verify_dependabot(root: Path) -> None:
     if len(maven) != 1:
         fail(f"{prefix}: must contain exactly one Maven updates entry")
     expected_cooldown = {
-        "default-days": 1, "semver-major-days": 7, "semver-minor-days": 7, "semver-patch-days": 1,
-        "include": ["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin", "io.quarkus.platform:quarkus-bom", "io.quarkus:quarkus-extension-maven-plugin", "io.quarkus:quarkus-extension-processor", "io.quarkus:quarkus-maven-plugin"],
-        "exclude": ["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin"],
+        "default-days": 0,
+        "semver-major-days": 0,
+        "semver-minor-days": 0,
+        "semver-patch-days": 0,
     }
     if maven[0].get("cooldown") != expected_cooldown:
-        expected_inspect = '{"default-days"=>1, "semver-major-days"=>7, "semver-minor-days"=>7, "semver-patch-days"=>1, "include"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin", "io.quarkus.platform:quarkus-bom", "io.quarkus:quarkus-extension-maven-plugin", "io.quarkus:quarkus-extension-processor", "io.quarkus:quarkus-maven-plugin"], "exclude"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin"]}'
+        expected_inspect = '{"default-days"=>0, "semver-major-days"=>0, "semver-minor-days"=>0, "semver-patch-days"=>0}'
         fail(f"{prefix}: Maven updates must use the {expected_inspect} cooldown")
     groups = maven[0].get("groups")
     if not isinstance(groups, dict):
         fail(f"{prefix}: Maven groups must be a mapping")
+    spring_boot_patterns = [
+        "org.springframework.boot:spring-boot-dependencies",
+        "org.springframework.boot:spring-boot-starter-parent",
+        "org.springframework.boot:spring-boot-maven-plugin",
+    ]
+    quarkus_patterns = [
+        "io.quarkus.platform:quarkus-bom",
+        "io.quarkus:quarkus-extension-maven-plugin",
+        "io.quarkus:quarkus-extension-processor",
+        "io.quarkus:quarkus-maven-plugin",
+    ]
     expected_groups = {
-        "jfoundry-spring-boot-platform": {"patterns": expected_cooldown["include"][:3], "update-types": ["patch", "minor"]},
-        "jfoundry-quarkus-platform": {"patterns": expected_cooldown["include"][3:], "update-types": ["patch", "minor"]},
+        "jfoundry-spring-boot-platform": {"patterns": spring_boot_patterns, "update-types": ["patch", "minor"]},
+        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns, "update-types": ["patch", "minor"]},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
         "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
