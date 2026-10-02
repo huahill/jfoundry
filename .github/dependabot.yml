@@ -10,23 +10,14 @@ updates:
       - "/jfoundry-boms/*"
     schedule:
       interval: daily
+    # Zero days disables Dependabot's default three-day version-update cooldown.
+    # An unpublished platform coordinate must not be delayed into a mismatched
+    # update; close that pull request instead of waiting for a later publication.
     cooldown:
-      default-days: 1
-      semver-major-days: 7
-      semver-minor-days: 7
-      semver-patch-days: 1
-      include:
-        - org.springframework.boot:spring-boot-dependencies
-        - org.springframework.boot:spring-boot-starter-parent
-        - org.springframework.boot:spring-boot-maven-plugin
-        - io.quarkus.platform:quarkus-bom
-        - io.quarkus:quarkus-extension-maven-plugin
-        - io.quarkus:quarkus-extension-processor
-        - io.quarkus:quarkus-maven-plugin
-      exclude:
-        - org.springframework.boot:spring-boot-dependencies
-        - org.springframework.boot:spring-boot-starter-parent
-        - org.springframework.boot:spring-boot-maven-plugin
+      default-days: 0
+      semver-major-days: 0
+      semver-minor-days: 0
+      semver-patch-days: 0
     open-pull-requests-limit: 10
     rebase-strategy: disabled
     groups:

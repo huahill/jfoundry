@@ -47,22 +47,10 @@ updates:
     schedule:
       interval: weekly
     cooldown:
-      default-days: 1
-      semver-major-days: 7
-      semver-minor-days: 7
-      semver-patch-days: 1
-      include:
-        - org.springframework.boot:spring-boot-dependencies
-        - org.springframework.boot:spring-boot-starter-parent
-        - org.springframework.boot:spring-boot-maven-plugin
-        - io.quarkus.platform:quarkus-bom
-        - io.quarkus:quarkus-extension-maven-plugin
-        - io.quarkus:quarkus-extension-processor
-        - io.quarkus:quarkus-maven-plugin
-      exclude:
-        - org.springframework.boot:spring-boot-dependencies
-        - org.springframework.boot:spring-boot-starter-parent
-        - org.springframework.boot:spring-boot-maven-plugin
+      default-days: 0
+      semver-major-days: 0
+      semver-minor-days: 0
+      semver-patch-days: 0
     rebase-strategy: disabled
     groups:
       jfoundry-spring-boot-platform:
@@ -471,7 +459,7 @@ config = yaml.safe_load(path.read_text())
 config["updates"][0]["cooldown"]["semver-minor-days"] = 1
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
-assert_rejects_with_message "${temp_dir}" 'Dependabot update policy is invalid: Maven updates must use the {"default-days"=>1, "semver-major-days"=>7, "semver-minor-days"=>7, "semver-patch-days"=>1, "include"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin", "io.quarkus.platform:quarkus-bom", "io.quarkus:quarkus-extension-maven-plugin", "io.quarkus:quarkus-extension-processor", "io.quarkus:quarkus-maven-plugin"], "exclude"=>["org.springframework.boot:spring-boot-dependencies", "org.springframework.boot:spring-boot-starter-parent", "org.springframework.boot:spring-boot-maven-plugin"]} cooldown'
+assert_rejects_with_message "${temp_dir}" 'Dependabot update policy is invalid: Maven updates must use the {"default-days"=>0, "semver-major-days"=>0, "semver-minor-days"=>0, "semver-patch-days"=>0} cooldown'
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
@@ -480,7 +468,7 @@ from pathlib import Path
 import yaml
 path = Path(sys.argv[1])
 config = yaml.safe_load(path.read_text())
-config["updates"][0]["cooldown"]["include"].remove("io.quarkus.platform:quarkus-bom")
+config["updates"][0]["cooldown"]["include"] = ["io.quarkus.platform:quarkus-bom"]
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
 assert_rejects "${temp_dir}"
@@ -492,7 +480,7 @@ from pathlib import Path
 import yaml
 path = Path(sys.argv[1])
 config = yaml.safe_load(path.read_text())
-config["updates"][0]["cooldown"]["exclude"] = []
+config["updates"][0]["cooldown"]["exclude"] = ["org.springframework.boot:spring-boot-dependencies"]
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
 assert_rejects "${temp_dir}"

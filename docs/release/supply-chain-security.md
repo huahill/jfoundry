@@ -48,11 +48,9 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   candidate with `@dependabot rebase` before merging. This prevents one merge from retriggering the
   full CI matrix on every remaining Dependabot pull request. Pull requests opened before this setting
   still rebase for up to 30 days.
-- Quarkus platform coordinates use a one-day patch cooldown and a seven-day minor/major cooldown.
-  Spring Boot platform coordinates are explicitly excluded from the cooldown so the daily schedule
-  can propose new releases promptly. The Quarkus delay gives platform publishers and Maven Central
-  mirrors time to expose related coordinates before a routine update is proposed; it is a buffer, not
-  an atomic publication guarantee. Other Maven dependencies retain the normal Dependabot timing.
+- Maven version updates use explicit zero-day cooldown settings. Omitting `cooldown` would leave
+  Dependabot's default three-day delay in place. Security updates are never delayed by cooldown.
+  A grouped update whose coordinates did not publish the same version is closed rather than merged.
 - Grouping does not prove that every coordinate in a platform has published the same version.
   Repository POM contracts require the Spring Boot parent to match the consumer BOM and the Quarkus
   build parent to match the consumer BOM. The Quarkus runtime aggregator must not declare
