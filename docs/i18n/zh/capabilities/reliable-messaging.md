@@ -24,7 +24,7 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
 `jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换，
 而 `OutboxDispatcher` 仍是派发服务端口，`*OutboxTrigger` 仍是调度适配器。Quarkus 通过
-`jfoundry-outbox-jobrunr-quarkus-runtime` 和 `org.jobrunr:quarkus-jobrunr` 选择同一 JobRunr 模式，而不是使用 Spring 启动器。Helidon 不提供 JobRunr，因为上游没有 Helidon 扩展。
+`jfoundry-outbox-jobrunr-quarkus-runtime` 和 `org.jobrunr:quarkus-jobrunr` 选择同一 JobRunr 模式，而不是使用 Spring 启动器。Quarkus 中间件包含其 JVM PostgreSQL 派发验收，`native-jobrunr` 在原生镜像中验证同样的发布行为。Helidon 不提供 JobRunr，因为上游没有 Helidon 扩展。
 
 领域事件 Outbox 组合刻意独立于这两项能力。Spring 组合启动器包含领域事件、通用 Outbox、持久化桥接层和
 领域事件 Outbox 自动配置。Quarkus 与 Helidon 提供对应的显式模块：`jfoundry-domain-event-outbox-quarkus-runtime`

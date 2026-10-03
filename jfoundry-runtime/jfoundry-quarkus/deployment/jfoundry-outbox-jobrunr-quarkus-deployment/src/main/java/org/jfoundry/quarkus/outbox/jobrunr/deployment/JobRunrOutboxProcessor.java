@@ -3,6 +3,7 @@ package org.jfoundry.quarkus.outbox.jobrunr.deployment;
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.AdditionalIndexedClassesBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourcePatternsBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.jandex.DotName;
@@ -10,7 +11,7 @@ import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigge
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.OutboxDispatchJobRequest;
 import org.jfoundry.infrastructure.outbox.jobrunr.quarkus.QuarkusJobRunrOutboxProducer;
 
-/// Registers the JobRunr Outbox producer and native reflection for its job types.
+/// Registers the JobRunr Outbox producer, native reflection, and SQL migration resources.
 class JobRunrOutboxProcessor {
 
     @BuildStep
@@ -37,4 +38,12 @@ class JobRunrOutboxProcessor {
                 .fields()
                 .build();
     }
+
+    @BuildStep
+    NativeImageResourcePatternsBuildItem registerJobRunrSqlMigrations() {
+        return NativeImageResourcePatternsBuildItem.builder()
+                .includeGlob("org/jobrunr/storage/sql/**/*.sql")
+                .build();
+    }
 }
+

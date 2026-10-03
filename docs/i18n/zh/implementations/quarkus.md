@@ -196,7 +196,7 @@ transactionRunner.run(() -> {
 （默认 `5`）、`backoff-base`（默认 `1s`）和 `backoff-max`（默认 `5m`）。应用提供的 CDI
 `OutboxDispatcher` 优先。
 
-使用 JobRunr 派发时，增加 `jfoundry-outbox-jobrunr-quarkus-runtime`。该扩展依赖 `org.jobrunr:quarkus-jobrunr`，并把共享的 `JobRunrOutboxTrigger` 注册为 CDI bean。设置 `jfoundry.outbox.dispatcher.mode=jobrunr`。循环任务标识是 `jfoundry-outbox-dispatch`，`jfoundry.outbox.dispatcher.cron` 默认 `*/10 * * * * *`，`batch-size` 仍默认 `50`。`jfoundry.outbox.dispatcher.enabled` 保持不设置或为 `false`；JobRunr 模式下定时触发器不会工作。除非 `quarkus.jobrunr.database.type` 选择了其他存储，否则 JobRunr 使用应用数据源。模块测试覆盖 CDI 注册和循环任务请求。Quarkus 中间件与原生镜像 CI 尚未覆盖该扩展。不要用 `jfoundry-outbox-jobrunr-spring-boot-starter` 替代。
+使用 JobRunr 派发时，增加 `jfoundry-outbox-jobrunr-quarkus-runtime`。该扩展依赖 `org.jobrunr:quarkus-jobrunr`，并把共享的 `JobRunrOutboxTrigger` 注册为 CDI bean。设置 `jfoundry.outbox.dispatcher.mode=jobrunr`。循环任务标识是 `jfoundry-outbox-dispatch`，`jfoundry.outbox.dispatcher.cron` 默认 `*/10 * * * * *`，`batch-size` 仍默认 `50`。`jfoundry.outbox.dispatcher.enabled` 保持不设置或为 `false`；JobRunr 模式下定时触发器不会工作。除非 `quarkus.jobrunr.database.type` 选择了其他存储，否则 JobRunr 使用应用数据源。该属性在构建原生镜像时固定，SQL 存储必须在构建时设为 `sql`，运行时覆盖不会生效。模块测试覆盖 CDI 注册和循环任务请求。中间件阶段还会运行 `jvm-jobrunr` 配置档：内置调度器保持空闲，JobRunr 后台服务把预置的 PostgreSQL Outbox 记录发布出去。原生镜像验收是独立的 `native-jobrunr` 阶段，基础 Quarkus 原生任务不会构建该扩展。不要用 `jfoundry-outbox-jobrunr-spring-boot-starter` 替代。
 
 消息发送始终位于数据库事务之外。每次领取和状态转换都通过 `TransactionRunner` 在独立事务中进行，
 与运行时无关的 Outbox 契约保持一致。
@@ -400,7 +400,7 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
 
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。基础原生阶段不包含 Redisson。
+使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。基础原生阶段不包含 Redisson 或 JobRunr。
 Redis 锁验证是独立阶段，因此缺少 Redisson 地址不会破坏默认应用：
 
 ```bash
@@ -409,8 +409,16 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 ```
 
-该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。通用
-`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
+该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。JobRunr 的 JVM
+派发包含在 `--stage middleware` 中，原生镜像检查是独立阶段：
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus --stage native-jobrunr
+```
+
+通用 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
 `bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
 ## 当前范围
@@ -419,4 +427,4 @@ bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 诊断日志、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
 Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。
 它不装配 MyBatis-Plus，因为 Quarkus 持久化使用 JPA；不装配 RocketMQ，因为该运行时不支持该消息代理；
-也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁使用 `jfoundry-lock-redisson-quarkus-runtime`。JobRunr 派发使用 `jfoundry-outbox-jobrunr-quarkus-runtime`、`org.jobrunr:quarkus-jobrunr` 和 `jfoundry.outbox.dispatcher.mode=jobrunr`。模块测试已覆盖；中间件与原生镜像 CI 尚未覆盖。
+也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁使用 `jfoundry-lock-redisson-quarkus-runtime`。JobRunr 派发使用 `jfoundry-outbox-jobrunr-quarkus-runtime`、`org.jobrunr:quarkus-jobrunr` 和 `jfoundry.outbox.dispatcher.mode=jobrunr`。中间件的 `jvm-jobrunr` 配置档和独立的 `native-jobrunr` 配置档会验证 JobRunr 发布 PostgreSQL Outbox 记录。
