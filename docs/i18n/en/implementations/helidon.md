@@ -273,7 +273,7 @@ the Docker-free Java 25 baseline.
 
 RocketMQ delivery is not a supported Helidon composition. Helidon persistence, Outbox, and Inbox use
 JPA rather than MyBatis-Plus. JVM Redisson locking is provided by `jfoundry-lock-redisson-helidon`;
-JobRunr is not currently provided, and the Helidon Native Image does not include Redisson.
+JobRunr is not provided because JobRunr publishes no Helidon extension, and the Helidon Native Image does not include Redisson.
 Do not reuse Spring or Quarkus runtime adapters in a Helidon application. Add an application-owned
 adapter only when its client lifecycle and delivery semantics are verified for the selected Helidon
 release.

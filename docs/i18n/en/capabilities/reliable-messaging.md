@@ -34,7 +34,9 @@ These are separate responsibilities, not necessarily separate direct Maven decla
 built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-boot-starter`
 transitively, so an application does not declare it again. That dependency is Spring Boot assembly
 convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
-port and `*OutboxTrigger` stays the scheduling adapter.
+port and `*OutboxTrigger` stays the scheduling adapter. Quarkus selects the same JobRunr mode with
+`jfoundry-outbox-jobrunr-quarkus-runtime` and `org.jobrunr:quarkus-jobrunr` instead of the Spring
+starter. Helidon does not provide JobRunr because upstream JobRunr has no Helidon extension.
 
 The explicit Domain Event Outbox composition is separate from both capabilities. The Spring
 combination starter includes Domain Event, generic Outbox, the persistence bridge, and the Domain

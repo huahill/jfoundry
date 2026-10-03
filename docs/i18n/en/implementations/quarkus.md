@@ -84,8 +84,10 @@ MyBatis-Plus aggregate persistence is not a Quarkus composition because this run
 RocketMQ delivery is not supported. Quarkus applications compose extensions instead of Spring-style
 starters. Redisson locks are an explicit extension: depend on `jfoundry-lock-redisson-quarkus-runtime`
 and set `quarkus.redisson.single-server-config.address`. Quarkus intercepts `@DistributedLock` and
-evaluates its key with Jakarta EL. Inject `LockExecutor` for programmatic use. JobRunr remains
-deferred. Do not add a Spring starter as a substitute.
+evaluates its key with Jakarta EL. Inject `LockExecutor` for programmatic use. JobRunr dispatch is
+an explicit extension: depend on `jfoundry-outbox-jobrunr-quarkus-runtime` and
+`org.jobrunr:quarkus-jobrunr`, then set `jfoundry.outbox.dispatcher.mode=jobrunr`. Do not add a
+Spring starter as a substitute.
 
 ## Transaction Semantics
 
@@ -216,12 +218,24 @@ state-transition runtime:
 The extension provides the default CDI `OutboxDispatcher` service port, the generic
 `OutboxTemplate` and `PayloadSerializer`, and the `QuarkusOutboxTrigger` scheduling adapter through
 the Quarkus Scheduler. It remains inactive
-unless `jfoundry.outbox.dispatcher.enabled=true`. The application must provide both an
+unless `jfoundry.outbox.dispatcher.enabled=true`. That scheduled trigger does not dispatch when
+`jfoundry.outbox.dispatcher.mode=jobrunr`; the optional JobRunr extension owns dispatch in that
+mode. The application must provide both an
 `OutboxMessageStore` (for example through `jfoundry-outbox-jpa-quarkus-runtime`) and a real
 `MessageSender`; the trigger does not add a broker client or a logging sender. Configure
 `jfoundry.outbox.dispatcher.interval` (default `5s`), `batch-size` (default `50`), `max-retries`
 (default `5`), `backoff-base` (default `1s`), and `backoff-max` (default `5m`) as needed. An
 application-provided CDI `OutboxDispatcher` takes precedence.
+
+For JobRunr dispatch, add `jfoundry-outbox-jobrunr-quarkus-runtime`. That extension depends on
+`org.jobrunr:quarkus-jobrunr` and registers the shared `JobRunrOutboxTrigger` as a CDI bean. Set
+`jfoundry.outbox.dispatcher.mode=jobrunr`. The recurring job id is `jfoundry-outbox-dispatch`, and
+`jfoundry.outbox.dispatcher.cron` defaults to `*/10 * * * * *`. `batch-size` still defaults to `50`.
+Leave `jfoundry.outbox.dispatcher.enabled` unset or `false`; the scheduled trigger skips work in
+JobRunr mode. JobRunr uses the application datasource unless `quarkus.jobrunr.database.type` selects
+another storage type. Module tests cover CDI registration and the recurring-job request. Quarkus
+middleware and Native Image CI do not cover this extension yet. Do not replace it with
+`jfoundry-outbox-jobrunr-spring-boot-starter`.
 
 Message delivery remains outside database transactions. Each claim and state transition runs in an
 independent transaction through `TransactionRunner`, consistent with the framework-neutral Outbox
@@ -483,4 +497,6 @@ Inbox storage, automatic externalization for explicitly marked events, Kafka and
 optional Outbox dispatch, recovery, and cleanup. It does not assemble MyBatis-Plus because Quarkus
 persistence uses JPA, does not assemble RocketMQ because that broker is not supported on Quarkus, and
 does not publish Spring-style starters because Quarkus applications compose extensions. Redisson
-locks use `jfoundry-lock-redisson-quarkus-runtime`; JobRunr remains deferred.
+locks use `jfoundry-lock-redisson-quarkus-runtime`. JobRunr dispatch uses
+`jfoundry-outbox-jobrunr-quarkus-runtime` with `org.jobrunr:quarkus-jobrunr` and
+`jfoundry.outbox.dispatcher.mode=jobrunr`. Module tests cover it; middleware and Native Image CI do not.

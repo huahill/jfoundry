@@ -15,7 +15,7 @@ class QuarkusOutboxTriggerTest {
     @Test
     void scheduledDispatchDelegatesTheConfiguredBatchSize() {
         RecordingDispatcher dispatcher = new RecordingDispatcher();
-        QuarkusOutboxTrigger trigger = new QuarkusOutboxTrigger(dispatcher, true, 37);
+        QuarkusOutboxTrigger trigger = new QuarkusOutboxTrigger(dispatcher, true, "scheduled", 37);
 
         trigger.scheduledDispatch();
 
@@ -25,7 +25,17 @@ class QuarkusOutboxTriggerTest {
     @Test
     void scheduledDispatchDoesNothingWhenDisabled() {
         RecordingDispatcher dispatcher = new RecordingDispatcher();
-        QuarkusOutboxTrigger trigger = new QuarkusOutboxTrigger(dispatcher, false, 37);
+        QuarkusOutboxTrigger trigger = new QuarkusOutboxTrigger(dispatcher, false, "scheduled", 37);
+
+        trigger.scheduledDispatch();
+
+        assertThat(dispatcher.lastBatchSize).isNull();
+    }
+
+    @Test
+    void scheduledDispatchDoesNothingWhenJobRunrModeIsSelected() {
+        RecordingDispatcher dispatcher = new RecordingDispatcher();
+        QuarkusOutboxTrigger trigger = new QuarkusOutboxTrigger(dispatcher, true, "jobrunr", 37);
 
         trigger.scheduledDispatch();
 

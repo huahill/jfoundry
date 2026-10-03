@@ -33,6 +33,7 @@
         <quarkus.version>3.40.1</quarkus.version>
         <quarkus.jackson-annotations.version>2.22</quarkus.jackson-annotations.version>
         <redisson.version>4.8.0</redisson.version>
+        <jobrunr.version>9.0.0</jobrunr.version>
     </properties>
 
     <dependencyManagement>
@@ -60,6 +61,16 @@
                 <groupId>org.redisson</groupId>
                 <artifactId>redisson-quarkus-33-deployment</artifactId>
                 <version>${redisson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jobrunr</groupId>
+                <artifactId>quarkus-jobrunr</artifactId>
+                <version>${jobrunr.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jobrunr</groupId>
+                <artifactId>quarkus-jobrunr-deployment</artifactId>
+                <version>${jobrunr.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
