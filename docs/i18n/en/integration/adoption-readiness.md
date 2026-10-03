@@ -135,8 +135,9 @@ The strongest evidence currently applies to:
   Native Image verification for the base runtime, MyBatis-Plus persistence, Redisson locking, and
   JobRunr Outbox dispatching. The expense approval demo additionally verifies its Kafka, Outbox,
   Inbox, PostgreSQL, and payment-projection path with two Native Image executables.
-- CDI discovery and Jakarta Transactions `TransactionRunner` integration for the supported Quarkus version, with a
-  JVM consumer smoke test and a Native Image CI gate.
+- CDI discovery, Jakarta Transactions `TransactionRunner`, JPA aggregate persistence, domain-event
+  dispatch, and JPA Outbox/Inbox for the supported Quarkus version. The JVM middleware profile and the
+  Native Image CI gate both run these paths against PostgreSQL. Redisson remains a separate native stage.
 - CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem Details for the
   supported Helidon MP version. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
   JTA and JPA remain upstream experimental limitations, with a reproducible failure record in

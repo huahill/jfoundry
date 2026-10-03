@@ -77,7 +77,7 @@ Quarkus REST 边界，`jfoundry-restclient-quarkus-runtime` 负责出站 REST Cl
 Quarkus 的持久化、Outbox 与 Inbox 使用 JPA，因此不提供 MyBatis-Plus 组合。Quarkus 不支持 RocketMQ
 投递，也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁是显式扩展：依赖
 `jfoundry-lock-redisson-quarkus-runtime`，并设置 `quarkus.redisson.single-server-config.address`。
-应用注入 `LockExecutor`；Quarkus 不拦截 `@DistributedLock`。JobRunr 仍延后。不要用 Spring 启动器替代。
+Quarkus 会拦截 `@DistributedLock`，并用 Jakarta EL 求值 key。需要编程式调用时注入 `LockExecutor`。JobRunr 仍延后。不要用 Spring 启动器替代。
 
 ## 事务语义
 
@@ -383,8 +383,9 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 
 ## 原生镜像验证
 
-仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。其
-`@QuarkusIntegrationTest` 通过 HTTP 入口调用 `TransactionRunner`、领域事件分发、Outbox 派发、恢复和清理，针对原生可执行文件运行。
+仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。每个
+`@QuarkusIntegrationTest` 都使用 `PostgreSqlIntegrationTestProfile`：它启动 PostgreSQL，并把数据源种类设为
+`postgresql`。这些测试通过 HTTP 入口，针对原生可执行文件验证 `TransactionRunner`、JPA 聚合持久化、领域事件分发、Inbox，以及 Outbox 的持久化、派发、恢复和清理。
 
 ### 本地 CI 对齐验证
 
