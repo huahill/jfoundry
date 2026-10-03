@@ -83,8 +83,9 @@ Client registration without moving HTTP lifecycle APIs into the core.
 MyBatis-Plus aggregate persistence is not a Quarkus composition because this runtime uses JPA.
 RocketMQ delivery is not supported. Quarkus applications compose extensions instead of Spring-style
 starters. Redisson locks are an explicit extension: depend on `jfoundry-lock-redisson-quarkus-runtime`
-and set `quarkus.redisson.single-server-config.address`. Inject `LockExecutor`; Quarkus does not
-intercept `@DistributedLock`. JobRunr remains deferred. Do not add a Spring starter as a substitute.
+and set `quarkus.redisson.single-server-config.address`. Quarkus intercepts `@DistributedLock` and
+evaluates its key with Jakarta EL. Inject `LockExecutor` for programmatic use. JobRunr remains
+deferred. Do not add a Spring starter as a substitute.
 
 ## Transaction Semantics
 
@@ -441,9 +442,11 @@ regular module test does not require Docker:
 ## Native Image Verification
 
 The repository's Quarkus native CI job installs the full reactor and then builds a separate consumer
-application with Quarkus container Native Image build. Its `@QuarkusIntegrationTest` invokes
-`TransactionRunner`, domain-event dispatch, Outbox dispatch, recovery, and cleanup through HTTP
-endpoints against the native executable.
+application with Quarkus container Native Image build. Every `@QuarkusIntegrationTest` uses
+`PostgreSqlIntegrationTestProfile`, which starts PostgreSQL and sets the datasource kind to
+`postgresql`. Those tests exercise `TransactionRunner`, JPA aggregate persistence, domain-event
+dispatch, Inbox, and Outbox persistence, dispatch, recovery, and cleanup through HTTP against the
+native executable.
 
 ### CI-Aligned Local Verification
 
