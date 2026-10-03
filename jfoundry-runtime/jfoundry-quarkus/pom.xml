@@ -35,6 +35,7 @@
         <subproject>runtime/jfoundry-restclient-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-web-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-outbox-quarkus-runtime</subproject>
+        <subproject>runtime/jfoundry-outbox-jobrunr-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-messaging-kafka-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-messaging-rabbitmq-quarkus-runtime</subproject>
         <subproject>runtime/jfoundry-outbox-jpa-quarkus-runtime</subproject>
@@ -49,6 +50,7 @@
         <subproject>deployment/jfoundry-restclient-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-web-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-outbox-quarkus-deployment</subproject>
+        <subproject>deployment/jfoundry-outbox-jobrunr-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-messaging-kafka-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-messaging-rabbitmq-quarkus-deployment</subproject>
         <subproject>deployment/jfoundry-outbox-jpa-quarkus-deployment</subproject>

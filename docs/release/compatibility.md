@@ -107,6 +107,9 @@ Maven 4.0.0-rc-7 quiet mode writes the distribution version to standard output b
 expression result. Release and snapshot workflows resolve `project.version` through
 `scripts/maven-project-version.sh`, which ignores that line and the older `[INFO] [stdout]` prefix.
 
+Quarkus JobRunr dispatch is an optional extension. Module tests cover its CDI registration and
+recurring-job request. It is not part of the Quarkus middleware or Native Image CI matrix.
+
 Quarkus 3.40.x test bootstrap still cannot load the Maven 4.1 `subprojects` workspace model on
 its own. JFoundry keeps `quarkus-maven-plugin:generate-code-tests` on the affected `@QuarkusTest`
 modules, the workaround accepted when

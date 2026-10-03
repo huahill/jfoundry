@@ -12,6 +12,7 @@ public final class QuarkusOutboxTrigger {
 
     private final OutboxDispatcher outboxDispatcher;
     private final boolean enabled;
+    private final String mode;
     private final int batchSize;
 
     @Inject
@@ -19,16 +20,19 @@ public final class QuarkusOutboxTrigger {
             OutboxDispatcher outboxDispatcher,
             @ConfigProperty(name = "jfoundry.outbox.dispatcher.enabled", defaultValue = "false")
             boolean enabled,
+            @ConfigProperty(name = "jfoundry.outbox.dispatcher.mode", defaultValue = "scheduled")
+            String mode,
             @ConfigProperty(name = "jfoundry.outbox.dispatcher.batch-size", defaultValue = "50")
             int batchSize) {
         this.outboxDispatcher = outboxDispatcher;
         this.enabled = enabled;
+        this.mode = mode;
         this.batchSize = batchSize;
     }
 
     @Scheduled(every = "${jfoundry.outbox.dispatcher.interval:5s}", identity = "jfoundry-outbox-dispatcher")
     void scheduledDispatch() {
-        if (enabled) {
+        if (enabled && !"jobrunr".equals(mode)) {
             outboxDispatcher.dispatch(batchSize);
         }
     }

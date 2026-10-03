@@ -189,6 +189,26 @@ class SpringBootParentPomTest {
     }
 
     @Test
+    void quarkusRuntimeBomOwnsJobRunrExtensionsAfterThePlatformImport() throws Exception {
+        Document quarkus = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+        Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
+
+        assertThat(managesDependency(quarkus, "org.jobrunr", "quarkus-jobrunr")).isTrue();
+        assertThat(managesDependency(quarkus, "org.jobrunr", "quarkus-jobrunr-deployment")).isTrue();
+        assertThat(managesDependency(foundation, "org.jobrunr", "quarkus-jobrunr")).isFalse();
+        assertThat(managesDependency(foundation, "org.jobrunr", "quarkus-jobrunr-deployment")).isFalse();
+        assertThat(managesDependency(boot, "org.jobrunr", "quarkus-jobrunr")).isFalse();
+        assertThat(managesDependency(boot, "org.jobrunr", "quarkus-jobrunr-deployment")).isFalse();
+        assertThat(childText(child(quarkus.getDocumentElement(), "properties"), "jobrunr.version"))
+                .isEqualTo(childText(child(foundation.getDocumentElement(), "properties"), "jobrunr.version"));
+        assertThat(managedArtifactIds(quarkus)).containsSubsequence(
+                "redisson-quarkus-33-deployment",
+                "quarkus-jobrunr",
+                "quarkus-jobrunr-deployment");
+    }
+
+    @Test
     void helidonRuntimeBomOwnsTheRedissonIntegrationAfterThePlatformImport() throws Exception {
         Document helidon = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
         Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));

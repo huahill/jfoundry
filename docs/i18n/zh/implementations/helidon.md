@@ -232,5 +232,5 @@ bash scripts/verify-runtime-ci.sh helidon
 ## 延后集成
 
 Helidon 不提供 RocketMQ 投递。Helidon 的持久化、Outbox 与 Inbox 使用 JPA，而不是 MyBatis-Plus。
-JVM 上的 Redisson 分布式锁由 `jfoundry-lock-redisson-helidon` 提供。当前仍不提供 JobRunr，Helidon 原生镜像也不包含 Redisson。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
+JVM 上的 Redisson 分布式锁由 `jfoundry-lock-redisson-helidon` 提供。JobRunr 没有发布 Helidon 扩展，因此当前不提供 JobRunr；Helidon 原生镜像也不包含 Redisson。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
 只有在所选 Helidon 版本中验证客户端生命周期和投递语义后，才应添加应用自有适配器。

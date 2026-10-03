@@ -76,7 +76,8 @@ Before pushing a branch, select the narrowest CI-equivalent stage that covers th
 | Quarkus Redisson lock adapter | `scripts/verify-runtime-ci.sh quarkus --stage native-redisson` |
 | Helidon JVM Redisson lock adapter | `scripts/verify-runtime-ci.sh helidon --stage jvm-redisson` |
 | MyBatis-Plus persistence, Outbox/Inbox store, or Native hints | `scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus` |
-| JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
+| Spring JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
+| Quarkus JobRunr Outbox extension | Focused runtime and deployment module tests. Native Image is not claimed for this extension. |
 | Shared runtime contract or lifecycle behavior | Matching Spring, Quarkus, and Helidon stages |
 
 Local preflight shortens feedback time; it never replaces the server-side merge gate.
