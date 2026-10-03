@@ -36,7 +36,9 @@ transitively, so an application does not declare it again. That dependency is Sp
 convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
 port and `*OutboxTrigger` stays the scheduling adapter. Quarkus selects the same JobRunr mode with
 `jfoundry-outbox-jobrunr-quarkus-runtime` and `org.jobrunr:quarkus-jobrunr` instead of the Spring
-starter. Helidon does not provide JobRunr because upstream JobRunr has no Helidon extension.
+starter. Its JVM PostgreSQL dispatch is part of Quarkus middleware, and `native-jobrunr`
+verifies the same publication in a Native Image. Helidon does not provide JobRunr because upstream
+JobRunr has no Helidon extension.
 
 The explicit Domain Event Outbox composition is separate from both capabilities. The Spring
 combination starter includes Domain Event, generic Outbox, the persistence bridge, and the Domain

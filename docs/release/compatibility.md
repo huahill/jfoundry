@@ -60,7 +60,7 @@ describes the stable scope those jobs cover rather than copying transient PASS o
 | Runtime | JVM and middleware scope | Native Image scope |
 |---------|--------------------------|--------------------|
 | Spring | Runtime assembly plus PostgreSQL, MySQL, Kafka, RabbitMQ, RocketMQ, Redis/Redisson, MyBatis-Plus, JPA, Outbox, and Inbox integration paths | Base runtime and Web MVC plus MyBatis-Plus/PostgreSQL, Redisson/Redis, and JobRunr/PostgreSQL capability checks |
-| Quarkus | CDI, JTA, JPA, REST, messaging, Outbox/Inbox, PostgreSQL, and Redis/Redisson runtime wiring | JPA aggregate persistence, transactions, domain events, Outbox, and Inbox against PostgreSQL, plus a separate Redisson/Redis capability check |
+| Quarkus | CDI, JTA, JPA, REST, messaging, Outbox/Inbox, PostgreSQL, Redis/Redisson, and JobRunr/PostgreSQL runtime wiring | JPA aggregate persistence, transactions, domain events, Outbox, and Inbox against PostgreSQL, plus separate Redisson/Redis and JobRunr/PostgreSQL capability checks |
 | Helidon MP | CDI, JTA, JPA, REST, Outbox/Inbox, scheduling, Problem Details, PostgreSQL, and Redis/Redisson runtime wiring | CDI/Web startup and Problem Details response only |
 
 This matrix does not certify arbitrary downstream dependency graphs, databases, brokers, deployment
@@ -106,9 +106,6 @@ model while Maven 4 remains experimental.
 Maven 4.0.0-rc-7 quiet mode writes the distribution version to standard output before a forced
 expression result. Release and snapshot workflows resolve `project.version` through
 `scripts/maven-project-version.sh`, which ignores that line and the older `[INFO] [stdout]` prefix.
-
-Quarkus JobRunr dispatch is an optional extension. Module tests cover its CDI registration and
-recurring-job request. It is not part of the Quarkus middleware or Native Image CI matrix.
 
 Quarkus 3.40.x test bootstrap still cannot load the Maven 4.1 `subprojects` workspace model on
 its own. JFoundry keeps `quarkus-maven-plugin:generate-code-tests` on the affected `@QuarkusTest`

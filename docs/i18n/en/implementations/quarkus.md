@@ -233,8 +233,11 @@ For JobRunr dispatch, add `jfoundry-outbox-jobrunr-quarkus-runtime`. That extens
 `jfoundry.outbox.dispatcher.cron` defaults to `*/10 * * * * *`. `batch-size` still defaults to `50`.
 Leave `jfoundry.outbox.dispatcher.enabled` unset or `false`; the scheduled trigger skips work in
 JobRunr mode. JobRunr uses the application datasource unless `quarkus.jobrunr.database.type` selects
-another storage type. Module tests cover CDI registration and the recurring-job request. Quarkus
-middleware and Native Image CI do not cover this extension yet. Do not replace it with
+another storage type. That property is fixed when a native image is built, so SQL storage must be selected with `sql` during image generation; a runtime override cannot change it. Module tests cover CDI registration and the recurring-job request. The
+middleware stage also runs the `jvm-jobrunr` profile: the built-in scheduler stays idle, and the
+JobRunr background server publishes a seeded PostgreSQL Outbox row. Native Image acceptance is
+the separate `native-jobrunr` stage. The base Quarkus native job does not build this extension.
+Do not replace it with
 `jfoundry-outbox-jobrunr-spring-boot-starter`.
 
 Message delivery remains outside database transactions. Each claim and state transition runs in an
@@ -464,7 +467,7 @@ native executable.
 
 ### CI-Aligned Local Verification
 
-Run both Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
+Run the Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
 build as CI. On macOS, it uses local GraalVM because a Linux container executable cannot run on the
 host:
 
@@ -475,8 +478,8 @@ bash scripts/verify-runtime-ci.sh quarkus
 ```
 
 Use `--stage middleware` or `--stage native` to run one stage. The base native stage does not include
-Redisson. Redis lock verification is separate, so a missing Redisson address cannot break the default
-application:
+Redisson or JobRunr. Redis lock verification is separate, so a missing Redisson address cannot break
+the default application:
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -484,9 +487,17 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 ```
 
-That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile. To run all
-supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment variables
-set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
+That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile. JobRunr JVM
+dispatch is part of `--stage middleware`. Its Native Image check is separate:
+
+```bash
+JAVA_25_HOME=/path/to/java-25 \
+GRAALVM_HOME=/path/to/graalvm-25 \
+bash scripts/verify-runtime-ci.sh quarkus --stage native-jobrunr
+```
+
+To run all supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment
+variables set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 
@@ -499,4 +510,5 @@ persistence uses JPA, does not assemble RocketMQ because that broker is not supp
 does not publish Spring-style starters because Quarkus applications compose extensions. Redisson
 locks use `jfoundry-lock-redisson-quarkus-runtime`. JobRunr dispatch uses
 `jfoundry-outbox-jobrunr-quarkus-runtime` with `org.jobrunr:quarkus-jobrunr` and
-`jfoundry.outbox.dispatcher.mode=jobrunr`. Module tests cover it; middleware and Native Image CI do not.
+`jfoundry.outbox.dispatcher.mode=jobrunr`. The middleware `jvm-jobrunr` profile and the separate
+`native-jobrunr` profile verify that JobRunr publishes a PostgreSQL Outbox row.

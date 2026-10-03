@@ -2,6 +2,7 @@ package org.jfoundry.quarkus.outbox.jobrunr.deployment;
 
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.builditem.AdditionalIndexedClassesBuildItem;
+import io.quarkus.deployment.builditem.nativeimage.NativeImageResourcePatternsBuildItem;
 import io.quarkus.deployment.builditem.nativeimage.ReflectiveClassBuildItem;
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.JobRunrOutboxTrigger;
 import org.jfoundry.infrastructure.outbox.jobrunr.dispatcher.OutboxDispatchJobRequest;
@@ -40,4 +41,21 @@ class JobRunrOutboxProcessorTest {
         assertThat(reflection.isMethods()).isTrue();
         assertThat(reflection.isFields()).isTrue();
     }
+
+    @Test
+    void registersJobRunrSqlMigrationsForNativeImage() {
+        NativeImageResourcePatternsBuildItem resources = new JobRunrOutboxProcessor().registerJobRunrSqlMigrations();
+
+        assertThat(resources.getIncludePatterns())
+                .singleElement()
+                .satisfies(pattern -> {
+                    assertThat(pattern).isNotEqualTo("org/jobrunr/storage/sql/**/*.sql");
+                    assertThat("org/jobrunr/storage/sql/common/migrations/v000__create_migrations_table.sql")
+                            .matches(pattern);
+                    assertThat("org/jobrunr/storage/sql/postgres/migrations/v014__improve_job_stats.sql")
+                            .matches(pattern);
+                    assertThat("org/jobrunr/storage/other.sql").doesNotMatch(pattern);
+                });
+    }
 }
+

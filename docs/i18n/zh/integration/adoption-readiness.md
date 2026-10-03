@@ -111,7 +111,7 @@ Hexagonal Port/Adapter 约定分离。
   MyBatis-Plus 持久化、Redisson 锁和 JobRunr Outbox 派发的 GraalVM 原生镜像验证。费用报销审批
   Demo 还使用两个原生可执行文件验证 Kafka、Outbox、Inbox、PostgreSQL 和支付投影链路。
 - 受支持 Quarkus 版本的 CDI 发现、Jakarta Transactions `TransactionRunner`、JPA 聚合持久化、领域事件分发和
-  JPA Outbox/Inbox。JVM 中间件配置档与原生镜像 CI 验证任务都针对 PostgreSQL 运行这些路径。Redisson 仍是独立的原生阶段。
+  JPA Outbox/Inbox。JVM 中间件配置档与原生镜像 CI 验证任务都针对 PostgreSQL 运行这些路径。Redisson 仍是独立阶段，会先运行 JVM 配置档再构建原生镜像。JobRunr 的 JVM 派发运行在 Quarkus 中间件阶段，原生镜像检查是独立的 `native-jobrunr` 阶段。
 - 受支持 Helidon MP 版本的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
   其 GraalVM 25 使用方已验证 CDI/Web 启动和 Problem Details 响应；原生 JTA 与 JPA 仍受上游实验性
   限制，可复现的失败记录见 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
