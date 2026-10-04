@@ -8,8 +8,8 @@ import jakarta.ws.rs.ext.Provider;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jfoundry.http.correlation.RequestCorrelationId;
 import org.jfoundry.http.correlation.RequestCorrelationOptions;
-import org.jfoundry.http.jaxrs.AbstractJaxRsRequestCorrelationProvider;
-import org.jfoundry.http.jaxrs.RequestCorrelationPathMatcher;
+import org.jfoundry.http.jaxrs.web.AbstractJaxRsRequestCorrelationProvider;
+import org.jfoundry.http.jaxrs.web.RequestCorrelationPathMatcher;
 import org.slf4j.MDC;
 import org.jspecify.annotations.Nullable;
 

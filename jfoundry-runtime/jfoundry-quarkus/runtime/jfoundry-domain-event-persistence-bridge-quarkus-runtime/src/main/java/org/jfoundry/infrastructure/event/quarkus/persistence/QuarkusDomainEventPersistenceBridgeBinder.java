@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.event.quarkus;
+package org.jfoundry.infrastructure.event.quarkus.persistence;
 
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.event.Observes;

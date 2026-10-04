@@ -1,4 +1,4 @@
-package org.jfoundry.http.helidon;
+package org.jfoundry.http.quarkus.restclient;
 
 import jakarta.ws.rs.client.ClientRequestFilter;
 import jakarta.ws.rs.client.ClientResponseFilter;

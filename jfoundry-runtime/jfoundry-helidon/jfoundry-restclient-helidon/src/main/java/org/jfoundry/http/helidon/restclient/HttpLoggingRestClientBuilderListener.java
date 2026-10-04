@@ -1,4 +1,4 @@
-package org.jfoundry.http.quarkus;
+package org.jfoundry.http.helidon.restclient;
 
 import org.eclipse.microprofile.rest.client.RestClientBuilder;
 import org.eclipse.microprofile.rest.client.spi.RestClientBuilderListener;

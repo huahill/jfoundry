@@ -1,4 +1,4 @@
-package org.jfoundry.http.jaxrs;
+package org.jfoundry.http.jaxrs.web;
 
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseFilter;

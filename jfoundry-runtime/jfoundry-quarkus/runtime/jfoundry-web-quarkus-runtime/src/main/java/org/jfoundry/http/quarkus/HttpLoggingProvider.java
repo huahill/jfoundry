@@ -4,7 +4,7 @@ import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
 import jakarta.ws.rs.container.PreMatching;
 import jakarta.ws.rs.ext.Provider;
-import org.jfoundry.http.jaxrs.AbstractJaxRsServerHttpLoggingProvider;
+import org.jfoundry.http.jaxrs.web.AbstractJaxRsServerHttpLoggingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
