@@ -45,7 +45,7 @@ Quarkus 的 JPA Outbox 存储加入 `jfoundry-outbox-jpa-quarkus-runtime`。它�
 支持。依赖配置和原生镜像验证见 [Quarkus](quarkus.md)。
 
 Quarkus 的 Outbox 派发加入 `jfoundry-outbox-quarkus-runtime`，并提供真实的 CDI `MessageSender`。
-只有设置 `jfoundry.outbox.dispatcher.enabled=true` 后调度才会启用；它不会引入消息代理客户端或回退发送器。
+`JdkOutboxWorker` 默认开启；仅记录进程才设置 `jfoundry.outbox.dispatcher.enabled=false`。worker 不会引入消息代理客户端或回退发送器。
 派发配置见 [Quarkus](quarkus.md)。
 
 Quarkus 的 JPA Inbox 存储加入 `jfoundry-inbox-jpa-quarkus-runtime`。它会把

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 @SpringBootTest(
         classes = OutboxInboxDatabaseConfig.class,
-        properties = "jfoundry.outbox.dispatcher.mode=none"
+        properties = "jfoundry.outbox.dispatcher.enabled=false"
 )
 class RabbitOutboxDispatchIT {
 

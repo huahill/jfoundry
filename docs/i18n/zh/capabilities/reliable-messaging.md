@@ -15,26 +15,23 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 | Outbox 能力 | 负责记录通用集成消息、恢复、清理和协调派发 | `jfoundry-outbox-spring-boot-starter` |
 | 领域事件 Outbox 组合 | 将选定领域事件映射为通用 Outbox 消息 | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | 存储适配器 | 持久化 `OutboxMessageStore` 记录 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用实现 |
-| 派发触发方式 / 调度适配器 | 触发派发任务 | 内置定时模式、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter` 或应用触发器 |
+| 派发 worker | 周期性领取并发送已记录消息 | 由 Outbox 能力通过 `JdkOutboxWorker` 内置提供 |
 | 消息传输 | 发送已领取的消息载荷 | 消息代理专用的 `jfoundry-messaging-*-spring-boot-starter` 或应用 `MessageSender` |
 
 聚合持久化是另一项独立选择。`jfoundry-persistence-*-spring-boot-starter` 持久化业务聚合，
 `jfoundry-outbox-*-spring-boot-starter` 持久化 Outbox 记录；选择其中一项不会自动选择另一项。
 
-职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器和 JobRunr 启动器会传递引入
-`jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换，
-而 `OutboxDispatcher` 仍是派发服务端口，`*OutboxTrigger` 仍是调度适配器。Quarkus 通过
-`jfoundry-outbox-jobrunr-quarkus-runtime` 和 `org.jobrunr:quarkus-jobrunr` 选择同一 JobRunr 模式，而不是使用 Spring 启动器。Quarkus 中间件包含其 JVM PostgreSQL 派发验收，`native-jobrunr` 在原生镜像中验证同样的发布行为。Helidon 不提供 JobRunr，因为上游没有 Helidon 扩展。
+职责独立不表示每项都要声明一个直接 Maven 依赖。内置存储启动器会传递引入
+`jfoundry-outbox-spring-boot-starter`，应用无需重复声明。这只是 Spring Boot 装配便利；存储仍可替换。
+`OutboxDispatcher` 是派发服务端口，`JdkOutboxWorker` 是 Spring、Quarkus 和 Helidon 上的进程内定时器。
+仅记录进程才需要设置 `jfoundry.outbox.dispatcher.enabled=false`。
 
 领域事件 Outbox 组合刻意独立于这两项能力。Spring 组合启动器包含领域事件、通用 Outbox、持久化桥接层和
 领域事件 Outbox 自动配置。Quarkus 与 Helidon 提供对应的显式模块：`jfoundry-domain-event-outbox-quarkus-runtime`
 和 `jfoundry-domain-event-outbox-helidon`；它们的通用 Outbox 模块不会注册领域事件 Bean。因此，仅使用领域事件的应用
 不会得到 Outbox 记录器，仅使用通用 Outbox 的应用也不会得到领域事件上下文或派发器。
 
-运行时特定的 `*OutboxTrigger` 类型是调度适配器。`OutboxDispatcher` 仍然是它们调用的派发服务端口。
-
-如果应用曾经直接构造旧的 `ScheduledOutboxDispatcher`、`JobRunrOutboxDispatcher`、`QuarkusOutboxDispatcher`
-或 `HelidonOutboxDispatcher` 类型，请将这些调用点改为对应的 `*OutboxTrigger` 类。
+应用不应自己调度 `OutboxDispatcher`。运行时适配器会在 Outbox 派发开启时启动 `JdkOutboxWorker`。
 
 ## 事件流
 

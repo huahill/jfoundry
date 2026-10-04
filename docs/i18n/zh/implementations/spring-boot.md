@@ -74,11 +74,11 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 | 出站 `RestClient` 支持与可配置 HTTP 日志 | `jfoundry-restclient-spring-boot-starter` | 应用于 Spring Boot 管理的 `RestClient.Builder`；手工 builder 使用 Java API。 |
 | Outbox 记录的 JSON 序列化 | `jfoundry-outbox-spring-boot-starter`（或应用自己的 `PayloadSerializer`） | `OutboxTemplateAutoConfiguration` 在 Jackson 与 Outbox 存储可用时提供默认 Jackson `PayloadSerializer`；消息启动器只提供传输集成与依赖，本身不提供序列化器 Bean。 |
 | Kafka、RabbitMQ 或 RocketMQ 投递 | 对应 `jfoundry-messaging-*-spring-boot-starter` | 显式选择具体消息代理传输方式。 |
-| Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供通用消息记录、恢复、清理和内置定时派发触发器。手工组合时直接添加；内置存储与 JobRunr 启动器会传递引入它。 |
+| Outbox 能力 | `jfoundry-outbox-spring-boot-starter` | 提供通用消息记录、恢复、清理和 JDK 派发 worker。手工组合时直接添加；内置存储启动器会传递引入它。 |
 | 领域事件到 Outbox 组合 | `jfoundry-domain-event-outbox-spring-boot-starter` | 提供领域事件、通用 Outbox、持久化桥接层和领域事件到 Outbox 的自动记录。只有已收集事件必须可靠离开本进程时才选择。 |
 | Outbox 存储 | `jfoundry-outbox-jpa-spring-boot-starter`、`jfoundry-outbox-mybatis-plus-spring-boot-starter` 或应用 `OutboxMessageStore` | 只持久化 Outbox 记录；内置存储启动器也会引入 Outbox 能力，迁移仍由应用负责。 |
 | Inbox 运行时与存储 | `jfoundry-inbox-spring-boot-starter` 加一个 `jfoundry-inbox-*-spring-boot-starter` | 消费端幂等；迁移由应用负责。 |
-| Outbox 派发触发方式 / 调度适配器 | 内置定时模式（`ScheduledOutboxTrigger`）、可选的 `jfoundry-outbox-jobrunr-spring-boot-starter`（`JobRunrOutboxTrigger`）或应用触发器 | JobRunr 会替换内置触发方式并传递引入 Outbox 能力；任何选项仍需要 Outbox 存储和真实发送器。 |
+| Outbox 派发 worker | 由 `jfoundry-outbox-spring-boot-starter` 启动 `JdkOutboxWorker` | 仍需要 Outbox 存储和真实发送器。仅记录进程才设置 `jfoundry.outbox.dispatcher.enabled=false`。 |
 | Redisson 分布式锁 | `jfoundry-lock-redisson-spring-boot-starter` | 仅可选的跨实例锁能力。 |
 
 完整启动器清单、配置项、条件和 Bean 优先级见 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)。
@@ -104,10 +104,9 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 ## 可靠消息
 
-Outbox 装配包含四项独立决策：能力、存储、派发触发方式和消息传输。模块名中相同的 `outbox` 前缀只表示适配器服务于该能力，不表示 JPA、MyBatis-Plus 或 JobRunr 各自构成完整方案。JFoundry 不会创建数据库表，也不会虚构消息目的地；将所选 SQL 模板复制到应用自己的迁移流程中。
+Outbox 装配包含三项独立决策：能力、存储和消息传输。模块名中相同的 `outbox` 前缀只表示适配器服务于该能力，不表示 JPA 或 MyBatis-Plus 各自构成完整方案。JFoundry 不会创建数据库表，也不会虚构消息目的地；将所选 SQL 模板复制到应用自己的迁移流程中。
 
-在 Spring Boot 中，`OutboxDispatcher` 是派发服务端口。`ScheduledOutboxTrigger` 和
-`JobRunrOutboxTrigger` 是调用它的调度适配器。
+在 Spring Boot 中，`OutboxDispatcher` 是派发服务端口。`JdkOutboxWorker` 是进程内定时器，负责派发、恢复和清理。应用不应自己再去调度派发器。
 
 `jfoundry-messaging-spring-boot-starter` 不会注册回退 `MessageSender`。启用投递前，必须添加一个消息代理专用启动器或提供应用 `MessageSender`，否则不存在生产投递路径。自动 Outbox 事件记录默认关闭，通过 `jfoundry.domain.event.dispatch.outbox.enabled=true` 启用。它只写入标注 `@Externalized` 的领域事件或被 `DomainEventExternalizer` 选中的事件，绝不会从持久化变更推断消息。直接选择消息代理见[消息传输](../capabilities/message-delivery.md)，Outbox 与 Inbox 语义见[可靠消息](../capabilities/reliable-messaging.md)。
 
@@ -219,7 +218,7 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
 业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
 `createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
-PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。精确测试版本记录在
+PostgreSQL；不认证 JPA、消息代理或 Redisson。精确测试版本记录在
 [兼容矩阵](../../../release/compatibility.md)。此外，它还会
 通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
 
@@ -231,9 +230,7 @@ PostgreSQL；不认证 JPA、消息代理、Redisson 或 JobRunr。精确测试�
 
 `native-redisson` 配置档单独认证 Redisson 4.6.1 锁 starter 与 Redis 的组合。测试在 JVM 进程中
 启动 Redis，启动生成的原生可执行程序，并验证 JFoundry `LockExecutor` 能获取和释放分布式锁。
-`native-jobrunr` 配置档单独认证 JobRunr 8.7.1 与 PostgreSQL 的 Outbox 派发。它启动生成的原生
-可执行程序、启用 JobRunr 后台服务器，并验证持久化的 Outbox 消息会被调度和发布。这些配置档不认证
-其他 Redis、JobRunr 存储、消息代理或持久化组合。业务应用的事件载荷由应用序列化时，仍需为其类型
+这些配置档不认证其他 Redis、消息代理或持久化组合。业务应用的事件载荷由应用序列化时，仍需为其类型
 提供 Spring AOT binding hints。
 
 ### 本地 CI 对齐验证
@@ -246,6 +243,6 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-使用 `--stage middleware`、`--stage native`、`--stage native-mybatis-plus`、`--stage native-redisson`
-或 `--stage native-jobrunr` 可以只运行一个阶段。通用
+使用 `--stage middleware`、`--stage native`、`--stage native-mybatis-plus` 或 `--stage native-redisson`
+可以只运行一个阶段。通用
 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。

@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// applies to custom mapper SQL ({@code @Update}/{@code @Select}/{@code @Delete}), not only
 /// standard BaseMapper CRUD.
 /// <p>
-/// Isolation: this test brings up the full autoconfig chain, so it sets dispatcher mode to none to
+/// Isolation: this test brings up the full autoconfig chain, so it disables the JDK worker to
 /// avoid polling interacting with downstream tests and uses a dedicated in-memory H2 name. This test
 /// stays in autoconfigure because it specifically exercises the autoconfig-layer
 /// {@code TableNameHandler} wiring.
@@ -42,11 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
         classes = OutboxTableNameOverrideTest.TestApp.class,
         properties = {
                 "jfoundry.outbox.table-name=custom_outbox",
-                // Set dispatcher mode to none so this test exercises only the persistence
+                // Disable the JDK worker so this test exercises only the persistence
                 // layer (append → TableNameHandler → custom_outbox). Otherwise the full
-                // autoconfig chain starts a ScheduledOutboxTrigger whose polling may
+                // autoconfig chain starts a JdkOutboxWorker whose polling may
                 // interact with subsequent tests sharing the same H2 instance.
-                "jfoundry.outbox.dispatcher.mode=none",
+                "jfoundry.outbox.dispatcher.enabled=false",
                 "spring.autoconfigure.exclude=org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration",
                 // Dedicated in-memory DB name for isolation from DomainEventExternalizationIntegrationTest.
                 "spring.datasource.url=jdbc:h2:mem:jfoundry-table-name-override;DB_CLOSE_DELAY=-1",

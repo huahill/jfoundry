@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
 @SpringBootTest(classes = JpaOutboxInboxDatabaseConfig.class, properties = {
-        "jfoundry.outbox.dispatcher.mode=none",
+        "jfoundry.outbox.dispatcher.enabled=false",
         "spring.jpa.hibernate.ddl-auto=none"
 })
 class MySqlJpaOutboxStoreIT {

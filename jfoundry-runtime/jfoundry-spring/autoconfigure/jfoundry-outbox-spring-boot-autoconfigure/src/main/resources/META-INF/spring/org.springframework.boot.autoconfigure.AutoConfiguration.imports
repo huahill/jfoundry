@@ -3,4 +3,3 @@ org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration
 org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaEntityScanAutoConfiguration
 org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration
 org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration
-org.jfoundry.autoconfigure.outbox.dispatcher.JobRunrDispatcherAutoConfiguration

@@ -14,7 +14,7 @@ jfoundry core 模块不得依赖 Spring、Spring Boot、Helidon、Quarkus、Micr
 |------|------|
 | 领域与架构 | `jfoundry-domain`、`jfoundry-architecture`、`jfoundry-hexagonal`、`jfoundry-onion`、`jfoundry-cqrs` |
 | 应用契约 | `jfoundry-application-core`、`jfoundry-transaction-core`、`jfoundry-domain-event-core`、`jfoundry-messaging-core`、`jfoundry-outbox-core`、`jfoundry-domain-event-outbox-core`、`jfoundry-inbox-core` |
-| 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-domain-event-persistence-bridge`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储、JobRunr 派发适配器 |
+| 运行时无关适配器 | `jfoundry-persistence-core`、`jfoundry-persistence-mybatis-plus`、`jfoundry-persistence-jpa`、`jfoundry-domain-event-persistence-bridge`、`jfoundry-messaging-jackson`、Outbox/Inbox MyBatis-Plus 与 JPA 存储 |
 | 共享 Jakarta 适配器 | `jfoundry-http-jaxrs`、`jfoundry-web-jaxrs`、`jfoundry-restclient-jaxrs`、`jfoundry-transaction-jta`、`jfoundry-domain-event-jta`、`jfoundry-lock-el` |
 | Spring 运行时集成 | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot 集成 | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`、`jfoundry-runtime/jfoundry-spring/starters/*` |
@@ -64,7 +64,7 @@ Spring Boot 自动配置模块与启动器仍按能力划分。
 
 ## 依赖管理边界
 
-`jfoundry-foundation-dependencies` 只管理运行时无关、且选定运行时平台 BOM 尚未管理的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、JobRunr、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
+`jfoundry-foundation-dependencies` 只管理运行时无关、且选定运行时平台 BOM 尚未管理的库和测试工具。同一组件族的运行时无关坐标可以由 Foundation 管理，但其运行时特定的启动器、部署制品或原生镜像集成不得进入 Foundation。例如，Foundation 管理 MyBatis-Plus、Redisson 和 jMolecules 的运行时无关坐标，但不管理它们的 Spring 特定制品。
 
 Foundation 不得再声明 Spring Boot、Quarkus 或 Helidon 平台 BOM 已经管理的栈，包括 JUnit、Mockito、Jackson、SLF4J、OpenTelemetry、Kafka/RabbitMQ/RocketMQ 客户端、Hibernate 和 JDBC 驱动。这些版本跟随选定运行时。根 `jfoundry-parent` 可以导入 JUnit、Jackson 和 OpenTelemetry BOM 以便编译 JFoundry 自身。它不得直接钉死这些 GA，否则会覆盖更近的运行时 BOM。
 
@@ -106,13 +106,9 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 `jfoundry-domain-event-persistence-bridge` 是聚合持久化成功与领域事件收集之间的可选适配器，不是持久化核心，
 通用持久化不依赖它。
 
-`jfoundry-outbox-spring` 拥有 Spring 运行时集成，例如事务同步和 scheduled Outbox 触发器。
-可选的领域事件到 Outbox 派发器位于 `jfoundry-domain-event-outbox-spring`；只有应用同时需要两项能力时才显式组合。
-
-`jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配。`OutboxDispatcherProperties`
-及关联属性位于这里，因为属性绑定属于 Boot 职责。
-
-`jfoundry-outbox-jobrunr` 是纯 JobRunr 派发适配器；它的 Spring Boot 自动配置也属于 `jfoundry-outbox-spring-boot-autoconfigure`。
+`jfoundry-outbox-spring-boot-autoconfigure` 拥有 Outbox 配置项、条件和 Bean 装配，包括启动 `JdkOutboxWorker`。
+`OutboxDispatcherProperties` 及关联属性位于这里，因为属性绑定属于 Boot 职责。可选的领域事件到 Outbox 派发器位于
+`jfoundry-domain-event-outbox-spring`；只有应用同时需要两项能力时才显式组合。
 
 `jfoundry-outbox-jpa` 和 `jfoundry-inbox-jpa` 是运行时无关的 Jakarta Persistence 适配器。它们实现 Outbox 和 Inbox 存储 SPI，不要求 Spring 或 Spring Boot。它们的 Spring Boot 启动器，即 `jfoundry-outbox-jpa-spring-boot-starter` 和 `jfoundry-inbox-jpa-spring-boot-starter`，是显式能力选择；通用 `jfoundry-persistence-jpa-spring-boot-starter` 只提供业务 JPA 运行时装配，不会引入任一存储。
 

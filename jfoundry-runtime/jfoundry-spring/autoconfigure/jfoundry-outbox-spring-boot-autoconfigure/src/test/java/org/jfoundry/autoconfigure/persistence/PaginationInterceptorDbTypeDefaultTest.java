@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// MyBatis-Plus auto-detects the dialect lazily on the first paging query.
 @SpringBootTest(classes = PaginationInterceptorDbTypeDefaultTest.NoDbTypeTestApp.class)
 @TestPropertySource(properties = {
-        "jfoundry.outbox.dispatcher.mode=none",
+        "jfoundry.outbox.dispatcher.enabled=false",
         "spring.autoconfigure.exclude=org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration",
         "spring.datasource.url=jdbc:h2:mem:jfoundry-db-type-default;DB_CLOSE_DELAY=-1",
         "spring.sql.init.schema-locations=classpath:outbox_event.sql"

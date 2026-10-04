@@ -8,7 +8,7 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 
 | Starter | Adds | Does not add |
 |---------|------|--------------|
-| `jfoundry-spring-boot-starter` | Minimal Spring Boot baseline for jfoundry capability starters | Transaction integration, Outbox, Inbox, persistence, broker clients, JobRunr |
+| `jfoundry-spring-boot-starter` | Minimal Spring Boot baseline for jfoundry capability starters | Transaction integration, Outbox, Inbox, persistence, broker clients |
 | `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` integration | A transaction manager; it adapts one supplied by Spring Boot or the application |
 | `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
@@ -18,11 +18,10 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` adapter, selected after Boot creates `KafkaOperations` | Outbox store |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` adapter | Outbox store |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` adapter | Outbox store |
-| `jfoundry-outbox-spring-boot-starter` | Generic Outbox core, `OutboxTemplate`, scheduled dispatch integration | Domain Event, Outbox table store, JobRunr |
+| `jfoundry-outbox-spring-boot-starter` | Generic Outbox core, `OutboxTemplate`, and the JDK dispatch worker | Domain Event, Outbox table store |
 | `jfoundry-domain-event-outbox-spring-boot-starter` | Domain Event, generic Outbox, persistence bridge, and Domain Event-to-Outbox auto-configuration | — |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox capability plus the JPA `OutboxMessageStore` adapter | Database migration execution |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox capability plus the MyBatis-Plus `OutboxMessageStore` adapter | Database migration execution |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox capability plus the JobRunr `OutboxTrigger` | Outbox table store |
 | `jfoundry-inbox-spring-boot-starter` | Inbox core and `InboxTemplate` | Inbox table store |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` adapter and supported-database claim strategy | Database migration execution, claim support for database products other than PostgreSQL and MySQL |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` adapter | Database migration execution |
@@ -46,17 +45,14 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry.web.mvc.logging.format` | `HUMAN` | Selects `HUMAN` Feign-style `-->` / `<--` lines with bodies on one line and `END HTTP` closers, or `INLINE` one-line `key=value` events, for inbound Servlet HTTP logs. |
 | `jfoundry.web.mvc.logging.excluded-paths` | `/actuator/health/**` | Ant-style application paths excluded from inbound Servlet HTTP logs. A configured list replaces the default. |
 | `jfoundry.web.mvc.logging.included-headers` | `accept`, `authorization`, `content-type`, `content-length`, `location`, `x-request-id` | Header names included in inbound Servlet HTTP logs at `HEADERS` or `FULL`. A configured list replaces the default. Use `*` to include every header after redaction. |
-| `jfoundry.outbox.dispatcher.mode` | `scheduled` | Selects `scheduled`, `jobrunr`, or `none`. |
-| `jfoundry.outbox.dispatcher.interval-ms` | `5000` | Fixed-delay interval for scheduled dispatch. |
-| `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr recurring dispatch cron expression. |
+| `jfoundry.outbox.dispatcher.enabled` | `true` | Whether this process runs the JDK Outbox worker for dispatch, recovery, and cleanup. Set `false` for recorder-only processes. |
+| `jfoundry.outbox.dispatcher.interval` | `5s` | Fixed-delay interval between Outbox dispatch ticks. |
 | `jfoundry.outbox.dispatcher.batch-size` | `50` | Maximum records claimed per dispatch run. |
 | `jfoundry.outbox.dispatcher.max-retries` | `5` | Maximum dispatch attempts before dead-lettering. |
-| `jfoundry.outbox.dispatcher.backoff-base-ms` | `1000` | Base retry backoff. |
-| `jfoundry.outbox.dispatcher.backoff-max-ms` | `300000` | Maximum retry backoff. |
-| `jfoundry.outbox.recovery.enabled` | follows dispatcher mode | Enables stuck `DISPATCHING` recovery for `scheduled` and `jobrunr`; always disabled for `none`. |
+| `jfoundry.outbox.dispatcher.backoff-base` | `1s` | Initial retry backoff. |
+| `jfoundry.outbox.dispatcher.backoff-max` | `5m` | Maximum retry backoff. |
 | `jfoundry.outbox.recovery.interval` | `60s` | Recovery job interval. |
 | `jfoundry.outbox.recovery.stuck-timeout` | `5m` | Age after which `DISPATCHING` rows are considered stuck. |
-| `jfoundry.outbox.cleanup.enabled` | follows dispatcher mode | Enables terminal-row cleanup for `scheduled` and `jobrunr`; always disabled for `none`. |
 | `jfoundry.outbox.cleanup.interval` | `24h` | Cleanup job interval. |
 | `jfoundry.outbox.cleanup.published-retention-days` | `7` | Retention for `PUBLISHED` rows. |
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | Retention for `DEAD_LETTERED` rows. |
@@ -86,8 +82,7 @@ bean into the default recorder. Applications normally provide these mappings wit
 | `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | RocketMQ producer class and `MQProducer` bean exist; no existing `MessageSender`. |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox table-name customizer, `MybatisPlusInterceptor`, `OutboxMessageStore` | MyBatis-Plus and Outbox store adapter classes are present. SQL templates are not run automatically. |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | `EntityManagerFactory` and the JPA Outbox adapter are present; no user-defined `OutboxMessageStore` exists. |
-| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`, `ScheduledOutboxTrigger`, recovery job, cleanup job | An Outbox store, message sender, and `TransactionRunner` exist; mode is `scheduled` or maintenance is enabled by managed modes. |
-| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxTrigger` | JobRunr and jfoundry JobRunr trigger classes are present; `mode=jobrunr`; store, sender, backoff, and `TransactionRunner` beans exist. |
+| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`, `OutboxDispatcher`, `DefaultOutboxMaintenance`, `JdkOutboxWorker` | An Outbox store, message sender, and `TransactionRunner` exist. The worker starts unless `jfoundry.outbox.dispatcher.enabled=false`. |
 | `InboxMybatisPlusAutoConfiguration` | MyBatis-Plus `InboxMessageStore` | `SqlSessionFactory`, mapper scanning, and Inbox store adapter are present; no existing store. |
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`, JPA `InboxMessageStore` | `EntityManagerFactory` and the JPA Inbox adapter are present. A user `InboxMessageStore` or `JpaInboxClaimStrategy` takes precedence; built-in claim strategies support only PostgreSQL and MySQL, and an unknown database product fails fast unless the application supplies a strategy. |
 | `InboxAutoConfiguration` | `InboxTemplate` | `InboxTemplate` is on the classpath and `InboxMessageStore` plus `TransactionRunner` beans exist. |
@@ -117,13 +112,9 @@ bean into the default recorder. Applications normally provide these mappings wit
   redact credentials, cookies, tokens, secrets, and API keys, and cap `FULL` JSON body capture at 8 KiB.
   Client duration ends at response headers; Servlet duration ends at synchronous or async terminal
   completion. Neither is an end-to-end client latency measurement or a business audit event.
-- For a Spring Boot Native Image, `jfoundry.outbox.dispatcher.mode` is a build-time structural
-  setting. Pass the selected value to `process-aot`; changing it only when starting the native
-  executable cannot restore beans that AOT excluded. Build a distinct image when a deployment needs
-  a different dispatcher mode.
-- `mode=none` means no dispatcher, recovery job, or cleanup job is registered, even when recovery
-  or cleanup is explicitly enabled.
-- `ScheduledOutboxTrigger` is the Spring scheduling adapter for scheduled mode, and
-  `JobRunrOutboxTrigger` is the adapter for JobRunr mode. `OutboxDispatcher` remains the dispatch
-  service port. Applications that directly constructed the old `ScheduledOutboxDispatcher` or
-  `JobRunrOutboxDispatcher` types must rename those call sites.
+- For a Spring Boot Native Image, `jfoundry.outbox.dispatcher.enabled` is evaluated at AOT time.
+  Building with `false` cannot start a worker later by flipping the property on the native
+  executable.
+- `OutboxDispatcher` is the dispatch service port. `JdkOutboxWorker` is the process-local timer
+  that invokes dispatch, recovery, and cleanup. Applications should not call `OutboxDispatcher`
+  on a schedule of their own.

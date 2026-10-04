@@ -8,8 +8,8 @@
     <artifactId>jfoundry-outbox-spring-boot-starter</artifactId>
     <name>jfoundry-outbox-spring-boot-starter</name>
     <description>
-        Spring Boot starter for transactional outbox core, Spring transaction synchronization,
-        scheduled dispatching, recovery, and cleanup jobs.
+        Spring Boot starter for transactional outbox core, recording, the JDK dispatch worker,
+        recovery, and cleanup.
     </description>
 
     <dependencies>
@@ -28,10 +28,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-outbox-spring</artifactId>
         </dependency>
     </dependencies>
 

@@ -23,7 +23,7 @@ it does not own CDI registration or a container lifecycle. Spring uses `runtime/
 |------|---------|
 | Domain and architecture | `jfoundry-domain`, `jfoundry-architecture`, `jfoundry-hexagonal`, `jfoundry-onion`, `jfoundry-cqrs` |
 | Application contracts | `jfoundry-application-core`, `jfoundry-transaction-core`, `jfoundry-domain-event-core`, `jfoundry-messaging-core`, `jfoundry-outbox-core`, `jfoundry-domain-event-outbox-core`, `jfoundry-inbox-core` |
-| Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-domain-event-persistence-bridge`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores, JobRunr dispatch adapter |
+| Framework-neutral adapters | `jfoundry-persistence-core`, `jfoundry-persistence-jpa`, `jfoundry-persistence-mybatis-plus`, `jfoundry-domain-event-persistence-bridge`, `jfoundry-messaging-jackson`, Outbox/Inbox JPA and MyBatis-Plus stores |
 | Shared Jakarta adapters | `jfoundry-http-jaxrs`, `jfoundry-web-jaxrs`, `jfoundry-restclient-jaxrs`, `jfoundry-transaction-jta`, `jfoundry-domain-event-jta`, `jfoundry-lock-el` |
 | Spring runtime integration | `jfoundry-runtime/jfoundry-spring/runtime/*` |
 | Spring Boot integration | `jfoundry-runtime/jfoundry-spring/autoconfigure/*`, `jfoundry-runtime/jfoundry-spring/starters/*` |
@@ -95,7 +95,7 @@ messages and appends them through the generic Outbox contract.
 `jfoundry-foundation-dependencies` owns only runtime-neutral libraries and test utilities that the
 selected runtime platform BOM does not already manage. A component family may have neutral coordinates
 in Foundation while its runtime-specific starters, deployment artifacts, or Native Image integrations
-remain outside it. For example, Foundation manages the neutral MyBatis-Plus, JobRunr, Redisson, and
+remain outside it. For example, Foundation manages the neutral MyBatis-Plus, Redisson, and
 jMolecules coordinates, but it does not manage their Spring-specific artifacts.
 
 Foundation must not re-declare platform stacks already owned by Spring Boot, Quarkus, or Helidon BOMs,
@@ -158,16 +158,11 @@ state machine and it is not required for in-process Domain Event dispatch.
 `jfoundry-domain-event-persistence-bridge` is an optional adapter between successful aggregate persistence
 and Domain Event collection. It is not a persistence core and generic persistence does not depend on it.
 
-`jfoundry-outbox-spring` owns Spring runtime integration such as transaction synchronization and
-scheduled Outbox triggers. `jfoundry-domain-event-outbox-spring` owns the optional Domain Event-to-Outbox
-dispatcher. The explicit combination is selected only when an application needs both capabilities.
-
 `jfoundry-outbox-spring-boot-autoconfigure` owns Outbox configuration properties, conditions, and bean
-wiring. `OutboxDispatcherProperties` and related properties live there because property binding is
-a Boot concern.
-
-`jfoundry-outbox-jobrunr` is a pure JobRunr dispatch adapter. Its Spring Boot auto-configuration
-also belongs under `jfoundry-outbox-spring-boot-autoconfigure`.
+wiring, including starting `JdkOutboxWorker`. `OutboxDispatcherProperties` and related properties live
+there because property binding is a Boot concern. `jfoundry-domain-event-outbox-spring` owns the optional
+Domain Event-to-Outbox dispatcher. The explicit combination is selected only when an application needs
+both capabilities.
 
 `jfoundry-outbox-jpa` and `jfoundry-inbox-jpa` are framework-neutral Jakarta Persistence adapters.
 They implement the Outbox and Inbox store SPIs without requiring Spring or Spring Boot. Their

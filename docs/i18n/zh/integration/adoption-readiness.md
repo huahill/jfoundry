@@ -78,8 +78,8 @@ jfoundry 不只是项目脚手架。它的主要价值是为业务应用中反�
 简单，同时覆盖完整架构与集成链路。同一套业务规则、数据库模型、集成契约和验收场景已通过分别维护
 的 Hexagonal 与 Onion Simple 变体验证。截至评估日期，已记录的证据包括：
 
-- jfoundry 在 Java 25 下完成 67 模块测试矩阵，其中包括基础运行时、MyBatis-Plus、Redisson 和
-  JobRunr 能力的 Spring Boot 原生镜像验证。
+- jfoundry 在 Java 25 下完成 67 模块测试矩阵，其中包括基础运行时、MyBatis-Plus 和
+  Redisson 能力的 Spring Boot 原生镜像验证。
 - 插件发布的全部技能、Codex 插件清单和 Claude 市场元数据通过校验。
 - 两个架构变体均通过同一套完整自动化测试，其中包含 5 个基于容器的端到端场景。
 - 端到端环境包含两个独立 PostgreSQL、Kafka、Redis 和两个 Spring Boot 应用上下文。
@@ -108,10 +108,10 @@ Hexagonal Port/Adapter 约定分离。
 
 - Java 25 业务应用。
 - 受支持的 Spring Boot 与 Spring Framework 版本，包括 JVM 中间件集成，以及基础运行时、
-  MyBatis-Plus 持久化、Redisson 锁和 JobRunr Outbox 派发的 GraalVM 原生镜像验证。费用报销审批
+  MyBatis-Plus 持久化与 Redisson 锁的 GraalVM 原生镜像验证。费用报销审批
   Demo 还使用两个原生可执行文件验证 Kafka、Outbox、Inbox、PostgreSQL 和支付投影链路。
 - 受支持 Quarkus 版本的 CDI 发现、Jakarta Transactions `TransactionRunner`、JPA 聚合持久化、领域事件分发和
-  JPA Outbox/Inbox。JVM 中间件配置档与原生镜像 CI 验证任务都针对 PostgreSQL 运行这些路径。Redisson 仍是独立阶段，会先运行 JVM 配置档再构建原生镜像。JobRunr 的 JVM 派发运行在 Quarkus 中间件阶段，原生镜像检查是独立的 `native-jobrunr` 阶段。
+  JPA Outbox/Inbox。JVM 中间件配置档与原生镜像 CI 验证任务都针对 PostgreSQL 运行这些路径。Redisson 仍是独立阶段，会先运行 JVM 配置档再构建原生镜像。
 - 受支持 Helidon MP 版本的 CDI/JTA、JPA 装配、JPA Outbox/Inbox 存储、调度与 JAX-RS Problem Details。
   其 GraalVM 25 使用方已验证 CDI/Web 启动和 Problem Details 响应；原生 JTA 与 JPA 仍受上游实验性
   限制，可复现的失败记录见 [Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015)。
@@ -133,7 +133,7 @@ Hexagonal Port/Adapter 约定分离。
   包级环和 ArchUnit 依赖规则完成验证。
 - 在已有生产项目中切换架构风格的迁移成本或组织效果。本 Demo 验证的是两个分别维护的变体，
   不是生产迁移。
-- Helidon 消息代理投递、Redisson 锁、JobRunr 和可工作的 Helidon 原生 JTA/JPA 路径。不得从 Spring 或
+- Helidon 消息代理投递、Redisson 锁和可工作的 Helidon 原生 JTA/JPA 路径。不得从 Spring 或
   Quarkus 能力自动推断这些能力。Micronaut 尚无运行时集成。
 - 其他 ORM、数据库或消息中间件组合。
 - 任意下游依赖图、部署目标或应用配置的原生镜像兼容性。使用方必须针对实际选择的能力和构建期配置
