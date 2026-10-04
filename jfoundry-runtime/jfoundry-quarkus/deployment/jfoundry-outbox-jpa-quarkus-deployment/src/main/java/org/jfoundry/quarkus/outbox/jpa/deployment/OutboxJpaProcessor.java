@@ -5,7 +5,7 @@ import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.hibernate.orm.deployment.spi.AdditionalJpaModelBuildItem;
 import io.quarkus.hibernate.orm.runtime.PersistenceUnitUtil;
 import org.jfoundry.infrastructure.outbox.jpa.JpaOutboxMessageEntity;
-import org.jfoundry.infrastructure.outbox.quarkus.QuarkusJpaOutboxMessageStoreProducer;
+import org.jfoundry.infrastructure.outbox.quarkus.jpa.QuarkusJpaOutboxMessageStoreProducer;
 
 import java.util.Set;
 

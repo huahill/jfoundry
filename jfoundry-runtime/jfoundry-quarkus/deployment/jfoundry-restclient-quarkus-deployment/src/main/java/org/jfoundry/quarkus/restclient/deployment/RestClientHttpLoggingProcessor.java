@@ -9,7 +9,7 @@ import io.quarkus.deployment.builditem.nativeimage.ServiceProviderBuildItem;
 class RestClientHttpLoggingProcessor {
 
     static final String REST_CLIENT_BUILDER_LISTENER =
-            "org.jfoundry.http.quarkus.HttpLoggingRestClientBuilderListener";
+            "org.jfoundry.http.quarkus.restclient.HttpLoggingRestClientBuilderListener";
 
     @BuildStep
     ServiceProviderBuildItem registerRestClientBuilderListener() {

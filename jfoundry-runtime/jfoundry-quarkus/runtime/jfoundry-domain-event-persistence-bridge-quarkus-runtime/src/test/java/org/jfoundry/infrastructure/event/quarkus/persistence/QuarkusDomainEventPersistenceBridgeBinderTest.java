@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.event.quarkus;
+package org.jfoundry.infrastructure.event.quarkus.persistence;
 
 import jakarta.enterprise.inject.Instance;
 import org.jfoundry.application.event.DomainEventContext;

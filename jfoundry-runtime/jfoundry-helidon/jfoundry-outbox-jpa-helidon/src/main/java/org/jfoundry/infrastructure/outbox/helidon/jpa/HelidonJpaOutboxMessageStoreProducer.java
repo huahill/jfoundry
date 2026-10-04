@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.outbox.helidon;
+package org.jfoundry.infrastructure.outbox.helidon.jpa;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Produces;

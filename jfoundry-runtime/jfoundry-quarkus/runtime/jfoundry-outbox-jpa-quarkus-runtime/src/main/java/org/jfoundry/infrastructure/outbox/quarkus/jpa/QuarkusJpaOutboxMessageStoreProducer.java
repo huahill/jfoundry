@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.outbox.quarkus;
+package org.jfoundry.infrastructure.outbox.quarkus.jpa;
 
 import io.quarkus.arc.DefaultBean;
 import jakarta.enterprise.context.ApplicationScoped;

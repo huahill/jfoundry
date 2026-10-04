@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.event.helidon;
+package org.jfoundry.infrastructure.event.helidon.persistence;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;

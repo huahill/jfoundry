@@ -1,4 +1,4 @@
-package org.jfoundry.http.jaxrs;
+package org.jfoundry.http.jaxrs.web;
 
 import java.util.List;
 import java.util.regex.Pattern;

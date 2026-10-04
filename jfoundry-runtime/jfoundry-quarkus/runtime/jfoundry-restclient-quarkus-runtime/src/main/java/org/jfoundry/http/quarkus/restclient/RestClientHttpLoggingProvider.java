@@ -1,9 +1,9 @@
-package org.jfoundry.http.quarkus;
+package org.jfoundry.http.quarkus.restclient;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.LongSupplier;
 
-import org.jfoundry.http.jaxrs.AbstractJaxRsRestClientLoggingProvider;
+import org.jfoundry.http.jaxrs.restclient.AbstractJaxRsRestClientLoggingProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

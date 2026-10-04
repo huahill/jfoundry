@@ -1,4 +1,4 @@
-package org.jfoundry.autoconfigure.event;
+package org.jfoundry.autoconfigure.event.outbox;
 
 import org.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import org.jfoundry.application.event.externalization.DomainEventExternalizationResolver;

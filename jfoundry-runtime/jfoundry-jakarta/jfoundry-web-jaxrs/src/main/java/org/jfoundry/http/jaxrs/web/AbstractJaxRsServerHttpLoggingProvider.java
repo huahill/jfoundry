@@ -1,4 +1,4 @@
-package org.jfoundry.http.jaxrs;
+package org.jfoundry.http.jaxrs.web;
 
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
@@ -13,6 +13,7 @@ import jakarta.ws.rs.ext.ReaderInterceptorContext;
 import jakarta.ws.rs.ext.WriterInterceptor;
 import jakarta.ws.rs.ext.WriterInterceptorContext;
 import org.jfoundry.http.HttpLogFormatter;
+import org.jfoundry.http.jaxrs.AbstractJaxRsHttpLoggingSupport;
 import org.jfoundry.http.HttpLoggingFormat;
 import org.jfoundry.http.HttpLoggingLevel;
 import org.jfoundry.http.HttpLoggingPolicy;

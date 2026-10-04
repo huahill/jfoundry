@@ -2,7 +2,7 @@ package org.jfoundry.quarkus.domain.event.bridge.deployment;
 
 import io.quarkus.arc.deployment.AdditionalBeanBuildItem;
 import io.quarkus.deployment.annotations.BuildStep;
-import org.jfoundry.infrastructure.event.quarkus.QuarkusDomainEventPersistenceBridgeBinder;
+import org.jfoundry.infrastructure.event.quarkus.persistence.QuarkusDomainEventPersistenceBridgeBinder;
 
 /// Registers the explicit Domain Event persistence bridge during Quarkus augmentation.
 class DomainEventPersistenceBridgeProcessor {
