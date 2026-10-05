@@ -14,6 +14,7 @@ import org.jfoundry.application.transaction.TransactionRunner;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Path("/jfoundry/outbox/maintenance")
@@ -84,22 +85,10 @@ public class OutboxMaintenanceResource {
                 outboxMessageStore.append(newMessage(publishedEventId, occurredAt));
                 outboxMessageStore.append(newMessage(deadLetteredEventId, occurredAt));
             });
+            Set<String> fixtureEventIds = Set.of(publishedEventId, deadLetteredEventId);
             transactionRunner.run(() -> {
-                OutboxMessage published = requireClaimed(
-                        outboxMessageStore.claimDispatchable(CLAIM_LIMIT, "maintenance-cleanup"),
-                        publishedEventId,
-                        "cleanup-published");
-                outboxMessageStore.markAsPublished(published.getEventId(), published.getClaimToken());
-                OutboxMessage deadLettered = requireClaimed(
-                        outboxMessageStore.claimDispatchable(CLAIM_LIMIT, "maintenance-cleanup"),
-                        deadLetteredEventId,
-                        "cleanup-dead-lettered");
-                outboxMessageStore.markAsFailed(
-                        deadLettered.getEventId(),
-                        deadLettered.getClaimToken(),
-                        "test failure",
-                        1,
-                        failedAttempts -> Duration.ZERO);
+                finishCleanupClaim(fixtureEventIds, publishedEventId);
+                finishCleanupClaim(fixtureEventIds, publishedEventId);
             });
 
             int deleted = outboxMaintenance.cleanUpTerminalMessages(0, 0, 1000);
@@ -115,12 +104,35 @@ public class OutboxMaintenanceResource {
         }
     }
 
+    /// Claim order is occurrence time, then event id. The cleanup rows share one occurrence
+    /// time, so either fixture id may arrive first.
+    private void finishCleanupClaim(Set<String> fixtureEventIds, String publishedEventId) {
+        OutboxMessage claimed = requireClaimed(
+                outboxMessageStore.claimDispatchable(CLAIM_LIMIT, "maintenance-cleanup"),
+                fixtureEventIds,
+                "cleanup");
+        if (publishedEventId.equals(claimed.getEventId())) {
+            outboxMessageStore.markAsPublished(claimed.getEventId(), claimed.getClaimToken());
+            return;
+        }
+        outboxMessageStore.markAsFailed(
+                claimed.getEventId(),
+                claimed.getClaimToken(),
+                "test failure",
+                1,
+                failedAttempts -> Duration.ZERO);
+    }
+
     private static OutboxMessage requireClaimed(List<OutboxMessage> claimed, String eventId, String step) {
+        return requireClaimed(claimed, Set.of(eventId), step);
+    }
+
+    private static OutboxMessage requireClaimed(List<OutboxMessage> claimed, Set<String> eventIds, String step) {
         return claimed.stream()
-                .filter(message -> eventId.equals(message.getEventId()))
+                .filter(message -> eventIds.contains(message.getEventId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
-                        step + " claimed no rows for " + eventId + "; claimed="
+                        step + " claimed no rows for " + eventIds + "; claimed="
                                 + claimed.stream().map(OutboxMessage::getEventId).toList()));
     }
 
