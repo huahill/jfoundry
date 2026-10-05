@@ -52,7 +52,6 @@ class FrameworkModuleArchitectureTest {
         FrameworkModuleRules.outbox_domain_event_dispatcher_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.kafka_message_sender_should_be_in_infrastructure_ring.check(classes);
         FrameworkModuleRules.jackson_payload_serializer_should_be_in_infrastructure_ring.check(classes);
-        FrameworkModuleRules.scheduled_outbox_trigger_should_be_in_infrastructure_ring.check(classes);
-        FrameworkModuleRules.jobrunr_outbox_trigger_should_be_in_infrastructure_ring.check(classes);
+        FrameworkModuleRules.jdk_outbox_worker_should_be_in_application_ring.check(classes);
     }
 }

@@ -6,7 +6,7 @@
 
 | 启动器 | 引入能力 | 不会引入 |
 |---------|----------|----------|
-| `jfoundry-spring-boot-starter` | jfoundry 能力启动器的最小 Spring Boot 基线 | 事务集成、Outbox、Inbox、持久化、消息代理客户端、JobRunr |
+| `jfoundry-spring-boot-starter` | jfoundry 能力启动器的最小 Spring Boot 基线 | 事务集成、Outbox、Inbox、持久化、消息代理客户端 |
 | `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` 集成 | 事务管理器；它只适配 Spring Boot 或应用已经提供的管理器 |
 | `jfoundry-observability-spring-boot-starter` | 对符合条件的 Outbox、Inbox 和锁操作进行 Micrometer Observation | 遥测 exporter、collector 或直接 OpenTelemetry 装饰器 |
 | `jfoundry-lock-redisson-spring-boot-starter` | 分布式锁核心、Spring `@DistributedLock` 拦截、Redisson 适配器、Redisson Spring Boot 启动器 | Outbox、Inbox、消息代理投递 |
@@ -16,11 +16,10 @@
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` 适配器，在 Boot 创建 `KafkaOperations` 后选择 | Outbox 存储 |
 | `jfoundry-messaging-rabbitmq-spring-boot-starter` | RabbitMQ `MessageSender` 适配器 | Outbox 存储 |
 | `jfoundry-messaging-rocketmq-spring-boot-starter` | RocketMQ `MessageSender` 适配器 | Outbox 存储 |
-| `jfoundry-outbox-spring-boot-starter` | 通用 Outbox 核心、`OutboxTemplate`、定时派发集成 | 领域事件、Outbox 表存储、JobRunr |
+| `jfoundry-outbox-spring-boot-starter` | 通用 Outbox 核心、`OutboxTemplate` 和 JDK 派发 worker | 领域事件、Outbox 表存储 |
 | `jfoundry-domain-event-outbox-spring-boot-starter` | 领域事件、通用 Outbox、持久化桥接层和领域事件到 Outbox 自动配置 | — |
 | `jfoundry-outbox-mybatis-plus-spring-boot-starter` | Outbox 能力与 MyBatis-Plus `OutboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-outbox-jpa-spring-boot-starter` | Outbox 能力与 JPA `OutboxMessageStore` 适配器 | 数据库迁移执行 |
-| `jfoundry-outbox-jobrunr-spring-boot-starter` | Outbox 能力加上 JobRunr `OutboxTrigger` | Outbox 表存储 |
 | `jfoundry-inbox-spring-boot-starter` | Inbox 核心、`InboxTemplate` | Inbox 表存储 |
 | `jfoundry-inbox-mybatis-plus-spring-boot-starter` | MyBatis-Plus `InboxMessageStore` 适配器 | 数据库迁移执行 |
 | `jfoundry-inbox-jpa-spring-boot-starter` | JPA `InboxMessageStore` 适配器和受支持数据库的领取策略 | 数据库迁移执行，以及 PostgreSQL、MySQL 之外数据库的内置领取支持 |
@@ -44,17 +43,14 @@
 | `jfoundry.web.mvc.logging.format` | `HUMAN` | 为入站 Servlet HTTP 日志选择 `HUMAN`（Feign 风格：`-->` 请求、`<--` 响应，body 仍一行，并以 `END HTTP` 收尾）或 `INLINE` 单行 `key=value` 事件。 |
 | `jfoundry.web.mvc.logging.excluded-paths` | `/actuator/health/**` | 从入站 Servlet HTTP 日志中排除的 Ant 风格应用内路径；配置列表会替换默认值。 |
 | `jfoundry.web.mvc.logging.included-headers` | `accept`、`authorization`、`content-type`、`content-length`、`location`、`x-request-id` | `HEADERS` 或 `FULL` 时入站 Servlet HTTP 日志包含的 header 名；配置列表会替换默认值。使用 `*` 可在脱敏后输出全部 header。 |
-| `jfoundry.outbox.dispatcher.mode` | `scheduled` | 选择 `scheduled`、`jobrunr` 或 `none`。 |
-| `jfoundry.outbox.dispatcher.interval-ms` | `5000` | 定时派发固定延迟间隔。 |
-| `jfoundry.outbox.dispatcher.cron` | `*/10 * * * * *` | JobRunr 周期性派发 cron 表达式。 |
+| `jfoundry.outbox.dispatcher.enabled` | `true` | 当前进程是否运行 JDK Outbox worker（派发、恢复、清理）。仅记录进程设为 `false`。 |
+| `jfoundry.outbox.dispatcher.interval` | `5s` | Outbox 派发固定延迟间隔。 |
 | `jfoundry.outbox.dispatcher.batch-size` | `50` | 每次派发最多领取的记录数。 |
 | `jfoundry.outbox.dispatcher.max-retries` | `5` | 进入死信前最大派发尝试次数。 |
-| `jfoundry.outbox.dispatcher.backoff-base-ms` | `1000` | 重试退避基础值。 |
-| `jfoundry.outbox.dispatcher.backoff-max-ms` | `300000` | 最大重试退避值。 |
-| `jfoundry.outbox.recovery.enabled` | 跟随派发模式 | 在 `scheduled` 和 `jobrunr` 下开启卡住的 `DISPATCHING` 恢复；`none` 下始终关闭。 |
+| `jfoundry.outbox.dispatcher.backoff-base` | `1s` | 初始重试退避。 |
+| `jfoundry.outbox.dispatcher.backoff-max` | `5m` | 最大重试退避。 |
 | `jfoundry.outbox.recovery.interval` | `60s` | 恢复任务间隔。 |
 | `jfoundry.outbox.recovery.stuck-timeout` | `5m` | `DISPATCHING` 记录超过该时间后视为卡住。 |
-| `jfoundry.outbox.cleanup.enabled` | 跟随派发模式 | 在 `scheduled` 和 `jobrunr` 下开启终态记录清理；`none` 下始终关闭。 |
 | `jfoundry.outbox.cleanup.interval` | `24h` | 清理任务间隔。 |
 | `jfoundry.outbox.cleanup.published-retention-days` | `7` | `PUBLISHED` 记录保留天数。 |
 | `jfoundry.outbox.cleanup.dead-lettered-retention-days` | `30` | `DEAD_LETTERED` 记录保留天数。 |
@@ -83,8 +79,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 | `RocketMessageSenderAutoConfiguration` | `SpringRocketMessageSender` | 存在 RocketMQ 生产者类和 `MQProducer` Bean；没有已有 `MessageSender`。 |
 | `OutboxMybatisPlusAutoConfiguration` | Outbox 表名定制器、`MybatisPlusInterceptor`、`OutboxMessageStore` | MyBatis-Plus 和 Outbox 存储适配器类存在。SQL 模板不会自动执行。 |
 | `OutboxJpaAutoConfiguration` | JPA `OutboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Outbox 适配器；没有用户自定义 `OutboxMessageStore`。 |
-| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`、`ScheduledOutboxTrigger`、恢复任务、清理任务 | 存在 Outbox 存储、消息发送器和 `TransactionRunner`；模式为 `scheduled` 或维护任务由托管模式启用。 |
-| `JobRunrDispatcherAutoConfiguration` | `JobRunrOutboxTrigger` | 存在 JobRunr 和 jfoundry JobRunr 触发器类；`mode=jobrunr`；存在存储、发送器、退避策略和 `TransactionRunner` Bean。 |
+| `OutboxDispatcherAutoConfiguration` | `BackoffStrategy`、`OutboxDispatcher`、`DefaultOutboxMaintenance`、`JdkOutboxWorker` | 存在 Outbox 存储、消息发送器和 `TransactionRunner`。除非 `jfoundry.outbox.dispatcher.enabled=false`，否则会启动 worker。 |
 | `InboxMybatisPlusAutoConfiguration` | MyBatis-Plus `InboxMessageStore` | 存在 `SqlSessionFactory`、映射器扫描和 Inbox 存储适配器；没有已有存储。 |
 | `InboxJpaAutoConfiguration` | `JpaInboxClaimStrategy`、JPA `InboxMessageStore` | 存在 `EntityManagerFactory` 和 JPA Inbox 适配器。用户提供的 `InboxMessageStore` 或 `JpaInboxClaimStrategy` 优先；内置领取策略仅支持 PostgreSQL 和 MySQL，未知数据库产品在应用未提供策略时会快速失败。 |
 | `InboxAutoConfiguration` | `InboxTemplate` | 类路径中存在 `InboxTemplate`，且存在 `InboxMessageStore` 和 `TransactionRunner` Bean。 |
@@ -110,10 +105,7 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
 - 入站与出站 HTTP 日志相互独立。两者都以 `INFO` 分类输出事件，移除 URI query，脱敏凭证、cookie、token、
   secret 与 API key，并将 `FULL` JSON body 捕获限制为 8 KiB。客户端时长在响应 header 到达时结束；Servlet
   时长在同步或异步终态完成时结束。两者都不是端到端客户端延迟，也不是业务审计事件。
-- 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.mode` 是构建期的结构化配置。必须将
-  选定值传给 `process-aot`；仅在启动原生可执行文件时变更该值，无法恢复被 AOT 裁剪的 Bean。需要不同
-  派发模式的部署应构建独立镜像。
-- `mode=none` 表示不注册派发器、恢复任务或清理任务，即使显式开启恢复或清理也不会注册。
-- `ScheduledOutboxTrigger` 是 scheduled 模式的 Spring 调度适配器，`JobRunrOutboxTrigger` 是
-  JobRunr 模式的适配器。`OutboxDispatcher` 仍然是派发服务端口。直接构造旧的
-  `ScheduledOutboxDispatcher` 或 `JobRunrOutboxDispatcher` 类型的应用必须改写这些调用点。
+- 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.enabled` 在 AOT 时求值。构建时设为
+  `false` 后，不能再靠启动参数打开 worker。
+- `OutboxDispatcher` 是派发服务端口。`JdkOutboxWorker` 是进程内定时器，负责派发、恢复和清理。
+  应用不应自己再去定时调用 `OutboxDispatcher`。

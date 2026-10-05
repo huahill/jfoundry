@@ -9,7 +9,9 @@ public final class PostgreSqlIntegrationTestProfile implements QuarkusTestProfil
 
     @Override
     public Map<String, String> getConfigOverrides() {
-        return Map.of("quarkus.datasource.db-kind", "postgresql");
+        return Map.of(
+                "quarkus.datasource.db-kind", "postgresql",
+                "jfoundry.outbox.dispatcher.enabled", "false");
     }
 
     @Override

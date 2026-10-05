@@ -95,7 +95,7 @@ scenarios were validated with separately maintained Hexagonal and Onion Simple v
 assessment date, the recorded evidence includes:
 
 - jfoundry test matrices on Java 25 across the 67-module reactor, including Spring Boot Native
-  Image verification for the base runtime, MyBatis-Plus, Redisson, and JobRunr capabilities.
+  Image verification for the base runtime, MyBatis-Plus, and Redisson capabilities.
 - Validation of every shipped plugin skill, the Codex plugin manifest, and the Claude marketplace
   metadata.
 - Both architecture variants passed the same complete automated demo suite, including five
@@ -132,12 +132,12 @@ The strongest evidence currently applies to:
 
 - Java 25 business applications.
 - The supported Spring Boot and Spring Framework versions, including JVM middleware integration and GraalVM
-  Native Image verification for the base runtime, MyBatis-Plus persistence, Redisson locking, and
-  JobRunr Outbox dispatching. The expense approval demo additionally verifies its Kafka, Outbox,
+  Native Image verification for the base runtime, MyBatis-Plus persistence, and Redisson locking.
+  The expense approval demo additionally verifies its Kafka, Outbox,
   Inbox, PostgreSQL, and payment-projection path with two Native Image executables.
 - CDI discovery, Jakarta Transactions `TransactionRunner`, JPA aggregate persistence, domain-event
   dispatch, and JPA Outbox/Inbox for the supported Quarkus version. The JVM middleware profile and the
-  Native Image CI gate both run these paths against PostgreSQL. Redisson remains a separate stage that runs its JVM profile before Native Image. JobRunr JVM dispatch runs in the Quarkus middleware stage, and its Native Image check is the separate `native-jobrunr` stage.
+  Native Image CI gate both run these paths against PostgreSQL. Redisson remains a separate stage that runs its JVM profile before Native Image.
 - CDI/JTA, JPA assembly, JPA Outbox/Inbox stores, scheduling, and JAX-RS Problem Details for the
   supported Helidon MP version. Its GraalVM 25 consumer verifies CDI/Web startup and the Problem Details response; Native
   JTA and JPA remain upstream experimental limitations, with a reproducible failure record in
@@ -161,7 +161,7 @@ The following areas are not established by the current evidence:
   rules.
 - The migration cost or organizational outcome of changing architecture style in an established
   production codebase. The demo validates two maintained variants, not a production migration.
-- Helidon broker delivery, Redisson locking, JobRunr, and working Helidon Native JTA/JPA paths. Do
+- Helidon broker delivery, Redisson locking, and working Helidon Native JTA/JPA paths. Do
   not infer these from Spring or Quarkus capabilities. Micronaut has no runtime integration yet.
 - Other ORM, database, or broker combinations.
 - Native Image compatibility for an arbitrary downstream dependency graph, deployment target, or

@@ -67,7 +67,6 @@
     <caffeine.version>3.3.0</caffeine.version>
 
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
-    <jobrunr.version>9.0.0</jobrunr.version>
     <mqttv3.version>1.2.5</mqttv3.version>
     <redisson.version>4.8.0</redisson.version>
 
@@ -238,11 +237,6 @@
         <groupId>org.eclipse.paho</groupId>
         <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
         <version>${mqttv3.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jobrunr</groupId>
-        <artifactId>jobrunr</artifactId>
-        <version>${jobrunr.version}</version>
       </dependency>
       <dependency>
         <groupId>org.redisson</groupId>

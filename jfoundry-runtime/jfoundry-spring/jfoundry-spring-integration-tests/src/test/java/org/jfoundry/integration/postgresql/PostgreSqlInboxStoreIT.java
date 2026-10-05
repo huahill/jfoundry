@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers
-@SpringBootTest(classes = PostgreSqlOutboxInboxDatabaseConfig.class, properties = "jfoundry.outbox.dispatcher.mode=none")
+@SpringBootTest(classes = PostgreSqlOutboxInboxDatabaseConfig.class, properties = "jfoundry.outbox.dispatcher.enabled=false")
 class PostgreSqlInboxStoreIT {
 
     private static final Duration LEASE = Duration.ofMinutes(5);

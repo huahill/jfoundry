@@ -82,19 +82,6 @@ write_pom "jfoundry-boms/jfoundry-foundation-dependencies/invalid-foundation" '
 expect_rejected "invalid-foundation"
 
 rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-foundation-dependencies/invalid-foundation"
-write_pom "jfoundry-boms/jfoundry-foundation-dependencies/invalid-jobrunr" '
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.jobrunr</groupId>
-                <artifactId>jobrunr-spring-boot-4-starter</artifactId>
-                <version>1.0.0</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>'
-expect_rejected "invalid-jobrunr"
-
-rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-foundation-dependencies/invalid-jobrunr"
 write_pom "jfoundry-runtime/jfoundry-spring/runtime/invalid-quarkus" '
     <dependencies>
         <dependency>

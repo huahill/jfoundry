@@ -88,8 +88,8 @@ When adding a module or third-party dependency, update the narrowest relevant BO
 For a third-party component family used by runtime adapters, split ownership by coordinate rather than
 placing the entire family in Foundation. Foundation manages only the family's runtime-neutral artifacts.
 The matching runtime BOM manages runtime starters, deployment artifacts, and runtime-specific Native
-Image integrations, using the same compatible component version when appropriate. JobRunr,
-MyBatis-Plus, Redisson, and jMolecules Integrations follow this rule: their neutral artifacts remain in
+Image integrations, using the same compatible component version when appropriate. MyBatis-Plus,
+Redisson, and jMolecules Integrations follow this rule: their neutral artifacts remain in
 Foundation while their Spring-specific artifacts belong in `jfoundry-spring-boot-dependencies`.
 Quarkus Redisson extension coordinates `redisson-quarkus-33` and `redisson-quarkus-33-deployment`
 belong in `jfoundry-quarkus-dependencies`. The Helidon integration coordinate `redisson-helidon-40`
@@ -126,7 +126,7 @@ Quarkus, or Helidon integration.
 Default Spring Boot starter:
 
 - keep `jfoundry-spring-boot-starter` minimal;
-- do not implicitly include MyBatis-Plus stores, Outbox, Inbox, broker adapters, JobRunr, or middleware clients.
+- do not implicitly include MyBatis-Plus stores, Outbox, Inbox, broker adapters, or middleware clients.
 
 Capability starters:
 
@@ -138,9 +138,8 @@ Capability starters:
 - `jfoundry-messaging-kafka-spring-boot-starter`: Kafka sender adapter.
 - `jfoundry-messaging-rabbitmq-spring-boot-starter`: RabbitMQ sender adapter.
 - `jfoundry-messaging-rocketmq-spring-boot-starter`: RocketMQ sender adapter.
-- `jfoundry-outbox-spring-boot-starter`: Outbox core with Spring transaction/scheduling integration.
+- `jfoundry-outbox-spring-boot-starter`: Outbox core with the JDK dispatch worker.
 - `jfoundry-outbox-mybatis-plus-spring-boot-starter`: MyBatis-Plus Outbox store.
-- `jfoundry-outbox-jobrunr-spring-boot-starter`: JobRunr dispatcher.
 - `jfoundry-inbox-spring-boot-starter`: Inbox core and `InboxTemplate`.
 - `jfoundry-inbox-mybatis-plus-spring-boot-starter`: MyBatis-Plus Inbox store.
 - `jfoundry-persistence-mybatis-plus-spring-boot-starter`: Spring Boot runtime assembly for business MyBatis-Plus persistence, not Outbox/Inbox stores.

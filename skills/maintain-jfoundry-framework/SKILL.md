@@ -89,7 +89,7 @@ For every module-placement decision, apply Onion Simple as defined in `reference
   and runtime exception classification in runtime modules; Domain and Application modules remain Jakarta-free.
 - Keep reusable architecture tests under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`.
 - Keep runtime-specific integration verification in the direct `jfoundry-runtime/<runtime>/jfoundry-<runtime>-integration-tests` module; keep framework-neutral tests beside their core or infrastructure implementation.
-- Do not make default starters heavy. Outbox, Inbox, broker adapters, JobRunr, and MyBatis-Plus store adapters must remain explicit capability choices.
+- Do not make default starters heavy. Outbox, Inbox, broker adapters, and MyBatis-Plus store adapters must remain explicit capability choices.
 
 ## Source Documents
 

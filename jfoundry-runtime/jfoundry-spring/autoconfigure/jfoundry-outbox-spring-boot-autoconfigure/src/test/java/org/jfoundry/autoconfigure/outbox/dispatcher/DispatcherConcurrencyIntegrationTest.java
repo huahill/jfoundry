@@ -42,11 +42,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// test would fail.
 /// <p>
 /// Test isolation: uses a dedicated H2 database name {@code jfoundry-dispatcher-concurrency-test}
-/// and sets automatic dispatcher mode to none, avoiding competition between the auto-configured
-/// @Scheduled dispatcher and manually constructed test dispatchers.
+/// and disables the JDK worker, avoiding competition between the auto-configured
+/// worker and manually constructed test dispatchers.
 @SpringBootTest(classes = DispatcherConcurrencyIntegrationTest.TestApp.class)
 @TestPropertySource(properties = {
-        "jfoundry.outbox.dispatcher.mode=none",
+        "jfoundry.outbox.dispatcher.enabled=false",
         "jfoundry.outbox.dispatcher.batch-size=100",
         "spring.datasource.url=jdbc:h2:mem:jfoundry-dispatcher-concurrency-test;DB_CLOSE_DELAY=-1",
         "spring.sql.init.schema-locations=classpath:outbox_event.sql"

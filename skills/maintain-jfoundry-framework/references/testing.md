@@ -38,8 +38,6 @@ mvn test
 | Spring middleware integration | `mvn -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pit verify` |
 | Spring Native Image consumer | `mvn -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests -am -Pnative package`, then probe `/jfoundry/native/ready` |
 | Quarkus PostgreSQL middleware integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-integration verify` |
-| Quarkus JobRunr JVM dispatch | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -am -Pjvm-jobrunr verify` |
-| Quarkus JobRunr Native Image | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative-jobrunr verify` |
 | Quarkus Native Image integration | `mvn -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests -Pnative verify` |
 | Helidon PostgreSQL/JTA middleware integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-integration verify` |
 | Helidon JVM Redisson integration | `mvn -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests -am -Pjvm-redisson verify` |
@@ -78,8 +76,6 @@ Before pushing a branch, select the narrowest CI-equivalent stage that covers th
 | Quarkus Redisson lock adapter | `scripts/verify-runtime-ci.sh quarkus --stage native-redisson` |
 | Helidon JVM Redisson lock adapter | `scripts/verify-runtime-ci.sh helidon --stage jvm-redisson` |
 | MyBatis-Plus persistence, Outbox/Inbox store, or Native hints | `scripts/verify-runtime-ci.sh spring --stage native-mybatis-plus` |
-| Spring JobRunr Outbox adapter or starter | `scripts/verify-runtime-ci.sh spring --stage native-jobrunr` |
-| Quarkus JobRunr Outbox extension | `scripts/verify-runtime-ci.sh quarkus --stage jvm-jobrunr`, then `scripts/verify-runtime-ci.sh quarkus --stage native-jobrunr` |
 | Shared runtime contract or lifecycle behavior | Matching Spring, Quarkus, and Helidon stages |
 
 Local preflight shortens feedback time; it never replaces the server-side merge gate.

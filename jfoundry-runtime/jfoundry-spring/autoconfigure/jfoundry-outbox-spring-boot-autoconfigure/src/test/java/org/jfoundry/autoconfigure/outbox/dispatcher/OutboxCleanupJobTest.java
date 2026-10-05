@@ -6,6 +6,7 @@ import org.jfoundry.infrastructure.outbox.mybatis.OutboxData;
 import org.jfoundry.infrastructure.outbox.mybatis.OutboxMapper;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.messaging.SendResult;
+import org.jfoundry.application.outbox.DefaultOutboxMaintenance;
 import org.jfoundry.application.outbox.OutboxDispatcher;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
@@ -29,8 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// <p>
 /// Test isolation: the dedicated H2 DB name {@code jfoundry-cleanup-test} avoids sharing
 /// state with other autoconfigure tests that use {@code jfoundry-outbox-test} or
-/// {@code jfoundry-starter-test}. The dispatcher mode is set to {@code none} so this test
-/// only exercises cleanup behavior.
+/// {@code jfoundry-starter-test}. The JDK worker is disabled so this test only exercises cleanup behavior.
 /// <p>
 /// Note: {@code OutboxMessageStore.findById(...)} does not exist on the SPI —
 /// we verify deletion through {@link OutboxMapper#selectById(String)} instead (same
@@ -42,8 +42,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 /// mapper were removed; all UPDATE operations are performed through BaseMapper + Wrapper.
 @SpringBootTest(classes = OutboxCleanupJobTest.TestApp.class)
 @TestPropertySource(properties = {
-        "jfoundry.outbox.dispatcher.interval-ms=600000",
-        "jfoundry.outbox.cleanup.enabled=false",
+        "jfoundry.outbox.dispatcher.enabled=false",
+        "jfoundry.outbox.dispatcher.interval=10m",
         "jfoundry.outbox.cleanup.published-retention-days=7",
         "jfoundry.outbox.cleanup.dead-lettered-retention-days=30",
         "jfoundry.outbox.cleanup.batch-size=100",
@@ -91,7 +91,7 @@ class OutboxCleanupJobTest {
         seed("evt-old", OutboxMessageStatus.PUBLISHED, Instant.now().minusSeconds(8 * 86400L));
         seed("evt-recent", OutboxMessageStatus.PUBLISHED, Instant.now().minusSeconds(86400L));
 
-        int deleted = cleanupJob().runOnce();
+        int deleted = cleanup();
 
         assertThat(deleted).isEqualTo(1);
         assertThat(mapper.selectById("evt-old")).isNull();
@@ -106,7 +106,7 @@ class OutboxCleanupJobTest {
         seed("evt-dead-old", OutboxMessageStatus.DEAD_LETTERED, Instant.now().minusSeconds(40L * 86400L));
         seed("evt-dead-recent", OutboxMessageStatus.DEAD_LETTERED, Instant.now().minusSeconds(10L * 86400L));
 
-        int deleted = cleanupJob().runOnce();
+        int deleted = cleanup();
 
         assertThat(deleted).isEqualTo(1);
         assertThat(mapper.selectById("evt-dead-old")).isNull();
@@ -120,28 +120,11 @@ class OutboxCleanupJobTest {
         seed("evt-pending", OutboxMessageStatus.PENDING, Instant.now().minusSeconds(365L * 86400L));
         seed("evt-failed", OutboxMessageStatus.FAILED, Instant.now().minusSeconds(365L * 86400L));
 
-        int deleted = cleanupJob().runOnce();
+        int deleted = cleanup();
 
         assertThat(deleted).isZero();
         assertThat(mapper.selectById("evt-pending")).isNotNull();
         assertThat(mapper.selectById("evt-failed")).isNotNull();
-    }
-
-    @Test
-    void disabledCleanupIsNoOp() {
-        // Re-fetch the properties bean and disable it at runtime (no ApplicationContext restart).
-        // Validates the @Scheduled method's short-circuit guard: disabled → return 0, no Repository call.
-        seed("evt-disabled", OutboxMessageStatus.PUBLISHED, Instant.now().minusSeconds(365L * 86400L));
-
-        // Direct call with a job whose properties.isEnabled()=false
-        OutboxCleanupProperties disabled = new OutboxCleanupProperties();
-        disabled.setEnabled(false);
-        OutboxCleanupJob disabledJob = new OutboxCleanupJob(repository, disabled);
-
-        int deleted = disabledJob.runOnce();
-
-        assertThat(deleted).isZero();
-        assertThat(mapper.selectById("evt-disabled")).isNotNull();
     }
 
     @Test
@@ -153,7 +136,7 @@ class OutboxCleanupJobTest {
             seed("evt-batch-" + i, OutboxMessageStatus.PUBLISHED, yearAgo);
         }
 
-        int deleted = cleanupJob().runOnce();
+        int deleted = cleanup();
 
         assertThat(deleted).isEqualTo(250);
         // Spot-check: first and last should be gone.
@@ -188,12 +171,10 @@ class OutboxCleanupJobTest {
         assertThat(seeded.getStatus()).isEqualTo(status.name());
     }
 
-    private OutboxCleanupJob cleanupJob() {
-        OutboxCleanupProperties properties = new OutboxCleanupProperties();
-        properties.setEnabled(true);
-        properties.setPublishedRetentionDays(7);
-        properties.setDeadLetteredRetentionDays(30);
-        properties.setBatchSize(100);
-        return new OutboxCleanupJob(repository, properties);
+    @Autowired
+    private DefaultOutboxMaintenance outboxMaintenance;
+
+    private int cleanup() {
+        return outboxMaintenance.cleanUpTerminalMessages(7, 30, 100);
     }
 }

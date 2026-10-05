@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 /// Framework-neutral Outbox dispatch service implementation.
 /// <p>
 /// Runtime adapters decide when this service is triggered. This service owns the shared
-/// claim/send/mark state transition so Spring, JobRunr, Helidon, or Quarkus integrations do
+/// claim/send/mark state transition so Spring, Helidon, or Quarkus integrations do
 /// not duplicate delivery behavior.
 public class DefaultOutboxDispatchService implements OutboxDispatcher {
 

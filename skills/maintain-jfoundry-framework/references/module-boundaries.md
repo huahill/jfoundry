@@ -18,7 +18,7 @@ Stable, low-intrusion libraries such as jMolecules and `slf4j-api` may appear in
 - `jfoundry-architecture`: architecture style facade modules and aggregation.
 - `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`: reusable ArchUnit and test helpers for framework users.
 - `jfoundry-application`: application-layer contracts, CQRS annotations, event dispatch contracts, messaging SPI, Outbox/Inbox core contracts.
-- `jfoundry-infrastructure`: framework-neutral technical adapters for persistence, messaging, payload serialization, JobRunr dispatching, and similar technologies.
+- `jfoundry-infrastructure`: framework-neutral technical adapters for persistence, messaging, payload serialization, and similar technologies.
 
 ### Runtime Integration
 
@@ -106,6 +106,6 @@ Use jMolecules architecture annotations internally. The JFoundry wrapper annotat
   lifecycle dependency under the label of a portable specification API.
 - An adapter module adds `AutoConfiguration.imports`.
 - A starter module gains Java source with runtime behavior.
-- A default starter starts pulling broker clients, Outbox store adapters, Inbox store adapters, JobRunr, or MyBatis-Plus stores implicitly.
+- A default starter starts pulling broker clients, Outbox store adapters, Inbox store adapters, or MyBatis-Plus stores implicitly.
 - Outbox/Inbox persistence data starts extending aggregate persistence abstractions.
 - Boot auto-configuration is marked as an Onion ring package.
