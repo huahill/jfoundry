@@ -66,9 +66,11 @@ public final class QuarkusOutboxDispatchProducer {
     void startWorker(@Observes StartupEvent event,
                      OutboxDispatcher dispatcher,
                      DefaultOutboxMaintenance maintenance,
-                     Config config) {
+                     Config config,
+                     @ConfigProperty(name = "jfoundry.outbox.dispatcher.enabled", defaultValue = "true")
+                     boolean enabled) {
         synchronized (this) {
-            if (worker == null && JdkOutboxWorkerSettings.workerEnabled(config::getOptionalValue)) {
+            if (worker == null && enabled) {
                 worker = JdkOutboxWorker.start(
                         JdkOutboxWorkerSettings.from(config::getOptionalValue), dispatcher, maintenance);
             }
