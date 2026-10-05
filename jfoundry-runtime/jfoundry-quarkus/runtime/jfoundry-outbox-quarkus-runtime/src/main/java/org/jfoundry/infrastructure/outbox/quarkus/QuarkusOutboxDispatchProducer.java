@@ -1,9 +1,9 @@
 package org.jfoundry.infrastructure.outbox.quarkus;
 
 import io.quarkus.arc.DefaultBean;
+import io.quarkus.runtime.StartupEvent;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Initialized;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
@@ -61,7 +61,9 @@ public final class QuarkusOutboxDispatchProducer {
         return new DefaultOutboxMaintenance(() -> resolve(outboxMessageStore), transactionRunner);
     }
 
-    void startWorker(@Observes @Initialized(ApplicationScoped.class) Object ignored,
+    /// Starts the worker after runtime startup. {@code StartupEvent} does not fire during
+    /// native image generation, so the timer cannot capture JTA or Hibernate into the image heap.
+    void startWorker(@Observes StartupEvent event,
                      OutboxDispatcher dispatcher,
                      DefaultOutboxMaintenance maintenance,
                      Config config) {
