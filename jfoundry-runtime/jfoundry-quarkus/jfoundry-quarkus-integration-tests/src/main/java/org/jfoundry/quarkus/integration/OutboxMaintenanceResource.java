@@ -6,12 +6,10 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.jfoundry.application.outbox.DefaultOutboxMaintenance;
 import org.jfoundry.application.outbox.OutboxMessage;
 import org.jfoundry.application.outbox.OutboxMessageStore;
 import org.jfoundry.application.transaction.TransactionRunner;
-import org.eclipse.microprofile.config.Config;
-import org.jfoundry.application.outbox.DefaultOutboxMaintenance;
-import org.jfoundry.application.outbox.JdkOutboxWorkerSettings;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -24,19 +22,16 @@ public class OutboxMaintenanceResource {
     private final TransactionRunner transactionRunner;
     private final OutboxMessageStore outboxMessageStore;
     private final DefaultOutboxMaintenance outboxMaintenance;
-    private final Config config;
     private final EntityManager entityManager;
 
     public OutboxMaintenanceResource(
             TransactionRunner transactionRunner,
             OutboxMessageStore outboxMessageStore,
             DefaultOutboxMaintenance outboxMaintenance,
-            Config config,
             EntityManager entityManager) {
         this.transactionRunner = transactionRunner;
         this.outboxMessageStore = outboxMessageStore;
         this.outboxMaintenance = outboxMaintenance;
-        this.config = config;
         this.entityManager = entityManager;
     }
 
@@ -53,8 +48,7 @@ public class OutboxMaintenanceResource {
             }
         });
 
-        JdkOutboxWorkerSettings settings = JdkOutboxWorkerSettings.from(config::getOptionalValue);
-        int recovered = outboxMaintenance.recoverStuckDispatching(settings.recoveryStuckTimeout());
+        int recovered = outboxMaintenance.recoverStuckDispatching(Duration.ZERO);
         String status = transactionRunner.call(() -> {
             Object value = entityManager.createNativeQuery("""
                     select status from jfoundry_outbox_event where event_id = ?1
@@ -96,11 +90,7 @@ public class OutboxMaintenanceResource {
                     failedAttempts -> Duration.ZERO);
         });
 
-        JdkOutboxWorkerSettings settings = JdkOutboxWorkerSettings.from(config::getOptionalValue);
-        int deleted = outboxMaintenance.cleanUpTerminalMessages(
-                settings.publishedRetentionDays(),
-                settings.deadLetteredRetentionDays(),
-                settings.cleanupBatchSize());
+        int deleted = outboxMaintenance.cleanUpTerminalMessages(0, 0, 1000);
         long remaining = transactionRunner.call(() -> ((Number) entityManager.createNativeQuery("""
                 select count(*) from jfoundry_outbox_event where event_id = ?1 or event_id = ?2
                 """)
