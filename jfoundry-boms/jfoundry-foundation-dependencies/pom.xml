@@ -45,7 +45,7 @@
     <jakarta-cdi.version>4.1.0</jakarta-cdi.version>
     <jakarta-el.version>5.0.1</jakarta-el.version>
     <jakarta-interceptor.version>2.2.0</jakarta-interceptor.version>
-    <expressly.version>5.0.0</expressly.version>
+    <expressly.version>6.0.0</expressly.version>
     <microprofile-config.version>3.1.2</microprofile-config.version>
     <parsson.version>1.1.9</parsson.version>
 
