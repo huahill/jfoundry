@@ -20,7 +20,7 @@ import java.util.UUID;
 @ApplicationScoped
 public class OutboxMaintenanceResource {
 
-    private static final int CLAIM_LIMIT = 50;
+    private static final int CLAIM_LIMIT = 1;
 
     private final TransactionRunner transactionRunner;
     private final OutboxMessageStore outboxMessageStore;

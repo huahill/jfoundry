@@ -48,8 +48,7 @@ public final class DefaultOutboxMaintenance {
             return 0;
         }
         Instant cutoff = Instant.now().minus(stuckTimeout);
-        int recovered = inNewTransaction("jfoundry-outbox-recovery",
-                () -> repository.recoverStuckDispatching(cutoff));
+        int recovered = inNewTransaction(() -> repository.recoverStuckDispatching(cutoff));
         if (recovered > 0) {
             log.warn("Recovered {} stuck DISPATCHING outbox records (threshold={})",
                     recovered, stuckTimeout);
@@ -68,13 +67,11 @@ public final class DefaultOutboxMaintenance {
             return 0;
         }
         Instant now = Instant.now();
-        int publishedDeleted = inNewTransaction("jfoundry-outbox-cleanup",
-                () -> repository.deleteByStatusAndOccurredAtBefore(
+        int publishedDeleted = inNewTransaction(() -> repository.deleteByStatusAndOccurredAtBefore(
                         OutboxMessageStatus.PUBLISHED,
                         now.minus(Duration.ofDays(publishedRetentionDays)),
                         batchSize));
-        int deadDeleted = inNewTransaction("jfoundry-outbox-cleanup",
-                () -> repository.deleteByStatusAndOccurredAtBefore(
+        int deadDeleted = inNewTransaction(() -> repository.deleteByStatusAndOccurredAtBefore(
                         OutboxMessageStatus.DEAD_LETTERED,
                         now.minus(Duration.ofDays(deadLetteredRetentionDays)),
                         batchSize));
@@ -86,9 +83,10 @@ public final class DefaultOutboxMaintenance {
         return total;
     }
 
-    private <T> T inNewTransaction(String name, TransactionCallback<T> callback) {
+    /// JTA runtimes reject {@link TransactionOptions#name()}; keep this unnamed so Quarkus
+    /// and Helidon can run recovery and cleanup.
+    private <T> T inNewTransaction(TransactionCallback<T> callback) {
         return transactionRunner.call(TransactionOptions.builder()
-                .name(name)
                 .propagation(TransactionPropagation.REQUIRES_NEW)
                 .build(), callback);
     }

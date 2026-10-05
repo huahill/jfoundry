@@ -2,6 +2,7 @@ package org.jfoundry.application.outbox;
 
 import org.jfoundry.application.transaction.TransactionCallback;
 import org.jfoundry.application.transaction.TransactionOptions;
+import org.jfoundry.application.transaction.TransactionPropagation;
 import org.jfoundry.application.transaction.TransactionRunner;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,10 @@ class DefaultOutboxMaintenanceTest {
         assertThat(recovered).isEqualTo(3);
         assertThat(store.recoverCutoff).isNotNull();
         assertThat(store.recoverCutoff).isBeforeOrEqualTo(Instant.now().minus(Duration.ofMinutes(4)));
-        assertThat(transactionRunner.names).containsExactly("jfoundry-outbox-recovery");
+        assertThat(transactionRunner.options).singleElement().satisfies(options -> {
+            assertThat(options.name()).isEmpty();
+            assertThat(options.propagation()).isEqualTo(TransactionPropagation.REQUIRES_NEW);
+        });
     }
 
     @Test
@@ -50,8 +54,10 @@ class DefaultOutboxMaintenanceTest {
         assertThat(deleted).isEqualTo(3);
         assertThat(store.deletedStatuses)
                 .containsExactly(OutboxMessageStatus.PUBLISHED, OutboxMessageStatus.DEAD_LETTERED);
-        assertThat(transactionRunner.names)
-                .containsExactly("jfoundry-outbox-cleanup", "jfoundry-outbox-cleanup");
+        assertThat(transactionRunner.options).hasSize(2).allSatisfy(options -> {
+            assertThat(options.name()).isEmpty();
+            assertThat(options.propagation()).isEqualTo(TransactionPropagation.REQUIRES_NEW);
+        });
     }
 
     @Test
@@ -65,11 +71,11 @@ class DefaultOutboxMaintenanceTest {
     }
 
     private static final class CountingTransactionRunner implements TransactionRunner {
-        private final List<String> names = new ArrayList<>();
+        private final List<TransactionOptions> options = new ArrayList<>();
 
         @Override
         public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
-            names.add(options.name().orElse(""));
+            this.options.add(options);
             return callback.execute();
         }
     }
