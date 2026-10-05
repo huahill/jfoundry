@@ -416,6 +416,7 @@
                         <configuration>
                             <systemProperties>
                                 <quarkus.datasource.db-kind>postgresql</quarkus.datasource.db-kind>
+                                <jfoundry.outbox.dispatcher.enabled>false</jfoundry.outbox.dispatcher.enabled>
                             </systemProperties>
                         </configuration>
                     </plugin>
@@ -453,6 +454,7 @@
                         <configuration>
                             <systemProperties>
                                 <quarkus.datasource.db-kind>postgresql</quarkus.datasource.db-kind>
+                                <jfoundry.outbox.dispatcher.enabled>false</jfoundry.outbox.dispatcher.enabled>
                             </systemProperties>
                         </configuration>
                     </plugin>

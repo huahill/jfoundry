@@ -7,7 +7,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
-import org.eclipse.microprofile.config.Config;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jfoundry.application.messaging.MessageSender;
 import org.jfoundry.application.outbox.DefaultOutboxDispatchService;
@@ -24,10 +23,39 @@ import org.jspecify.annotations.Nullable;
 import java.time.Duration;
 
 /// Produces the default Outbox dispatcher for Quarkus applications and starts the JDK worker.
+///
+/// Worker schedule keys are injected with {@code @ConfigProperty} so native images keep them.
 @ApplicationScoped
 public final class QuarkusOutboxDispatchProducer {
 
     private JdkOutboxWorker worker;
+
+    @ConfigProperty(name = "jfoundry.outbox.dispatcher.enabled", defaultValue = "true")
+    boolean workerEnabled;
+
+    @ConfigProperty(name = "jfoundry.outbox.dispatcher.batch-size", defaultValue = "50")
+    int dispatchBatchSize;
+
+    @ConfigProperty(name = "jfoundry.outbox.dispatcher.interval", defaultValue = "5s")
+    Duration dispatchInterval;
+
+    @ConfigProperty(name = "jfoundry.outbox.recovery.interval", defaultValue = "60s")
+    Duration recoveryInterval;
+
+    @ConfigProperty(name = "jfoundry.outbox.recovery.stuck-timeout", defaultValue = "5m")
+    Duration recoveryStuckTimeout;
+
+    @ConfigProperty(name = "jfoundry.outbox.cleanup.interval", defaultValue = "24h")
+    Duration cleanupInterval;
+
+    @ConfigProperty(name = "jfoundry.outbox.cleanup.published-retention-days", defaultValue = "7")
+    int publishedRetentionDays;
+
+    @ConfigProperty(name = "jfoundry.outbox.cleanup.dead-lettered-retention-days", defaultValue = "30")
+    int deadLetteredRetentionDays;
+
+    @ConfigProperty(name = "jfoundry.outbox.cleanup.batch-size", defaultValue = "1000")
+    int cleanupBatchSize;
 
     @Produces
     @DefaultBean
@@ -65,15 +93,12 @@ public final class QuarkusOutboxDispatchProducer {
     /// native image generation, so the timer cannot capture JTA or Hibernate into the image heap.
     void startWorker(@Observes StartupEvent event,
                      OutboxDispatcher dispatcher,
-                     DefaultOutboxMaintenance maintenance,
-                     Config config,
-                     @ConfigProperty(name = "jfoundry.outbox.dispatcher.enabled", defaultValue = "true")
-                     boolean enabled) {
+                     DefaultOutboxMaintenance maintenance) {
         synchronized (this) {
-            if (worker == null && enabled) {
-                worker = JdkOutboxWorker.start(
-                        JdkOutboxWorkerSettings.from(config::getOptionalValue), dispatcher, maintenance);
+            if (worker != null || !workerEnabled) {
+                return;
             }
+            worker = JdkOutboxWorker.start(workerSettings(), dispatcher, maintenance);
         }
     }
 
@@ -83,6 +108,18 @@ public final class QuarkusOutboxDispatchProducer {
             worker.close();
             worker = null;
         }
+    }
+
+    private JdkOutboxWorkerSettings workerSettings() {
+        return new JdkOutboxWorkerSettings(
+                dispatchBatchSize,
+                dispatchInterval,
+                recoveryInterval,
+                recoveryStuckTimeout,
+                cleanupInterval,
+                publishedRetentionDays,
+                deadLetteredRetentionDays,
+                cleanupBatchSize);
     }
 
     private static <T> @Nullable T resolve(Instance<T> instance) {
