@@ -57,6 +57,15 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 不得同时导入 `jfoundry-spring-boot-dependencies` 与 `jfoundry-spring-cloud-dependencies`。Cloud BOM 只管理平台生态，
 不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
 
+这条开发线不对外支持。只用 Boot 的应用和 Cloud 应用都使用 Spring Boot `4.2.0-M2`，即 Spring Cloud
+`2026.0.0-M1` 管理的里程碑版本。该版本由 `jfoundry-spring-boot-dependencies` 和应用 Parent 持有。
+
+这条线上的 Spring Cloud Alibaba 是 `2026.0.0.0-SNAPSHOT`，只发布到 GitHub Packages。使用方不会从 BOM
+继承该仓库，需要自行配置仓库 id `github`，地址为
+`https://maven.pkg.github.com/alibaba/spring-cloud-alibaba`，只启用 snapshots、关闭 releases，并用具备
+`read:packages` 的令牌认证。该快照不是 Maven Central 构件，也不是对外支持的 JFoundry 组合。版本线见
+[兼容矩阵](../../../release/compatibility.md)。
+
 保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)先导入
 `jfoundry-spring-boot-dependencies`，再导入 `jfoundry-dependencies`，并自行管理 Java 与 Spring Boot 版本。
 

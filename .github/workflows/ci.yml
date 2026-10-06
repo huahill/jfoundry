@@ -15,6 +15,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  JFOUNDRY_ALIBABA_PACKAGES_USERNAME: youngledo
+  JFOUNDRY_ALIBABA_PACKAGES_TOKEN: ${{ secrets.ALIBABA_PACKAGES_READ_TOKEN }}
+
 jobs:
   changes:
     name: Classify changes

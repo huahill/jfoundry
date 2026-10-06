@@ -26,6 +26,10 @@ permissions:
   contents: read
   security-events: write
 
+env:
+  JFOUNDRY_ALIBABA_PACKAGES_USERNAME: youngledo
+  JFOUNDRY_ALIBABA_PACKAGES_TOKEN: ${{ secrets.ALIBABA_PACKAGES_READ_TOKEN }}
+
 jobs:
   analyze:
     name: Analyze ${{ matrix.language }}

@@ -61,15 +61,22 @@ platform BOM and official Cloud or integration BOMs that business applications c
 that runtime. It never adds those libraries to an application's runtime classpath by itself; the
 application still declares each selected starter or client explicitly.
 
-`jfoundry-spring-boot-dependencies` manages only the supported Boot-only Spring Boot line. The separate
-`jfoundry-spring-cloud-dependencies` line manages the supported Spring Cloud and Spring Cloud Alibaba
-line; the Cloud application's parent or another explicit BOM manages Spring Boot. Runtime BOM POMs are
+`jfoundry-spring-boot-dependencies` manages the Spring Boot line. On this unsupported development
+line that release is Spring Boot 4.2.0-M2, the milestone managed by Spring Cloud 2026.0.0-M1. The separate
+`jfoundry-spring-cloud-dependencies` line manages Spring Cloud and Spring Cloud Alibaba only; the
+Cloud application's parent manages Spring Boot and must use that same release. Runtime BOM POMs are
 the executable source of exact platform versions. `docs/release/compatibility.md` records stable
 supported lines and owning BOMs, and is checked against the BOMs in CI without requiring a documentation
 change for every patch release. CI logs and release evidence retain the exact versions used by each
 immutable commit or tag. This allows a Cloud application to add an appropriate Cloud starter without a
 version while keeping the choice of configuration server, service discovery, traffic management, or
 other platform capability explicit in the application.
+
+Spring Cloud Alibaba is currently `2026.0.0.0-SNAPSHOT` from GitHub Packages and is not an externally
+supported release. Do not put that package repository in a published POM; resolution stays in
+`.mvn/github-packages-settings.xml` and consumer builds. The Cloud BOM release profile must keep
+rejecting the snapshot. Align the Boot BOM and Boot parent with that Cloud-managed Boot release,
+but do not import or manage Spring Boot from the Cloud BOM.
 
 Do not add every available ecosystem BOM to a runtime BOM. Add one only when all of the following hold:
 

@@ -12,6 +12,7 @@ version="$2"
 maven4_bin="${3:-}"
 group_path="io/github/xfoundries"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+github_packages_settings="${script_dir}/../.mvn/github-packages-settings.xml"
 
 xml_query() {
     java "${script_dir}/VerifyConsumerPomXml.java" "$@"
@@ -230,12 +231,24 @@ XML
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.7</version>
+        <version>${spring_boot_version}</version>
         <relativePath/>
     </parent>
     <groupId>io.github.xfoundries.verification</groupId>
     <artifactId>cloud-consumer-pom-smoke</artifactId>
     <version>1.0.0</version>
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/alibaba/spring-cloud-alibaba</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -294,9 +307,9 @@ XML
 </project>
 XML
 
-    "${maven4_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-    "${maven4_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-    "${maven4_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+    "${maven4_bin}" -B -gs "${github_packages_settings}" -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+    "${maven4_bin}" -B -gs "${github_packages_settings}" -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
+    "${maven4_bin}" -B -gs "${github_packages_settings}" -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
 fi
 
 echo "Consumer POM verification passed: ${repository} (${version})"

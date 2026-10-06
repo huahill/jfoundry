@@ -10,16 +10,28 @@ documentation to patch-level updates.
 
 | Platform | Supported line | Version source |
 |----------|----------------|----------------|
-| Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
-| Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
-| Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
+| Spring Boot-only | 4.2.x | `jfoundry-spring-boot-dependencies` |
+| Spring Cloud | 2026.0.x | `jfoundry-spring-cloud-dependencies` |
+| Spring Cloud Alibaba | 2026.0.x | `jfoundry-spring-cloud-dependencies` |
 | Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
-Spring Cloud applications use Spring Boot 4.0.x; the current consumer compatibility check uses Spring
-Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the application parent remains
-the version source for that part of the combination. Boot-only applications use Spring Boot 4.1.x and
-must not combine the Boot-only and Cloud runtime BOMs.
+This development line is not an externally supported release. Boot-only and Spring Cloud
+applications both use Spring Boot 4.2.0-M2, the milestone managed by Spring Cloud 2026.0.0-M1.
+`jfoundry-spring-boot-dependencies` owns that Boot version. The Cloud BOM deliberately does not
+manage Spring Boot, so a Cloud application parent remains the version source for that part of the
+combination and must use the same 4.2.0-M2 release. Do not combine the Boot-only and Cloud runtime
+BOMs.
+
+Spring Cloud Alibaba on this line is `2026.0.0.0-SNAPSHOT`. It is published only to GitHub Packages
+for `alibaba/spring-cloud-alibaba`, requires a token with `read:packages`, and is not a Maven Central
+artifact or an externally supported JFoundry release. The published Cloud BOM does not declare
+repositories: Maven Central rejects them, and consumers do not inherit repositories from an imported
+BOM. Builds resolve the snapshot through repository id `github` in
+`.mvn/github-packages-settings.xml`. Set `JFOUNDRY_ALIBABA_PACKAGES_USERNAME` to the token owner and
+`JFOUNDRY_ALIBABA_PACKAGES_TOKEN` to the token. CI uses `youngledo` as the username and reads the
+token from the `ALIBABA_PACKAGES_READ_TOKEN` secret. The Cloud BOM release profile rejects the
+snapshot, so a stable release cannot ship it.
 
 ## Toolchain Baselines
 

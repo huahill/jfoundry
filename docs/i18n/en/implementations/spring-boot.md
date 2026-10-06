@@ -69,6 +69,17 @@ application parent or another explicit Boot BOM. Do not import both
 the platform ecosystem only; it does not add Cloud starters or imply that JFoundry provides an
 adapter for every Cloud component.
 
+This development line is not externally supported. Boot-only and Cloud applications both use Spring
+Boot `4.2.0-M2`, the milestone managed by Spring Cloud `2026.0.0-M1`. That version stays in
+`jfoundry-spring-boot-dependencies` and the application parent.
+
+Spring Cloud Alibaba on this line is `2026.0.0.0-SNAPSHOT`, published only to GitHub Packages.
+Consumers do not inherit that repository from the BOM. Configure repository id `github` at
+`https://maven.pkg.github.com/alibaba/spring-cloud-alibaba`, enable snapshots, disable releases,
+and authenticate with a token that has `read:packages`. This snapshot is not a Maven Central
+artifact and is not an externally supported JFoundry combination. The version line is recorded in
+the [compatibility matrix](../../../release/compatibility.md).
+
 An application retaining another parent while using Spring Boot without Spring Cloud should import
 `jfoundry-spring-boot-dependencies` before `jfoundry-dependencies` as described in
 [Getting Started](../integration/getting-started.md), then manage Java and Spring Boot versions itself.

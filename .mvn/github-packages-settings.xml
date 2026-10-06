@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <!-- Resolves Spring Cloud Alibaba snapshots from GitHub Packages without putting a repository in a published POM. -->
+    <servers>
+        <server>
+            <id>github</id>
+            <username>${env.JFOUNDRY_ALIBABA_PACKAGES_USERNAME}</username>
+            <password>${env.JFOUNDRY_ALIBABA_PACKAGES_TOKEN}</password>
+        </server>
+    </servers>
+    <profiles>
+        <profile>
+            <id>alibaba-spring-cloud-snapshots</id>
+            <repositories>
+                <repository>
+                    <id>github</id>
+                    <name>Spring Cloud Alibaba GitHub Packages snapshots</name>
+                    <url>https://maven.pkg.github.com/alibaba/spring-cloud-alibaba</url>
+                    <releases>
+                        <enabled>false</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>alibaba-spring-cloud-snapshots</activeProfile>
+    </activeProfiles>
+</settings>
