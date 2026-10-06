@@ -20,14 +20,14 @@ for workflow in .github/workflows/codeql.yml .github/workflows/snapshot.yml; do
     fi
 done
 
-require_text ".github/workflows/ci.yml" "README.md|README_ZH.md|AGENTS.md|docs/*)"
+require_text ".github/workflows/ci.yml" "README.md|README_ZH.md|AGENTS.md|docs/*|skills/*)"
 
 python3 - "${root_dir}/.github/workflows/codeql.yml" "${root_dir}/.github/workflows/snapshot.yml" <<'PY'
 import sys
 from pathlib import Path
 import yaml
 
-expected = ["README.md", "README_ZH.md", "AGENTS.md", "docs/**"]
+expected = ["README.md", "README_ZH.md", "AGENTS.md", "docs/**", "skills/**"]
 for raw_path in sys.argv[1:]:
     path = Path(raw_path)
     workflow = yaml.safe_load(path.read_text(encoding="utf-8"))
@@ -38,4 +38,4 @@ for raw_path in sys.argv[1:]:
         raise SystemExit(f"{path} pull_request paths-ignore must be {expected!r}")
 PY
 
-echo "Workflow path verification passed: documentation whitelist is README.md, README_ZH.md, AGENTS.md, docs/**"
+echo "Workflow path verification passed: documentation whitelist is README.md, README_ZH.md, AGENTS.md, docs/**, skills/**"

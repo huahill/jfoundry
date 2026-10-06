@@ -25,8 +25,10 @@ The supported platform versions and Native Image evidence are maintained in the
 
 - The supported Spring Boot, Quarkus, and Helidon MP lines are supported only through their
   documented JFoundry assemblies.
-- Spring Native Image is validated for the base runtime plus MyBatis-Plus/PostgreSQL,
-  Redisson/Redis, and JobRunr/PostgreSQL paths.
+- Spring Native Image is validated for the base runtime plus MyBatis-Plus/PostgreSQL and
+  Redisson/Redis paths.
+- Quarkus Native Image is validated for the base PostgreSQL path plus a separate Redisson/Redis
+  capability check.
 - Helidon Native supports the documented CDI/Web consumer path. Helidon Native JTA and JPA are not
   supported until the upstream limitation documented in the compatibility matrix is resolved.
 - Other databases, brokers, ORMs, deployment targets, and downstream dependency graphs require

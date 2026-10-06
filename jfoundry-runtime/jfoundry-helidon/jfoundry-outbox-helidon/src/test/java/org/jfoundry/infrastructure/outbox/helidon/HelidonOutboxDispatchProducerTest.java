@@ -32,8 +32,8 @@ class HelidonOutboxDispatchProducerTest {
                 unavailableSender(),
                 new NoOpTransactionRunner(),
                 5,
-                Duration.ZERO,
-                Duration.ofSeconds(1));
+                Duration.ofSeconds(1),
+                Duration.ofMinutes(5));
 
         assertThatCode(() -> dispatcher.dispatch(11)).doesNotThrowAnyException();
         assertThat(dispatcher).isInstanceOf(DefaultOutboxDispatchService.class);
@@ -65,17 +65,15 @@ class HelidonOutboxDispatchProducerTest {
     @Test
     void producedDispatcherValidatesBackoffWhenDependenciesAreAvailable() {
         HelidonOutboxDispatchProducer producer = new HelidonOutboxDispatchProducer();
-        OutboxDispatcher dispatcher = producer.outboxDispatcher(
+        assertThatCode(() -> producer.outboxDispatcher(
                 availableStore(new RecordingOutboxMessageStore()),
                 availableSender(message -> SendResult.ok()),
                 new NoOpTransactionRunner(),
                 5,
                 Duration.ZERO,
-                Duration.ofSeconds(1));
-
-        assertThatCode(() -> dispatcher.dispatch(1))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Invalid Outbox dispatch backoff configuration");
+                Duration.ofSeconds(1)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("base must be positive");
     }
 
     @SuppressWarnings("unchecked")

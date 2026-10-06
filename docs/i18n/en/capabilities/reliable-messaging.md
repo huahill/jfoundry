@@ -23,7 +23,7 @@ the capability; it does not identify a complete Outbox solution.
 | Outbox capability | Records generic integration messages, recovers, cleans up, and coordinates dispatch | `jfoundry-outbox-spring-boot-starter` |
 | Domain Event Outbox composition | Maps selected Domain Events to generic Outbox messages | `jfoundry-domain-event-outbox-spring-boot-starter` |
 | Store adapter | Persists `OutboxMessageStore` records | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application implementation |
-| Dispatch trigger / scheduling adapter | Starts dispatch work | Built-in scheduled mode, optional `jfoundry-outbox-jobrunr-spring-boot-starter`, or an application trigger |
+| Dispatch worker | Periodically claims and sends recorded messages | Built into the Outbox capability through `JdkOutboxWorker` |
 | Message transport | Sends the claimed payload | A broker-specific `jfoundry-messaging-*-spring-boot-starter` or an application `MessageSender` |
 
 Aggregate persistence is a separate choice. A `jfoundry-persistence-*-spring-boot-starter` persists
@@ -31,10 +31,11 @@ business aggregates; a `jfoundry-outbox-*-spring-boot-starter` persists Outbox r
 does not select the other.
 
 These are separate responsibilities, not necessarily separate direct Maven declarations. The
-built-in store starters and the JobRunr starter include `jfoundry-outbox-spring-boot-starter`
-transitively, so an application does not declare it again. That dependency is Spring Boot assembly
-convenience; the store remains replaceable, while `OutboxDispatcher` stays the dispatch service
-port and `*OutboxTrigger` stays the scheduling adapter.
+built-in store starters include `jfoundry-outbox-spring-boot-starter` transitively, so an
+application does not declare it again. That dependency is Spring Boot assembly convenience; the
+store remains replaceable. `OutboxDispatcher` is the dispatch service port, and `JdkOutboxWorker`
+is the process-local timer that invokes it on Spring, Quarkus, and Helidon. Set
+`jfoundry.outbox.dispatcher.enabled=false` only for recorder-only processes.
 
 The explicit Domain Event Outbox composition is separate from both capabilities. The Spring
 combination starter includes Domain Event, generic Outbox, the persistence bridge, and the Domain
@@ -44,12 +45,8 @@ generic Outbox modules do not register Domain Event beans. A Domain Event-only a
 does not get an Outbox recorder, and a generic Outbox-only application does not get a Domain Event
 context or dispatcher.
 
-Runtime-specific `*OutboxTrigger` types are scheduling adapters. `OutboxDispatcher` remains the
-dispatch service port that they invoke.
-
-If an application directly constructed the old `ScheduledOutboxDispatcher`,
-`JobRunrOutboxDispatcher`, `QuarkusOutboxDispatcher`, or `HelidonOutboxDispatcher` types, rename
-those call sites to the matching `*OutboxTrigger` classes.
+Applications should not schedule `OutboxDispatcher` themselves. The runtime adapter starts
+`JdkOutboxWorker` when Outbox dispatch is enabled.
 
 ## Event Flow
 

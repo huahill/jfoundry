@@ -63,6 +63,16 @@ cleanup or invalidate state before immediately rethrowing it. Do not recover fro
 fails while another `Exception` or `Error` is already in flight, retain the original failure and attach each
 cleanup failure with `Throwable.addSuppressed`; add focused tests for both the primary and cleanup failures.
 
+## Exception Policy
+
+Expected use-case and domain failures use the closed catalogs. Programmer and configuration preconditions stay JDK exceptions.
+
+- Read `ApplicationException` for the application catalog: `InvalidArgumentException`, `NotFoundException`, `ConflictException`, and `ExternalAccessException`. Domain failures use `DomainRuleViolationException` and `DomainStateException`.
+- HTTP mapping for that catalog is documented in `docs/i18n/en/capabilities/web.md` and `docs/i18n/zh/capabilities/web.md`. Do not copy the status table into this skill.
+- `IllegalArgumentException` and `IllegalStateException` are correct for programmer preconditions and API misuse, including blank constructor arguments, invalid annotation attributes, and impossible internal state. Do not convert them to `InvalidArgumentException`. That type is caller-facing invalid use-case input and becomes an HTTP 400 detail.
+- Do not fold a specific caller-catchable outcome, such as `DistributedLockUnavailableException`, into the HTTP catalog unless the public behavior change is intentional.
+- An IDE duplicate-expression hint is a readability cleanup, not an architecture rule.
+
 ## Non-Negotiable Boundaries
 
 For every module-placement decision, apply Onion Simple as defined in `references/module-boundaries.md`.
@@ -79,7 +89,7 @@ For every module-placement decision, apply Onion Simple as defined in `reference
   and runtime exception classification in runtime modules; Domain and Application modules remain Jakarta-free.
 - Keep reusable architecture tests under `jfoundry-core/jfoundry-architecture/jfoundry-architecture-test`.
 - Keep runtime-specific integration verification in the direct `jfoundry-runtime/<runtime>/jfoundry-<runtime>-integration-tests` module; keep framework-neutral tests beside their core or infrastructure implementation.
-- Do not make default starters heavy. Outbox, Inbox, broker adapters, JobRunr, and MyBatis-Plus store adapters must remain explicit capability choices.
+- Do not make default starters heavy. Outbox, Inbox, broker adapters, and MyBatis-Plus store adapters must remain explicit capability choices.
 
 ## Source Documents
 
@@ -89,6 +99,8 @@ Prefer current repository documents and code over memory:
 - `../../docs/i18n/en/framework/architecture-styles.md`
 - `../../docs/i18n/en/framework/archunit-rules.md`
 - `../../docs/i18n/en/capabilities/reliable-messaging.md`
+- `../../docs/i18n/en/capabilities/web.md`
+- `../../docs/i18n/zh/capabilities/web.md`
 - `../../docs/i18n/en/modeling/index.md`
 - `../../docs/i18n/en/modeling/domain-event.md`
 - `../../docs/i18n/en/modeling/repository-vs-read-contracts.md`

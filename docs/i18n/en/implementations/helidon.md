@@ -90,15 +90,11 @@ tables: copy the published Outbox and Inbox SQL templates into the application's
 Inbox claim strategies support PostgreSQL and MySQL; another database requires an application
 `JpaInboxClaimStrategy` bean.
 
-`jfoundry-outbox-helidon` provides the `HelidonOutboxTrigger` scheduling adapter and the
-`OutboxDispatcher` service port. Enable scheduled dispatch only after providing both the store and
-broker sender:
+`jfoundry-outbox-helidon` produces the `OutboxDispatcher` service port and starts `JdkOutboxWorker`
+when the store and broker sender are available. The worker is on by default; set
+`jfoundry.outbox.dispatcher.enabled=false` only for recorder-only processes.
 
-```properties
-jfoundry.outbox.dispatcher.enabled=true
-```
-
-The trigger properties match the runtime-neutral Outbox behavior: `interval` defaults to `5s`,
+The worker properties match the runtime-neutral Outbox behavior: `interval` defaults to `5s`,
 `batch-size` to `50`, `max-retries` to `5`, `backoff-base` to `1s`, and `backoff-max` to `5m`.
 
 The generic Outbox module does not provide Domain Event beans. Add
@@ -273,7 +269,7 @@ the Docker-free Java 25 baseline.
 
 RocketMQ delivery is not a supported Helidon composition. Helidon persistence, Outbox, and Inbox use
 JPA rather than MyBatis-Plus. JVM Redisson locking is provided by `jfoundry-lock-redisson-helidon`;
-JobRunr is not currently provided, and the Helidon Native Image does not include Redisson.
+the Helidon Native Image does not include Redisson.
 Do not reuse Spring or Quarkus runtime adapters in a Helidon application. Add an application-owned
 adapter only when its client lifecycle and delivery semantics are verified for the selected Helidon
 release.

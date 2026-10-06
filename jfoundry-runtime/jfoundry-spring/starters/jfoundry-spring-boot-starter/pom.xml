@@ -46,20 +46,18 @@
                                 <bannedDependencies>
                                     <searchTransitive>true</searchTransitive>
                                     <message>
-                                        jfoundry-spring-boot-starter must stay lightweight. Use dedicated capability starters for distributed locks, Outbox, Inbox, MyBatis-Plus, brokers, or JobRunr.
+                                        jfoundry-spring-boot-starter must stay lightweight. Use dedicated capability starters for distributed locks, Outbox, Inbox, MyBatis-Plus, brokers.
                                     </message>
                                     <excludes>
                                         <exclude>io.github.xfoundries:jfoundry-lock-*</exclude>
                                         <exclude>io.github.xfoundries:jfoundry-outbox-*</exclude>
                                         <exclude>io.github.xfoundries:jfoundry-inbox-*</exclude>
                                         <exclude>io.github.xfoundries:jfoundry-persistence-mybatis-plus</exclude>
-                                        <exclude>io.github.xfoundries:jfoundry-outbox-jobrunr</exclude>
                                         <exclude>com.baomidou:*</exclude>
                                         <exclude>org.mybatis:*</exclude>
                                         <exclude>org.springframework.kafka:*</exclude>
                                         <exclude>org.springframework.amqp:*</exclude>
                                         <exclude>org.apache.rocketmq:*</exclude>
-                                        <exclude>org.jobrunr:*</exclude>
                                         <exclude>org.redisson:*</exclude>
                                     </excludes>
                                 </bannedDependencies>

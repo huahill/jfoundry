@@ -12,7 +12,7 @@ readonly FAILURE="failure"
 readonly REQUIRED_FULL_RESULTS=(
     "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
     "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
-    "${SUCCESS}" "${SUCCESS}" "${SUCCESS}"
+    "${SUCCESS}" "${SUCCESS}"
 )
 
 assert_succeeds() {
@@ -29,18 +29,16 @@ assert_fails() {
     fi
 }
 
-assert_succeeds false false "${SUCCESS}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
+docs_only_rest=(
+    "${SKIPPED}" "${SKIPPED}"
+    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
     "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
-assert_fails false false "${FAILURE}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
-assert_succeeds false true "${SUCCESS}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
-assert_succeeds false true "${SUCCESS}" "${SKIPPED}" "${FAILURE}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" \
-    "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}" "${SKIPPED}"
+)
+
+assert_succeeds false false "${SUCCESS}" "${docs_only_rest[@]}"
+assert_fails false false "${FAILURE}" "${docs_only_rest[@]}"
+assert_succeeds false true "${SUCCESS}" "${docs_only_rest[@]}"
+assert_succeeds false true "${SUCCESS}" "${SKIPPED}" "${FAILURE}" "${docs_only_rest[@]:2}"
 assert_succeeds true true "${SUCCESS}" "${SUCCESS}" "${SUCCESS}" "${REQUIRED_FULL_RESULTS[@]}"
 assert_succeeds true false "${SUCCESS}" "${SUCCESS}" "${SKIPPED}" "${REQUIRED_FULL_RESULTS[@]}"
 

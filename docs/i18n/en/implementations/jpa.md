@@ -67,8 +67,9 @@ externalization, or Inbox support. See [Quarkus](quarkus.md) for dependency setu
 verification.
 
 For Quarkus Outbox dispatching, add `jfoundry-outbox-quarkus-runtime` and provide a real CDI
-`MessageSender`. Its scheduler is disabled until `jfoundry.outbox.dispatcher.enabled=true`; it does
-not add a broker client or a fallback sender. See [Quarkus](quarkus.md) for dispatch configuration.
+`MessageSender`. `JdkOutboxWorker` is on by default; set `jfoundry.outbox.dispatcher.enabled=false`
+only for recorder-only processes. The worker does not add a broker client or a fallback sender. See
+[Quarkus](quarkus.md) for dispatch configuration.
 
 For Quarkus JPA Inbox storage, add `jfoundry-inbox-jpa-quarkus-runtime`. It registers
 `JpaInboxMessageEntity` with the default persistence unit and supplies default CDI

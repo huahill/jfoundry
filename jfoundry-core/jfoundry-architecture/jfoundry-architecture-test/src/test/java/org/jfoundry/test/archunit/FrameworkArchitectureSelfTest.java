@@ -101,10 +101,7 @@ class FrameworkArchitectureSelfTest {
             FrameworkModuleRules.jackson_payload_serializer_should_be_in_infrastructure_ring;
 
     @ArchTest
-    static final ArchRule scheduled_outbox_trigger_should_be_in_infrastructure_ring =
-            FrameworkModuleRules.scheduled_outbox_trigger_should_be_in_infrastructure_ring;
+    static final ArchRule jdk_outbox_worker_should_be_in_application_ring =
+            FrameworkModuleRules.jdk_outbox_worker_should_be_in_application_ring;
 
-    @ArchTest
-    static final ArchRule jobrunr_outbox_trigger_should_be_in_infrastructure_ring =
-            FrameworkModuleRules.jobrunr_outbox_trigger_should_be_in_infrastructure_ring;
 }

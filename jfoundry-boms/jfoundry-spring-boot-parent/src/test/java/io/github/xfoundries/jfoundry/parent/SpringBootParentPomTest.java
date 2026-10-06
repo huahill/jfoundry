@@ -126,7 +126,6 @@ class SpringBootParentPomTest {
         Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
         Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
-        assertThat(managesDependency(foundation, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isFalse();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
         assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isFalse();
@@ -137,7 +136,6 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-jackson3")).isFalse();
         assertThat(property(foundation, "jmolecules-integrations.version")).isNull();
 
-        assertThat(managesDependency(boot, "org.jobrunr", "jobrunr-spring-boot-4-starter")).isTrue();
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
@@ -152,8 +150,6 @@ class SpringBootParentPomTest {
         assertThat(importedBoms(cloud)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         for (Document springLine : List.of(boot, cloud)) {
-            assertThat(managesDependency(springLine, "org.jobrunr", "jobrunr-spring-boot-4-starter"))
-                    .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
                     .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();

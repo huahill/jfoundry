@@ -9,6 +9,7 @@ on:
       - README_ZH.md
       - AGENTS.md
       - docs/**
+      - skills/**
   workflow_dispatch:
 
 concurrency:

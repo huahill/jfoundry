@@ -83,8 +83,9 @@ Client registration without moving HTTP lifecycle APIs into the core.
 MyBatis-Plus aggregate persistence is not a Quarkus composition because this runtime uses JPA.
 RocketMQ delivery is not supported. Quarkus applications compose extensions instead of Spring-style
 starters. Redisson locks are an explicit extension: depend on `jfoundry-lock-redisson-quarkus-runtime`
-and set `quarkus.redisson.single-server-config.address`. Inject `LockExecutor`; Quarkus does not
-intercept `@DistributedLock`. JobRunr remains deferred. Do not add a Spring starter as a substitute.
+and set `quarkus.redisson.single-server-config.address`. Quarkus intercepts `@DistributedLock` and
+evaluates its key with Jakarta EL. Inject `LockExecutor` for programmatic use. Do not add a
+Spring starter as a substitute.
 
 ## Transaction Semantics
 
@@ -213,11 +214,10 @@ state-transition runtime:
 ```
 
 The extension provides the default CDI `OutboxDispatcher` service port, the generic
-`OutboxTemplate` and `PayloadSerializer`, and the `QuarkusOutboxTrigger` scheduling adapter through
-the Quarkus Scheduler. It remains inactive
-unless `jfoundry.outbox.dispatcher.enabled=true`. The application must provide both an
-`OutboxMessageStore` (for example through `jfoundry-outbox-jpa-quarkus-runtime`) and a real
-`MessageSender`; the trigger does not add a broker client or a logging sender. Configure
+`OutboxTemplate` and `PayloadSerializer`, and starts `JdkOutboxWorker`. The worker is on by default;
+set `jfoundry.outbox.dispatcher.enabled=false` only for recorder-only processes. The application
+must provide both an `OutboxMessageStore` (for example through `jfoundry-outbox-jpa-quarkus-runtime`)
+and a real `MessageSender`; the worker does not add a broker client or a logging sender. Configure
 `jfoundry.outbox.dispatcher.interval` (default `5s`), `batch-size` (default `50`), `max-retries`
 (default `5`), `backoff-base` (default `1s`), and `backoff-max` (default `5m`) as needed. An
 application-provided CDI `OutboxDispatcher` takes precedence.
@@ -226,12 +226,10 @@ Message delivery remains outside database transactions. Each claim and state tra
 independent transaction through `TransactionRunner`, consistent with the framework-neutral Outbox
 contract.
 
-The same extension also provides scheduled Outbox maintenance without requiring a `MessageSender`.
-Recovery is disabled by default; enable it with `jfoundry.outbox.recovery.enabled=true` to reset
-stale `DISPATCHING` records at `jfoundry.outbox.recovery.interval` (default `60s`) after
-`jfoundry.outbox.recovery.stuck-timeout` (default `5m`). Cleanup is independently disabled by
-default; enable it with `jfoundry.outbox.cleanup.enabled=true` to remove expired terminal records
-at `jfoundry.outbox.cleanup.interval` (default `24h`). Its defaults retain `PUBLISHED` records for
+When the worker is running, recovery and cleanup run on the same timer. Recovery resets stale
+`DISPATCHING` records at `jfoundry.outbox.recovery.interval` (default `60s`) after
+`jfoundry.outbox.recovery.stuck-timeout` (default `5m`). Cleanup removes expired terminal records
+at `jfoundry.outbox.cleanup.interval` (default `24h`). Defaults retain `PUBLISHED` records for
 seven days, `DEAD_LETTERED` records for 30 days, and delete at most 1000 records per status per
 run. Configure `published-retention-days`, `dead-lettered-retention-days`, and `batch-size` under
 `jfoundry.outbox.cleanup` when different operational limits are required.
@@ -441,13 +439,15 @@ regular module test does not require Docker:
 ## Native Image Verification
 
 The repository's Quarkus native CI job installs the full reactor and then builds a separate consumer
-application with Quarkus container Native Image build. Its `@QuarkusIntegrationTest` invokes
-`TransactionRunner`, domain-event dispatch, Outbox dispatch, recovery, and cleanup through HTTP
-endpoints against the native executable.
+application with Quarkus container Native Image build. Every `@QuarkusIntegrationTest` uses
+`PostgreSqlIntegrationTestProfile`, which starts PostgreSQL and sets the datasource kind to
+`postgresql`. Those tests exercise `TransactionRunner`, JPA aggregate persistence, domain-event
+dispatch, Inbox, and Outbox persistence, dispatch, recovery, and cleanup through HTTP against the
+native executable.
 
 ### CI-Aligned Local Verification
 
-Run both Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
+Run the Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
 build as CI. On macOS, it uses local GraalVM because a Linux container executable cannot run on the
 host:
 
@@ -458,8 +458,8 @@ bash scripts/verify-runtime-ci.sh quarkus
 ```
 
 Use `--stage middleware` or `--stage native` to run one stage. The base native stage does not include
-Redisson. Redis lock verification is separate, so a missing Redisson address cannot break the default
-application:
+Redisson. Redis lock verification is separate, so a missing Redisson address cannot break
+the default application:
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
@@ -467,9 +467,10 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 ```
 
-That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile. To run all
-supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment variables
-set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
+That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile.
+
+To run all supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment
+variables set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 
@@ -480,4 +481,5 @@ Inbox storage, automatic externalization for explicitly marked events, Kafka and
 optional Outbox dispatch, recovery, and cleanup. It does not assemble MyBatis-Plus because Quarkus
 persistence uses JPA, does not assemble RocketMQ because that broker is not supported on Quarkus, and
 does not publish Spring-style starters because Quarkus applications compose extensions. Redisson
-locks use `jfoundry-lock-redisson-quarkus-runtime`; JobRunr remains deferred.
+locks use `jfoundry-lock-redisson-quarkus-runtime`. Outbox dispatch uses the JDK worker in
+`jfoundry-outbox-quarkus-runtime`.

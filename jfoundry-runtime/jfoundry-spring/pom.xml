@@ -31,7 +31,6 @@
         <subproject>runtime/jfoundry-domain-event-outbox-spring</subproject>
         <subproject>runtime/jfoundry-persistence-spring</subproject>
         <subproject>runtime/jfoundry-messaging-spring</subproject>
-        <subproject>runtime/jfoundry-outbox-spring</subproject>
         <subproject>runtime/jfoundry-transaction-spring</subproject>
         <subproject>runtime/jfoundry-lock-spring</subproject>
         <subproject>runtime/jfoundry-observability-spring</subproject>
@@ -66,7 +65,6 @@
         <subproject>starters/jfoundry-outbox-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-outbox-mybatis-plus-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-outbox-jpa-spring-boot-starter</subproject>
-        <subproject>starters/jfoundry-outbox-jobrunr-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-inbox-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-inbox-mybatis-plus-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-inbox-jpa-spring-boot-starter</subproject>

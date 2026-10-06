@@ -88,11 +88,11 @@ database, delivery, scheduling, and distributed-lock choices.
 | Outbound `RestClient` support and configurable HTTP logging | `jfoundry-restclient-spring-boot-starter` | Applies to Spring Boot-managed `RestClient.Builder` instances; manual builders use the Java API. |
 | JSON serialization for Outbox records | `jfoundry-outbox-spring-boot-starter` (or an application `PayloadSerializer`) | `OutboxTemplateAutoConfiguration` provides the default Jackson `PayloadSerializer` when Jackson and an Outbox store are available; messaging starters provide transport integration and dependencies, but no serializer bean by themselves. |
 | Kafka, RabbitMQ, or RocketMQ delivery | Matching `jfoundry-messaging-*-spring-boot-starter` | Select a concrete broker transport explicitly. |
-| Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds generic recording, recovery, cleanup, and the built-in scheduled dispatch trigger. Add it directly for manual composition; built-in store and JobRunr starters include it transitively. |
+| Outbox capability | `jfoundry-outbox-spring-boot-starter` | Adds generic recording, recovery, cleanup, and the JDK dispatch worker. Add it directly for manual composition; built-in store starters include it transitively. |
 | Domain Event to Outbox composition | `jfoundry-domain-event-outbox-spring-boot-starter` | Adds Domain Event, generic Outbox, the persistence bridge, and automatic Domain Event-to-Outbox recording. Select it only when the captured event must leave the process reliably. |
 | Outbox store | `jfoundry-outbox-jpa-spring-boot-starter`, `jfoundry-outbox-mybatis-plus-spring-boot-starter`, or an application `OutboxMessageStore` | Persists Outbox records only; built-in store starters also bring the Outbox capability, while applications still own migrations. |
 | Inbox runtime and store | `jfoundry-inbox-spring-boot-starter` plus one `jfoundry-inbox-*-spring-boot-starter` | Consumer idempotency; applications own migrations. |
-| Outbox dispatch trigger / scheduling adapter | Built-in scheduled mode (`ScheduledOutboxTrigger`), optional `jfoundry-outbox-jobrunr-spring-boot-starter` (`JobRunrOutboxTrigger`), or an application trigger | JobRunr replaces the built-in trigger and brings the Outbox capability transitively; every option still needs an Outbox store and real sender. |
+| Outbox dispatch worker | Started by `jfoundry-outbox-spring-boot-starter` as `JdkOutboxWorker` | Needs an Outbox store and a real sender. Set `jfoundry.outbox.dispatcher.enabled=false` only for recorder-only processes. |
 | Redisson distributed lock | `jfoundry-lock-redisson-spring-boot-starter` | Optional cross-instance locking only. |
 
 The exact starter catalog, configuration properties, conditions, and bean precedence are maintained
@@ -149,14 +149,14 @@ Aggregate mapping, optimistic-locking, and repository-shape decisions remain in 
 
 ## Reliable Messaging
 
-Outbox assembly has four independent decisions: capability, store, dispatch trigger, and message
-transport. The shared `outbox` prefix indicates which capability an adapter serves; it does not make
-JPA, MyBatis-Plus, or JobRunr a complete Outbox solution. JFoundry does not create database tables or
-invent message destinations. Copy the selected SQL template into the application's own migration
-process.
+Outbox assembly has three independent decisions: capability, store, and message transport. The
+shared `outbox` prefix indicates which capability an adapter serves; it does not make JPA or
+MyBatis-Plus a complete Outbox solution. JFoundry does not create database tables or invent message
+destinations. Copy the selected SQL template into the application's own migration process.
 
-In Spring Boot, `OutboxDispatcher` is the dispatch service port. `ScheduledOutboxTrigger` and
-`JobRunrOutboxTrigger` are the scheduling adapters that invoke it.
+In Spring Boot, `OutboxDispatcher` is the dispatch service port. `JdkOutboxWorker` is the
+process-local timer that invokes dispatch, recovery, and cleanup. Applications should not schedule
+the dispatcher themselves.
 
 `jfoundry-messaging-spring-boot-starter` does not register a fallback `MessageSender`. Before
 enabling dispatch, add one broker-specific starter or provide an application `MessageSender`; without
@@ -307,7 +307,7 @@ Native executable, and verifies an insert, reload, update, and reload of a busin
 `AuditStampHolder`,
 including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
 claim applies to the supported Spring Boot and MyBatis-Plus versions with PostgreSQL; it does not certify
-JPA, brokers, Redisson, or JobRunr. Exact tested versions are recorded in the
+JPA, brokers, or Redisson. Exact tested versions are recorded in the
 [compatibility matrix](../../../release/compatibility.md). It also verifies the built-in MyBatis-Plus Outbox and Inbox
 stores through append, paginated claim, idempotent claim, and processed-state operations:
 
@@ -319,12 +319,9 @@ stores through append, paginated claim, idempotent claim, and processed-state op
 
 The `native-redisson` profile separately certifies the Redisson 4.6.1 lock starter with Redis. It
 starts Redis in the JVM test process, launches the generated Native executable, and verifies that
-the JFoundry `LockExecutor` acquires and releases a distributed lock. The `native-jobrunr` profile
-separately certifies JobRunr 8.7.1 Outbox dispatching with PostgreSQL. It launches the generated
-Native executable, enables the JobRunr background server, and verifies that a persisted Outbox
-message is scheduled and published. These profiles do not certify other Redis, JobRunr storage,
-broker, or persistence combinations. Native applications must also register their own event payload
-types for Spring AOT binding when those types are serialized by the application.
+the JFoundry `LockExecutor` acquires and releases a distributed lock. These profiles do not certify
+other Redis, broker, or persistence combinations. Native applications must also register their own
+event payload types for Spring AOT binding when those types are serialized by the application.
 
 ### CI-Aligned Local Verification
 
@@ -336,6 +333,6 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
 
-Use `--stage middleware`, `--stage native`, `--stage native-mybatis-plus`, `--stage native-redisson`,
-or `--stage native-jobrunr` to run one stage. The general
+Use `--stage middleware`, `--stage native`, `--stage native-mybatis-plus`, or `--stage native-redisson`
+to run one stage. The general
 `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.

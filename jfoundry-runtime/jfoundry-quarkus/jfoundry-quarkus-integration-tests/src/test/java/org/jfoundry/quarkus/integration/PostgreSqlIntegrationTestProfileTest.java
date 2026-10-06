@@ -19,6 +19,8 @@ class PostgreSqlIntegrationTestProfileTest {
         assertEquals(PostgreSqlTestResource.class, testResource.getClazz());
         assertEquals("postgresql", new PostgreSqlIntegrationTestProfile().getConfigOverrides()
                 .get("quarkus.datasource.db-kind"));
+        assertEquals("false", new PostgreSqlIntegrationTestProfile().getConfigOverrides()
+                .get("jfoundry.outbox.dispatcher.enabled"));
         assertEquals(List.of(PostgreSqlIntegrationTestProfile.class), List.of(
                 DomainEventDispatchResourceIT.class,
                 DomainEventExternalizationResourceIT.class,

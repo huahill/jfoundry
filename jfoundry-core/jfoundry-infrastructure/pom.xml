@@ -30,6 +30,5 @@
         <subproject>jfoundry-persistence-mybatis-plus</subproject>
         <subproject>jfoundry-outbox-mybatis-plus</subproject>
         <subproject>jfoundry-outbox-jpa</subproject>
-        <subproject>jfoundry-outbox-jobrunr</subproject>
     </subprojects>
 </project>

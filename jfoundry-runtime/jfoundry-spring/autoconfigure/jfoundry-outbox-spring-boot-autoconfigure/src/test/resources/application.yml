@@ -1,12 +1,11 @@
 jfoundry:
   outbox:
     dispatcher:
-      mode: scheduled
-      interval-ms: 100
+      interval: 100ms
       batch-size: 10
       max-retries: 3
-      backoff-base-ms: 50
-      backoff-max-ms: 1000
+      backoff-base: 50ms
+      backoff-max: 1s
 
 spring:
   datasource:

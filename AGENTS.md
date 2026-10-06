@@ -34,7 +34,7 @@ The core framework must remain independent of runtime frameworks such as Spring,
 
 - `jfoundry-domain` contains domain modeling primitives and must not depend on application, infrastructure, persistence, messaging, or runtime integration modules.
 - `jfoundry-application` contains application-layer contracts, transaction abstractions, domain event orchestration, event externalization rules, Outbox/Inbox SPI, messaging SPI, and serialization SPI. It must not depend on Spring, MyBatis-Plus, broker clients, or concrete databases.
-- `jfoundry-infrastructure` contains concrete adapters for persistence, messaging, serialization, and job execution. Infrastructure adapters may depend on native clients such as MyBatis-Plus, Kafka clients, RabbitMQ Java client, RocketMQ client, Jackson, or JobRunr, but they must not depend on Spring Framework or Spring Boot unless they are deliberately placed under `jfoundry-spring`.
+- `jfoundry-infrastructure` contains concrete adapters for persistence, messaging, serialization, and job execution. Infrastructure adapters may depend on native clients such as MyBatis-Plus, Kafka clients, RabbitMQ Java client, RocketMQ client, or Jackson, but they must not depend on Spring Framework or Spring Boot unless they are deliberately placed under `jfoundry-spring`.
 - `jfoundry-spring` is the Spring runtime integration layer. Put Spring Framework adapters under `jfoundry-runtime/jfoundry-spring/runtime`, Spring Boot auto-configuration in capability-specific modules under `jfoundry-runtime/jfoundry-spring/autoconfigure`, Spring Boot starters under `jfoundry-runtime/jfoundry-spring/starters`, and Spring runtime integration tests under `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests`. Spring-side wrappers may adapt Spring clients such as `KafkaTemplate` or `RabbitTemplate` to core SPI interfaces, but core and infrastructure modules must not require those Spring clients.
 - `jfoundry-runtime/jfoundry-spring/starters` should assemble existing capabilities; avoid placing domain logic, persistence logic, or broker-specific behavior directly in starters.
 - Runtime-specific smoke, middleware, Testcontainers, and Native Image integration tests belong in the direct `jfoundry-<runtime>-integration-tests` module; framework-neutral tests stay next to their core or infrastructure implementation.
@@ -99,10 +99,11 @@ to keep `main` linear. The squash commit subject is the pull request title, so k
 Commit form. Do not use merge commits or rebase-merge. Local verification accelerates feedback but does not
 replace the server-side merge gate.
 
-Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`, and
-`docs/**`. These paths run documentation checks and the merge gate, but skip repository metadata,
-Dependency Review, Java, runtime, Native Image, Maven compatibility, and CodeQL checks. Changes to
-workflows, scripts, POMs, source code, or maintenance skills remain full-validation changes.
+Documentation-only changes are explicitly limited to `README.md`, `README_ZH.md`, `AGENTS.md`,
+`docs/**`, and `skills/**`. These paths run documentation checks and the merge gate, but skip
+repository metadata, Dependency Review, Java, runtime, Native Image, Maven compatibility, and CodeQL
+checks. Changes to workflows, scripts, POMs, or source code remain full-validation changes. A pull
+request that mixes a documentation path with any other path still runs the full matrix.
 
 ## Documentation Comments
 

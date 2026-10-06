@@ -77,7 +77,7 @@ Quarkus REST 边界，`jfoundry-restclient-quarkus-runtime` 负责出站 REST Cl
 Quarkus 的持久化、Outbox 与 Inbox 使用 JPA，因此不提供 MyBatis-Plus 组合。Quarkus 不支持 RocketMQ
 投递，也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁是显式扩展：依赖
 `jfoundry-lock-redisson-quarkus-runtime`，并设置 `quarkus.redisson.single-server-config.address`。
-应用注入 `LockExecutor`；Quarkus 不拦截 `@DistributedLock`。JobRunr 仍延后。不要用 Spring 启动器替代。
+Quarkus 会拦截 `@DistributedLock`，并用 Jakarta EL 求值 key。需要编程式调用时注入 `LockExecutor`。不要用 Spring 启动器替代。
 
 ## 事务语义
 
@@ -187,11 +187,10 @@ transactionRunner.run(() -> {
 </dependency>
 ```
 
-该扩展通过 Quarkus Scheduler 提供默认 CDI `OutboxDispatcher` 服务端口、通用的
-`OutboxTemplate` 与 `PayloadSerializer`，以及 `QuarkusOutboxTrigger` 调度适配器。只有配置
-`jfoundry.outbox.dispatcher.enabled=true` 时才会启动
-定时派发。应用必须提供 `OutboxMessageStore`（例如通过 `jfoundry-outbox-jpa-quarkus-runtime`）和真实的
-`MessageSender`；触发器不会引入消息代理客户端或日志发送器。可按需配置
+该扩展提供默认 CDI `OutboxDispatcher` 服务端口、通用的 `OutboxTemplate` 与 `PayloadSerializer`，并启动
+`JdkOutboxWorker`。worker 默认开启；仅记录进程才设置 `jfoundry.outbox.dispatcher.enabled=false`。
+应用必须提供 `OutboxMessageStore`（例如通过 `jfoundry-outbox-jpa-quarkus-runtime`）和真实的
+`MessageSender`；worker 不会引入消息代理客户端或日志发送器。可按需配置
 `jfoundry.outbox.dispatcher.interval`（默认 `5s`）、`batch-size`（默认 `50`）、`max-retries`
 （默认 `5`）、`backoff-base`（默认 `1s`）和 `backoff-max`（默认 `5m`）。应用提供的 CDI
 `OutboxDispatcher` 优先。
@@ -199,11 +198,10 @@ transactionRunner.run(() -> {
 消息发送始终位于数据库事务之外。每次领取和状态转换都通过 `TransactionRunner` 在独立事务中进行，
 与运行时无关的 Outbox 契约保持一致。
 
-同一扩展还提供不依赖 `MessageSender` 的 Outbox 定时维护。恢复默认关闭；配置
-`jfoundry.outbox.recovery.enabled=true` 后，会以 `jfoundry.outbox.recovery.interval`（默认 `60s`）执行，
-并将超过 `jfoundry.outbox.recovery.stuck-timeout`（默认 `5m`）的 `DISPATCHING` 记录重置。清理同样默认关闭；
-配置 `jfoundry.outbox.cleanup.enabled=true` 后，会以 `jfoundry.outbox.cleanup.interval`（默认 `24h`）删除过期的终态记录。
-默认保留 `PUBLISHED` 记录七天、`DEAD_LETTERED` 记录 30 天，并且每次每种状态最多删除 1000 条。需要不同的运维限制时，
+worker 运行时，恢复和清理走同一套定时器。恢复会按 `jfoundry.outbox.recovery.interval`（默认 `60s`）执行，
+并将超过 `jfoundry.outbox.recovery.stuck-timeout`（默认 `5m`）的 `DISPATCHING` 记录重置。清理会按
+`jfoundry.outbox.cleanup.interval`（默认 `24h`）删除过期终态记录。默认保留 `PUBLISHED` 记录七天、
+`DEAD_LETTERED` 记录 30 天，并且每次每种状态最多删除 1000 条。需要不同的运维限制时，
 可在 `jfoundry.outbox.cleanup` 下配置 `published-retention-days`、`dead-lettered-retention-days` 和 `batch-size`。
 
 恢复和每种终态记录清理都使用独立的 `REQUIRES_NEW` 事务边界。消息代理适配器和启动器仍是显式能力。
@@ -383,8 +381,9 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 
 ## 原生镜像验证
 
-仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。其
-`@QuarkusIntegrationTest` 通过 HTTP 入口调用 `TransactionRunner`、领域事件分发、Outbox 派发、恢复和清理，针对原生可执行文件运行。
+仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。每个
+`@QuarkusIntegrationTest` 都使用 `PostgreSqlIntegrationTestProfile`：它启动 PostgreSQL，并把数据源种类设为
+`postgresql`。这些测试通过 HTTP 入口，针对原生可执行文件验证 `TransactionRunner`、JPA 聚合持久化、领域事件分发、Inbox，以及 Outbox 的持久化、派发、恢复和清理。
 
 ### 本地 CI 对齐验证
 
@@ -406,8 +405,9 @@ GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 ```
 
-该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。通用
-`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
+该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。
+
+通用 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
 `bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
 ## 当前范围
@@ -416,4 +416,4 @@ bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
 诊断日志、应用服务领域事件分发、JPA 聚合持久化上下文装配、可选的 JPA
 Outbox 和 Inbox 存储、被明确标记事件的自动外部化、Kafka 与 RabbitMQ 消息投递，以及可选的 Outbox 派发、恢复和清理。
 它不装配 MyBatis-Plus，因为 Quarkus 持久化使用 JPA；不装配 RocketMQ，因为该运行时不支持该消息代理；
-也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁使用 `jfoundry-lock-redisson-quarkus-runtime`；JobRunr 仍延后。
+也不发布 Spring 风格启动器，因为 Quarkus 应用显式组合扩展。Redisson 分布式锁使用 `jfoundry-lock-redisson-quarkus-runtime`。Outbox 派发使用 `jfoundry-outbox-quarkus-runtime` 中的 JDK worker。

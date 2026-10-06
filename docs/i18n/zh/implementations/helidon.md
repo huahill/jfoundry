@@ -77,14 +77,10 @@ JPA Outbox 与 Inbox 能力复用运行时无关的 JPA 存储，不会创建 SQ
 Inbox SQL 模板复制到自己的迁移流程。Inbox 领取策略支持 PostgreSQL 与 MySQL；其它数据库需要
 由应用提供 `JpaInboxClaimStrategy` Bean。
 
-`jfoundry-outbox-helidon` 提供 `HelidonOutboxTrigger` 调度适配器和 `OutboxDispatcher` 服务端口。
-只有在提供存储和消息代理发送器后才启用定时派发：
+`jfoundry-outbox-helidon` 会生产 `OutboxDispatcher` 服务端口，并在存储和消息代理发送器可用时启动
+`JdkOutboxWorker`。worker 默认开启；仅记录进程才设置 `jfoundry.outbox.dispatcher.enabled=false`。
 
-```properties
-jfoundry.outbox.dispatcher.enabled=true
-```
-
-触发器属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`、`batch-size` 默认 `50`、
+worker 属性沿用运行时无关的 Outbox 行为：`interval` 默认 `5s`、`batch-size` 默认 `50`、
 `max-retries` 默认 `5`、`backoff-base` 默认 `1s`、`backoff-max` 默认 `5m`。
 
 通用 Outbox 模块不会提供领域事件 Bean。若需要可选的领域事件到 Outbox 派发器和外部化生产器，加入
@@ -232,5 +228,5 @@ bash scripts/verify-runtime-ci.sh helidon
 ## 延后集成
 
 Helidon 不提供 RocketMQ 投递。Helidon 的持久化、Outbox 与 Inbox 使用 JPA，而不是 MyBatis-Plus。
-JVM 上的 Redisson 分布式锁由 `jfoundry-lock-redisson-helidon` 提供。当前仍不提供 JobRunr，Helidon 原生镜像也不包含 Redisson。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
+JVM 上的 Redisson 分布式锁由 `jfoundry-lock-redisson-helidon` 提供。Helidon 原生镜像不包含 Redisson。不要在 Helidon 应用中复用 Spring 或 Quarkus 运行时适配器。
 只有在所选 Helidon 版本中验证客户端生命周期和投递语义后，才应添加应用自有适配器。

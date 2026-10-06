@@ -23,11 +23,11 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | MyBatis-Plus Outbox/Inbox store adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-mybatis-plus` or `jfoundry-core/jfoundry-infrastructure/jfoundry-inbox-mybatis-plus` |
 | Broker `MessageSender` adapter | Matching runtime integration module, such as `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-messaging-spring`, `jfoundry-runtime/jfoundry-quarkus/runtime/jfoundry-messaging-<broker>-quarkus-runtime`, or `jfoundry-runtime/jfoundry-helidon/jfoundry-messaging-<broker>-helidon` |
 | Payload serializer adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-messaging-jackson` |
-| Pure JobRunr dispatcher adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-outbox-jobrunr` |
+| Outbox dispatch timer | `jfoundry-core/jfoundry-application/jfoundry-outbox-core` (`JdkOutboxWorker`) |
 | Spring Framework local domain-event adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-domain-event-spring` |
 | Spring transaction adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-transaction-spring` |
 | Spring messaging transport adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-messaging-spring` |
-| Spring Outbox transaction/scheduling adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-outbox-spring` |
+| Spring Outbox auto-configuration | `jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-outbox-spring-boot-autoconfigure` |
 | Spring Web MVC ProblemDetail adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-webmvc-spring` |
 | Spring Boot conditions/properties/wiring | A capability-specific module under `jfoundry-runtime/jfoundry-spring/autoconfigure` |
 | Spring runtime or middleware integration verification | `jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests` |

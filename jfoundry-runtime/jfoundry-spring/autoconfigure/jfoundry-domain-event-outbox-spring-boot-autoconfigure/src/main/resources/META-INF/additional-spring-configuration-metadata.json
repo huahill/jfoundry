@@ -2,8 +2,8 @@
   "groups": [
     {
       "name": "jfoundry.domain.event.dispatch.outbox",
-      "type": "org.jfoundry.autoconfigure.event.DomainEventOutboxProperties",
-      "sourceType": "org.jfoundry.autoconfigure.event.DomainEventOutboxProperties"
+      "type": "org.jfoundry.autoconfigure.event.outbox.DomainEventOutboxProperties",
+      "sourceType": "org.jfoundry.autoconfigure.event.outbox.DomainEventOutboxProperties"
     }
   ],
   "properties": [
