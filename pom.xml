@@ -78,7 +78,7 @@
         <hibernate.version>7.4.12.Final</hibernate.version>
         <h2.version>2.5.252</h2.version>
         <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
-        <postgresql.version>42.7.13</postgresql.version>
+        <postgresql.version>42.7.14</postgresql.version>
         <snakeyaml.version>2.7</snakeyaml.version>
     </properties>
 
