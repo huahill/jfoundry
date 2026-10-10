@@ -89,7 +89,7 @@ class HttpLoggingInterceptorTest {
         assertThat(messages()).containsExactly(
                 "--> GET https://downstream.test/orders/42",
                 "--> END HTTP",
-                "<-- 200 (24ms)",
+                "<-- GET https://downstream.test/orders/42 200 (24ms)",
                 "<-- END HTTP");
     }
 
@@ -112,7 +112,7 @@ class HttpLoggingInterceptorTest {
                 "--> Content-Type: application/json",
                 "--> {\"password\":\"<redacted>\"}",
                 "--> END HTTP",
-                "<-- 200 (1ms)",
+                "<-- GET https://downstream.test/orders/42 200 (1ms)",
                 "<-- Content-Type: application/json",
                 "<-- {\"result\":\"accepted\"}",
                 "<-- END HTTP");
@@ -234,6 +234,43 @@ class HttpLoggingInterceptorTest {
         assertThat(messages()).last().isEqualTo(
                 "HTTP client response metadata could not be read for logging: method=GET, "
                         + "uri=https://downstream.test/orders/42");
+    }
+
+    @Test
+    void humanLogNamesTheOperationAndRepeatsTheTargetOnTheResponse() throws IOException {
+        var response = new TrackingResponse(HttpStatus.OK, "accepted");
+        var interceptor = new HttpLoggingInterceptor(HttpLoggingLevel.BASIC, HttpLoggingFormat.HUMAN, () -> true,
+                nanos(0, 24_000_000));
+
+        var request = new HttpRequest() {
+            @Override
+            public HttpMethod getMethod() {
+                return REQUEST.getMethod();
+            }
+
+            @Override
+            public URI getURI() {
+                return REQUEST.getURI();
+            }
+
+            @Override
+            public HttpHeaders getHeaders() {
+                return REQUEST.getHeaders();
+            }
+
+            @Override
+            public Map<String, Object> getAttributes() {
+                return Map.of(HttpLoggingInterceptor.OPERATION_ATTRIBUTE, "AppDeliveryClient#getEnvByCode");
+            }
+        };
+
+        assertThat(interceptor.intercept(request, new byte[0], (ignored, body) -> response)).isSameAs(response);
+
+        assertThat(messages()).containsExactly(
+                "--> [AppDeliveryClient#getEnvByCode] GET https://downstream.test/orders/42",
+                "--> [AppDeliveryClient#getEnvByCode] END HTTP",
+                "<-- [AppDeliveryClient#getEnvByCode] GET https://downstream.test/orders/42 200 (24ms)",
+                "<-- [AppDeliveryClient#getEnvByCode] END HTTP");
     }
 
     @Test
