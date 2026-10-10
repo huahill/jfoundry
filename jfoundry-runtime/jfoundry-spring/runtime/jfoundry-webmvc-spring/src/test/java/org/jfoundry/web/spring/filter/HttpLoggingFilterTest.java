@@ -119,8 +119,8 @@ class HttpLoggingFilterTest {
         });
 
         assertThat(messages()).containsExactly(
-                "HTTP server request: method=POST, uri=https://service.test/orders",
-                "HTTP server response: method=POST, uri=https://service.test/orders, status=201, "
+                "HTTP server request: method=POST, uri=/orders",
+                "HTTP server response: method=POST, uri=/orders, status=201, "
                         + "completion=complete, duration=25ms");
         assertThat(logs.list).allMatch(event -> event.getLevel() == Level.INFO);
         assertThat(messages()).noneMatch(message -> message.contains("access_token"));
@@ -148,7 +148,7 @@ class HttpLoggingFilterTest {
         });
 
         assertThat(messages()).containsExactly(
-                "--> POST https://service.test/orders",
+                "--> POST /orders",
                 "--> Authorization: <redacted>",
                 "--> Content-Type: application/json",
                 "--> {\"reason\":\"retry\",\"password\":\"<redacted>\"}",
@@ -326,8 +326,8 @@ class HttpLoggingFilterTest {
         })).isSameAs(failure);
 
         assertThat(messages()).containsExactly(
-                "HTTP server request: method=POST, uri=https://service.test/orders",
-                "HTTP server request failed: method=POST, uri=https://service.test/orders, completion=failed, "
+                "HTTP server request: method=POST, uri=/orders",
+                "HTTP server request failed: method=POST, uri=/orders, completion=failed, "
                         + "exception=jakarta.servlet.ServletException, duration=4ms");
     }
 
@@ -340,11 +340,11 @@ class HttpLoggingFilterTest {
 
         filter.doFilter(request, response, (actualRequest, actualResponse) -> actualRequest.startAsync());
 
-        assertThat(messages()).containsExactly("HTTP server request: method=POST, uri=https://service.test/orders");
+        assertThat(messages()).containsExactly("HTTP server request: method=POST, uri=/orders");
         ((MockAsyncContext) request.getAsyncContext()).complete();
         assertThat(messages()).containsExactly(
-                "HTTP server request: method=POST, uri=https://service.test/orders",
-                "HTTP server response: method=POST, uri=https://service.test/orders, status=200, "
+                "HTTP server request: method=POST, uri=/orders",
+                "HTTP server response: method=POST, uri=/orders, status=200, "
                         + "completion=async-complete, duration=32ms");
     }
 
