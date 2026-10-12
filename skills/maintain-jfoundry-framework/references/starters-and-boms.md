@@ -111,7 +111,8 @@ Starters are user-facing dependency entry points. They should:
 - avoid Java runtime logic;
 - remain capability-specific;
 - avoid surprising transitive dependencies;
-- make heavy capabilities explicit.
+- make heavy capabilities explicit;
+- keep each runtime's built-in local domain-event transport inside that runtime's domain-event integration. Spring `ApplicationEventPublisher` publication, Quarkus CDI delivery, and Helidon CDI delivery are the same capability, not optional starters.
 
 ## Runtime-Neutral Dependency Entry Points
 
@@ -130,8 +131,12 @@ Default Spring Boot starter:
 
 Capability starters:
 
-- `jfoundry-domain-event-spring-boot-starter`: local domain event dispatch to application `DomainEventDispatcher` beans.
-- `jfoundry-event-spring-boot-starter`: publishes those dispatched events through Spring `ApplicationEventPublisher`.
+- `jfoundry-domain-event-spring-boot-starter`: local domain-event dispatch. It registers
+  `SpringApplicationEventDispatcher`, which publishes through Spring `ApplicationEventPublisher`.
+  That matches Quarkus CDI delivery in `jfoundry-domain-event-quarkus-runtime` and Helidon CDI
+  delivery in `jfoundry-domain-event-helidon`. Another `SpringApplicationEventDispatcher` replaces
+  only that default. Other application `DomainEventDispatcher` beans are additive. Outbox remains
+  the optional extra dispatcher.
 - `jfoundry-messaging-spring-boot-starter`: messaging contracts, Spring Boot JSON support, Jackson
   serializer; it must support non-web applications without requiring a
   WebMVC or WebFlux starter.
@@ -157,7 +162,8 @@ Check:
 3. Does it pull a broker, ORM, migration tool, or scheduler into the default path?
 4. Does auto-configuration still have matching conditions?
 5. Does README or `../../../docs/i18n/en/integration/getting-started.md` need an update? If the change affects localized user guidance, update the matching `../../../docs/i18n/zh/` page too.
-6. Does the compatibility matrix need a version entry?
+6. Does the same capability already exist as built-in behavior in Quarkus or Helidon? If so, do not make only the Spring path optional.
+7. Does the compatibility matrix need a version entry?
 
 ## Release Compatibility
 

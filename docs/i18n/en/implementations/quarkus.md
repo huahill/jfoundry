@@ -61,7 +61,6 @@ artifact automatically.
 |---|---|
 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
-| `jfoundry-event-spring-boot-starter` | No Quarkus equivalent. Quarkus delivers local domain events through CDI in `jfoundry-domain-event-quarkus-runtime`. |
 | Domain Event persistence bridge | `jfoundry-domain-event-persistence-bridge-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`, `jfoundry-persistence-quarkus-runtime`, `jfoundry-persistence-jpa`, `jfoundry-persistence-jpa-quarkus-runtime`, `quarkus-hibernate-orm`, and the selected Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | The JPA composition above plus `jfoundry-outbox-jpa-quarkus-runtime` and `jfoundry-outbox-quarkus-runtime` when dispatching is required |
