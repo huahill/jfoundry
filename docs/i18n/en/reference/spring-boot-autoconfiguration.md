@@ -12,7 +12,8 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | `jfoundry-transaction-spring-boot-starter` | Spring `TransactionRunner` integration | A transaction manager; it adapts one supplied by Spring Boot or the application |
 | `jfoundry-observability-spring-boot-starter` | Micrometer Observation for eligible Outbox, Inbox, and lock operations | A telemetry exporter, collector, or direct OpenTelemetry decorator |
 | `jfoundry-lock-redisson-spring-boot-starter` | Distributed lock core, Spring `@DistributedLock` interception, Redisson adapter, Redisson Spring Boot starter | Outbox, Inbox, broker delivery |
-| `jfoundry-domain-event-spring-boot-starter` | Domain event dispatch and Spring application event publishing | Outbox persistence or broker delivery |
+| `jfoundry-domain-event-spring-boot-starter` | Domain event dispatch to application `DomainEventDispatcher` beans | Spring application event publishing, Outbox persistence, or broker delivery |
+| `jfoundry-event-spring-boot-starter` | Publication of dispatched domain events through Spring `ApplicationEventPublisher` | Outbox persistence or broker delivery |
 | `jfoundry-restclient-spring-boot-starter` | Outbound Spring `RestClient` support and configurable HTTP logging | Inbound Web MVC ProblemDetail handling |
 | `jfoundry-messaging-spring-boot-starter` | Messaging SPI, Jackson payload serializer, and Spring messaging runtime | Any `MessageSender` or broker client |
 | `jfoundry-messaging-kafka-spring-boot-starter` | Kafka `MessageSender` adapter, selected after Boot creates `KafkaOperations` | Outbox store |
@@ -34,8 +35,6 @@ technology-specific setup, use the [implementation guides](../implementations/sp
 | Property | Default | Effect |
 |----------|---------|--------|
 | `jfoundry.lock.annotation.enabled` | `true` | Enables `@DistributedLock` advisor when a `DistributedLockClient` bean exists. |
-| `jfoundry.domain.event.dispatch.enabled` | `true` | Enables application-service boundary domain event dispatch. |
-| `jfoundry.domain.event.dispatch.spring.enabled` | `true` | Enables Spring `ApplicationEventPublisher` dispatch when the Spring event adapter is present. |
 | `jfoundry.domain.event.dispatch.outbox.enabled` | `false` | Enables Outbox-backed domain event dispatch when a `DomainEventOutboxRecorder` bean exists. |
 | `jfoundry.outbox.table-name` | `jfoundry_outbox_event` | Rewrites the MyBatis-Plus Outbox physical table name. Applications must create the table. |
 | `jfoundry.web.rest-client.logging.level` | `NONE` | Selects `NONE`, `BASIC`, `HEADERS`, or `FULL` logging for Spring Boot-managed outbound `RestClient.Builder` instances. |

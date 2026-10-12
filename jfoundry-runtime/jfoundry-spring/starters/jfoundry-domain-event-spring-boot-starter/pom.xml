@@ -7,7 +7,7 @@
 
     <artifactId>jfoundry-domain-event-spring-boot-starter</artifactId>
     <name>jfoundry-domain-event-spring-boot-starter</name>
-    <description>Spring Boot starter for jfoundry domain event dispatch and Spring application event publishing.</description>
+    <description>Spring Boot starter for jfoundry domain event dispatch.</description>
 
     <dependencies>
         <dependency>
@@ -17,10 +17,6 @@
         <dependency>
             <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain-event-spring</artifactId>
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.1.0
+                             https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+    <parent>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>jfoundry-event-spring-boot-autoconfigure</artifactId>
+    <name>jfoundry-event-spring-boot-autoconfigure</name>
+    <description>Spring Boot auto-configuration that publishes dispatched domain events as Spring application events.</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
