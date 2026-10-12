@@ -25,6 +25,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 | Payload serializer adapter | `jfoundry-core/jfoundry-infrastructure/jfoundry-messaging-jackson` |
 | Outbox dispatch timer | `jfoundry-core/jfoundry-application/jfoundry-outbox-core` (`JdkOutboxWorker`) |
 | Spring Framework local domain-event adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-domain-event-spring` |
+| Spring Boot registration of that default dispatcher | `jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure` |
 | Spring transaction adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-transaction-spring` |
 | Spring messaging transport adapter | `jfoundry-runtime/jfoundry-spring/runtime/jfoundry-messaging-spring` |
 | Spring Outbox auto-configuration | `jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-outbox-spring-boot-autoconfigure` |
@@ -74,6 +75,7 @@ Use this file before adding modules, classes, annotations, rules, adapters, star
 - If a test verifies Helidon runtime wiring, middleware, Testcontainers, or Native Image behavior, put it under `jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests`.
 - If an auto-configuration condition depends on a bean created by another auto-configuration, declare the ordering explicitly and test the real upstream auto-configuration chain instead of only pre-registering the bean in a context runner.
 - If the code only selects dependencies for users, put it in a starter POM.
+- Keep a runtime's built-in local domain-event transport with that runtime's domain-event integration. `SpringApplicationEventDispatcher`, Quarkus `DelegatingCdiDomainEventDispatcher`, and Helidon `CdiDomainEventDispatcher` are the same capability. Do not split the Spring publisher into an optional starter. Outbox remains the optional extra dispatcher.
 - If the code talks to a concrete database, ORM, serializer, or scheduler but does not require Spring Boot wiring, put it in `jfoundry-infrastructure`.
 - If the code implements `MessageSender` through a concrete broker client, place it in the runtime integration that manages that client. Keep only the `MessageSender` and `SendResult` contracts runtime-neutral.
 - Keep framework-neutral tests next to the core or infrastructure implementation they verify; use the direct runtime-local integration-test module only when the behavior depends on a concrete runtime.

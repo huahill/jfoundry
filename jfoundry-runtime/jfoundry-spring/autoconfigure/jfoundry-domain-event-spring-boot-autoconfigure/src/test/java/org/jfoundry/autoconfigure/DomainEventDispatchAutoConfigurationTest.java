@@ -9,6 +9,8 @@ import org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchInterceptor;
 import org.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventScope;
+import org.jfoundry.autoconfigure.event.SpringEventDispatchAutoConfiguration;
+import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jmolecules.ddd.types.Identifier;
 import org.junit.jupiter.api.Test;
@@ -37,32 +39,60 @@ class DomainEventDispatchAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(
                     AopAutoConfiguration.class,
                     DomainEventPersistenceAutoConfiguration.class,
+                    SpringEventDispatchAutoConfiguration.class,
                     DomainEventDispatchAutoConfiguration.class))
             .withBean(ApplicationEventPublisher.class, () -> event -> {
             });
 
     @Test
-    void defaultConfigurationRegistersContextWithoutADispatcher() {
+    void defaultConfigurationRegistersSpringDispatcher() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(DomainEventScope.class);
             assertThat(context).hasSingleBean(DomainEventContext.class);
-            assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-            assertThat(context).doesNotHaveBean(DomainEventDispatchCoordinator.class);
-            assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
-            assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
+            assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+            assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+            assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+            assertThat(context).hasBean("domainEventDispatchAdvisor");
+            assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
         });
     }
 
     @Test
-    void applicationDispatcherRegistersDispatchInfrastructure() {
+    void applicationDispatcherRemainsAdditive() {
         contextRunner
                 .withUserConfiguration(ApplicationDispatcherConfiguration.class)
                 .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventDispatcher.class);
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(2);
                     assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
                     assertThat(context).hasBean("domainEventDispatchAdvisor");
-                    assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
+                });
+    }
+
+    @Test
+    void applicationSpringDispatcherReplacesTheAutoConfiguredDispatcher() {
+        contextRunner
+                .withUserConfiguration(ApplicationSpringDispatcherConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBean(SpringApplicationEventDispatcher.class))
+                            .isInstanceOf(ApplicationSpringDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(1);
+                });
+    }
+
+    @Test
+    void missingSpringDispatcherLeavesDispatchInfrastructureAbsent() {
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(SpringApplicationEventDispatcher.class))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DomainEventScope.class);
+                    assertThat(context).hasSingleBean(DomainEventContext.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
                 });
     }
 
@@ -70,10 +100,10 @@ class DomainEventDispatchAutoConfigurationTest {
     void legacyDomainEventEnabledPropertyDoesNotDisableDispatchInfrastructure() {
         contextRunner
                 .withPropertyValues("jfoundry.domain.event.enabled=false")
-                .withUserConfiguration(ApplicationDispatcherConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
                     assertThat(context).hasBean("domainEventDispatchAdvisor");
@@ -143,6 +173,23 @@ class DomainEventDispatchAutoConfigurationTest {
         DomainEventDispatcher domainEventDispatcher() {
             return events -> {
             };
+        }
+    }
+
+    @Configuration
+    static class ApplicationSpringDispatcherConfiguration {
+
+        @Bean
+        ApplicationSpringDispatcher springApplicationEventDispatcher() {
+            return new ApplicationSpringDispatcher(event -> {
+            });
+        }
+    }
+
+    static final class ApplicationSpringDispatcher extends SpringApplicationEventDispatcher {
+
+        ApplicationSpringDispatcher(ApplicationEventPublisher eventPublisher) {
+            super(eventPublisher);
         }
     }
 

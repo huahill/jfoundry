@@ -56,7 +56,6 @@ Spring Boot 启动器用于选择依赖集合，并依赖 Boot 自动配置。Qu
 |---|---|
 | `jfoundry-transaction-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime` |
 | `jfoundry-domain-event-spring-boot-starter` | `jfoundry-domain-event-quarkus-runtime` |
-| `jfoundry-event-spring-boot-starter` | 没有对应的 Quarkus 扩展。Quarkus 通过 `jfoundry-domain-event-quarkus-runtime` 的 CDI 投递本地领域事件。 |
 | 领域事件持久化桥接层 | `jfoundry-domain-event-persistence-bridge-quarkus-runtime` |
 | `jfoundry-persistence-jpa-spring-boot-starter` | `jfoundry-transaction-quarkus-runtime`、`jfoundry-persistence-quarkus-runtime`、`jfoundry-persistence-jpa`、`jfoundry-persistence-jpa-quarkus-runtime`、`quarkus-hibernate-orm` 及所选 Quarkus JDBC extension |
 | `jfoundry-outbox-jpa-spring-boot-starter` | 上述 JPA 组合，加上 `jfoundry-outbox-jpa-quarkus-runtime`；需要派发时再加 `jfoundry-outbox-quarkus-runtime` |
