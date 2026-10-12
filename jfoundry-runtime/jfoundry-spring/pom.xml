@@ -41,6 +41,7 @@
         <subproject>autoconfigure/jfoundry-transaction-spring-boot-autoconfigure</subproject>
         <subproject>autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure</subproject>
         <subproject>autoconfigure/jfoundry-domain-event-outbox-spring-boot-autoconfigure</subproject>
+        <subproject>autoconfigure/jfoundry-event-spring-boot-autoconfigure</subproject>
         <subproject>autoconfigure/jfoundry-lock-spring-boot-autoconfigure</subproject>
         <subproject>autoconfigure/jfoundry-messaging-spring-boot-autoconfigure</subproject>
         <subproject>autoconfigure/jfoundry-observability-spring-boot-autoconfigure</subproject>
@@ -57,6 +58,7 @@
         <subproject>starters/jfoundry-webmvc-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-domain-event-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-domain-event-outbox-spring-boot-starter</subproject>
+        <subproject>starters/jfoundry-event-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-messaging-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-messaging-kafka-spring-boot-starter</subproject>
         <subproject>starters/jfoundry-messaging-rocketmq-spring-boot-starter</subproject>

@@ -130,7 +130,8 @@ Default Spring Boot starter:
 
 Capability starters:
 
-- `jfoundry-domain-event-spring-boot-starter`: local domain event publication.
+- `jfoundry-domain-event-spring-boot-starter`: local domain event dispatch to application `DomainEventDispatcher` beans.
+- `jfoundry-event-spring-boot-starter`: publishes those dispatched events through Spring `ApplicationEventPublisher`.
 - `jfoundry-messaging-spring-boot-starter`: messaging contracts, Spring Boot JSON support, Jackson
   serializer; it must support non-web applications without requiring a
   WebMVC or WebFlux starter.

@@ -67,10 +67,6 @@ verify_spring_metadata \
     'jfoundry-outbox-spring-boot-autoconfigure' \
     'jfoundry.outbox.table-name'
 verify_spring_metadata \
-    'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-domain-event-spring-boot-autoconfigure' \
-    'jfoundry-domain-event-spring-boot-autoconfigure' \
-    'jfoundry.domain.event'
-verify_spring_metadata \
     'jfoundry-runtime/jfoundry-spring/autoconfigure/jfoundry-restclient-spring-boot-autoconfigure' \
     'jfoundry-restclient-spring-boot-autoconfigure' \
     'jfoundry.web.rest-client.logging.level'

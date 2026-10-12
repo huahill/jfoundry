@@ -5,25 +5,19 @@ import org.jfoundry.application.event.DomainEventContext;
 import org.jfoundry.application.event.DefaultDomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatchCoordinator;
 import org.jfoundry.application.event.DomainEventDispatcher;
-import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
 
 @AutoConfiguration
-@EnableConfigurationProperties(DomainEventDispatchProperties.class)
 @ConditionalOnClass({
         ApplicationService.class,
         DomainEventDispatcher.class,
@@ -44,8 +38,6 @@ public class DomainEventDispatchAutoConfiguration {
     }
 
     @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(prefix = "jfoundry.domain.event.dispatch", name = "enabled",
-                           havingValue = "true", matchIfMissing = true)
     static class DispatchConfiguration {
 
         @Bean
@@ -74,22 +66,6 @@ public class DomainEventDispatchAutoConfiguration {
             advisor.setPointcut(new AnnotationMatchingPointcut(ApplicationService.class, true));
             advisor.setAdviceBeanName("domainEventDispatchInterceptor");
             return advisor;
-        }
-    }
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnClass(name = "org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher")
-    @ConditionalOnProperty(prefix = "jfoundry.domain.event.dispatch", name = "enabled",
-                           havingValue = "true", matchIfMissing = true)
-    static class SpringDispatchConfiguration {
-
-        @Bean
-        @ConditionalOnMissingBean(SpringApplicationEventDispatcher.class)
-        @ConditionalOnProperty(prefix = "jfoundry.domain.event.dispatch.spring", name = "enabled",
-                               havingValue = "true", matchIfMissing = true)
-        public SpringApplicationEventDispatcher springApplicationEventDispatcher(
-                ApplicationEventPublisher eventPublisher) {
-            return new SpringApplicationEventDispatcher(eventPublisher);
         }
     }
 

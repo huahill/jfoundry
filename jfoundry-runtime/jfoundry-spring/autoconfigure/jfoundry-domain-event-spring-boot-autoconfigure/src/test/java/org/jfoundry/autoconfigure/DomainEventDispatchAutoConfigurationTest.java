@@ -11,7 +11,6 @@ import org.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventScope;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jmolecules.ddd.types.Identifier;
-import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -43,28 +42,27 @@ class DomainEventDispatchAutoConfigurationTest {
             });
 
     @Test
-    void defaultConfigurationRegistersContextAndSpringDispatcher() {
+    void defaultConfigurationRegistersContextWithoutADispatcher() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(DomainEventScope.class);
             assertThat(context).hasSingleBean(DomainEventContext.class);
-            assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
-            assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
-            assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
-            assertThat(context).hasBean("domainEventDispatchAdvisor");
-            assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
+            assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
+            assertThat(context).doesNotHaveBean(DomainEventDispatchCoordinator.class);
+            assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
+            assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
         });
     }
 
     @Test
-    void disabledDispatchKeepsContextButDoesNotRegisterDispatchInfrastructure() {
+    void applicationDispatcherRegistersDispatchInfrastructure() {
         contextRunner
-                .withPropertyValues("jfoundry.domain.event.dispatch.enabled=false")
+                .withUserConfiguration(ApplicationDispatcherConfiguration.class)
                 .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventScope.class);
-                    assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
-                    assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
+                    assertThat(context).hasSingleBean(DomainEventDispatcher.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).hasBean("domainEventDispatchAdvisor");
+                    assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
                 });
     }
 
@@ -72,26 +70,13 @@ class DomainEventDispatchAutoConfigurationTest {
     void legacyDomainEventEnabledPropertyDoesNotDisableDispatchInfrastructure() {
         contextRunner
                 .withPropertyValues("jfoundry.domain.event.enabled=false")
+                .withUserConfiguration(ApplicationDispatcherConfiguration.class)
                 .run(context -> {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
                     assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
                     assertThat(context).hasBean("domainEventDispatchAdvisor");
-                });
-    }
-
-    @Test
-    void missingSpringEventModuleDoesNotBreakMinimalStarter() {
-        contextRunner
-                .withClassLoader(new FilteredClassLoader("org.jfoundry.infrastructure.event.spring"))
-                .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventScope.class);
-                    assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
-                    assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
                 });
     }
 
@@ -102,20 +87,7 @@ class DomainEventDispatchAutoConfigurationTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
                     assertThat(context).doesNotHaveBean("domainEventContextBeanPostProcessorRegistrar");
-                });
-    }
-
-    @Test
-    void disabledSpringDispatcherDoesNotRegisterSpringPublisher() {
-        contextRunner
-                .withPropertyValues("jfoundry.domain.event.dispatch.spring.enabled=false")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).doesNotHaveBean(SpringApplicationEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
                 });
     }
 
@@ -162,6 +134,16 @@ class DomainEventDispatchAutoConfigurationTest {
         repository.add(TestAggregate.create("order-1"));
 
         assertThat(interceptedCalls).hasValue(1);
+    }
+
+    @Configuration
+    static class ApplicationDispatcherConfiguration {
+
+        @Bean
+        DomainEventDispatcher domainEventDispatcher() {
+            return events -> {
+            };
+        }
     }
 
     @Configuration

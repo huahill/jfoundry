@@ -81,7 +81,8 @@ database, delivery, scheduling, and distributed-lock choices.
 | Need | Add | Boundary |
 |---|---|---|
 | Local application transactions | `jfoundry-transaction-spring-boot-starter` | Supplies Spring `TransactionRunner` integration; Spring Boot or the application provides the transaction manager. |
-| Local domain-event listeners | `jfoundry-domain-event-spring-boot-starter` | Publishes domain events through Spring application events; it is not an Outbox or broker. |
+| Local domain-event dispatch | `jfoundry-domain-event-spring-boot-starter` | Dispatches to application `DomainEventDispatcher` beans. It does not publish Spring application events, and it is not an Outbox or broker. |
+| Spring application-event listeners | `jfoundry-event-spring-boot-starter` | Publishes dispatched domain events through Spring `ApplicationEventPublisher`. |
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
@@ -108,10 +109,7 @@ a defined ownership rule. See [application transactions](../capabilities/applica
 
 How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
 
-The event starter activates application-service domain-event dispatch and publishes each dispatched
-event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
-process. A `@TransactionalEventListener` selects the desired transaction phase, such as
-`AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
+The domain-event starter activates application-service domain-event dispatch. Add `jfoundry-event-spring-boot-starter` when those dispatched events should also be published through Spring's `ApplicationEventPublisher`. An ordinary listener then observes publication in process. A `@TransactionalEventListener` selects the desired transaction phase, such as `AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
 not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
 fact with `recordEvent(...)`. `DomainEventContext.register(...)` is legal only inside an
 `@ApplicationService` invocation; outside that scope it fails immediately.
@@ -125,8 +123,7 @@ independent; applications can also register through `DomainEventContext` directl
 When persistence registers the aggregate inside an active Spring transaction, the Domain Event Outbox
 combination's Outbox dispatcher
 (`BeforeCommitDomainEventDispatcher`) writes in that transaction's `beforeCommit` phase so the
-aggregate change and any Outbox row commit atomically. In-process Spring event publication happens
-in `afterCommit`. The interceptor does not dispatch when transaction events exist. Without an
+aggregate change and any Outbox row commit atomically. When the Spring event starter is selected, that publication happens in `afterCommit`. The interceptor does not dispatch when transaction events exist. Without an
 active transaction, the runtime dispatches the full batch at the successful outermost
 `@ApplicationService` boundary. Application business code does not call `drainEvents()` in this
 automatic path.
