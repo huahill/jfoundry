@@ -228,8 +228,11 @@ exceptions, as described in their implementation guides.
 `jfoundry-restclient-spring` is the opt-in Spring integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
-`HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLevel` and `HttpLoggingFormat` from
+`HttpResponseException` that retains the complete original response body unchanged. Its diagnostic message
+appends a raw preview of that body, limited to 400 bytes or 200 characters, without parsing or redacting
+it. The preview is not a caller-facing problem detail. HTTP diagnostic logs keep their separate redaction
+policy. Transport and response-decoding failures become an `HttpRequestException` with a safe failure kind.
+Import `HttpLoggingLevel` and `HttpLoggingFormat` from
 `org.jfoundry.http`, Spring's logging support from `org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
 the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
 locations have no forwarding aliases.

@@ -178,8 +178,13 @@ Ant 风格 `*`、`**`、`?` pattern；Spring 会先移除 Servlet context path�
 
 `jfoundry-restclient-spring` 为选定的出站 `RestClient` 调用提供显式集成。只对该集成拥有的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行调用。非成功响应会转换为
-只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
-`HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。
+`HttpResponseException`。异常原样保留完整的响应正文字节，不解析、不改写。诊断消息另附一段原文预览，最多 400 字节或
+200 个字符，不脱敏。这段预览不是返回给调用方的问题详情。HTTP 诊断日志仍使用各自的脱敏策略。传输和响应解码失败会转换为
+带有安全失败类别的 `HttpRequestException`，同时将原始异常保留为 cause，供服务端诊断。
+
+这种分类只属于 Spring `RestClient`。Quarkus 与 Helidon 只为 MicroProfile REST Client 注册诊断日志，HTTP
+错误仍由该客户端处理。非成功响应保持客户端自己的异常，通常是 `jakarta.ws.rs.WebApplicationException`；传输失败
+保持为 `jakarta.ws.rs.ProcessingException`。
 
 API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 与 `HttpLoggingFormat` 位于 `org.jfoundry.http`，Spring 专属的
 `HttpLoggingSupport` 位于 `org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，

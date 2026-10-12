@@ -191,7 +191,9 @@ URI queries, user information, and fragments are never logged. Sensitive headers
 fields are redacted case-insensitively, and body capture is capped at 8 KiB. Client duration ends when
 response headers arrive, while body logs appear after consumption or close. Jakarta REST has no
 portable transport-failure callback, so this adapter does not depend on Helidon-private hooks to
-claim Spring-equivalent failure logging.
+claim Spring-equivalent failure logging. It also does not translate a non-success response into
+`HttpResponseException` or a transport failure into `HttpRequestException`; those types belong to
+Spring `RestClient`.
 
 ## Request Correlation
 

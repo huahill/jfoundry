@@ -156,8 +156,9 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 
 `jfoundry-restclient-spring` 为出站 `RestClient` 调用提供显式 Spring 集成。只对拥有该集成的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
-只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
-`HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
+`HttpResponseException`。异常原样保留完整的响应正文字节，不解析、不改写。诊断消息另附一段原文预览，最多 400 字节或
+200 个字符，不脱敏。这段预览不是返回给调用方的问题详情。HTTP 诊断日志仍使用各自的脱敏策略。传输和响应解码失败会转换为
+带有安全失败类别的 `HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
 `org.jfoundry.http.spring` 导入，执行链拦截器从
 `org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
 `org.jfoundry.web.spring` 位置不提供转发别名。

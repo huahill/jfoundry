@@ -365,7 +365,9 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 
 所有 URI 都会移除 query、user info 与 fragment。敏感 header 和嵌套 JSON 字段以不区分大小写的方式脱敏，
 `FULL` 最多保留 8 KiB。客户端时长在响应 header 到达时结束，响应 body 日志在消费或关闭后出现。Jakarta REST
-没有可移植的传输失败回调，因此该适配器不会依赖运行时私有 hook 来声称与 Spring 相同的客户端失败日志。
+没有可移植的传输失败回调，因此该适配器不会依赖运行时私有 hook 来声称与 Spring 相同的客户端失败日志。它也不会把
+非成功响应转换成 `HttpResponseException`，或把传输失败转换成 `HttpRequestException`；这两种异常只属于 Spring
+`RestClient`。
 
 ## PostgreSQL 中间件验证
 

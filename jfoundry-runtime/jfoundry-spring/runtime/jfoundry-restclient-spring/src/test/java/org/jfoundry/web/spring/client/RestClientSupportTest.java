@@ -12,6 +12,7 @@ import org.springframework.web.client.RestClientException;
 
 import javax.net.ssl.SSLException;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 
@@ -30,8 +31,11 @@ class RestClientSupportTest {
         RestClient client = RestClientSupport.configure(builder).build();
 
         assertThatThrownBy(() -> client.get().uri("https://downstream.test/orders/42").retrieve().toBodilessEntity())
-                .isInstanceOfSatisfying(HttpResponseException.class,
-                        exception -> assertThat(exception.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value()));
+                .isInstanceOfSatisfying(HttpResponseException.class, exception -> {
+                    assertThat(exception.statusCode()).isEqualTo(HttpStatus.NOT_FOUND.value());
+                    assertThat(exception.body()).asString(StandardCharsets.UTF_8).isEqualTo("ignored response body");
+                    assertThat(exception).hasMessage("HTTP response failed with status 404\nignored response body");
+                });
         server.verify();
     }
 
