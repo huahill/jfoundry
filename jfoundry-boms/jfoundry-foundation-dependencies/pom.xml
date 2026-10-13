@@ -57,7 +57,7 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Apache Commons -->
-    <commons-codec.version>1.22.1</commons-codec.version>
+    <commons-codec.version>1.23.0</commons-codec.version>
     <commons-collections4.version>4.6.0</commons-collections4.version>
     <commons-io.version>2.22.0</commons-io.version>
     <commons-lang3.version>3.21.0</commons-lang3.version>
