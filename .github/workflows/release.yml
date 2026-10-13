@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload Maven Central deployment details
         if: ${{ always() && steps.central_deployment_evidence.outcome == 'success' }}
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ inputs.release_tag }}-central-deployment
           path: |
@@ -341,7 +341,7 @@ jobs:
           find release-evidence -type f -print0 | sort -z | xargs -0 shasum -a 256 > release-evidence/SHA256SUMS
 
       - name: Upload release evidence
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ inputs.release_tag }}-release-evidence
           path: release-evidence
