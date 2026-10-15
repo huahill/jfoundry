@@ -20,6 +20,13 @@ updates:
       semver-patch-days: 0
     open-pull-requests-limit: 10
     rebase-strategy: disabled
+    # Kafka 4.4 moved AppInfoParser into org.apache.kafka.common.utils.internals.
+    # Quarkus native substitutions still target the previous class and fail the
+    # native jobs. Ignore 4.4.x until a Quarkus release that fixes
+    # https://github.com/quarkusio/quarkus/issues/57490 is consumed here.
+    ignore:
+      - dependency-name: "org.apache.kafka:kafka-clients"
+        versions: ["4.4.x"]
     groups:
       jfoundry-spring-boot-platform:
         patterns:
