@@ -5,6 +5,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,16 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+        assertThat(childText(child(parent.getDocumentElement(), "parent"), "relativePath"))
+                .as("an empty relativePath keeps the Spring parent external to Dependabot")
+                .isEmpty();
+        assertThat(Files.readString(Path.of("pom.xml"))).doesNotContain("<modules>");
+        assertThat(Files.readString(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml")))
+                .containsOnlyOnce("<spring-boot.version>" + bomVersion + "</spring-boot.version>");
+        assertThat(Files.readString(Path.of("src", "test", "dependabot-reactor", "pom.xml")))
+                .contains("<modelVersion>4.0.0</modelVersion>")
+                .contains("<module>../../..</module>")
+                .contains("<module>../../../../jfoundry-spring-boot-dependencies</module>");
     }
 
     @Test
@@ -251,8 +262,41 @@ class SpringBootParentPomTest {
         String buildVersion = childText(child(build.getDocumentElement(), "properties"), "quarkus.version");
         String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
         assertThat(buildVersion).as("Quarkus build parent and consumer BOM versions").isEqualTo(bomVersion);
-        assertThat(childText(child(build.getDocumentElement(), "parent"), "relativePath"))
-                .isEqualTo("../../pom.xml");
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "pom.xml")))
+                .containsOnlyOnce("<quarkus.version>" + buildVersion + "</quarkus.version>")
+                .doesNotContain("<modules>");
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml")))
+                .containsOnlyOnce("<quarkus.version>" + bomVersion + "</quarkus.version>")
+                .doesNotContain("<parent>");
+        assertThat(child(bom.getDocumentElement(), "parent")).isNull();
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "src", "test", "dependabot-reactor", "pom.xml")))
+                .contains("<modelVersion>4.0.0</modelVersion>")
+                .contains("<module>../../..</module>")
+                .contains("<module>../../../../jfoundry-quarkus-dependencies</module>");
+        assertThat(Files.readString(Path.of("..", "..", "pom.xml"))).doesNotContain("dependabot-reactor");
+        java.util.List<String> dependabotDirectories = Files.readAllLines(Path.of("..", "..", ".github", "dependabot.yml"))
+                .stream()
+                .map(String::trim)
+                .filter(line -> line.startsWith("- \""))
+                .map(line -> line.substring(3, line.length() - 1))
+                .toList();
+        assertThat(dependabotDirectories).contains(
+                "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor",
+                "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor");
+        assertThat(dependabotDirectories).doesNotContain(
+                "/jfoundry-boms/*",
+                "/jfoundry-boms/jfoundry-quarkus-build",
+                "/jfoundry-boms/jfoundry-quarkus-dependencies",
+                "/jfoundry-boms/jfoundry-spring-boot-parent",
+                "/jfoundry-boms/jfoundry-spring-boot-dependencies",
+                "/jfoundry-runtime/*");
+        Element quarkusParent = child(build.getDocumentElement(), "parent");
+        assertThat(childText(quarkusParent, "relativePath")).isEqualTo("../../pom.xml");
+        assertThat(child(quarkusParent, "groupId"))
+                .as("parent coordinates would make Dependabot adopt the root POM")
+                .isNull();
+        assertThat(child(quarkusParent, "artifactId")).isNull();
+        assertThat(child(quarkusParent, "version")).isNull();
         assertThat(managedPlugins(build)).contains(
                 new Coordinate("io.quarkus", "quarkus-maven-plugin", "${quarkus.version}"),
                 new Coordinate("io.quarkus", "quarkus-extension-maven-plugin", "${quarkus.version}"));
