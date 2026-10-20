@@ -478,10 +478,6 @@
                     <artifactId>mybatis-plus-jsqlparser</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>com.baomidou</groupId>
-                    <artifactId>mybatis-plus-spring-boot-native-image</artifactId>
-                </dependency>
-                <dependency>
                     <groupId>org.postgresql</groupId>
                     <artifactId>postgresql</artifactId>
                 </dependency>

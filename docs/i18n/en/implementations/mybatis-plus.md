@@ -52,6 +52,11 @@ Choose `jfoundry-outbox-mybatis-plus-spring-boot-starter` for the built-in `Outb
 explicit choices; `jfoundry-persistence-mybatis-plus-spring-boot-starter` assembles business persistence only
 and does not add either store. SQL templates remain application-owned migrations.
 
+Each of these three starters also brings `mybatis-plus-spring-boot-native-image`. Its version is managed by
+`jfoundry-spring-boot-dependencies`, not by the application. The artifact's auto-configuration activates only
+during Spring AOT processing, so it does not change ordinary JVM startup. Do not declare that Baomidou
+coordinate directly.
+
 Under Spring Boot, the default Outbox dispatcher and Inbox template use `TransactionRunner` for
 their database phases. This is required even though individual MyBatis mapper calls can otherwise
 commit independently: the handler and Inbox `PROCESSED` transition must remain atomic.

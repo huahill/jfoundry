@@ -28,6 +28,8 @@ jfoundry MyBatis-Plus 运行时集成；不要从运行时无关适配器推导�
 
 内置 `OutboxMessageStore` 选择 `jfoundry-outbox-mybatis-plus-spring-boot-starter`，内置 `InboxMessageStore` 选择 `jfoundry-inbox-mybatis-plus-spring-boot-starter`。两者均为显式选择；`jfoundry-persistence-mybatis-plus-spring-boot-starter` 只装配业务持久化，不会引入任一存储。SQL 模板仍由业务应用迁移流程拥有。
 
+这三个启动器还会引入 `mybatis-plus-spring-boot-native-image`，版本由 `jfoundry-spring-boot-dependencies` 管理，而不是由应用声明。该构件的自动配置只在 Spring AOT 处理期间生效，因此不会改变普通 JVM 启动。不要直接声明这个 Baomidou 坐标。
+
 在 Spring Boot 下，默认 Outbox 派发器和 Inbox 模板使用 `TransactionRunner` 包裹各自的数据库阶段。即使单次 MyBatis 映射器调用可以自行提交，这仍不可省略：处理器与 Inbox 的 `PROCESSED` 状态迁移必须保持原子性。
 
 运行时装配和用户替换行为见 [Spring Boot](spring-boot.md)，条件和配置项见[参考](../reference/spring-boot-autoconfiguration.md)。
