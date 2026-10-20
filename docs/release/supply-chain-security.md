@@ -28,16 +28,28 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 ## Dependabot Update Governance
 
 - Dependabot version updates read Maven Central, not GitHub Releases. The Maven
-  updater also follows only `<modules>` lists, so Maven 4.1 `<subprojects>`
-  aggregators are invisible unless their manifests are named in `directories`.
-  Keep one Maven update block pointed at `/` and `/jfoundry-boms/*` so plugin
-  pins and consumer BOMs stay in scope. Do not scan `/jfoundry-runtime/*`:
-  those aggregators use Maven 4.1 inferred parents and `${project.version}`
-  imports, which Dependabot cannot evaluate. Keep Quarkus plugin and processor
-  pins on `jfoundry-quarkus-build` under `jfoundry-boms/`, next to the consumer
-  BOM, so the `jfoundry-quarkus-platform` group can update both in one pull
-  request. The Quarkus runtime aggregator must not redeclare `quarkus.version`.
-  Do not dual-write `<modules>` to compensate, and do not glob every leaf module.
+  updater follows only `<modules>` lists, and ordinary groups do not cross directory
+  jobs. Maven 4.1 `<subprojects>` aggregators are therefore invisible unless their
+  manifests are named in `directories`. Keep one Maven update block pointed at `/`
+  and an explicit `jfoundry-boms` manifest list. Do not scan `/jfoundry-runtime/*`:
+  those aggregators use Maven 4.1 inferred parents and `${project.version}` imports,
+  which Dependabot cannot evaluate. Do not use `/jfoundry-boms/*`: that wildcard
+  creates one job per BOM directory and splits a platform pair into separate pull
+  requests. Quarkus keeps `quarkus.version` on `jfoundry-quarkus-build` and
+  `jfoundry-quarkus-dependencies`; Spring Boot keeps the parent version on
+  `jfoundry-spring-boot-parent` and `spring-boot.version` on
+  `jfoundry-spring-boot-dependencies`. Each pair is linked by an unpublished model
+  4.0.0 reactor at `src/test/dependabot-reactor/pom.xml`, and that reactor is the
+  only Dependabot directory for the pair. Those reactors are excluded from the
+  Maven 4.1 source-model check, are not release subprojects, and are not published.
+  The Quarkus build parent must keep a relativePath-only parent, without `groupId`,
+  `artifactId`, or `version`. Dependabot fetches that path, rejects it as the parent,
+  and does not adopt the root POM. The Spring Boot parent must keep an empty
+  `<relativePath/>` so its external parent is not resolved as a local POM.
+  Do not add `<modules>` to a 4.1.0 source POM, do not parent a published BOM from
+  its build parent, and do not redeclare `quarkus.version` on the Quarkus runtime
+  aggregator. Helidon and Spring Cloud each have one platform version source, so
+  they stay as single manifest directories.
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
   plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven

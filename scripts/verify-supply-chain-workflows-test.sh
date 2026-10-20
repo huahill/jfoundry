@@ -43,7 +43,13 @@ updates:
   - package-ecosystem: maven
     directories:
       - "/"
-      - "/jfoundry-boms/*"
+      - "/jfoundry-boms/jfoundry-dependencies"
+      - "/jfoundry-boms/jfoundry-foundation-dependencies"
+      - "/jfoundry-boms/jfoundry-helidon-dependencies"
+      - "/jfoundry-boms/jfoundry-modules-dependencies"
+      - "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-cloud-dependencies"
     schedule:
       interval: weekly
     cooldown:
@@ -397,7 +403,7 @@ config["updates"][0].pop("directories", None)
 config["updates"][0]["directory"] = "/"
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 HEREDOC
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan / and /jfoundry-boms/*"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan / and the supported jfoundry-boms manifests"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'

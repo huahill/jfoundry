@@ -15,6 +15,15 @@ create a published parent or inheritance boundary.
 - `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
   pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
   BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
+- Dependabot follows `<modules>` only and cannot group updates across directory jobs. Do not dual-write
+  `<modules>` into `jfoundry-quarkus-build` or `jfoundry-spring-boot-parent`, and do not parent a published
+  BOM from either of them. Each platform instead has an unpublished model 4.0.0 reactor at
+  `src/test/dependabot-reactor/pom.xml`. The Quarkus reactor modules are `jfoundry-quarkus-build` and
+  `jfoundry-quarkus-dependencies`; the Spring Boot reactor modules are `jfoundry-spring-boot-parent` and
+  `jfoundry-spring-boot-dependencies`. Dependabot scans those reactors instead of the split directories.
+  Do not add parent coordinates to `jfoundry-quarkus-build`; its parent stays relativePath-only so
+  Dependabot discards the root POM. Keep `<relativePath/>` empty on `jfoundry-spring-boot-parent`.
+  Helidon and Spring Cloud have one version source each and do not need a reactor.
 - Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
   line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
