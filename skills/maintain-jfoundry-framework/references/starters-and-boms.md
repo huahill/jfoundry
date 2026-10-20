@@ -7,8 +7,8 @@ create a published parent or inheritance boundary.
 
 - `jfoundry-parent` is the repository's internal build parent. It imports the core
   `jfoundry-dependencies` BOM for internal modules and must not be used as a consumer-facing BOM
-  parent. It may import JUnit, Jackson, and OpenTelemetry BOMs for compiling JFoundry itself, but must not pin those GAs
-  directly, or Maven would override the nearer runtime BOM.
+  parent. It may import JUnit, Jackson, OpenTelemetry, SLF4J, Mockito, and AssertJ BOMs for compiling JFoundry itself, but must not pin those GAs
+  directly, or Maven would override the nearer runtime BOM. Give those BOM versions property names the runtime platform does not use.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
   the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
   `jfoundry-dependencies`.

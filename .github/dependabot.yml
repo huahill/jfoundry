@@ -20,10 +20,6 @@ updates:
       semver-patch-days: 0
     open-pull-requests-limit: 10
     rebase-strategy: disabled
-    # kafka-clients 4.4.x moves AppInfoParser and breaks Quarkus native
-    # substitutions until https://github.com/quarkusio/quarkus/issues/57490 is
-    # consumed. Maven updates must not define ignore rules; close that pull
-    # request instead.
     groups:
       jfoundry-spring-boot-platform:
         patterns:

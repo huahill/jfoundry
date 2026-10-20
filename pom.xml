@@ -64,22 +64,13 @@
         <argLine/>
         <mockito.javaagent.argLine/>
 
-        <!-- Versions for framework-neutral module parents; do not pin these GAs here. -->
+        <!-- Framework-neutral versions. Import BOMs here; do not pin coordinates a runtime BOM owns. -->
         <junit-jupiter.version>6.1.3</junit-jupiter.version>
         <jackson3.version>3.2.4</jackson3.version>
-        <mockito.version>5.24.0</mockito.version>
-        <byte-buddy.version>1.18.15</byte-buddy.version>
-        <assertj.version>3.27.7</assertj.version>
-        <slf4j.version>2.0.20</slf4j.version>
+        <mockito-bom.version>5.24.0</mockito-bom.version>
+        <assertj-bom.version>3.27.7</assertj-bom.version>
+        <slf4j-bom.version>2.0.20</slf4j-bom.version>
         <opentelemetry.version>1.67.0</opentelemetry.version>
-        <kafka-clients.version>4.3.1</kafka-clients.version>
-        <rabbitmq-amqp-client.version>5.37.0</rabbitmq-amqp-client.version>
-        <rocketmq-client.version>5.5.1</rocketmq-client.version>
-        <hibernate.version>7.4.13.Final</hibernate.version>
-        <h2.version>2.5.252</h2.version>
-        <mysql-connector-j.version>26.7.0</mysql-connector-j.version>
-        <postgresql.version>42.7.14</postgresql.version>
-        <snakeyaml.version>2.7</snakeyaml.version>
     </properties>
 
     <subprojects>
@@ -135,74 +126,25 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-bom</artifactId>
+                <version>${slf4j-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy</artifactId>
-                <version>${byte-buddy.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>net.bytebuddy</groupId>
-                <artifactId>byte-buddy-agent</artifactId>
-                <version>${byte-buddy.version}</version>
+                <artifactId>mockito-bom</artifactId>
+                <version>${mockito-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.kafka</groupId>
-                <artifactId>kafka-clients</artifactId>
-                <version>${kafka-clients.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.rabbitmq</groupId>
-                <artifactId>amqp-client</artifactId>
-                <version>${rabbitmq-amqp-client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.rocketmq</groupId>
-                <artifactId>rocketmq-client</artifactId>
-                <version>${rocketmq-client.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.hibernate.orm</groupId>
-                <artifactId>hibernate-core</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.mysql</groupId>
-                <artifactId>mysql-connector-j</artifactId>
-                <version>${mysql-connector-j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.postgresql</groupId>
-                <artifactId>postgresql</artifactId>
-                <version>${postgresql.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
+                <artifactId>assertj-bom</artifactId>
+                <version>${assertj-bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

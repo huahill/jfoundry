@@ -25,6 +25,8 @@
         <dependency>
             <groupId>com.rabbitmq</groupId>
             <artifactId>amqp-client</artifactId>
+            <!-- Helidon does not manage this client. Keep the version on this adapter only. -->
+            <version>5.37.0</version>
         </dependency>
         <dependency>
             <groupId>org.jspecify</groupId>
