@@ -40,7 +40,10 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
                 new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
                 new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"),
-                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"));
+                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"),
+                new Coordinate("org.slf4j", "slf4j-bom", "${slf4j-bom.version}"),
+                new Coordinate("org.mockito", "mockito-bom", "${mockito-bom.version}"),
+                new Coordinate("org.assertj", "assertj-bom", "${assertj-bom.version}"));
     }
 
     @Test
@@ -50,7 +53,22 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
         assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
         assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isFalse();
-        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(document, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(document, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(document, "org.hibernate.orm", "hibernate-core")).isFalse();
+        assertThat(managesDependency(document, "com.h2database", "h2")).isFalse();
+        assertThat(managesDependency(document, "com.mysql", "mysql-connector-j")).isFalse();
+        assertThat(managesDependency(document, "org.postgresql", "postgresql")).isFalse();
+        assertThat(managesDependency(document, "org.yaml", "snakeyaml")).isFalse();
+        assertThat(managesDependency(document, "org.slf4j", "slf4j-api")).isFalse();
+        assertThat(managesDependency(document, "org.mockito", "mockito-core")).isFalse();
+        assertThat(managesDependency(document, "net.bytebuddy", "byte-buddy")).isFalse();
+        assertThat(managesDependency(document, "org.assertj", "assertj-core")).isFalse();
+        assertThat(property(document, "slf4j.version")).isNull();
+        assertThat(property(document, "mockito.version")).isNull();
+        assertThat(property(document, "hibernate.version")).isNull();
+        assertThat(property(document, "kafka-clients.version")).isNull();
     }
 
     @Test
@@ -144,6 +162,9 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "com.rabbitmq", "amqp-client")).isFalse();
         assertThat(managesDependency(boot, "org.apache.rocketmq", "rocketmq-client")).isFalse();
         assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        Document springReactor = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "pom.xml"));
+        assertThat(managesDependency(springReactor, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+        assertThat(managesDependency(springReactor, "org.apache.kafka", "kafka-clients")).isFalse();
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
@@ -246,8 +267,17 @@ class SpringBootParentPomTest {
         assertThat(property(runtime, "helidon.version")).isNull();
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
+        assertThat(managesDependency(runtime, "org.hibernate.orm", "hibernate-core")).isTrue();
+        assertThat(managesDependency(runtime, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(runtime, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(property(runtime, "hibernate.version")).isNull();
         assertThat(importedBoms(bom)).containsExactly(
                 new Coordinate("io.helidon", "helidon-dependencies", "${helidon.version}"));
+        Document rabbitmq = document(Path.of(
+                "..", "..", "jfoundry-runtime", "jfoundry-helidon",
+                "jfoundry-messaging-rabbitmq-helidon", "pom.xml"));
+        assertThat(childText(dependency(rabbitmq, "com.rabbitmq", "amqp-client"), "version"))
+                .isEqualTo("5.37.0");
     }
 
     @Test
