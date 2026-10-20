@@ -308,7 +308,9 @@ including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifie
 claim applies to the supported Spring Boot and MyBatis-Plus versions with PostgreSQL; it does not certify
 JPA, brokers, or Redisson. Exact tested versions are recorded in the
 [compatibility matrix](../../../release/compatibility.md). It also verifies the built-in MyBatis-Plus Outbox and Inbox
-stores through append, paginated claim, idempotent claim, and processed-state operations:
+stores through append, paginated claim, idempotent claim, and processed-state operations. The persistence, Outbox,
+and Inbox starters supply `mybatis-plus-spring-boot-native-image`; this profile does not declare that Baomidou
+coordinate:
 
 ```bash
 ./mvnw -B \

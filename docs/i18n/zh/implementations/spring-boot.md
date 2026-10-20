@@ -221,7 +221,8 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 `createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
 PostgreSQL；不认证 JPA、消息代理或 Redisson。精确测试版本记录在
 [兼容矩阵](../../../release/compatibility.md)。此外，它还会
-通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
+通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储。
+持久化、Outbox 和 Inbox 启动器提供 `mybatis-plus-spring-boot-native-image`；该配置档不再声明这个 Baomidou 坐标：
 
 ```bash
 ./mvnw -B \

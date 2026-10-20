@@ -156,6 +156,7 @@ class SpringBootParentPomTest {
         Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
+        assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isFalse();
         assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isFalse();
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
@@ -166,6 +167,7 @@ class SpringBootParentPomTest {
         assertThat(property(foundation, "jmolecules-integrations.version")).isNull();
 
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isTrue();
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
@@ -183,6 +185,8 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         for (Document springLine : List.of(boot, cloud)) {
             assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
+                    .isEqualTo(springLine == boot);
+            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
                     .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
             assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
@@ -342,6 +346,24 @@ class SpringBootParentPomTest {
                     .satisfies(it -> {
                         assertThat(childText(it, "scope")).isEqualTo("provided");
                         assertThat(childText(it, "optional")).isEqualTo("true");
+                    });
+        }
+    }
+
+    @Test
+    void mybatisPlusStartersBringTheNativeImageArtifactWithoutAVersion() throws Exception {
+        Path starters = Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "starters");
+        for (String artifactId : List.of(
+                "jfoundry-persistence-mybatis-plus-spring-boot-starter",
+                "jfoundry-outbox-mybatis-plus-spring-boot-starter",
+                "jfoundry-inbox-mybatis-plus-spring-boot-starter")) {
+            Document starter = document(starters.resolve(artifactId).resolve("pom.xml"));
+            assertThat(dependency(starter, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
+                    .isNotNull()
+                    .satisfies(nativeImage -> {
+                        assertThat(child(nativeImage, "version")).isNull();
+                        assertThat(child(nativeImage, "scope")).isNull();
+                        assertThat(child(nativeImage, "optional")).isNull();
                     });
         }
     }
