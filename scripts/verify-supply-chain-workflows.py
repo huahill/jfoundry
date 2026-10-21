@@ -119,8 +119,13 @@ def verify_dependabot(root: Path) -> None:
             fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
     if maven[0].get("rebase-strategy") != "disabled":
         fail(f"{prefix}: Maven updates must disable automatic rebasing")
-    if "ignore" in maven[0]:
-        fail(f"{prefix}: Maven updates must not define ignore rules")
+    # The only allowed ignore rule keeps Dependabot from proposing Helidon Tip releases whose
+    # JDK-aligned major version names a JDK above the Java baseline compiled into this reactor.
+    expected_ignore = [
+        {"dependency-name": "io.helidon:helidon-dependencies", "versions": [">= 27"]},
+    ]
+    if maven[0].get("ignore") != expected_ignore:
+        fail(f"{prefix}: Maven updates must ignore exactly the JDK-aligned Helidon Tip line (io.helidon:helidon-dependencies >= 27) above the Java baseline")
     expected_directories = [
         "/",
         "/jfoundry-boms/jfoundry-dependencies",

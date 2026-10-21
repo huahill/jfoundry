@@ -23,7 +23,9 @@ create a published parent or inheritance boundary.
   `jfoundry-spring-boot-dependencies`. Dependabot scans those reactors instead of the split directories.
   Do not add parent coordinates to `jfoundry-quarkus-build`; its parent stays relativePath-only so
   Dependabot discards the root POM. Keep `<relativePath/>` empty on `jfoundry-spring-boot-parent`.
-  Helidon and Spring Cloud have one version source each and do not need a reactor.
+  Helidon and Spring Cloud have one version source each and do not need a reactor. Helidon keeps
+  the only Maven ignore rule: `io.helidon:helidon-dependencies` ignores JDK-aligned Tip versions
+  `>= 27` while the Java baseline is 25; move the floor in the same change that raises the baseline.
 - Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
   line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
