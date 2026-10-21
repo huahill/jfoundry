@@ -72,9 +72,15 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
 - Only Maven-only patch pull requests may be queued for squash auto-merge, and they merge only after
   Dependency Review and the `Merge gate` succeed. Minor and major Maven updates require manual review.
   The complete supported runtime matrix remains the compatibility boundary for runtime changes.
-- Dependabot does not ignore runtime platform dependency-management updates. Spring Boot, Spring
-  Cloud, Spring Cloud Alibaba, Quarkus, and Helidon remain visible to dependency update and security
-  monitoring.
+- Runtime platform dependency-management updates are not ignored, with one baseline-bound exception.
+  Helidon's upstream line is JDK-aligned: Tip releases at major 27 and later require the JDK their
+  major number names, above this repository's Java 25 baseline, while Helidon 4.5 remains the
+  supported long-term line. `io.helidon:helidon-dependencies` therefore ignores versions `>= 27`;
+  Helidon 4.5 LTS updates stay visible, and the ignore floor must be raised or removed in the same
+  change that raises the Java baseline. `scripts/verify-supply-chain-workflows.py` pins this as the
+  only ignore rule. Spring Boot, Spring Cloud, Spring Cloud Alibaba, Quarkus, and Helidon otherwise
+  remain visible to dependency update and security monitoring; ignore rules never suppress security
+  updates.
 - CodeQL `init` and `analyze` updates are atomic: they are upgraded together in the same pull request.
   GitHub Actions updates, including CodeQL updates, are never eligible for Maven auto-merge.
 

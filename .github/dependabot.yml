@@ -47,6 +47,13 @@ updates:
       jfoundry-maven-minors:
         patterns: ["*"]
         update-types: [minor]
+    # Helidon Tip releases are JDK-aligned: major 27 requires JDK 27, and this repository
+    # builds on the Java 25 baseline with the Helidon 4.5 LTS line. Ignore Tip releases at
+    # or above 27 until the Java baseline catches up, and raise this floor in the same
+    # change that raises the baseline.
+    ignore:
+      - dependency-name: io.helidon:helidon-dependencies
+        versions: [">= 27"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -21,6 +21,12 @@ Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the appli
 the version source for that part of the combination. Boot-only applications use Spring Boot 4.1.x and
 must not combine the Boot-only and Cloud runtime BOMs.
 
+Helidon's upstream line is JDK-aligned: Tip releases at major 27 and later require the JDK their
+major number names, while Helidon 4.5 remains the supported long-term line. The Java 25 baseline
+therefore stays on Helidon MP 4.5.x, and `.github/dependabot.yml` ignores
+`io.helidon:helidon-dependencies` versions `>= 27` so Tip releases are not proposed. Raise or remove
+that ignore floor in the same change that raises the Java baseline.
+
 ## Toolchain Baselines
 
 | Area | Supported baseline |
