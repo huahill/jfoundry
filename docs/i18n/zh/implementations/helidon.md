@@ -160,7 +160,9 @@ MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.
 
 日志不会包含 URI query、user info 或 fragment。敏感 header 与嵌套 JSON 字段会以不区分大小写的方式脱敏，
 body 捕获上限为 8 KiB。客户端时长在响应 header 到达时结束，body 日志在消费或关闭后出现。Jakarta REST
-没有可移植的传输失败回调，因此该适配器不会依赖 Helidon 私有 hook 来声称与 Spring 相同的失败日志。
+没有可移植的传输失败回调，因此该适配器不会依赖 Helidon 私有 hook 来声称与 Spring 相同的失败日志。它也不会把
+非成功响应转换成 `HttpResponseException`，或把传输失败转换成 `HttpRequestException`；这两种异常只属于 Spring
+`RestClient`。
 
 ## 请求关联
 

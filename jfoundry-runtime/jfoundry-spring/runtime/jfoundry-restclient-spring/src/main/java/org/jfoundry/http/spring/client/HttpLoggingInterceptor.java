@@ -33,6 +33,9 @@ import org.springframework.http.client.ClientHttpResponse;
 /// The `duration` field ends when response headers are available and excludes response-body consumption and decoding.
 public final class HttpLoggingInterceptor implements ClientHttpRequestInterceptor {
 
+    /// Request attribute carrying the caller's operation name, such as `MksClient#createCiEnv`.
+    public static final String OPERATION_ATTRIBUTE = "org.jfoundry.http.operation";
+
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingInterceptor.class);
 
     private final HttpLoggingLevel level;
@@ -83,33 +86,36 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution)
             throws IOException {
+        var operation = operation(request);
         if (this.level == HttpLoggingLevel.NONE || !this.infoEnabled.getAsBoolean()) {
             return execution.execute(request, body);
         }
         var method = requestMethod(request);
         var uri = requestUri(request);
-        logRequest(request, body, method, uri);
+        logRequest(request, body, method, uri, operation);
         var startedAt = this.nanoTime.getAsLong();
         try {
             var response = execution.execute(request, body);
-            var status = logResponseSafely(response, method, uri, elapsedMillis(startedAt));
+            var status = logResponseSafely(response, method, uri, operation, elapsedMillis(startedAt));
             return this.level.includesBodies()
-                    ? new LoggingClientHttpResponse(this.format, response, method, uri, status) : response;
+                    ? new LoggingClientHttpResponse(this.format, response, method, uri, operation, status) : response;
         } catch (IOException | RuntimeException exception) {
             logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.CLIENT, method, uri, null,
-                    exception.getClass().getName(), elapsedMillis(startedAt)));
+                    exception.getClass().getName(), elapsedMillis(startedAt)), method, uri, operation);
             throw exception;
         }
     }
 
-    private void logRequest(HttpRequest request, byte[] body, String method, String uri) {
+    private void logRequest(HttpRequest request, byte[] body, String method, String uri, String operation) {
         logAll(HttpLogFormatter.request(this.format, HttpLoggingSide.CLIENT, method, uri,
-                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(request.getHeaders(), this.includedHeaders) : null));
+                this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(request.getHeaders(), this.includedHeaders) : null),
+                method, uri, operation);
         if (this.level.includesBodies()) {
             logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.CLIENT, method, uri,
-                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)));
+                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)),
+                    method, uri, operation);
         }
-        logAll(HttpLogFormatter.end(this.format, true));
+        logAll(HttpLogFormatter.end(this.format, true), method, uri, operation);
     }
 
     private static String requestMethod(HttpRequest request) {
@@ -128,23 +134,24 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         }
     }
 
-    private Integer logResponseSafely(ClientHttpResponse response, String method, String uri, long durationMillis) {
+    private Integer logResponseSafely(ClientHttpResponse response, String method, String uri, String operation,
+            long durationMillis) {
         int status;
         try {
             status = response.getStatusCode().value();
         } catch (IOException | RuntimeException exception) {
-            logAll(HttpLogFormatter.responseMetadataUnavailable(this.format, method, uri));
+            logAll(HttpLogFormatter.responseMetadataUnavailable(this.format, method, uri), method, uri, operation);
             if (!this.level.includesBodies()) {
-                logAll(HttpLogFormatter.end(this.format, false));
+                logAll(HttpLogFormatter.end(this.format, false), method, uri, operation);
             }
             return null;
         }
         logAll(HttpLogFormatter.response(this.format, HttpLoggingSide.CLIENT, method, uri, status, null,
                 durationMillis,
                 this.level.includesHeaders() ? HttpLoggingSupport.describeHeaders(response.getHeaders(), this.includedHeaders) : null,
-                null));
+                null), method, uri, operation);
         if (!this.level.includesBodies()) {
-            logAll(HttpLogFormatter.end(this.format, false));
+            logAll(HttpLogFormatter.end(this.format, false), method, uri, operation);
         }
         return status;
     }
@@ -163,6 +170,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private final Integer status;
 
+        private final String operation;
+
         private final HttpLoggingFormat format;
 
         private BodyLoggingInputStream body;
@@ -170,10 +179,11 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private boolean closed;
 
         private LoggingClientHttpResponse(HttpLoggingFormat format, ClientHttpResponse delegate, String method,
-                String uri, Integer status) {
+                String uri, String operation, Integer status) {
             this.delegate = delegate;
             this.method = method;
             this.uri = uri;
+            this.operation = operation;
             this.status = status;
             this.format = format;
         }
@@ -192,7 +202,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         public InputStream getBody() throws IOException {
             if (this.body == null) {
                 this.body = new BodyLoggingInputStream(this.format, this.delegate.getBody(),
-                        this.delegate.getHeaders(), this.method, this.uri, this.status);
+                        this.delegate.getHeaders(), this.method, this.uri, this.operation, this.status);
             }
             return this.body;
         }
@@ -216,9 +226,9 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
                 logAll(HttpLogFormatter.responseBody(this.format, HttpLoggingSide.CLIENT, this.method, this.uri,
                         responseStatus(this.status),
                         HttpLoggingSupport.describeBody(this.delegate.getHeaders().getContentType(),
-                                new byte[0], false, false)));
+                                new byte[0], false, false)), this.method, this.uri, this.operation);
             }
-            logAll(HttpLogFormatter.end(this.format, false));
+            logAll(HttpLogFormatter.end(this.format, false), this.method, this.uri, this.operation);
             this.delegate.close();
         }
 
@@ -226,12 +236,12 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             try {
                 if (this.body == null && this.delegate.getStatusCode().isError()) {
                     this.body = new BodyLoggingInputStream(this.format, this.delegate.getBody(),
-                            this.delegate.getHeaders(), this.method, this.uri, this.status);
+                            this.delegate.getHeaders(), this.method, this.uri, this.operation, this.status);
                     this.body.readNBytes(HttpLoggingSupport.MAX_BODY_BYTES + 1);
                 }
             } catch (IOException | RuntimeException exception) {
                 logAll(HttpLogFormatter.responseBodyUnavailable(this.format, this.method, this.uri,
-                        responseStatus(this.status)));
+                        responseStatus(this.status)), this.method, this.uri, this.operation);
             }
         }
     }
@@ -245,6 +255,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private final String uri;
 
         private final Integer status;
+
+        private final String operation;
 
         private final HttpLoggingFormat format;
 
@@ -261,11 +273,12 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private int capturedAtMark = -1;
 
         private BodyLoggingInputStream(HttpLoggingFormat format, InputStream delegate, HttpHeaders headers,
-                String method, String uri, Integer status) {
+                String method, String uri, String operation, Integer status) {
             super(delegate);
             this.headers = headers;
             this.method = method;
             this.uri = uri;
+            this.operation = operation;
             this.status = status;
             this.format = format;
         }
@@ -356,7 +369,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             logAll(HttpLogFormatter.responseBody(this.format, HttpLoggingSide.CLIENT, this.method, this.uri,
                     responseStatus(this.status),
                     HttpLoggingSupport.describeBody(this.headers.getContentType(), this.captured.toByteArray(),
-                            this.complete && !this.skipped, this.truncated)));
+                            this.complete && !this.skipped, this.truncated)), this.method, this.uri, this.operation);
         }
     }
 
@@ -364,10 +377,51 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         return status != null ? status : "<unavailable>";
     }
 
-    private static void logAll(java.util.List<String> messages) {
+    private static void logAll(java.util.List<String> messages, String method, String uri, String operation) {
         for (var message : messages) {
-            safely(() -> LOG.info("{}", message));
+            var presented = present(message, method, uri, operation);
+            safely(() -> LOG.info("{}", presented));
         }
+    }
+
+    private static String present(String message, String method, String uri, String operation) {
+        if (message.startsWith("<-- ") && !message.startsWith("<-- END HTTP") && statusLine(message)) {
+            message = "<-- " + method + " " + uri + " " + message.substring(4);
+        }
+        if (operation == null) {
+            return message;
+        }
+        if (message.startsWith("--> ") || message.startsWith("<-- ")) {
+            return message.substring(0, 4) + "[" + operation + "] " + message.substring(4);
+        }
+        var marker = message.indexOf(": ");
+        if (marker > 0) {
+            return message.substring(0, marker + 2) + "operation=" + operation + ", " + message.substring(marker + 2);
+        }
+        return message;
+    }
+
+    private static boolean statusLine(String message) {
+        var value = message.substring(4);
+        var space = value.indexOf(' ');
+        if (space <= 0) {
+            return false;
+        }
+        for (var index = 0; index < space; index++) {
+            if (!Character.isDigit(value.charAt(index))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String operation(HttpRequest request) {
+        var attributes = request.getAttributes();
+        if (attributes == null) {
+            return null;
+        }
+        var attribute = attributes.get(OPERATION_ATTRIBUTE);
+        return attribute instanceof String text && !text.isBlank() ? text : null;
     }
 
     private static void safely(Runnable logging) {

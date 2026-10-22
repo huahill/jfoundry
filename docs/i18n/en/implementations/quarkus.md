@@ -421,7 +421,9 @@ All URIs exclude query, user-info, and fragment data. Sensitive headers and nest
 redacted case-insensitively, and `FULL` retains at most 8 KiB. Client duration ends when response
 headers arrive; response-body logging occurs after consumption or close. Jakarta REST exposes no
 portable transport-failure callback, so the adapter does not use runtime-private hooks to claim
-Spring-equivalent client failure logging.
+Spring-equivalent client failure logging. It also does not translate a non-success response into
+`HttpResponseException` or a transport failure into `HttpRequestException`; those types belong to
+Spring `RestClient`.
 
 ## PostgreSQL Middleware Verification
 

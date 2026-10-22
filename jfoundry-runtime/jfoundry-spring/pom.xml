@@ -14,8 +14,18 @@
     </description>
     <packaging>pom</packaging>
 
+    <properties>
+        <!-- Spring Boot does not manage org.apache.rocketmq:rocketmq-client. -->
+        <jfoundry.spring.rocketmq-client.version>5.5.1</jfoundry.spring.rocketmq-client.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>${jfoundry.spring.rocketmq-client.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.xfoundries</groupId>
                 <artifactId>jfoundry-spring-boot-dependencies</artifactId>
