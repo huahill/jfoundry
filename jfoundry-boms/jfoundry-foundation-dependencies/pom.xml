@@ -25,7 +25,7 @@
     <jfoundry.release.scm.url>https://github.com/xfoundries/jfoundry</jfoundry.release.scm.url>
     <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
     <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
-    <central-publishing-maven-plugin.version>0.11.0</central-publishing-maven-plugin.version>
+    <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
     <!-- Imported BOMs -->
     <jmolecules.version>2025.0.2</jmolecules.version>
 
@@ -57,14 +57,14 @@
     <mapstruct.version>1.6.3</mapstruct.version>
 
     <!-- Apache Commons -->
-    <commons-codec.version>1.22.1</commons-codec.version>
+    <commons-codec.version>1.23.0</commons-codec.version>
     <commons-collections4.version>4.6.0</commons-collections4.version>
     <commons-io.version>2.22.0</commons-io.version>
     <commons-lang3.version>3.21.0</commons-lang3.version>
     <commons-text.version>1.15.0</commons-text.version>
 
     <!-- Caching -->
-    <caffeine.version>3.3.0</caffeine.version>
+    <caffeine.version>3.3.1</caffeine.version>
 
     <!-- Runtime-neutral jobs, cache, and optional MQTT -->
     <mqttv3.version>1.2.5</mqttv3.version>

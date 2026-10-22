@@ -67,7 +67,7 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 | 需求 | 添加 | 边界 |
 |---|---|---|
 | 本地应用事务 | `jfoundry-transaction-spring-boot-starter` | 提供 Spring `TransactionRunner` 集成；事务管理器由 Spring Boot 或应用提供。 |
-| 本地领域事件监听 | `jfoundry-domain-event-spring-boot-starter` | 通过 Spring 应用事件发布领域事件；不是 Outbox 或消息代理。 |
+| 本地领域事件派发 | `jfoundry-domain-event-spring-boot-starter` | 派发给应用提供的 `DomainEventDispatcher` Bean，并通过 Spring `ApplicationEventPublisher` 发布。它不是 Outbox 或消息代理。 |
 | MyBatis-Plus 聚合持久化 | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | 仅业务聚合持久化，不含 Outbox/Inbox 存储。 |
 | JPA 聚合持久化 | `jfoundry-persistence-jpa-spring-boot-starter` | 每个聚合一个受管实体图，不含 Outbox/Inbox 存储。 |
 | RFC 9457 Web MVC 错误响应 | `jfoundry-webmvc-spring-boot-starter` | 仅 HTTP 入站适配。 |
@@ -89,12 +89,12 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 聚合如何记录领域事件见[领域事件](../modeling/domain-event.md)。
 
-事件启动器会启用应用服务领域事件分发，并通过 Spring `ApplicationEventPublisher` 发布已分发的事件。普通监听器在进程内观察发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。`DomainEventContext.register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
+领域事件启动器会启用应用服务边界上的领域事件派发，并默认通过 `SpringApplicationEventDispatcher` 把已派发事件发布到 Spring `ApplicationEventPublisher`。普通监听器在进程内观察这次发布；`@TransactionalEventListener` 可选择 `AFTER_COMMIT` 等事务阶段。这与 Outbox 路径不同。另一个 `SpringApplicationEventDispatcher` 会替换这个默认发布器，其它 `DomainEventDispatcher` Bean 仍然叠加。应用服务调用失败时，待分发的聚合事件不会被发布。聚合行为仍使用 `recordEvent(...)` 显式记录每个领域事实。`DomainEventContext.register(...)` 只允许在 `@ApplicationService` 调用内使用；作用域外立即失败。
 
 聚合 Repository 的自动收集只由领域事件 Outbox 组合启动器中显式提供的持久化桥接层负责。它使用与事件无关的
 `AggregatePersistenceObserver` 完成钩子，并且只在持久化成功后为实现 `EventRecordable` 的聚合注册事件。仅选择领域事件或通用持久化时，两者仍保持独立；应用也可以直接注册到 `DomainEventContext`。
 
-持久化在活动 Spring 事务中注册聚合时，领域事件 Outbox 组合的 `BeforeCommitDomainEventDispatcher` 在该事务的 `beforeCommit` 阶段写入，使聚合变更与任意 Outbox 记录原子提交；进程内 Spring 事件在 `afterCommit` 发布。存在事务事件时，拦截器不会派发。没有活动事务时，运行时在最外层 `@ApplicationService` 成功完成后派发整批事件。该自动路径中的应用业务代码不调用 `drainEvents()`。
+持久化在活动 Spring 事务中注册聚合时，领域事件 Outbox 组合的 `BeforeCommitDomainEventDispatcher` 在该事务的 `beforeCommit` 阶段写入，使聚合变更与任意 Outbox 记录原子提交；领域事件启动器的 `SpringApplicationEventDispatcher` 在该事务的 `afterCommit` 阶段发布。存在事务事件时，拦截器不会派发。没有活动事务时，运行时在最外层 `@ApplicationService` 成功完成后派发整批事件。该自动路径中的应用业务代码不调用 `drainEvents()`。
 
 ## 持久化
 
@@ -156,8 +156,9 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 
 `jfoundry-restclient-spring` 为出站 `RestClient` 调用提供显式 Spring 集成。只对拥有该集成的 builder 使用
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
-只包含状态码的 `HttpResponseException`；传输和响应解码失败会转换为带有安全失败类别的
-`HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
+`HttpResponseException`。异常原样保留完整的响应正文字节，不解析、不改写。诊断消息另附一段原文预览，最多 400 字节或
+200 个字符，不脱敏。这段预览不是返回给调用方的问题详情。HTTP 诊断日志仍使用各自的脱敏策略。传输和响应解码失败会转换为
+带有安全失败类别的 `HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
 `org.jfoundry.http.spring` 导入，执行链拦截器从
 `org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
 `org.jfoundry.web.spring` 位置不提供转发别名。
@@ -220,7 +221,8 @@ Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消
 `createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
 PostgreSQL；不认证 JPA、消息代理或 Redisson。精确测试版本记录在
 [兼容矩阵](../../../release/compatibility.md)。此外，它还会
-通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储：
+通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储。
+持久化、Outbox 和 Inbox 启动器提供 `mybatis-plus-spring-boot-native-image`；该配置档不再声明这个 Baomidou 坐标：
 
 ```bash
 ./mvnw -B \

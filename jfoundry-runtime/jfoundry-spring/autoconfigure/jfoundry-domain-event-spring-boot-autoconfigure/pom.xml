@@ -10,7 +10,7 @@
 
     <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
     <name>jfoundry-domain-event-spring-boot-autoconfigure</name>
-    <description>Spring Boot auto-configuration for jfoundry domain event dispatch.</description>
+    <description>Spring Boot auto-configuration for jfoundry domain event dispatch, including publication through Spring application events.</description>
 
     <dependencies>
         <dependency>
@@ -23,21 +23,16 @@
         </dependency>
         <dependency>
             <groupId>io.github.xfoundries</groupId>
+            <artifactId>jfoundry-domain-event-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.xfoundries</groupId>
             <artifactId>jfoundry-domain-event-persistence-bridge</artifactId>
             <optional>true</optional>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
-            <artifactId>jfoundry-domain-event-spring</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-autoconfigure</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>

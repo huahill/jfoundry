@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.github.xfoundries</groupId>
+    <artifactId>jfoundry-spring-boot-dependabot-reactor</artifactId>
+    <version>0</version>
+    <packaging>pom</packaging>
+    <name>jfoundry-spring-boot-dependabot-reactor</name>
+    <description>Dependabot-only module list for the Spring Boot platform. Not a release subproject and not published.</description>
+
+    <!-- Dependabot follows modules only and does not group updates across directory jobs. -->
+    <modules>
+        <module>../../..</module>
+        <module>../../../../jfoundry-spring-boot-dependencies</module>
+    </modules>
+</project>

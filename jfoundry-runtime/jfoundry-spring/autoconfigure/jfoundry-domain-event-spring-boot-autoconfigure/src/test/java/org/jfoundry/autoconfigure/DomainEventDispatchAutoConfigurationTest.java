@@ -9,9 +9,10 @@ import org.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventDispatchInterceptor;
 import org.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration;
 import org.jfoundry.autoconfigure.event.DomainEventScope;
+import org.jfoundry.autoconfigure.event.SpringEventDispatchAutoConfiguration;
+import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
 import org.jmolecules.ddd.types.Identifier;
-import org.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
 import org.junit.jupiter.api.Test;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.MethodBeforeAdvice;
@@ -38,12 +39,13 @@ class DomainEventDispatchAutoConfigurationTest {
             .withConfiguration(AutoConfigurations.of(
                     AopAutoConfiguration.class,
                     DomainEventPersistenceAutoConfiguration.class,
+                    SpringEventDispatchAutoConfiguration.class,
                     DomainEventDispatchAutoConfiguration.class))
             .withBean(ApplicationEventPublisher.class, () -> event -> {
             });
 
     @Test
-    void defaultConfigurationRegistersContextAndSpringDispatcher() {
+    void defaultConfigurationRegistersSpringDispatcher() {
         contextRunner.run(context -> {
             assertThat(context).hasSingleBean(DomainEventScope.class);
             assertThat(context).hasSingleBean(DomainEventContext.class);
@@ -56,13 +58,39 @@ class DomainEventDispatchAutoConfigurationTest {
     }
 
     @Test
-    void disabledDispatchKeepsContextButDoesNotRegisterDispatchInfrastructure() {
+    void applicationDispatcherRemainsAdditive() {
         contextRunner
-                .withPropertyValues("jfoundry.domain.event.dispatch.enabled=false")
+                .withUserConfiguration(ApplicationDispatcherConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(2);
+                    assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).hasBean("domainEventDispatchAdvisor");
+                });
+    }
+
+    @Test
+    void applicationSpringDispatcherReplacesTheAutoConfiguredDispatcher() {
+        contextRunner
+                .withUserConfiguration(ApplicationSpringDispatcherConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBean(SpringApplicationEventDispatcher.class))
+                            .isInstanceOf(ApplicationSpringDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(1);
+                });
+    }
+
+    @Test
+    void missingSpringDispatcherLeavesDispatchInfrastructureAbsent() {
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(SpringApplicationEventDispatcher.class))
                 .run(context -> {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
                     assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatchCoordinator.class);
                     assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
                     assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
                 });
@@ -83,39 +111,13 @@ class DomainEventDispatchAutoConfigurationTest {
     }
 
     @Test
-    void missingSpringEventModuleDoesNotBreakMinimalStarter() {
-        contextRunner
-                .withClassLoader(new FilteredClassLoader("org.jfoundry.infrastructure.event.spring"))
-                .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventScope.class);
-                    assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
-                    assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
-                });
-    }
-
-    @Test
     void missingPersistenceModuleDoesNotBreakEventDispatch() {
         contextRunner
                 .withClassLoader(new FilteredClassLoader("org.jfoundry.infrastructure.persistence"))
                 .run(context -> {
                     assertThat(context).hasSingleBean(DomainEventScope.class);
                     assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
                     assertThat(context).doesNotHaveBean("domainEventContextBeanPostProcessorRegistrar");
-                });
-    }
-
-    @Test
-    void disabledSpringDispatcherDoesNotRegisterSpringPublisher() {
-        contextRunner
-                .withPropertyValues("jfoundry.domain.event.dispatch.spring.enabled=false")
-                .run(context -> {
-                    assertThat(context).hasSingleBean(DomainEventContext.class);
-                    assertThat(context).doesNotHaveBean(SpringApplicationEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
-                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
                 });
     }
 
@@ -162,6 +164,33 @@ class DomainEventDispatchAutoConfigurationTest {
         repository.add(TestAggregate.create("order-1"));
 
         assertThat(interceptedCalls).hasValue(1);
+    }
+
+    @Configuration
+    static class ApplicationDispatcherConfiguration {
+
+        @Bean
+        DomainEventDispatcher domainEventDispatcher() {
+            return events -> {
+            };
+        }
+    }
+
+    @Configuration
+    static class ApplicationSpringDispatcherConfiguration {
+
+        @Bean
+        ApplicationSpringDispatcher springApplicationEventDispatcher() {
+            return new ApplicationSpringDispatcher(event -> {
+            });
+        }
+    }
+
+    static final class ApplicationSpringDispatcher extends SpringApplicationEventDispatcher {
+
+        ApplicationSpringDispatcher(ApplicationEventPublisher eventPublisher) {
+            super(eventPublisher);
+        }
     }
 
     @Configuration

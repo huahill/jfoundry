@@ -57,7 +57,11 @@ public class WebMvcHttpLoggingAutoConfiguration {
                 .toList();
         return request -> {
             var contextRelativePath = removePathPrefix(request.getRequestURI(), request.getContextPath());
-            var applicationPath = removePathPrefix(contextRelativePath, request.getServletPath());
+            var servletPath = request.getServletPath();
+            // The default servlet reports the whole path as servletPath. Stripping that exact path leaves "/".
+            var applicationPath = contextRelativePath.equals(servletPath)
+                    ? contextRelativePath
+                    : removePathPrefix(contextRelativePath, servletPath);
             return normalizedPatterns.stream().anyMatch(pattern -> matcher.match(pattern, applicationPath));
         };
     }

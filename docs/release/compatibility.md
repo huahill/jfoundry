@@ -21,6 +21,12 @@ Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the appli
 the version source for that part of the combination. Boot-only applications use Spring Boot 4.1.x and
 must not combine the Boot-only and Cloud runtime BOMs.
 
+Helidon's upstream line is JDK-aligned: Tip releases at major 27 and later require the JDK their
+major number names, while Helidon 4.5 remains the supported long-term line. The Java 25 baseline
+therefore stays on Helidon MP 4.5.x, and `.github/dependabot.yml` ignores
+`io.helidon:helidon-dependencies` versions `>= 27` so Tip releases are not proposed. Raise or remove
+that ignore floor in the same change that raises the Java baseline.
+
 ## Toolchain Baselines
 
 | Area | Supported baseline |
@@ -88,11 +94,10 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
   Helidon 4.5.5 manages Testcontainers 1.21.4, whose core brings `junit:junit` and makes Surefire
   treat JUnit Jupiter tags as JUnit 4 categories. Foundation manages the Testcontainers 2.0 module
   coordinates; this override keeps the shared core coordinate on that line.
-- The Helidon reactor keeps `jakarta.persistence-api` 3.2.0 and `jboss-logging` 3.6.1.Final
-  ahead of the Helidon BOM import. `jfoundry-parent` directly pins Hibernate 7.4.11.Final, which a
-  child BOM import cannot replace, while Helidon 4.5.5 would otherwise select JPA 3.1.0 and
-  jboss-logging 3.5.3.Final. The override is build-local and is not published in
-  `jfoundry-helidon-dependencies`.
+- The Helidon reactor directly manages `hibernate-core` 7.4.13.Final, `jakarta.persistence-api` 3.2.0,
+  and `jboss-logging` 3.6.1.Final ahead of the Helidon BOM import. Helidon 4.5.5 would otherwise select
+  Hibernate 6.3, JPA 3.1.0, and jboss-logging 3.5.3.Final. The override is build-local and is not
+  published in `jfoundry-helidon-dependencies`.
 
 These exceptions are dependency-management decisions, not claims that JFoundry supplies an adapter for
 every library managed by a runtime platform.

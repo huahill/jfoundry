@@ -5,6 +5,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,16 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
+        assertThat(childText(child(parent.getDocumentElement(), "parent"), "relativePath"))
+                .as("an empty relativePath keeps the Spring parent external to Dependabot")
+                .isEmpty();
+        assertThat(Files.readString(Path.of("pom.xml"))).doesNotContain("<modules>");
+        assertThat(Files.readString(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml")))
+                .containsOnlyOnce("<spring-boot.version>" + bomVersion + "</spring-boot.version>");
+        assertThat(Files.readString(Path.of("src", "test", "dependabot-reactor", "pom.xml")))
+                .contains("<modelVersion>4.0.0</modelVersion>")
+                .contains("<module>../../..</module>")
+                .contains("<module>../../../../jfoundry-spring-boot-dependencies</module>");
     }
 
     @Test
@@ -40,7 +51,10 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-dependencies", "${project.version}"),
                 new Coordinate("org.junit", "junit-bom", "${junit-jupiter.version}"),
                 new Coordinate("tools.jackson", "jackson-bom", "${jackson3.version}"),
-                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"));
+                new Coordinate("io.opentelemetry", "opentelemetry-bom", "${opentelemetry.version}"),
+                new Coordinate("org.slf4j", "slf4j-bom", "${slf4j-bom.version}"),
+                new Coordinate("org.mockito", "mockito-bom", "${mockito-bom.version}"),
+                new Coordinate("org.assertj", "assertj-bom", "${assertj-bom.version}"));
     }
 
     @Test
@@ -50,7 +64,22 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(document, "org.junit.jupiter", "junit-jupiter")).isFalse();
         assertThat(managesDependency(document, "tools.jackson.core", "jackson-databind")).isFalse();
         assertThat(managesDependency(document, "io.opentelemetry", "opentelemetry-api")).isFalse();
-        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+        assertThat(managesDependency(document, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        assertThat(managesDependency(document, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(document, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(managesDependency(document, "org.hibernate.orm", "hibernate-core")).isFalse();
+        assertThat(managesDependency(document, "com.h2database", "h2")).isFalse();
+        assertThat(managesDependency(document, "com.mysql", "mysql-connector-j")).isFalse();
+        assertThat(managesDependency(document, "org.postgresql", "postgresql")).isFalse();
+        assertThat(managesDependency(document, "org.yaml", "snakeyaml")).isFalse();
+        assertThat(managesDependency(document, "org.slf4j", "slf4j-api")).isFalse();
+        assertThat(managesDependency(document, "org.mockito", "mockito-core")).isFalse();
+        assertThat(managesDependency(document, "net.bytebuddy", "byte-buddy")).isFalse();
+        assertThat(managesDependency(document, "org.assertj", "assertj-core")).isFalse();
+        assertThat(property(document, "slf4j.version")).isNull();
+        assertThat(property(document, "mockito.version")).isNull();
+        assertThat(property(document, "hibernate.version")).isNull();
+        assertThat(property(document, "kafka-clients.version")).isNull();
     }
 
     @Test
@@ -127,6 +156,7 @@ class SpringBootParentPomTest {
         Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
+        assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isFalse();
         assertThat(managesDependency(foundation, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-spring-boot-starter")).isFalse();
         assertThat(managesDependency(foundation, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
@@ -137,6 +167,7 @@ class SpringBootParentPomTest {
         assertThat(property(foundation, "jmolecules-integrations.version")).isNull();
 
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isTrue();
+        assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isTrue();
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
         assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
@@ -144,6 +175,9 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "com.rabbitmq", "amqp-client")).isFalse();
         assertThat(managesDependency(boot, "org.apache.rocketmq", "rocketmq-client")).isFalse();
         assertThat(managesDependency(foundation, "org.apache.rocketmq", "rocketmq-client")).isFalse();
+        Document springReactor = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "pom.xml"));
+        assertThat(managesDependency(springReactor, "org.apache.rocketmq", "rocketmq-client")).isTrue();
+        assertThat(managesDependency(springReactor, "org.apache.kafka", "kafka-clients")).isFalse();
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
@@ -151,6 +185,8 @@ class SpringBootParentPomTest {
                 new Coordinate("io.github.xfoundries", "jfoundry-foundation-dependencies", "${project.version}"));
         for (Document springLine : List.of(boot, cloud)) {
             assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
+                    .isEqualTo(springLine == boot);
+            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
                     .isEqualTo(springLine == boot);
             assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
             assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
@@ -230,8 +266,41 @@ class SpringBootParentPomTest {
         String buildVersion = childText(child(build.getDocumentElement(), "properties"), "quarkus.version");
         String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
         assertThat(buildVersion).as("Quarkus build parent and consumer BOM versions").isEqualTo(bomVersion);
-        assertThat(childText(child(build.getDocumentElement(), "parent"), "relativePath"))
-                .isEqualTo("../../pom.xml");
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "pom.xml")))
+                .containsOnlyOnce("<quarkus.version>" + buildVersion + "</quarkus.version>")
+                .doesNotContain("<modules>");
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml")))
+                .containsOnlyOnce("<quarkus.version>" + bomVersion + "</quarkus.version>")
+                .doesNotContain("<parent>");
+        assertThat(child(bom.getDocumentElement(), "parent")).isNull();
+        assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "src", "test", "dependabot-reactor", "pom.xml")))
+                .contains("<modelVersion>4.0.0</modelVersion>")
+                .contains("<module>../../..</module>")
+                .contains("<module>../../../../jfoundry-quarkus-dependencies</module>");
+        assertThat(Files.readString(Path.of("..", "..", "pom.xml"))).doesNotContain("dependabot-reactor");
+        java.util.List<String> dependabotDirectories = Files.readAllLines(Path.of("..", "..", ".github", "dependabot.yml"))
+                .stream()
+                .map(String::trim)
+                .filter(line -> line.startsWith("- \""))
+                .map(line -> line.substring(3, line.length() - 1))
+                .toList();
+        assertThat(dependabotDirectories).contains(
+                "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor",
+                "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor");
+        assertThat(dependabotDirectories).doesNotContain(
+                "/jfoundry-boms/*",
+                "/jfoundry-boms/jfoundry-quarkus-build",
+                "/jfoundry-boms/jfoundry-quarkus-dependencies",
+                "/jfoundry-boms/jfoundry-spring-boot-parent",
+                "/jfoundry-boms/jfoundry-spring-boot-dependencies",
+                "/jfoundry-runtime/*");
+        Element quarkusParent = child(build.getDocumentElement(), "parent");
+        assertThat(childText(quarkusParent, "relativePath")).isEqualTo("../../pom.xml");
+        assertThat(child(quarkusParent, "groupId"))
+                .as("parent coordinates would make Dependabot adopt the root POM")
+                .isNull();
+        assertThat(child(quarkusParent, "artifactId")).isNull();
+        assertThat(child(quarkusParent, "version")).isNull();
         assertThat(managedPlugins(build)).contains(
                 new Coordinate("io.quarkus", "quarkus-maven-plugin", "${quarkus.version}"),
                 new Coordinate("io.quarkus", "quarkus-extension-maven-plugin", "${quarkus.version}"));
@@ -246,8 +315,17 @@ class SpringBootParentPomTest {
         assertThat(property(runtime, "helidon.version")).isNull();
         assertThat(importedBoms(runtime)).containsExactly(
                 new Coordinate("io.github.xfoundries", "jfoundry-helidon-dependencies", "${project.version}"));
+        assertThat(managesDependency(runtime, "org.hibernate.orm", "hibernate-core")).isTrue();
+        assertThat(managesDependency(runtime, "org.apache.kafka", "kafka-clients")).isFalse();
+        assertThat(managesDependency(runtime, "com.rabbitmq", "amqp-client")).isFalse();
+        assertThat(property(runtime, "hibernate.version")).isNull();
         assertThat(importedBoms(bom)).containsExactly(
                 new Coordinate("io.helidon", "helidon-dependencies", "${helidon.version}"));
+        Document rabbitmq = document(Path.of(
+                "..", "..", "jfoundry-runtime", "jfoundry-helidon",
+                "jfoundry-messaging-rabbitmq-helidon", "pom.xml"));
+        assertThat(childText(dependency(rabbitmq, "com.rabbitmq", "amqp-client"), "version"))
+                .isEqualTo("5.37.0");
     }
 
     @Test
@@ -268,6 +346,24 @@ class SpringBootParentPomTest {
                     .satisfies(it -> {
                         assertThat(childText(it, "scope")).isEqualTo("provided");
                         assertThat(childText(it, "optional")).isEqualTo("true");
+                    });
+        }
+    }
+
+    @Test
+    void mybatisPlusStartersBringTheNativeImageArtifactWithoutAVersion() throws Exception {
+        Path starters = Path.of("..", "..", "jfoundry-runtime", "jfoundry-spring", "starters");
+        for (String artifactId : List.of(
+                "jfoundry-persistence-mybatis-plus-spring-boot-starter",
+                "jfoundry-outbox-mybatis-plus-spring-boot-starter",
+                "jfoundry-inbox-mybatis-plus-spring-boot-starter")) {
+            Document starter = document(starters.resolve(artifactId).resolve("pom.xml"));
+            assertThat(dependency(starter, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
+                    .isNotNull()
+                    .satisfies(nativeImage -> {
+                        assertThat(child(nativeImage, "version")).isNull();
+                        assertThat(child(nativeImage, "scope")).isNull();
+                        assertThat(child(nativeImage, "optional")).isNull();
                     });
         }
     }

@@ -7,14 +7,25 @@ create a published parent or inheritance boundary.
 
 - `jfoundry-parent` is the repository's internal build parent. It imports the core
   `jfoundry-dependencies` BOM for internal modules and must not be used as a consumer-facing BOM
-  parent. It may import JUnit, Jackson, and OpenTelemetry BOMs for compiling JFoundry itself, but must not pin those GAs
-  directly, or Maven would override the nearer runtime BOM.
+  parent. It may import JUnit, Jackson, OpenTelemetry, SLF4J, Mockito, and AssertJ BOMs for compiling JFoundry itself, but must not pin those GAs
+  directly, or Maven would override the nearer runtime BOM. Give those BOM versions property names the runtime platform does not use.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
   the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
   `jfoundry-dependencies`.
 - `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
   pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
   BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
+- Dependabot follows `<modules>` only and cannot group updates across directory jobs. Do not dual-write
+  `<modules>` into `jfoundry-quarkus-build` or `jfoundry-spring-boot-parent`, and do not parent a published
+  BOM from either of them. Each platform instead has an unpublished model 4.0.0 reactor at
+  `src/test/dependabot-reactor/pom.xml`. The Quarkus reactor modules are `jfoundry-quarkus-build` and
+  `jfoundry-quarkus-dependencies`; the Spring Boot reactor modules are `jfoundry-spring-boot-parent` and
+  `jfoundry-spring-boot-dependencies`. Dependabot scans those reactors instead of the split directories.
+  Do not add parent coordinates to `jfoundry-quarkus-build`; its parent stays relativePath-only so
+  Dependabot discards the root POM. Keep `<relativePath/>` empty on `jfoundry-spring-boot-parent`.
+  Helidon and Spring Cloud have one version source each and do not need a reactor. Helidon keeps
+  the only Maven ignore rule: `io.helidon:helidon-dependencies` ignores JDK-aligned Tip versions
+  `>= 27` while the Java baseline is 25; move the floor in the same change that raises the baseline.
 - Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
   line and explicitly import `jfoundry-spring-cloud-dependencies`
   before `jfoundry-dependencies`.
@@ -111,7 +122,8 @@ Starters are user-facing dependency entry points. They should:
 - avoid Java runtime logic;
 - remain capability-specific;
 - avoid surprising transitive dependencies;
-- make heavy capabilities explicit.
+- make heavy capabilities explicit;
+- keep each runtime's built-in local domain-event transport inside that runtime's domain-event integration. Spring `ApplicationEventPublisher` publication, Quarkus CDI delivery, and Helidon CDI delivery are the same capability, not optional starters.
 
 ## Runtime-Neutral Dependency Entry Points
 
@@ -130,7 +142,12 @@ Default Spring Boot starter:
 
 Capability starters:
 
-- `jfoundry-domain-event-spring-boot-starter`: local domain event publication.
+- `jfoundry-domain-event-spring-boot-starter`: local domain-event dispatch. It registers
+  `SpringApplicationEventDispatcher`, which publishes through Spring `ApplicationEventPublisher`.
+  That matches Quarkus CDI delivery in `jfoundry-domain-event-quarkus-runtime` and Helidon CDI
+  delivery in `jfoundry-domain-event-helidon`. Another `SpringApplicationEventDispatcher` replaces
+  only that default. Other application `DomainEventDispatcher` beans are additive. Outbox remains
+  the optional extra dispatcher.
 - `jfoundry-messaging-spring-boot-starter`: messaging contracts, Spring Boot JSON support, Jackson
   serializer; it must support non-web applications without requiring a
   WebMVC or WebFlux starter.
@@ -143,6 +160,7 @@ Capability starters:
 - `jfoundry-inbox-spring-boot-starter`: Inbox core and `InboxTemplate`.
 - `jfoundry-inbox-mybatis-plus-spring-boot-starter`: MyBatis-Plus Inbox store.
 - `jfoundry-persistence-mybatis-plus-spring-boot-starter`: Spring Boot runtime assembly for business MyBatis-Plus persistence, not Outbox/Inbox stores.
+- These three MyBatis-Plus starters also depend, without a version, on `mybatis-plus-spring-boot-native-image`. `jfoundry-spring-boot-dependencies` manages that Spring-specific coordinate; Foundation and the Cloud BOM do not. Consumers must not declare it. Its auto-configuration is inactive unless Spring AOT processing is enabled.
 - `jfoundry-persistence-jpa-spring-boot-starter`: explicit Spring Boot runtime assembly for business Jakarta Persistence adapters.
 - `jfoundry-restclient-spring-boot-starter`: outbound Spring `RestClient` support and HTTP logging.
 - `jfoundry-webmvc-spring-boot-starter`: Web MVC ProblemDetail support.
@@ -156,7 +174,8 @@ Check:
 3. Does it pull a broker, ORM, migration tool, or scheduler into the default path?
 4. Does auto-configuration still have matching conditions?
 5. Does README or `../../../docs/i18n/en/integration/getting-started.md` need an update? If the change affects localized user guidance, update the matching `../../../docs/i18n/zh/` page too.
-6. Does the compatibility matrix need a version entry?
+6. Does the same capability already exist as built-in behavior in Quarkus or Helidon? If so, do not make only the Spring path optional.
+7. Does the compatibility matrix need a version entry?
 
 ## Release Compatibility
 

@@ -1,13 +1,20 @@
 version: 2
 updates:
-  # Dependabot's Maven fetcher follows <modules> only. This repository uses Maven 4.1
-  # <subprojects>, so BOM manifests must be listed explicitly. Runtime aggregators are
-  # omitted because they use inferred parents and ${project.version}, which Dependabot
-  # cannot evaluate.
+  # Dependabot's Maven fetcher follows <modules> only and does not group updates across
+  # directory jobs. Maven 4.1 <subprojects> are therefore invisible. List BOM manifests
+  # explicitly. The Quarkus and Spring Boot platform pairs are reached through their
+  # src/test/dependabot-reactor aggregators so both literals land in one job. Do not scan
+  # /jfoundry-runtime/*: those aggregators use inferred parents and ${project.version}.
   - package-ecosystem: maven
     directories:
       - "/"
-      - "/jfoundry-boms/*"
+      - "/jfoundry-boms/jfoundry-dependencies"
+      - "/jfoundry-boms/jfoundry-foundation-dependencies"
+      - "/jfoundry-boms/jfoundry-helidon-dependencies"
+      - "/jfoundry-boms/jfoundry-modules-dependencies"
+      - "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-cloud-dependencies"
     schedule:
       interval: daily
     # Zero days disables Dependabot's default three-day version-update cooldown.
@@ -40,6 +47,13 @@ updates:
       jfoundry-maven-minors:
         patterns: ["*"]
         update-types: [minor]
+    # Helidon Tip releases are JDK-aligned: major 27 requires JDK 27, and this repository
+    # builds on the Java 25 baseline with the Helidon 4.5 LTS line. Ignore Tip releases at
+    # or above 27 until the Java baseline catches up, and raise this floor in the same
+    # change that raises the baseline.
+    ignore:
+      - dependency-name: io.helidon:helidon-dependencies
+        versions: [">= 27"]
   - package-ecosystem: github-actions
     directory: /
     schedule:

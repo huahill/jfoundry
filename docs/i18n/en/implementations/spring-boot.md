@@ -81,7 +81,7 @@ database, delivery, scheduling, and distributed-lock choices.
 | Need | Add | Boundary |
 |---|---|---|
 | Local application transactions | `jfoundry-transaction-spring-boot-starter` | Supplies Spring `TransactionRunner` integration; Spring Boot or the application provides the transaction manager. |
-| Local domain-event listeners | `jfoundry-domain-event-spring-boot-starter` | Publishes domain events through Spring application events; it is not an Outbox or broker. |
+| Local domain-event dispatch | `jfoundry-domain-event-spring-boot-starter` | Dispatches to application `DomainEventDispatcher` beans and publishes them through Spring `ApplicationEventPublisher`. It is not an Outbox or broker. |
 | Aggregate persistence with JPA | `jfoundry-persistence-jpa-spring-boot-starter` | One managed entity graph per aggregate; no Outbox or Inbox store. |
 | Aggregate persistence with MyBatis-Plus | `jfoundry-persistence-mybatis-plus-spring-boot-starter` | Business aggregate persistence only; no Outbox or Inbox store. |
 | RFC 9457 Web MVC errors | `jfoundry-webmvc-spring-boot-starter` | HTTP inbound adapter only. |
@@ -108,10 +108,7 @@ a defined ownership rule. See [application transactions](../capabilities/applica
 
 How aggregates record domain events is described in [Domain Events](../modeling/domain-event.md).
 
-The event starter activates application-service domain-event dispatch and publishes each dispatched
-event through Spring's `ApplicationEventPublisher`. An ordinary listener observes publication in
-process. A `@TransactionalEventListener` selects the desired transaction phase, such as
-`AFTER_COMMIT`; this is distinct from the Outbox path. Failed application-service invocations do
+The domain-event starter activates application-service domain-event dispatch and publishes those events through Spring's `ApplicationEventPublisher` with `SpringApplicationEventDispatcher`. An ordinary listener observes that publication in process. A `@TransactionalEventListener` selects the desired transaction phase, such as `AFTER_COMMIT`; this is distinct from the Outbox path. Another `SpringApplicationEventDispatcher` replaces the default publisher, while other `DomainEventDispatcher` beans remain additive. Failed application-service invocations do
 not dispatch their pending aggregate events. Aggregate behavior still explicitly records each domain
 fact with `recordEvent(...)`. `DomainEventContext.register(...)` is legal only inside an
 `@ApplicationService` invocation; outside that scope it fails immediately.
@@ -125,8 +122,7 @@ independent; applications can also register through `DomainEventContext` directl
 When persistence registers the aggregate inside an active Spring transaction, the Domain Event Outbox
 combination's Outbox dispatcher
 (`BeforeCommitDomainEventDispatcher`) writes in that transaction's `beforeCommit` phase so the
-aggregate change and any Outbox row commit atomically. In-process Spring event publication happens
-in `afterCommit`. The interceptor does not dispatch when transaction events exist. Without an
+aggregate change and any Outbox row commit atomically. The domain-event starter's `SpringApplicationEventDispatcher` publishes in that transaction's `afterCommit` phase. The interceptor does not dispatch when transaction events exist. Without an
 active transaction, the runtime dispatches the full batch at the successful outermost
 `@ApplicationService` boundary. Application business code does not call `drainEvents()` in this
 automatic path.
@@ -232,8 +228,11 @@ exceptions, as described in their implementation guides.
 `jfoundry-restclient-spring` is the opt-in Spring integration for outbound `RestClient` calls. Configure
 only the builder that owns the integration with `RestClientSupport.configure(builder)`, then execute
 the selected call through `RestClientSupport.execute(...)`. A non-success response becomes an
-`HttpResponseException` containing only its status code. Transport and response-decoding failures
-become an `HttpRequestException` with a safe failure kind. Import `HttpLoggingLevel` and `HttpLoggingFormat` from
+`HttpResponseException` that retains the complete original response body unchanged. Its diagnostic message
+appends a raw preview of that body, limited to 400 bytes or 200 characters, without parsing or redacting
+it. The preview is not a caller-facing problem detail. HTTP diagnostic logs keep their separate redaction
+policy. Transport and response-decoding failures become an `HttpRequestException` with a safe failure kind.
+Import `HttpLoggingLevel` and `HttpLoggingFormat` from
 `org.jfoundry.http`, Spring's logging support from `org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
 the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
 locations have no forwarding aliases.
@@ -309,7 +308,9 @@ including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifie
 claim applies to the supported Spring Boot and MyBatis-Plus versions with PostgreSQL; it does not certify
 JPA, brokers, or Redisson. Exact tested versions are recorded in the
 [compatibility matrix](../../../release/compatibility.md). It also verifies the built-in MyBatis-Plus Outbox and Inbox
-stores through append, paginated claim, idempotent claim, and processed-state operations:
+stores through append, paginated claim, idempotent claim, and processed-state operations. The persistence, Outbox,
+and Inbox starters supply `mybatis-plus-spring-boot-native-image`; this profile does not declare that Baomidou
+coordinate:
 
 ```bash
 ./mvnw -B \

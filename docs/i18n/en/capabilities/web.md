@@ -213,9 +213,17 @@ with a generated UUID. See [Request Correlation](request-correlation.md) for lif
 
 `jfoundry-restclient-spring` provides opt-in outbound `RestClient` support. Configure only the builder owned
 by the integration with `RestClientSupport.configure(builder)`, then execute that call through
-`RestClientSupport.execute(...)`. A non-success response becomes an `HttpResponseException` containing
-only its status code. Transport and response-decoding failures become an `HttpRequestException` with a
-safe failure kind while retaining the original exception as its cause for server-side diagnostics.
+`RestClientSupport.execute(...)`. A non-success response becomes an `HttpResponseException`. The exception
+retains the complete original response body unchanged. Its diagnostic message appends a raw preview of that
+body, limited to 400 bytes or 200 characters, without parsing or redacting it. The preview is not a
+caller-facing problem detail. HTTP diagnostic logs keep their separate redaction policy. Transport and
+response-decoding failures become an `HttpRequestException` with a safe failure kind while retaining the
+original exception as its cause for server-side diagnostics.
+
+This classification is specific to Spring `RestClient`. Quarkus and Helidon register diagnostic
+logging for MicroProfile REST Client calls and leave HTTP errors to that client. A non-success
+response remains the client's own exception, normally `jakarta.ws.rs.WebApplicationException`, and a
+transport failure remains `jakarta.ws.rs.ProcessingException`.
 
 The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` and
 `HttpLoggingFormat` from `org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -626,11 +625,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
     }
 
     private static String requestUri(HttpServletRequest request) {
-        try {
-            return HttpLoggingSupport.withoutQuery(URI.create(request.getRequestURL().toString()));
-        } catch (RuntimeException exception) {
-            return request.getRequestURI();
-        }
+        var uri = request.getRequestURI();
+        return uri == null || uri.isBlank() ? "/" : uri;
     }
 
     private static Charset requestCharset(String characterEncoding) {

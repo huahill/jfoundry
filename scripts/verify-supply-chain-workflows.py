@@ -119,14 +119,28 @@ def verify_dependabot(root: Path) -> None:
             fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
     if maven[0].get("rebase-strategy") != "disabled":
         fail(f"{prefix}: Maven updates must disable automatic rebasing")
-    if "ignore" in maven[0]:
-        fail(f"{prefix}: Maven updates must not define ignore rules")
-    expected_directories = ["/", "/jfoundry-boms/*"]
+    # The only allowed ignore rule keeps Dependabot from proposing Helidon Tip releases whose
+    # JDK-aligned major version names a JDK above the Java baseline compiled into this reactor.
+    expected_ignore = [
+        {"dependency-name": "io.helidon:helidon-dependencies", "versions": [">= 27"]},
+    ]
+    if maven[0].get("ignore") != expected_ignore:
+        fail(f"{prefix}: Maven updates must ignore exactly the JDK-aligned Helidon Tip line (io.helidon:helidon-dependencies >= 27) above the Java baseline")
+    expected_directories = [
+        "/",
+        "/jfoundry-boms/jfoundry-dependencies",
+        "/jfoundry-boms/jfoundry-foundation-dependencies",
+        "/jfoundry-boms/jfoundry-helidon-dependencies",
+        "/jfoundry-boms/jfoundry-modules-dependencies",
+        "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor",
+        "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor",
+        "/jfoundry-boms/jfoundry-spring-cloud-dependencies",
+    ]
     directories = maven[0].get("directories")
     if isinstance(directories, list) and "/jfoundry-runtime/*" in directories:
         fail(f"{prefix}: Maven updates must not scan /jfoundry-runtime/*")
     if directories != expected_directories or "directory" in maven[0]:
-        fail(f"{prefix}: Maven updates must explicitly scan / and /jfoundry-boms/*")
+        fail(f"{prefix}: Maven updates must explicitly scan / and the supported jfoundry-boms manifests")
     actions = [update for update in updates if update.get("package-ecosystem") == "github-actions"]
     if len(actions) != 1 or actions[0].get("groups") != {"github-codeql-action": {"patterns": ["github/codeql-action/*"]}}:
         fail(f"{prefix}: GitHub Actions groups are invalid")

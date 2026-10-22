@@ -43,7 +43,13 @@ updates:
   - package-ecosystem: maven
     directories:
       - "/"
-      - "/jfoundry-boms/*"
+      - "/jfoundry-boms/jfoundry-dependencies"
+      - "/jfoundry-boms/jfoundry-foundation-dependencies"
+      - "/jfoundry-boms/jfoundry-helidon-dependencies"
+      - "/jfoundry-boms/jfoundry-modules-dependencies"
+      - "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor"
+      - "/jfoundry-boms/jfoundry-spring-cloud-dependencies"
     schedule:
       interval: weekly
     cooldown:
@@ -72,6 +78,9 @@ updates:
       jfoundry-maven-minors:
         patterns: ["*"]
         update-types: [minor]
+    ignore:
+      - dependency-name: io.helidon:helidon-dependencies
+        versions: [">= 27"]
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -170,10 +179,10 @@ import sys
 from pathlib import Path
 path = Path(sys.argv[1])
 content = path.read_text()
-replacement = "        update-types: [patch]\n    ignore:\n      - dependency-name: org.example:manual-policy\n"
-if "        update-types: [patch]\n" not in content:
-    raise SystemExit("Expected Dependabot marker")
-path.write_text(content.replace("        update-types: [patch]\n", replacement, 1))
+marker = '      - dependency-name: io.helidon:helidon-dependencies\n        versions: [">= 27"]\n'
+if marker not in content:
+    raise SystemExit("Expected Dependabot ignore marker")
+path.write_text(content.replace(marker, marker + "      - dependency-name: org.example:manual-policy\n", 1))
 PY
 assert_rejects "${temp_dir}"
 
@@ -397,7 +406,7 @@ config["updates"][0].pop("directories", None)
 config["updates"][0]["directory"] = "/"
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 HEREDOC
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan / and /jfoundry-boms/*"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must explicitly scan / and the supported jfoundry-boms manifests"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'
@@ -435,6 +444,30 @@ config["updates"][0].pop("rebase-strategy", None)
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
 assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must disable automatic rebasing"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0].pop("ignore", None)
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must ignore exactly the JDK-aligned Helidon Tip line (io.helidon:helidon-dependencies >= 27) above the Java baseline"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["ignore"][0]["versions"] = [">= 28"]
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: Maven updates must ignore exactly the JDK-aligned Helidon Tip line (io.helidon:helidon-dependencies >= 27) above the Java baseline"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
