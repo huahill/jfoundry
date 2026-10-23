@@ -107,7 +107,9 @@ bean into the default recorder. Applications normally provide these mappings wit
   JFoundry does not support Spring Boot's Jackson 2 compatibility module.
 - Distributed lock support is explicit. The default Spring Boot starter does not pull Redisson.
 - Inbound and outbound HTTP logging are independent. Both emit categorized events at `INFO`, remove URI queries,
-  redact credentials, cookies, tokens, secrets, and API keys, and cap `FULL` JSON body capture at 8 KiB.
+  redact credentials, cookies, tokens, secrets, and API keys, and cap `FULL` JSON body capture at the configured
+  `jfoundry.web.mvc.logging.max-body-bytes` or `jfoundry.web.rest-client.logging.max-body-bytes` limit, 8 KiB by
+  default and at most 65536; values outside 1 through 65536 fail startup.
   Client duration ends at response headers; Servlet duration ends at synchronous or async terminal
   completion. Neither is an end-to-end client latency measurement or a business audit event.
 - For a Spring Boot Native Image, `jfoundry.outbox.dispatcher.enabled` is evaluated at AOT time.

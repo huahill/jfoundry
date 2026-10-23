@@ -44,6 +44,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
     private final List<String> includedHeaders;
 
+    private final int maxBodyBytes;
+
     private final BooleanSupplier infoEnabled;
 
     private final LongSupplier nanoTime;
@@ -62,23 +64,40 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
     /// Creates an interceptor with the requested logging detail, layout, and included headers.
     public HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format,
             Collection<String> includedHeaders) {
-        this(level, format, includedHeaders, LOG::isInfoEnabled, System::nanoTime);
+        this(level, format, includedHeaders, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, LOG::isInfoEnabled,
+                System::nanoTime);
+    }
+
+    /// Creates an interceptor with the requested logging detail, layout, included headers, and body-byte limit.
+    ///
+    /// The same limit applies to the request body and the response body.
+    public HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format,
+            Collection<String> includedHeaders, int maxBodyBytes) {
+        this(level, format, includedHeaders, maxBodyBytes, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingInterceptor(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, HttpLoggingFormat.INLINE, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
+        this(level, HttpLoggingFormat.INLINE, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, infoEnabled, nanoTime);
     }
 
     HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format, BooleanSupplier infoEnabled,
             LongSupplier nanoTime) {
-        this(level, format, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
+        this(level, format, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES,
+                infoEnabled, nanoTime);
     }
 
     HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format, Collection<String> includedHeaders,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        this(level, format, includedHeaders, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, infoEnabled, nanoTime);
+    }
+
+    HttpLoggingInterceptor(HttpLoggingLevel level, HttpLoggingFormat format, Collection<String> includedHeaders,
+            int maxBodyBytes, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
         this.format = Objects.requireNonNull(format, "format must not be null");
         this.includedHeaders = List.copyOf(Objects.requireNonNull(includedHeaders, "includedHeaders must not be null"));
+        this.maxBodyBytes = HttpLoggingPolicy.maxBodyBytes(maxBodyBytes);
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
@@ -98,7 +117,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             var response = execution.execute(request, body);
             var status = logResponseSafely(response, method, uri, operation, elapsedMillis(startedAt));
             return this.level.includesBodies()
-                    ? new LoggingClientHttpResponse(this.format, response, method, uri, operation, status) : response;
+                    ? new LoggingClientHttpResponse(this.format, this.maxBodyBytes, response, method, uri, operation,
+                            status) : response;
         } catch (IOException | RuntimeException exception) {
             logAll(HttpLogFormatter.failure(this.format, HttpLoggingSide.CLIENT, method, uri, null,
                     exception.getClass().getName(), elapsedMillis(startedAt)), method, uri, operation);
@@ -112,7 +132,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
                 method, uri, operation);
         if (this.level.includesBodies()) {
             logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.CLIENT, method, uri,
-                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false)),
+                    HttpLoggingSupport.describeBody(request.getHeaders().getContentType(), body, true, false,
+                            this.maxBodyBytes)),
                     method, uri, operation);
         }
         logAll(HttpLogFormatter.end(this.format, true), method, uri, operation);
@@ -174,18 +195,21 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private final HttpLoggingFormat format;
 
+        private final int maxBodyBytes;
+
         private BodyLoggingInputStream body;
 
         private boolean closed;
 
-        private LoggingClientHttpResponse(HttpLoggingFormat format, ClientHttpResponse delegate, String method,
-                String uri, String operation, Integer status) {
+        private LoggingClientHttpResponse(HttpLoggingFormat format, int maxBodyBytes, ClientHttpResponse delegate,
+                String method, String uri, String operation, Integer status) {
             this.delegate = delegate;
             this.method = method;
             this.uri = uri;
             this.operation = operation;
             this.status = status;
             this.format = format;
+            this.maxBodyBytes = maxBodyBytes;
         }
 
         @Override
@@ -201,7 +225,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         @Override
         public InputStream getBody() throws IOException {
             if (this.body == null) {
-                this.body = new BodyLoggingInputStream(this.format, this.delegate.getBody(),
+                this.body = new BodyLoggingInputStream(this.format, this.maxBodyBytes, this.delegate.getBody(),
                         this.delegate.getHeaders(), this.method, this.uri, this.operation, this.status);
             }
             return this.body;
@@ -223,10 +247,10 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             if (this.body != null) {
                 this.body.logBody();
             } else {
-                logAll(HttpLogFormatter.responseBody(this.format, HttpLoggingSide.CLIENT, this.method, this.uri,
-                        responseStatus(this.status),
-                        HttpLoggingSupport.describeBody(this.delegate.getHeaders().getContentType(),
-                                new byte[0], false, false)), this.method, this.uri, this.operation);
+            logAll(HttpLogFormatter.responseBody(this.format, HttpLoggingSide.CLIENT, this.method, this.uri,
+                    responseStatus(this.status),
+                    HttpLoggingSupport.describeBody(this.delegate.getHeaders().getContentType(),
+                            new byte[0], false, false, this.maxBodyBytes)), this.method, this.uri, this.operation);
             }
             logAll(HttpLogFormatter.end(this.format, false), this.method, this.uri, this.operation);
             this.delegate.close();
@@ -235,9 +259,9 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         private void logUnconsumedErrorBody() {
             try {
                 if (this.body == null && this.delegate.getStatusCode().isError()) {
-                    this.body = new BodyLoggingInputStream(this.format, this.delegate.getBody(),
+                    this.body = new BodyLoggingInputStream(this.format, this.maxBodyBytes, this.delegate.getBody(),
                             this.delegate.getHeaders(), this.method, this.uri, this.operation, this.status);
-                    this.body.readNBytes(HttpLoggingSupport.MAX_BODY_BYTES + 1);
+                    this.body.readNBytes(this.maxBodyBytes + 1);
                 }
             } catch (IOException | RuntimeException exception) {
                 logAll(HttpLogFormatter.responseBodyUnavailable(this.format, this.method, this.uri,
@@ -260,6 +284,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private final HttpLoggingFormat format;
 
+        private final int maxBodyBytes;
+
         private final ByteArrayOutputStream captured = new ByteArrayOutputStream();
 
         private boolean complete;
@@ -272,8 +298,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
 
         private int capturedAtMark = -1;
 
-        private BodyLoggingInputStream(HttpLoggingFormat format, InputStream delegate, HttpHeaders headers,
-                String method, String uri, String operation, Integer status) {
+        private BodyLoggingInputStream(HttpLoggingFormat format, int maxBodyBytes, InputStream delegate,
+                HttpHeaders headers, String method, String uri, String operation, Integer status) {
             super(delegate);
             this.headers = headers;
             this.method = method;
@@ -281,6 +307,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             this.operation = operation;
             this.status = status;
             this.format = format;
+            this.maxBodyBytes = maxBodyBytes;
         }
 
         @Override
@@ -343,7 +370,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         }
 
         private void capture(byte[] bytes, int offset, int length) {
-            var remaining = HttpLoggingSupport.MAX_BODY_BYTES - this.captured.size();
+            var remaining = this.maxBodyBytes - this.captured.size();
             if (remaining <= 0) {
                 this.truncated = true;
                 return;
@@ -354,7 +381,7 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
         }
 
         private void capture(int value) {
-            if (this.captured.size() < HttpLoggingSupport.MAX_BODY_BYTES) {
+            if (this.captured.size() < this.maxBodyBytes) {
                 this.captured.write(value);
             } else {
                 this.truncated = true;
@@ -369,7 +396,8 @@ public final class HttpLoggingInterceptor implements ClientHttpRequestIntercepto
             logAll(HttpLogFormatter.responseBody(this.format, HttpLoggingSide.CLIENT, this.method, this.uri,
                     responseStatus(this.status),
                     HttpLoggingSupport.describeBody(this.headers.getContentType(), this.captured.toByteArray(),
-                            this.complete && !this.skipped, this.truncated)), this.method, this.uri, this.operation);
+                            this.complete && !this.skipped, this.truncated, this.maxBodyBytes)),
+                    this.method, this.uri, this.operation);
         }
     }
 

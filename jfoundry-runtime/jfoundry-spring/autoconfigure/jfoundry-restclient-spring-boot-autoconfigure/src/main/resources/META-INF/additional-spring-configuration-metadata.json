@@ -24,6 +24,12 @@
       "type": "java.util.List<java.lang.String>",
       "defaultValue": ["accept", "authorization", "content-type", "content-length", "location", "x-request-id"],
       "description": "Header names included in outbound RestClient logs when HEADERS or FULL is enabled. The configured list replaces the default. Use * to include every header after redaction."
+    },
+    {
+      "name": "jfoundry.web.rest-client.logging.max-body-bytes",
+      "type": "java.lang.Integer",
+      "defaultValue": 8192,
+      "description": "Maximum body bytes retained per request or response in outbound RestClient logs when FULL is enabled, from 1 through 65536. Longer bodies are reported as <truncated at N bytes> without rendering partial content."
     }
   ]
 }

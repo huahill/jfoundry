@@ -25,6 +25,12 @@
       "description": "Header names included in inbound Servlet HTTP logs when HEADERS or FULL is enabled. The configured list replaces the default. Use * to include every header after redaction."
     },
     {
+      "name": "jfoundry.web.mvc.logging.max-body-bytes",
+      "type": "java.lang.Integer",
+      "defaultValue": 8192,
+      "description": "Maximum body bytes retained per request or response in inbound Servlet HTTP logs when FULL is enabled, from 1 through 65536. Longer bodies are reported as <truncated at N bytes> without rendering partial content."
+    },
+    {
       "name": "jfoundry.web.mvc.request-correlation.enabled",
       "type": "java.lang.Boolean",
       "defaultValue": true,

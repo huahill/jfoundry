@@ -96,6 +96,22 @@ class HttpLoggingSupportTest {
     }
 
     @Test
+    void appliesTheConfiguredBodyByteLimit() {
+        var within = ("{\"value\":\"" + "x".repeat(9_000) + "\"}").getBytes(StandardCharsets.UTF_8);
+
+        assertThat(HttpLoggingSupport.describeBody(MediaType.APPLICATION_JSON, within, true, false, 16 * 1024))
+                .startsWith("{\"value\":\"");
+        assertThat(HttpLoggingSupport.describeBody(MediaType.APPLICATION_JSON, within, true, false))
+                .isEqualTo("<truncated at 8192 bytes>");
+        assertThat(HttpLoggingSupport.describeBody(MediaType.APPLICATION_JSON,
+                new byte[16 * 1024 + 1], true, false, 16 * 1024))
+                .isEqualTo("<truncated at 16384 bytes>");
+        assertThat(HttpLoggingSupport.describeBody("application/json",
+                new byte[16 * 1024 + 1], true, false, 16 * 1024))
+                .isEqualTo("<truncated at 16384 bytes>");
+    }
+
+    @Test
     void acceptsStructuredJsonMediaTypes() {
         assertThat(HttpLoggingSupport.isJson(MediaType.parseMediaType("application/problem+json;charset=UTF-8")))
                 .isTrue();
