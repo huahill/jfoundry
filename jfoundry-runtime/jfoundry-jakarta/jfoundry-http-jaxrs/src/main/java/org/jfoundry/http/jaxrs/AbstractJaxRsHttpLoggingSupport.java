@@ -64,6 +64,22 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
         }
     }
 
+    /// Returns the configured body-byte limit for one request or response body.
+    ///
+    /// Values outside the supported range are clamped so an invalid limit cannot alter HTTP processing.
+    protected final int configuredMaxBodyBytes(String name) {
+        try {
+            var configured = ConfigProvider.getConfig().getOptionalValue(name, Integer.class);
+            if (configured.isEmpty()) {
+                return HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES;
+            }
+            return Math.clamp(configured.get(), 1, HttpLoggingPolicy.ABSOLUTE_MAX_BODY_BYTES);
+        } catch (RuntimeException exception) {
+            safely(() -> info("HTTP logging configuration could not be read: property=" + name));
+            return HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES;
+        }
+    }
+
     private <T extends Enum<T>> T configuredEnum(String name, Class<T> type, T defaultValue) {
         try {
             return ConfigProvider.getConfig().getOptionalValue(name, type).orElse(defaultValue);
@@ -93,8 +109,9 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
         }
     }
 
-    protected final BodyLog bodyLog(MediaType mediaType, Consumer<String> logger) {
-        return new BodyLog(capture -> logger.accept(JaxRsHttpLoggingSupport.describeBody(mediaType, capture)));
+    protected final BodyLog bodyLog(MediaType mediaType, int maxBodyBytes, Consumer<String> logger) {
+        return new BodyLog(maxBodyBytes, capture -> logger.accept(
+                JaxRsHttpLoggingSupport.describeBody(mediaType, capture)));
     }
 
     protected final void completeAndLog(BodyLog body) {
@@ -151,7 +168,7 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
 
     protected static final class BodyLog {
 
-        private final JaxRsHttpLoggingSupport.BodyCapture capture = new JaxRsHttpLoggingSupport.BodyCapture();
+        private final JaxRsHttpLoggingSupport.BodyCapture capture;
 
         private final Consumer<JaxRsHttpLoggingSupport.BodyCapture> logger;
 
@@ -159,7 +176,8 @@ public abstract class AbstractJaxRsHttpLoggingSupport {
 
         private boolean readerActive;
 
-        private BodyLog(Consumer<JaxRsHttpLoggingSupport.BodyCapture> logger) {
+        private BodyLog(int maxBodyBytes, Consumer<JaxRsHttpLoggingSupport.BodyCapture> logger) {
+            this.capture = new JaxRsHttpLoggingSupport.BodyCapture(maxBodyBytes);
             this.logger = logger;
         }
 

@@ -61,4 +61,19 @@ class HttpLoggingPolicyTest {
         assertThat(HttpLoggingPolicy.isSensitiveJsonField("refresh-token")).isTrue();
         assertThat(HttpLoggingPolicy.isSensitiveJsonField("displayName")).isFalse();
     }
+
+    @Test
+    void acceptsBodyByteLimitsWithinTheSupportedRangeOnly() {
+        assertThat(HttpLoggingPolicy.maxBodyBytes(1)).isEqualTo(1);
+        assertThat(HttpLoggingPolicy.maxBodyBytes(HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES)).isEqualTo(8_192);
+        assertThat(HttpLoggingPolicy.maxBodyBytes(HttpLoggingPolicy.ABSOLUTE_MAX_BODY_BYTES)).isEqualTo(65_536);
+
+        assertThatThrownBy(() -> HttpLoggingPolicy.maxBodyBytes(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("maxBodyBytes must be between 1 and " + HttpLoggingPolicy.ABSOLUTE_MAX_BODY_BYTES);
+        assertThatThrownBy(() -> HttpLoggingPolicy.maxBodyBytes(HttpLoggingPolicy.ABSOLUTE_MAX_BODY_BYTES + 1))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> HttpLoggingPolicy.maxBodyBytes(-1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

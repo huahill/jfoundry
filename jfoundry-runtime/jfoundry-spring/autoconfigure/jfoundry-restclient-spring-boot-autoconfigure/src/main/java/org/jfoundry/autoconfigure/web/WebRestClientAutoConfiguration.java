@@ -1,5 +1,6 @@
 package org.jfoundry.autoconfigure.web;
 
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.http.spring.client.HttpOperationRequestProcessor;
 import org.jfoundry.web.spring.client.RestClientSupport;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -22,9 +23,10 @@ public class WebRestClientAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(name = "jfoundryWebRestClientCustomizer")
     public RestClientCustomizer jfoundryWebRestClientCustomizer(JfoundryWebProperties properties) {
-        return builder -> RestClientSupport.configure(builder, properties.getRestClient().getLogging().getLevel(),
-                properties.getRestClient().getLogging().getFormat(),
-                properties.getRestClient().getLogging().getIncludedHeaders());
+        var logging = properties.getRestClient().getLogging();
+        var maxBodyBytes = HttpLoggingPolicy.maxBodyBytes(logging.getMaxBodyBytes());
+        return builder -> RestClientSupport.configure(builder, logging.getLevel(), logging.getFormat(),
+                logging.getIncludedHeaders(), maxBodyBytes);
     }
 
     /// Names each HTTP interface call for {@link org.jfoundry.http.spring.client.HttpLoggingInterceptor}.

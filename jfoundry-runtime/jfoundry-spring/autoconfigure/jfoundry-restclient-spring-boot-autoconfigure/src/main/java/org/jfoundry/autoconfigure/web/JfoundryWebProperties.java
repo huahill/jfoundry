@@ -38,6 +38,8 @@ public class JfoundryWebProperties {
 
         private List<String> includedHeaders = List.copyOf(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
 
+        private int maxBodyBytes = HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES;
+
         /// Returns the detail recorded for outbound `RestClient` HTTP logs.
         public HttpLoggingLevel getLevel() {
             return level;
@@ -66,6 +68,17 @@ public class JfoundryWebProperties {
         /// Sets header names included in outbound HTTP logs. The configured list replaces the default.
         public void setIncludedHeaders(List<String> includedHeaders) {
             this.includedHeaders = includedHeaders;
+        }
+
+        /// Returns the maximum number of body bytes retained in outbound HTTP logs.
+        public int getMaxBodyBytes() {
+            return maxBodyBytes;
+        }
+
+        /// Sets the maximum number of body bytes retained in outbound HTTP logs, from 1 through
+        /// `{@value HttpLoggingPolicy#ABSOLUTE_MAX_BODY_BYTES}`.
+        public void setMaxBodyBytes(int maxBodyBytes) {
+            this.maxBodyBytes = maxBodyBytes;
         }
     }
 }

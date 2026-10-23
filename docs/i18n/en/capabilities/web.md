@@ -272,9 +272,17 @@ All runtimes emit HTTP exchange events at `INFO`. `NONE` disables them. `BASIC` 
 response events with query-free method/URI, status, and duration without body wrappers.
 `HEADERS` adds the configured header subset after case-insensitive redaction of
 authorization, credentials, cookies, tokens, secrets, and API keys. `FULL` adds JSON bodies after
-nested-field redaction and retains at most 8 KiB; non-JSON,
+nested-field redaction and retains at most the configured body-byte limit, 8 KiB by default; non-JSON,
 malformed, incomplete, and oversized bodies
 are described rather than exposed. Capture forwards bytes immediately and cannot alter HTTP processing.
+
+Each logging site shares one body-byte limit between its request and response bodies. Configure
+`jfoundry.web.mvc.logging.max-body-bytes`, `jfoundry.web.rest-client.logging.max-body-bytes`,
+`jfoundry.web.quarkus.logging.max-body-bytes`, or `jfoundry.web.helidon.logging.max-body-bytes` to raise
+or lower it for larger list or detail payloads while debugging. The supported range is 1 through 65536;
+Spring Boot fails startup on values outside that range, while Quarkus and Helidon clamp them. Bodies that
+still exceed the limit are reported as `<truncated at N bytes>` without rendering partial JSON, so
+credentials inside an unparsable fragment are never exposed.
 
 Layout is independent of detail. `HUMAN` is the default once logging is enabled. It emits Feign-style
 console output: the request start line carries method and URI, later lines in that block do not repeat

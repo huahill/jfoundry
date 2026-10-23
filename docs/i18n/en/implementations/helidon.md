@@ -188,7 +188,11 @@ Native Image substitution is not compatible with the current GraalVM 25 baseline
 Client logging is not a release support claim. Spring `WebClient` is not supported.
 
 URI queries, user information, and fragments are never logged. Sensitive headers and nested JSON
-fields are redacted case-insensitively, and body capture is capped at 8 KiB. Client duration ends when
+fields are redacted case-insensitively, and body capture is capped at the configured body-byte limit,
+8 KiB by default. Each logging site shares one limit between request and response bodies; configure
+`jfoundry.web.helidon.logging.max-body-bytes` inbound or
+`jfoundry.web.rest-client.logging.max-body-bytes` outbound, with values clamped into 1 through 65536.
+Client duration ends when
 response headers arrive, while body logs appear after consumption or close. Jakarta REST has no
 portable transport-failure callback, so this adapter does not depend on Helidon-private hooks to
 claim Spring-equivalent failure logging. It also does not translate a non-success response into
