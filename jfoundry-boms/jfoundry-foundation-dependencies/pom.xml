@@ -50,7 +50,7 @@
     <parsson.version>1.1.9</parsson.version>
 
     <!-- Persistence -->
-    <mybatis-plus.version>3.5.18</mybatis-plus.version>
+    <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
     <jakarta-persistence.version>3.2.0</jakarta-persistence.version>
 
     <!-- Mapping and code generation -->
