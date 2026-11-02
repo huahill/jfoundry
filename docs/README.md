@@ -8,6 +8,7 @@ The documentation is organized by concept instead of module listing:
 - [中文文档](i18n/zh/index.md)
 - [Release and compatibility](release/compatibility.md)
 - [Maven Central publishing](release/maven-central.md)
+- [Hua identity migration plan (pending)](release/hua-migration-plan.md)
 - [Support policy](release/support-policy.md)
 - [Supply-chain security](release/supply-chain-security.md)
 
