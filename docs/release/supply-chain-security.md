@@ -97,6 +97,10 @@ Repository administrators must enable all of the following in GitHub repository 
 6. The active main-branch ruleset that requires the `Merge gate` status check and allows only
    `Squash and merge`. `Merge gate` requires the CI-integrated Dependency Review job for every full-change
    pull request; documentation-only pull requests are exempt because they cannot change dependencies.
+7. The repository Actions setting that allows GitHub Actions to create pull requests, while leaving
+   the default workflow token permission at read. `Prepare next SNAPSHOT` needs it to open the next
+   development pull request. Workflows must not approve or merge their own pull requests. Dependabot
+   patch auto-merge remains a separate workflow with its own eligibility checks.
 
 The release environment must contain `CENTRAL_USERNAME`, `CENTRAL_PASSWORD`, `GPG_PRIVATE_KEY`, and
 `GPG_PASSPHRASE`. Those values must never be committed, printed, or copied into issue discussions.

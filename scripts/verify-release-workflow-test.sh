@@ -67,6 +67,9 @@ jobs:
       - name: Verify Dependabot security alerts
         run: gh api repos/${GITHUB_REPOSITORY}/dependabot/alerts
       - uses: actions/attest-build-provenance@v2
+      - name: Dispatch trusted snapshot preparation
+        if: github.actor == 'github-actions[bot]'
+        run: gh workflow run prepare-snapshot.yml --repo "${GITHUB_REPOSITORY}" --ref main
 YAML
 
 unsafe_workflow="${temp_dir}/unsafe-release.yml"
