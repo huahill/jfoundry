@@ -386,3 +386,17 @@ jobs:
             --repo "${GITHUB_REPOSITORY}" \
             --title "${RELEASE_TAG}" \
             --generate-notes
+
+  dispatch-next-snapshot:
+    name: Dispatch next SNAPSHOT preparation
+    needs: publish
+    if: github.actor == 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Dispatch trusted snapshot preparation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run prepare-snapshot.yml --repo "${GITHUB_REPOSITORY}" --ref main
