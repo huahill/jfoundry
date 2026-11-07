@@ -206,6 +206,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: release-evidence
+      - name: Dispatch trusted snapshot preparation
+        if: github.actor == 'github-actions[bot]'
+        run: gh workflow run prepare-snapshot.yml --repo "${GITHUB_REPOSITORY}" --ref main
 YAML
 
 assert_rejects "${temp_dir}"
@@ -393,7 +396,48 @@ jobs:
       - run: git push --set-upstream origin branch
       - run: gh pr create
 YAML
+assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/dispatch-stable-release.yml" <<'YAML'
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    steps:
+      - run: |
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            exit 0
+          fi
+          test "$(git cat-file -t "refs/tags/${RELEASE_TAG}")" = "tag"
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
+          gh workflow run release.yml --repo "${GITHUB_REPOSITORY}" --ref main -f "release_tag=${RELEASE_TAG}"
+YAML
 assert_accepts "${temp_dir}"
+printf '\nCENTRAL_PASSWORD: blocked\n' >> "${temp_dir}/.github/workflows/dispatch-stable-release.yml"
+assert_rejects "${temp_dir}"
+cat > "${temp_dir}/.github/workflows/dispatch-stable-release.yml" <<'YAML'
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+permissions:
+  actions: write
+  contents: read
+jobs:
+  dispatch:
+    steps:
+      - run: |
+          if [[ ! "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            exit 0
+          fi
+          test "$(git cat-file -t "refs/tags/${RELEASE_TAG}")" = "tag"
+          git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main
+          gh workflow run release.yml --repo "${GITHUB_REPOSITORY}" --ref main -f "release_tag=${RELEASE_TAG}"
+YAML
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'HEREDOC'

@@ -194,17 +194,26 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
 ## GitHub Release Publishing
 
 1. Merge the committed release-version change after the complete CI matrix passes.
-2. Create and push an annotated tag such as `v1.0.0-RC1` for that exact commit.
-3. From the `main` branch, manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and
-   approve the `jfoundry` environment when its reviewers have inspected the candidate. The workflow
-   rejects runs started from a tag or any other branch so that it always uses the current reviewed
-   release workflow definition while checking out the immutable release tag as its source.
+2. Create and push an annotated tag for that exact commit. A stable tag has the form `vX.Y.Z`,
+   with no prerelease suffix. A prerelease tag keeps its suffix, for example `v1.0.0-RC1`.
+3. Pushing the stable tag starts `Dispatch stable release`. That workflow has no Central or signing
+   secrets. It verifies that the tag is annotated and reachable from `main`, then starts the trusted
+   `Release` workflow on `main` with `release_tag` set to the tag. Approve the `jfoundry` environment
+   when its reviewers have inspected the candidate. The publish job rejects a run whose workflow ref
+   is not `refs/heads/main`, so publication always uses the reviewed workflow definition and then
+   checks out the immutable tag as its source. Prerelease tags do not start the dispatcher. For a
+   prerelease, or to retry a publication, manually run `Release` from the Actions page on `main`
+   with the exact `release_tag` and approve the environment again.
 4. Wait for the workflow to publish Central, verify public availability, upload and attest release
    evidence, and create the GitHub Release. The Release display title matches the immutable tag exactly,
    including its leading `v`; rerunning the workflow also restores that title if it was edited manually.
 5. After a successful stable release, `Prepare next SNAPSHOT` creates a short-lived branch and pull
    request for the next minor `-SNAPSHOT` development version. Review and merge that PR before the
    next development changes. The workflow skips prerelease tags and does not write directly to `main`.
+   A release started by the tag dispatcher also dispatches this preparation from the trusted `Release`
+   workflow. GitHub does not deliver `workflow_run` for a run that `GITHUB_TOKEN` started, so the
+   explicit dispatch preserves the same pull-request handoff. A release started manually from the
+   Actions page still uses the `workflow_run` trigger.
 
 Retry an interrupted workflow only when its immutable source remains correct. If the release source
 must change, choose a new version and repeat the immutable-tag process; never move an existing tag.
