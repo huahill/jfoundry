@@ -10,5 +10,6 @@ The documentation is organized by concept instead of module listing:
 - [Maven Central publishing](release/maven-central.md)
 - [Support policy](release/support-policy.md)
 - [Supply-chain security](release/supply-chain-security.md)
+- [Automatic module names](release/automatic-module-names.md)
 
 Shared diagrams and images live under `i18n/assets/` and `i18n/assets/outbox/`.
