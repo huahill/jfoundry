@@ -102,7 +102,7 @@ def verify_dependabot(root: Path) -> None:
     ]
     expected_groups = {
         "jfoundry-spring-boot-platform": {"patterns": spring_boot_patterns, "update-types": ["patch", "minor"]},
-        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns, "update-types": ["patch", "minor"]},
+        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
         "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
@@ -113,7 +113,7 @@ def verify_dependabot(root: Path) -> None:
             if name == "jfoundry-spring-boot-platform":
                 fail(f"{prefix}: jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
             if name == "jfoundry-quarkus-platform":
-                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
+                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types")
             if name == "jfoundry-maven-patches":
                 fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
             fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")

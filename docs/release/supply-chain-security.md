@@ -35,8 +35,11 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   those aggregators use Maven 4.1 inferred parents and `${project.version}` imports,
   which Dependabot cannot evaluate. Do not use `/jfoundry-boms/*`: that wildcard
   creates one job per BOM directory and splits a platform pair into separate pull
-  requests. Quarkus keeps `quarkus.version` on `jfoundry-quarkus-build` and
-  `jfoundry-quarkus-dependencies`; Spring Boot keeps the parent version on
+  requests. Quarkus keeps plugin and processor versions on `quarkus.version` in
+  `jfoundry-quarkus-build`, and the platform BOM on `quarkus.platform.version` in
+  `jfoundry-quarkus-dependencies`. The property names must differ: when sibling
+  modules define one property for more than one dependency, Dependabot rewrites
+  only one of those POMs. Spring Boot keeps the parent version on
   `jfoundry-spring-boot-parent` and `spring-boot.version` on
   `jfoundry-spring-boot-dependencies`. Each pair is linked by an unpublished model
   4.0.0 reactor at `src/test/dependabot-reactor/pom.xml`, and that reactor is the
@@ -52,10 +55,14 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   they stay as single manifest directories.
 - Dependabot treats Spring Boot and Quarkus as platform units. The Spring Boot BOM, parent, and Maven
   plugin share one patch-and-minor group. The Quarkus BOM, extension build tools, processor, and Maven
-  plugin share another patch-and-minor group. These first-match groups precede the catch-all Maven
-  patch group and the catch-all Maven minor group so related updates available in the same Dependabot
-  run are proposed together. Remaining major updates stay ungrouped so accidental publications can be
-  closed without bundling them into a routine upgrade.
+  plugin share another group that must not set `update-types`. Dependabot compares only the first
+  three numeric components, so a platform build such as 3.40.1.2 is neither major, minor, nor patch
+  and is rejected by every group that sets `update-types`. These first-match groups precede the
+  catch-all Maven patch group and the catch-all Maven minor group so related updates available in the
+  same Dependabot run are proposed together. Spring Boot and the catch-all groups still limit routine
+  updates to patch and minor. A Quarkus major stays inside the Quarkus coordinate group and is not
+  bundled with unrelated Maven updates. Other major updates stay ungrouped so accidental publications
+  can be closed without bundling them into a routine upgrade.
 - Maven version-update pull requests do not rebase automatically when `main` moves. Rebase the next
   candidate with `@dependabot rebase` before merging. This prevents one merge from retriggering the
   full CI matrix on every remaining Dependabot pull request. Pull requests opened before this setting
@@ -65,7 +72,7 @@ notes; it must state the advisory, affected artifact, reason, compensating contr
   A grouped update whose coordinates did not publish the same version is closed rather than merged.
 - Grouping does not prove that every coordinate in a platform has published the same version.
   Repository POM contracts require the Spring Boot parent to match the consumer BOM and the Quarkus
-  build parent to match the consumer BOM. The Quarkus runtime aggregator must not declare
+  build parent's `quarkus.version` to match the consumer BOM's `quarkus.platform.version`. The Quarkus runtime aggregator must not declare
   `quarkus.version`. An incomplete platform update therefore fails the `Merge
   gate` instead of changing the supported baseline. Helidon has one platform version source in its
   consumer BOM and does not need a multi-coordinate group.
