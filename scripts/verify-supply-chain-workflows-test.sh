@@ -71,7 +71,6 @@ updates:
           - io.quarkus:quarkus-extension-maven-plugin
           - io.quarkus:quarkus-extension-processor
           - io.quarkus:quarkus-maven-plugin
-        update-types: [patch, minor]
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
@@ -524,7 +523,19 @@ patterns = config["updates"][0]["groups"]["jfoundry-quarkus-platform"]["patterns
 patterns.remove("io.quarkus.platform:quarkus-bom")
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["groups"]["jfoundry-quarkus-platform"]["update-types"] = ["patch", "minor"]
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'

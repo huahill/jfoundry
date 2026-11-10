@@ -74,7 +74,7 @@ content = path.read_text()
 content = content.replace("</properties>", "<spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version></properties>", 1)
 path.write_text(content)
 PY
-    write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.version" "3.40.1"
+    write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.platform.version" "3.40.1"
     write_pom "${fixture}" "jfoundry-helidon-dependencies" "helidon.version" "4.5.3"
     write_matrix "${fixture}"
 }
