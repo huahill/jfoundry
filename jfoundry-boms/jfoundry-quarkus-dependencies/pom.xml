@@ -30,7 +30,7 @@
         <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
-        <quarkus.version>3.40.1</quarkus.version>
+        <quarkus.version>3.40.1.2</quarkus.version>
         <quarkus.jackson-annotations.version>2.23</quarkus.jackson-annotations.version>
         <redisson.version>4.8.0</redisson.version>
     </properties>
