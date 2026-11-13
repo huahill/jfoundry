@@ -63,5 +63,8 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
         run: >
-          ./mvnw -B -DskipTests deploy
+          ./mvnw -B -T 1 -DskipTests deploy
           -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
+          -Daether.transport.http.retryHandler.count=8
+          -Daether.transport.http.retryHandler.interval=15000
+          -Daether.transport.http.retryHandler.intervalMax=120000

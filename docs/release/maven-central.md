@@ -158,9 +158,12 @@ including standalone BOM modules.
 Publish the current development version locally with:
 
 ```bash
-./mvnw -DskipTests deploy \
+./mvnw -T 1 -DskipTests deploy \
   -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
 ```
+
+`.mvn/maven.config` otherwise selects `-T 1C`. Central Portal answers that concurrent snapshot
+upload with Cloudflare error 1015 (HTTP 429), including checksum and metadata requests.
 
 The current reactor version must end with `-SNAPSHOT`. Do not use the release workflow for
 SNAPSHOTs; it intentionally rejects SNAPSHOT versions.
@@ -170,9 +173,15 @@ is pushed and can also be started manually from the Actions tab. The workflow ve
 current root version is a SNAPSHOT before deploying:
 
 ```bash
-./mvnw -B -DskipTests deploy \
-  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
+./mvnw -B -T 1 -DskipTests deploy \
+  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/ \
+  -Daether.transport.http.retryHandler.count=8 \
+  -Daether.transport.http.retryHandler.interval=15000 \
+  -Daether.transport.http.retryHandler.intervalMax=120000
 ```
+
+The retry settings keep the default `429,503` service-unavailable codes and wait longer than
+Resolver's 3 attempts at 5 seconds, which does not outlast this rate limit.
 
 Consumers must add the Central Portal snapshots repository to resolve these versions:
 
