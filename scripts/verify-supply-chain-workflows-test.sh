@@ -301,8 +301,10 @@ jobs:
           esac
       - name: Publish SNAPSHOT
         if: steps.version.outputs.is_snapshot == 'true'
-        run: ./mvnw -B -T 1 -DskipTests deploy -Daether.connector.basic.parallelPut=false -Daether.connector.basic.upstreamThreads=1 -Daether.transport.http.maxConnectionsPerRoute=1
-      - run: grep -Eq 'status=429|error-1015|Error 1015' deploy.log
+        run: |
+          ./mvnw -B -T 1 -DskipTests -nsu deploy -Daether.connector.basic.parallelPut=false -Daether.connector.basic.upstreamThreads=1 -Daether.transport.http.maxConnectionsPerRoute=1
+          grep -Eq 'status=429|error-1015|Error 1015' deploy.log
+          echo "Waiting ${quiet_seconds}s before the next Central snapshot deploy chunk."
 YAML
 assert_rejects "${temp_dir}"
 write_compliant_auto_merge_workflow
