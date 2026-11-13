@@ -224,7 +224,7 @@ def main() -> None:
             "git merge-base --is-ancestor",
             'gh workflow run release.yml --repo "${GITHUB_REPOSITORY}" --ref main -f "release_tag=${RELEASE_TAG}"',
         ],
-        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'", "./mvnw -B -T 1 -DskipTests deploy", "-Daether.transport.http.retryHandler.count=8", "-Daether.transport.http.retryHandler.interval=15000", "-Daether.transport.http.retryHandler.intervalMax=120000"],
+        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'", "./mvnw -B -T 1 -DskipTests deploy", "-Daether.connector.basic.parallelPut=false", "-Daether.connector.basic.upstreamThreads=1", "-Daether.transport.http.maxConnectionsPerRoute=1", "status=429|error-1015|Error 1015"],
         ".github/workflows/prepare-snapshot.yml": ["workflow_run:", "workflows:", "- Release", "git tag --points-at", "contents: write", "pull-requests: write", "scripts/set-maven-reactor-version.py", "git push --set-upstream origin", "gh pr create"],
     }
     verify_ci(root)
