@@ -301,7 +301,7 @@ jobs:
           esac
       - name: Publish SNAPSHOT
         if: steps.version.outputs.is_snapshot == 'true'
-        run: ./mvnw deploy
+        run: ./mvnw -B -T 1 -DskipTests deploy -Daether.transport.http.retryHandler.count=8 -Daether.transport.http.retryHandler.interval=15000 -Daether.transport.http.retryHandler.intervalMax=120000
 YAML
 assert_rejects "${temp_dir}"
 write_compliant_auto_merge_workflow
