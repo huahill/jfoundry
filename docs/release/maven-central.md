@@ -158,7 +158,7 @@ including standalone BOM modules.
 Publish the current development version locally with:
 
 ```bash
-./mvnw -T 1 -DskipTests deploy \
+./mvnw -T 1 -DskipTests -nsu deploy \
   -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/ \
   -Daether.connector.basic.parallelPut=false \
   -Daether.connector.basic.upstreamThreads=1 \
@@ -168,29 +168,19 @@ Publish the current development version locally with:
 `.mvn/maven.config` otherwise selects `-T 1C`. `-T 1` only publishes one reactor module at a time.
 Resolver still uploads that module's JAR, POM, sources, Javadoc, and checksums together: the
 default is `aether.connector.basic.parallelPut=true` with five upstream threads. Central Portal
-answers that burst with Cloudflare error 1015 (HTTP 429).
+answers that burst with Cloudflare error 1015 (HTTP 429). `-nsu` avoids refreshing snapshot
+metadata while publishing. Requests made during an active block refresh the block, so wait for it
+to expire instead of retrying immediately.
 
 The current reactor version must end with `-SNAPSHOT`. Do not use the release workflow for
 SNAPSHOTs; it intentionally rejects SNAPSHOT versions.
 
 GitHub Actions publishes SNAPSHOTs through `.github/workflows/snapshot.yml`. It runs when `main`
 is pushed and can also be started manually from the Actions tab. The workflow verifies that the
-current root version is a SNAPSHOT before deploying:
-
-```bash
-./mvnw -B -T 1 -DskipTests deploy \
-  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/ \
-  -Daether.connector.basic.parallelPut=false \
-  -Daether.connector.basic.upstreamThreads=1 \
-  -Daether.transport.http.maxConnectionsPerRoute=1 \
-  -Daether.transport.http.retryHandler.count=6 \
-  -Daether.transport.http.retryHandler.interval=15000
-```
-
-Leave `aether.transport.http.retryHandler.intervalMax` at its 300000 ms default. Resolver cancels
-the HTTP retry when a `Retry-After` value is above that cap, so a lower cap turns HTTP 429 into an
-immediate failure. If error 1015 is still present after Maven exits, the workflow waits and retries
-the deploy.
+current root version is a SNAPSHOT before deploying. It installs the reactor locally, then publishes
+20 modules at a time with the single-thread command above. It waits 10 minutes before the next
+chunk. A chunk that still receives error 1015 is retried after the same quiet wait; earlier chunks
+are not published again.
 
 Consumers must add the Central Portal snapshots repository to resolve these versions:
 
