@@ -26,24 +26,17 @@ public final class TestVersionedOrderRepository extends
     }
 
     @Override
-    protected void doAdd(TestOrder aggregate) {
-        insertAggregate(aggregate, ROOT_DATA_MAPPER.toData(aggregate), ignored -> { });
+    protected void onRootUpdated(TestOrder aggregate, VersionedOrderData rootData) {
+        if (failNextUpdate) {
+            failNextUpdate = false;
+            throw new IllegalStateException("Additional update failed.");
+        }
+        completedUpdates++;
     }
 
     @Override
-    protected void doModify(TestOrder aggregate) {
-        updateAggregate(aggregate, ROOT_DATA_MAPPER.toData(aggregate), ignored -> {
-            if (failNextUpdate) {
-                failNextUpdate = false;
-                throw new IllegalStateException("Additional update failed.");
-            }
-            completedUpdates++;
-        });
-    }
-
-    @Override
-    protected void doRemove(TestOrder aggregate) {
-        deleteAggregate(aggregate, () -> completedRemovals++);
+    protected void onRootRemoved(TestOrder aggregate) {
+        completedRemovals++;
     }
 
     public int completedUpdates() {

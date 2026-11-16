@@ -1,7 +1,8 @@
 package org.jfoundry.infrastructure.persistence.mybatis;
 
-import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserver;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
+import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserver;
+import org.jmolecules.ddd.types.AggregateRoot;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
@@ -18,6 +19,19 @@ class MybatisPlusAggregateRepositoryApiTest {
                 .noneMatch(parameterTypes -> parameterTypes.contains(AggregatePersistenceObserver.class));
         assertThat(MybatisPlusAggregateRepository.class.getSuperclass())
                 .isEqualTo(AbstractAggregateRepository.class);
+    }
+
+    @Test
+    void versionedRootLifecycleCannotBeReplacedByASubclass() throws NoSuchMethodException {
+        assertThat(Modifier.isFinal(MybatisPlusAggregateRepository.class
+                .getDeclaredMethod("doAdd", AggregateRoot.class)
+                .getModifiers())).isTrue();
+        assertThat(Modifier.isFinal(MybatisPlusAggregateRepository.class
+                .getDeclaredMethod("doModify", AggregateRoot.class)
+                .getModifiers())).isTrue();
+        assertThat(Modifier.isFinal(MybatisPlusAggregateRepository.class
+                .getDeclaredMethod("doRemove", AggregateRoot.class)
+                .getModifiers())).isTrue();
     }
 
     @Test
