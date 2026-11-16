@@ -10,10 +10,12 @@ Persistence data objects extend `AggregateData<K>` and use database-friendly IDs
 one `AggregateData`, one `DataMapper`, and one `BaseMapper` through
 `MybatisPlusAggregateRepository`.
 
-For a multi-table aggregate with a MyBatis-Plus root record, override the complete `do*` operation
-and use `loadAggregate`, `insertAggregate`, `updateAggregate`, and `deleteAggregate` when their
-root persistence and context behavior fit. Otherwise extend `AbstractAggregateRepository`. The
-business adapter remains responsible for restoration and dependent-record synchronization.
+For a multi-table aggregate with a MyBatis-Plus root record, `doAdd`, `doModify`, and `doRemove`
+are final. Synchronize dependent rows from `onRootInserted`, `onRootUpdated`, and `onRootRemoved`.
+Those callbacks run only after the root write accepts the aggregate instance loaded or added in the
+current persistence context. `doFindById` may still delegate to `loadAggregate` when restoration
+needs dependent rows. Otherwise extend `AbstractAggregateRepository`. The business adapter remains
+responsible for restoration and dependent-record synchronization.
 
 For persistence-owned optimistic locking, annotate the root data version with `@Version`, configure
 `OptimisticLockerInnerInterceptor`, and pass the data class to `MybatisPlusAggregateRepository`.

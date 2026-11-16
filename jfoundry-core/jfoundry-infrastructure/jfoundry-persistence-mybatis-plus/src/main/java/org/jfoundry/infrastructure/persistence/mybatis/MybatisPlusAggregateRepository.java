@@ -24,9 +24,11 @@ import org.jspecify.annotations.Nullable;
 
 /// MyBatis-Plus persistence base for an aggregate whose root is represented by one data object.
 /// <p>
-/// The default implementation stores a single data object. Adapters for multi-table aggregates may
-/// override the complete {@code do*} operations and use the protected operation methods to retain
-/// root persistence, optional optimistic locking, and persistence-context tracking.
+/// The default implementation stores a single data object. {@code doAdd}, {@code doModify}, and
+/// {@code doRemove} are final so a subclass cannot replace a versioned root update with a
+/// primary-key write. Multi-table adapters synchronize dependent rows from {@link #onRootInserted},
+/// {@link #onRootUpdated}, and {@link #onRootRemoved}. Those callbacks run only after the root
+/// write has accepted the aggregate instance loaded or added in this persistence context.
 ///
 /// @param <T> aggregate root type
 /// @param <ID> aggregate identifier type
@@ -123,9 +125,24 @@ public abstract class MybatisPlusAggregateRepository<
         return aggregate;
     }
 
+    /// Synchronizes dependent rows after the root insert has been accepted.
+    protected void onRootInserted(T aggregate, D rootData) {
+    }
+
+    /// Synchronizes dependent rows after the root update has been accepted.
+    ///
+    /// The callback is not invoked when this persistence context did not load or add the aggregate
+    /// instance, or when the versioned root update conflicts.
+    protected void onRootUpdated(T aggregate, D rootData) {
+    }
+
+    /// Synchronizes dependent rows after the root removal has been accepted.
+    protected void onRootRemoved(T aggregate) {
+    }
+
     @Override
-    protected void doAdd(T aggregate) {
-        insertAggregate(aggregate, toRootData.apply(aggregate), ignored -> { });
+    protected final void doAdd(T aggregate) {
+        insertAggregate(aggregate, toRootData.apply(aggregate), data -> onRootInserted(aggregate, data));
     }
 
     /// Inserts the root data and additional aggregate state before tracking persistence state.
@@ -161,8 +178,8 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     @Override
-    protected void doModify(T aggregate) {
-        updateAggregate(aggregate, toRootData.apply(aggregate), ignored -> { });
+    protected final void doModify(T aggregate) {
+        updateAggregate(aggregate, toRootData.apply(aggregate), data -> onRootUpdated(aggregate, data));
     }
 
     /// Updates the root data, completes additional writes, and then advances tracked state.
@@ -195,8 +212,8 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     @Override
-    protected void doRemove(T aggregate) {
-        deleteAggregate(aggregate, () -> { });
+    protected final void doRemove(T aggregate) {
+        deleteAggregate(aggregate, () -> onRootRemoved(aggregate));
     }
 
     /// Deletes the root data before completing any additional removal work.
