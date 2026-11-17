@@ -3,13 +3,13 @@ package org.jfoundry.infrastructure.persistence.mybatis.support;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.jfoundry.infrastructure.persistence.AggregateData;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAggregateData;
 
 import java.time.Instant;
 
 /// Test Data object for MyBatis-Plus table mapping.
 @TableName("test_order")
-public class TestOrderData extends AggregateData<String> {
+public class TestOrderData extends MybatisPlusAggregateData<String> {
 
     @TableId(type = IdType.INPUT)
     private String id;

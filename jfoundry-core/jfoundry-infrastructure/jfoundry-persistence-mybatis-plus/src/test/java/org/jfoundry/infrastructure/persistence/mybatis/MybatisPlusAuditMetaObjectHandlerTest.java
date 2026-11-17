@@ -1,7 +1,7 @@
 package org.jfoundry.infrastructure.persistence.mybatis;
 
 import org.apache.ibatis.reflection.SystemMetaObject;
-import org.jfoundry.infrastructure.persistence.AggregateData;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAggregateData;
 import org.jfoundry.infrastructure.persistence.AuditStamp;
 import org.jfoundry.infrastructure.persistence.AuditStampHolder;
 import org.jfoundry.infrastructure.persistence.AuditStamping;
@@ -50,7 +50,7 @@ class MybatisPlusAuditMetaObjectHandlerTest {
         assertThat(data.getLastModifiedBy()).isNull();
     }
 
-    private static final class TestData extends AggregateData<String> implements AuditStampHolder {
+    private static final class TestData extends MybatisPlusAggregateData<String> implements AuditStampHolder {
 
         private Instant createdAt;
         private String createdBy;

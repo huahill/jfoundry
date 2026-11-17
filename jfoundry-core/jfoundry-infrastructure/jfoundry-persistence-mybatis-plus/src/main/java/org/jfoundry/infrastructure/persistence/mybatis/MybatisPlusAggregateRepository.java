@@ -8,10 +8,8 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
-import org.jfoundry.infrastructure.persistence.AggregateData;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContext;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContextAware;
-import org.jfoundry.infrastructure.persistence.DataMapper;
 import org.jfoundry.infrastructure.persistence.PersistenceStateKey;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
@@ -37,7 +35,7 @@ import org.jspecify.annotations.Nullable;
 public abstract class MybatisPlusAggregateRepository<
         T extends AggregateRoot<T, ID>,
         ID extends Identifier,
-        D extends AggregateData<K>,
+        D extends MybatisPlusAggregateData<K>,
         K extends Serializable>
         extends AbstractAggregateRepository<T, ID>
         implements AggregatePersistenceContextAware {
@@ -45,20 +43,20 @@ public abstract class MybatisPlusAggregateRepository<
     protected final BaseMapper<D> mapper;
     private final Function<T, D> toRootData;
     private final Function<ID, K> toDataId;
-    private final @Nullable DataMapper<T, ID, D, K> dataMapper;
+    private final @Nullable MybatisPlusDataMapper<T, ID, D, K> dataMapper;
     private final @Nullable Class<D> dataType;
     private final PersistenceStateKey<VersionState> versionKey;
     private @Nullable AggregatePersistenceContext persistenceContext;
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
-            DataMapper<T, ID, D, K> dataMapper) {
+            MybatisPlusDataMapper<T, ID, D, K> dataMapper) {
         this(mapper, dataMapper::toData, dataMapper::toDataId, dataMapper, null);
     }
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
-            @Nullable DataMapper<T, ID, D, K> dataMapper,
+            @Nullable MybatisPlusDataMapper<T, ID, D, K> dataMapper,
             @Nullable Class<D> dataType) {
         this(mapper, dataMapper::toData, dataMapper::toDataId, dataMapper, dataType);
     }
@@ -75,7 +73,7 @@ public abstract class MybatisPlusAggregateRepository<
             BaseMapper<D> mapper,
             Function<T, D> toRootData,
             Function<ID, K> toDataId,
-            DataMapper<T, ID, D, K> dataMapper,
+            MybatisPlusDataMapper<T, ID, D, K> dataMapper,
             Class<D> dataType) {
         this.mapper = Objects.requireNonNull(mapper, "Mapper must not be null.");
         this.toRootData = Objects.requireNonNull(
@@ -90,7 +88,7 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     /// Bidirectional data mapper available to single-data subclasses.
-    protected final DataMapper<T, ID, D, K> dataMapper() {
+    protected final MybatisPlusDataMapper<T, ID, D, K> dataMapper() {
         if (dataMapper == null) {
             throw new IllegalStateException(
                     "This repository does not define reverse data mapping.");

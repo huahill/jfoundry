@@ -1,4 +1,4 @@
-package org.jfoundry.infrastructure.persistence;
+package org.jfoundry.infrastructure.persistence.mybatis;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,21 +10,21 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/// Verifies the equals/hashCode contract of {@link AggregateData}.
+/// Verifies the equals/hashCode contract of {@link MybatisPlusAggregateData}.
 /// <p>
 /// Key regression: non-persisted objects with id == null must not be folded into one element by
 /// HashSet/HashMap.
-class AggregateDataIdentityTest {
+class MybatisPlusAggregateDataIdentityTest {
 
     @Test
     void aggregateDataShouldBeThePersistenceBaseType() {
-        assertEquals(Object.class, AggregateData.class.getSuperclass());
+        assertEquals(Object.class, MybatisPlusAggregateData.class.getSuperclass());
     }
 
     @Test
     void newEntitiesWithNullIdShouldNotBeEqual() {
-        AggregateData<String> a = new TestData();
-        AggregateData<String> b = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> b = new TestData();
 
         assertNotEquals(a, b);
         assertFalse(a.equals(b));
@@ -32,10 +32,10 @@ class AggregateDataIdentityTest {
 
     @Test
     void newEntitiesWithNullIdShouldNotCollapseInHashSet() {
-        AggregateData<String> a = new TestData();
-        AggregateData<String> b = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> b = new TestData();
 
-        Set<AggregateData<String>> set = new HashSet<>();
+        Set<MybatisPlusAggregateData<String>> set = new HashSet<>();
         set.add(a);
         set.add(b);
 
@@ -44,9 +44,9 @@ class AggregateDataIdentityTest {
 
     @Test
     void entitiesWithSameIdShouldBeEqual() {
-        AggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
         a.setId("1");
-        AggregateData<String> b = new TestData();
+        MybatisPlusAggregateData<String> b = new TestData();
         b.setId("1");
 
         assertEquals(a, b);
@@ -55,9 +55,9 @@ class AggregateDataIdentityTest {
 
     @Test
     void entitiesWithDifferentIdShouldNotBeEqual() {
-        AggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
         a.setId("1");
-        AggregateData<String> b = new TestData();
+        MybatisPlusAggregateData<String> b = new TestData();
         b.setId("2");
 
         assertNotEquals(a, b);
@@ -65,8 +65,8 @@ class AggregateDataIdentityTest {
 
     @Test
     void nullIdEntityShouldNotEqualPersistedEntity() {
-        AggregateData<String> a = new TestData();
-        AggregateData<String> b = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> b = new TestData();
         b.setId("1");
 
         assertNotEquals(a, b);
@@ -75,20 +75,20 @@ class AggregateDataIdentityTest {
 
     @Test
     void sameReferenceShouldBeEqual() {
-        AggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
 
         assertTrue(a.equals(a));
     }
 
     @Test
     void shouldNotEqualNullOrDifferentType() {
-        AggregateData<String> a = new TestData();
+        MybatisPlusAggregateData<String> a = new TestData();
         a.setId("1");
 
         assertFalse(a.equals(null));
-        assertFalse(a.equals("not an AggregateData"));
+        assertFalse(a.equals("not an MybatisPlusAggregateData"));
     }
 
-    private static final class TestData extends AggregateData<String> {
+    private static final class TestData extends MybatisPlusAggregateData<String> {
     }
 }
