@@ -6,10 +6,11 @@ handlers, logical-delete fields, and generated identifiers stay outside the aggr
 
 ## Contract
 
-`DataMapper` is the explicit boundary between an aggregate and its persistence representation. It
-owns ID conversion, aggregate restoration, and the mapping of the aggregate's current state. A
-mapper can be plain Java, MapStruct-generated where that is sufficient, or a dependency-injected
-component when the application needs it.
+`JpaAggregateMapper` is the JPA boundary: it restores an aggregate from the managed entity and
+applies current state back to that same instance. `MybatisPlusDataMapper` is the MyBatis-Plus
+boundary: it converts an aggregate to the row object that MyBatis-Plus inserts or updates. Neither
+contract is shared by the other technology. A mapper can be plain Java, MapStruct-generated where
+that is sufficient, or a dependency-injected component when the application needs it.
 
 The persistence adapter owns the complete aggregate operation. It must not offer a generic
 multi-table collection synchronization policy: replacement, differential updates, append-only

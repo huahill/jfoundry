@@ -4,7 +4,7 @@
 
 ## 聚合持久化
 
-持久化数据对象继承 `AggregateData<K>` 并使用数据库友好的 ID。`DataMapper` 在仓储边界转换 ID、数据和聚合。`MybatisPlusAggregateRepository` 为一个 `AggregateData`、一个 `DataMapper` 和一个 `BaseMapper` 提供完整默认实现。
+持久化数据对象继承 `MybatisPlusAggregateData<K>` 并使用数据库友好的 ID。`MybatisPlusDataMapper` 在仓储边界转换 ID、数据和聚合。`MybatisPlusAggregateRepository` 为一个 `MybatisPlusAggregateData`、一个 `MybatisPlusDataMapper` 和一个 `BaseMapper` 提供完整默认实现。
 
 多表聚合存在 MyBatis-Plus 根记录时，`doAdd`、`doModify` 和 `doRemove` 是 final。从属记录同步放在 `onRootInserted`、`onRootUpdated` 和 `onRootRemoved`。这些回调只在根记录写入接受了当前持久化上下文里加载或新增的那个聚合实例之后运行。还原需要从属记录时，`doFindById` 仍可委托给 `loadAggregate`。否则直接继承 `AbstractAggregateRepository`。业务适配器仍负责还原和从属记录同步。
 

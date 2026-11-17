@@ -8,9 +8,9 @@
     <artifactId>jfoundry-persistence-core</artifactId>
     <name>jfoundry-persistence-core</name>
     <description>
-        DDD aggregate persistence support: storage-neutral repository lifecycle,
-        AggregateData, and DataMapper contracts. Concrete adapters extend this
-        module without pulling in runtime, messaging, or domain-event dispatch.
+        DDD aggregate persistence support: storage-neutral repository lifecycle.
+        Concrete adapters extend this module without pulling in runtime,
+        messaging, or domain-event dispatch.
     </description>
 
     <dependencies>
