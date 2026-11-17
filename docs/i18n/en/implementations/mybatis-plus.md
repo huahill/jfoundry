@@ -11,11 +11,14 @@ default is one `MybatisPlusAggregateData`, one `MybatisPlusDataMapper`, and one 
 through `MybatisPlusAggregateRepository`.
 
 For a multi-table aggregate with a MyBatis-Plus root record, `doAdd`, `doModify`, and `doRemove`
-are final. Synchronize dependent rows from `onRootInserted`, `onRootUpdated`, and `onRootRemoved`.
-Those callbacks run only after the root write accepts the aggregate instance loaded or added in the
-current persistence context. `doFindById` may still delegate to `loadAggregate` when restoration
-needs dependent rows. Otherwise extend `AbstractAggregateRepository`. The business adapter remains
-responsible for restoration and dependent-record synchronization.
+are final. Synchronize dependent rows in `afterInsert`, `afterUpdate`, and `afterRemove`. Those
+steps are the remainder of the same aggregate write: the root statement has succeeded, and the
+aggregate write has not finished. They run only after the root statement accepts the aggregate
+instance loaded or added in the current persistence context, and before persistence state is
+recorded. A failure stays in the surrounding transaction with the root statement. `doFindById` may
+still delegate to `loadAggregate` when restoration needs dependent rows. Otherwise extend
+`AbstractAggregateRepository`. The business adapter remains responsible for restoration and
+dependent-record synchronization.
 
 For persistence-owned optimistic locking, annotate the root data version with `@Version`, configure
 `OptimisticLockerInnerInterceptor`, and pass the data class to `MybatisPlusAggregateRepository`.

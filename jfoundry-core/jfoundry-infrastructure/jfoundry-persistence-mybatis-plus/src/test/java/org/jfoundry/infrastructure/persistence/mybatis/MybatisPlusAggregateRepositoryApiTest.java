@@ -6,6 +6,7 @@ import org.jmolecules.ddd.types.AggregateRoot;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
@@ -35,6 +36,13 @@ class MybatisPlusAggregateRepositoryApiTest {
     }
 
     @Test
+    void dependentWritesRemainPartOfTheAggregateWrite() throws NoSuchMethodException {
+        assertOverridable("afterInsert", AggregateRoot.class, MybatisPlusAggregateData.class);
+        assertOverridable("afterUpdate", AggregateRoot.class, MybatisPlusAggregateData.class);
+        assertOverridable("afterRemove", AggregateRoot.class);
+    }
+
+    @Test
     void persistenceContextAwarenessShouldRemainProxyable() throws NoSuchMethodException {
         assertThat(Modifier.isFinal(MybatisPlusAggregateRepository.class
                 .getMethod("setAggregatePersistenceContext",
@@ -47,5 +55,12 @@ class MybatisPlusAggregateRepositoryApiTest {
                 .map(Constructor::getParameterTypes)
                 .map(List::of)
                 .toList();
+    }
+
+    private static void assertOverridable(String name, Class<?>... parameterTypes)
+            throws NoSuchMethodException {
+        Method method = MybatisPlusAggregateRepository.class.getDeclaredMethod(name, parameterTypes);
+        assertThat(Modifier.isProtected(method.getModifiers())).isTrue();
+        assertThat(Modifier.isFinal(method.getModifiers())).isFalse();
     }
 }

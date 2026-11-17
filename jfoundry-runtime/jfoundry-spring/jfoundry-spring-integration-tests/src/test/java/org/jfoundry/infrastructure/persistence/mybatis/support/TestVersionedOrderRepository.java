@@ -26,7 +26,7 @@ public final class TestVersionedOrderRepository extends
     }
 
     @Override
-    protected void onRootUpdated(TestOrder aggregate, VersionedOrderData rootData) {
+    protected void afterUpdate(TestOrder aggregate, VersionedOrderData rootData) {
         if (failNextUpdate) {
             failNextUpdate = false;
             throw new IllegalStateException("Additional update failed.");
@@ -35,7 +35,7 @@ public final class TestVersionedOrderRepository extends
     }
 
     @Override
-    protected void onRootRemoved(TestOrder aggregate) {
+    protected void afterRemove(TestOrder aggregate) {
         completedRemovals++;
     }
 

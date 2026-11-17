@@ -24,9 +24,11 @@ import org.jspecify.annotations.Nullable;
 /// <p>
 /// The default implementation stores a single data object. {@code doAdd}, {@code doModify}, and
 /// {@code doRemove} are final so a subclass cannot replace a versioned root update with a
-/// primary-key write. Multi-table adapters synchronize dependent rows from {@link #onRootInserted},
-/// {@link #onRootUpdated}, and {@link #onRootRemoved}. Those callbacks run only after the root
-/// write has accepted the aggregate instance loaded or added in this persistence context.
+/// primary-key write. Multi-table adapters finish that same aggregate write in {@link #afterInsert},
+/// {@link #afterUpdate}, and {@link #afterRemove}. Those steps run only after the root statement
+/// has accepted the aggregate instance loaded or added in this persistence context, and before
+/// persistence state is recorded. A failure stays in the surrounding transaction with the root
+/// statement.
 ///
 /// @param <T> aggregate root type
 /// @param <ID> aggregate identifier type
@@ -123,24 +125,29 @@ public abstract class MybatisPlusAggregateRepository<
         return aggregate;
     }
 
-    /// Synchronizes dependent rows after the root insert has been accepted.
-    protected void onRootInserted(T aggregate, D rootData) {
-    }
-
-    /// Synchronizes dependent rows after the root update has been accepted.
+    /// Writes the rest of the aggregate after the root insert succeeds and before state is tracked.
     ///
-    /// The callback is not invoked when this persistence context did not load or add the aggregate
-    /// instance, or when the versioned root update conflicts.
-    protected void onRootUpdated(T aggregate, D rootData) {
+    /// A failure stays in the surrounding transaction with the root insert.
+    protected void afterInsert(T aggregate, D rootData) {
     }
 
-    /// Synchronizes dependent rows after the root removal has been accepted.
-    protected void onRootRemoved(T aggregate) {
+    /// Writes the rest of the aggregate after the root update succeeds and before state advances.
+    ///
+    /// This step does not run when this persistence context did not load or add the aggregate
+    /// instance, or when the versioned root update conflicts. A failure stays in the surrounding
+    /// transaction with the root update.
+    protected void afterUpdate(T aggregate, D rootData) {
+    }
+
+    /// Finishes aggregate removal after the root row is deleted.
+    ///
+    /// A failure stays in the surrounding transaction with the root removal.
+    protected void afterRemove(T aggregate) {
     }
 
     @Override
     protected final void doAdd(T aggregate) {
-        insertAggregate(aggregate, toRootData.apply(aggregate), data -> onRootInserted(aggregate, data));
+        insertAggregate(aggregate, toRootData.apply(aggregate), data -> afterInsert(aggregate, data));
     }
 
     /// Inserts the root data and additional aggregate state before tracking persistence state.
@@ -177,7 +184,7 @@ public abstract class MybatisPlusAggregateRepository<
 
     @Override
     protected final void doModify(T aggregate) {
-        updateAggregate(aggregate, toRootData.apply(aggregate), data -> onRootUpdated(aggregate, data));
+        updateAggregate(aggregate, toRootData.apply(aggregate), data -> afterUpdate(aggregate, data));
     }
 
     /// Updates the root data, completes additional writes, and then advances tracked state.
@@ -211,7 +218,7 @@ public abstract class MybatisPlusAggregateRepository<
 
     @Override
     protected final void doRemove(T aggregate) {
-        deleteAggregate(aggregate, () -> onRootRemoved(aggregate));
+        deleteAggregate(aggregate, () -> afterRemove(aggregate));
     }
 
     /// Deletes the root data before completing any additional removal work.
