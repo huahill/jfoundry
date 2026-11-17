@@ -6,7 +6,7 @@
 
 持久化数据对象继承 `MybatisPlusAggregateData<K>` 并使用数据库友好的 ID。`MybatisPlusDataMapper` 在仓储边界转换 ID、数据和聚合。`MybatisPlusAggregateRepository` 为一个 `MybatisPlusAggregateData`、一个 `MybatisPlusDataMapper` 和一个 `BaseMapper` 提供完整默认实现。
 
-多表聚合存在 MyBatis-Plus 根记录时，`doAdd`、`doModify` 和 `doRemove` 是 final。从属记录同步放在 `onRootInserted`、`onRootUpdated` 和 `onRootRemoved`。这些回调只在根记录写入接受了当前持久化上下文里加载或新增的那个聚合实例之后运行。还原需要从属记录时，`doFindById` 仍可委托给 `loadAggregate`。否则直接继承 `AbstractAggregateRepository`。业务适配器仍负责还原和从属记录同步。
+多表聚合存在 MyBatis-Plus 根记录时，`doAdd`、`doModify` 和 `doRemove` 是 final。从属记录同步放在 `afterInsert`、`afterUpdate` 和 `afterRemove`。这三步是同一次聚合写入的后半段：根语句已经成功，聚合写入尚未结束。它们只在根语句接受了当前持久化上下文里加载或新增的那个聚合实例之后运行，并且发生在记录持久化状态之前。失败与根语句留在同一个事务里。还原需要从属记录时，`doFindById` 仍可委托给 `loadAggregate`。否则直接继承 `AbstractAggregateRepository`。业务适配器仍负责还原和从属记录同步。
 
 若需要持久化所有的乐观锁，在根数据对象的版本字段上标注 `@Version`，配置 `OptimisticLockerInnerInterceptor`，并将数据对象类型传给 `MybatisPlusAggregateRepository`。仓储会处理已加载版本追踪、`updateById` 版本还原、零行冲突、已追踪版本推进以及 ID 加版本的删除。未标注 `@Version` 的数据对象保持不追踪行为。
 
