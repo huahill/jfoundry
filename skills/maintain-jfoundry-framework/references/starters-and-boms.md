@@ -15,6 +15,10 @@ create a published parent or inheritance boundary.
 - `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
   pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
   BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
+  The consumer BOM imports `quarkus-bom` with `quarkus.platform.version`. Do not reuse
+  `quarkus.version` there: sibling modules that define one property for several dependencies make
+  Dependabot update only one POM. The Quarkus Dependabot group must not set `update-types`, because a
+  fourth numeric component such as 3.40.1.2 is excluded from every group that does.
 - Dependabot follows `<modules>` only and cannot group updates across directory jobs. Do not dual-write
   `<modules>` into `jfoundry-quarkus-build` or `jfoundry-spring-boot-parent`, and do not parent a published
   BOM from either of them. Each platform instead has an unpublished model 4.0.0 reactor at

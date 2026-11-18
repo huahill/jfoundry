@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-import org.jfoundry.infrastructure.persistence.AggregateData;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAggregateData;
 import org.jfoundry.infrastructure.persistence.AuditStamp;
 import org.jfoundry.infrastructure.persistence.AuditStampHolder;
 
@@ -13,7 +13,7 @@ import java.time.Instant;
 
 /// Minimal persistence type that exercises MyBatis-Plus field filling in a Native Image consumer.
 @TableName("native_audit_record")
-public class NativeAuditRecord extends AggregateData<String> implements AuditStampHolder {
+public class NativeAuditRecord extends MybatisPlusAggregateData<String> implements AuditStampHolder {
 
     @TableId(type = IdType.INPUT)
     private String id;

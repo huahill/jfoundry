@@ -102,7 +102,7 @@ def verify_dependabot(root: Path) -> None:
     ]
     expected_groups = {
         "jfoundry-spring-boot-platform": {"patterns": spring_boot_patterns, "update-types": ["patch", "minor"]},
-        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns, "update-types": ["patch", "minor"]},
+        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
         "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
@@ -113,7 +113,7 @@ def verify_dependabot(root: Path) -> None:
             if name == "jfoundry-spring-boot-platform":
                 fail(f"{prefix}: jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
             if name == "jfoundry-quarkus-platform":
-                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
+                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types")
             if name == "jfoundry-maven-patches":
                 fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
             fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
@@ -224,7 +224,7 @@ def main() -> None:
             "git merge-base --is-ancestor",
             'gh workflow run release.yml --repo "${GITHUB_REPOSITORY}" --ref main -f "release_tag=${RELEASE_TAG}"',
         ],
-        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'"],
+        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'", "./mvnw -B -T 1 -DskipTests -nsu deploy", "-Daether.connector.basic.parallelPut=false", "-Daether.connector.basic.upstreamThreads=1", "-Daether.transport.http.maxConnectionsPerRoute=1", "status=429|error-1015|Error 1015", "Waiting ${quiet_seconds}s before the next Central snapshot deploy chunk."],
         ".github/workflows/prepare-snapshot.yml": ["workflow_run:", "workflows:", "- Release", "git tag --points-at", "contents: write", "pull-requests: write", "scripts/set-maven-reactor-version.py", "git push --set-upstream origin", "gh pr create"],
     }
     verify_ci(root)

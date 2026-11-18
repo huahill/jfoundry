@@ -1,9 +1,9 @@
 package org.jfoundry.infrastructure.persistence.mybatis.support;
 
-import org.jfoundry.infrastructure.persistence.DataMapper;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusDataMapper;
 
 /// Test mapper between aggregate roots and Data objects.
-public class TestOrderDataMapper implements DataMapper<TestOrder, TestOrderId, TestOrderData, String> {
+public class TestOrderDataMapper implements MybatisPlusDataMapper<TestOrder, TestOrderId, TestOrderData, String> {
 
     @Override
     public TestOrderData toData(TestOrder entity) {

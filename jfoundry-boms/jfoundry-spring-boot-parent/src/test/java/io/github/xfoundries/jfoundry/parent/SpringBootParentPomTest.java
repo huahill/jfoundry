@@ -264,13 +264,14 @@ class SpringBootParentPomTest {
 
         Document build = document(Path.of("..", "jfoundry-quarkus-build", "pom.xml"));
         String buildVersion = childText(child(build.getDocumentElement(), "properties"), "quarkus.version");
-        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.version");
+        String bomVersion = childText(child(bom.getDocumentElement(), "properties"), "quarkus.platform.version");
         assertThat(buildVersion).as("Quarkus build parent and consumer BOM versions").isEqualTo(bomVersion);
         assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "pom.xml")))
                 .containsOnlyOnce("<quarkus.version>" + buildVersion + "</quarkus.version>")
                 .doesNotContain("<modules>");
         assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml")))
-                .containsOnlyOnce("<quarkus.version>" + bomVersion + "</quarkus.version>")
+                .containsOnlyOnce("<quarkus.platform.version>" + bomVersion + "</quarkus.platform.version>")
+                .doesNotContain("<quarkus.version>")
                 .doesNotContain("<parent>");
         assertThat(child(bom.getDocumentElement(), "parent")).isNull();
         assertThat(Files.readString(Path.of("..", "jfoundry-quarkus-build", "src", "test", "dependabot-reactor", "pom.xml")))

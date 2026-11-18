@@ -71,7 +71,6 @@ updates:
           - io.quarkus:quarkus-extension-maven-plugin
           - io.quarkus:quarkus-extension-processor
           - io.quarkus:quarkus-maven-plugin
-        update-types: [patch, minor]
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]
@@ -302,7 +301,10 @@ jobs:
           esac
       - name: Publish SNAPSHOT
         if: steps.version.outputs.is_snapshot == 'true'
-        run: ./mvnw deploy
+        run: |
+          ./mvnw -B -T 1 -DskipTests -nsu deploy -Daether.connector.basic.parallelPut=false -Daether.connector.basic.upstreamThreads=1 -Daether.transport.http.maxConnectionsPerRoute=1
+          grep -Eq 'status=429|error-1015|Error 1015' deploy.log
+          echo "Waiting ${quiet_seconds}s before the next Central snapshot deploy chunk."
 YAML
 assert_rejects "${temp_dir}"
 write_compliant_auto_merge_workflow
@@ -524,7 +526,19 @@ patterns = config["updates"][0]["groups"]["jfoundry-quarkus-platform"]["patterns
 patterns.remove("io.quarkus.platform:quarkus-bom")
 path.write_text(yaml.safe_dump(config, sort_keys=False))
 PY
-assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates"
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types"
+
+write_compliant_dependabot
+python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
+import sys
+from pathlib import Path
+import yaml
+path = Path(sys.argv[1])
+config = yaml.safe_load(path.read_text())
+config["updates"][0]["groups"]["jfoundry-quarkus-platform"]["update-types"] = ["patch", "minor"]
+path.write_text(yaml.safe_dump(config, sort_keys=False))
+PY
+assert_rejects_with_message "${temp_dir}" "Dependabot update policy is invalid: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types"
 
 write_compliant_dependabot
 python3 - "${temp_dir}/.github/dependabot.yml" <<'PY'
