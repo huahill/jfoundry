@@ -314,7 +314,11 @@
             <plugin>
                 <groupId>org.graalvm.buildtools</groupId>
                 <artifactId>native-maven-plugin</artifactId>
-                <version>1.1.11</version>
+                <!-- 1.1.19 carries a reachability metadata snapshot with Netty 4.2.19
+                     coverage; older plugin builds embed a snapshot without it, which
+                     breaks Spring Boot 4.1.2 native images that use Netty (see
+                     https://github.com/oracle/graalvm-reachability-metadata/issues/11228). -->
+                <version>1.1.19</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.shared</groupId>
