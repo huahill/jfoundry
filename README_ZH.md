@@ -42,7 +42,7 @@ JFoundry 不是完整的业务应用框架，也不要求应用引入全部模�
 
 ## AI 辅助架构工作流
 
-[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) 是
+[`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills) 是
 JFoundry 在设计期的配套插件。用户无需预先选择架构风格：`$domain-architecture-workflow` 会从需求出发完成领域建模，
 再依据已确认的业务需求、外部边界和项目约束判断是否需要完整架构风格；需要时，由工作流在
 [Hexagonal 与 Onion](docs/i18n/zh/framework/architecture-styles.md) 之间作出选择，随后才将决策映射为 JFoundry 模块和
@@ -54,7 +54,7 @@ ArchUnit 规则。CQRS 仍是按需使用的局部模式。
 
 ### 查看端到端示例
 
-可直接查看 [jfoundry 费用报销审批 Demo](https://github.com/xfoundries/jfoundry-expense-approval-demo)。
+可直接查看 [jfoundry 费用报销审批 Demo](https://github.com/huahill/jfoundry-expense-approval-demo)。
 这是一个端到端参考项目：它以刻意简化的业务领域验证完整的架构和集成链路，并持续维护 Hexagonal
 与 Onion Simple 两个变体。
 
@@ -168,7 +168,7 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 - [采用就绪度与已验证范围](docs/i18n/zh/integration/adoption-readiness.md)
 - [发布支持策略](docs/release/support-policy.md)
 - [供应链安全](docs/release/supply-chain-security.md)
-- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)
+- [`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills)
 
 ### 能力
 

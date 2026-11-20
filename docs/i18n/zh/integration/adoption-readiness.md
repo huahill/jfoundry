@@ -8,8 +8,8 @@
 | 仓库 | 职责 |
 |------|------|
 | [huahill/jfoundry](https://github.com/huahill/jfoundry) | 面向 DDD 业务应用的可选 Java 运行时与实现框架 |
-| [xfoundries/domain-architecture-skills](https://github.com/xfoundries/domain-architecture-skills) | 负责领域建模、架构决策和可选 jfoundry 落地的设计期插件 |
-| [xfoundries/jfoundry-expense-approval-demo](https://github.com/xfoundries/jfoundry-expense-approval-demo) | 使用刻意简化的业务领域验证完整架构和集成链路的端到端项目 |
+| [huahill/domain-architecture-skills](https://github.com/huahill/domain-architecture-skills) | 负责领域建模、架构决策和可选 jfoundry 落地的设计期插件 |
+| [huahill/jfoundry-expense-approval-demo](https://github.com/huahill/jfoundry-expense-approval-demo) | 使用刻意简化的业务领域验证完整架构和集成链路的端到端项目 |
 
 插件与框架承担不同职责。即使项目不选择 jfoundry，插件仍然可以提供领域和架构指导。jfoundry
 应在领域、架构、项目形态和运行时约束明确后，作为可选实现方案进入项目。
@@ -74,7 +74,7 @@ jfoundry 不只是项目脚手架。它的主要价值是为业务应用中反�
 
 ## 验证证据
 
-[费用报销审批 Demo](https://github.com/xfoundries/jfoundry-expense-approval-demo) 刻意保持业务逻辑
+[费用报销审批 Demo](https://github.com/huahill/jfoundry-expense-approval-demo) 刻意保持业务逻辑
 简单，同时覆盖完整架构与集成链路。同一套业务规则、数据库模型、集成契约和验收场景已通过分别维护
 的 Hexagonal 与 Onion Simple 变体验证。截至评估日期，已记录的证据包括：
 

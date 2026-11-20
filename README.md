@@ -43,7 +43,7 @@ At repository level, `jfoundry-core/` groups the runtime-neutral modules, `jfoun
 
 ## AI-Assisted Architecture Workflow
 
-[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) is the
+[`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills) is the
 Domain Architecture Plugin that complements JFoundry at design time. It guides an AI coding agent
 from requirements through domain modeling and architecture decisions. Users do not choose an
 architecture style first: `$domain-architecture-workflow` uses confirmed business needs, external
@@ -59,7 +59,7 @@ the evidence and boundaries of using the plugin together with JFoundry.
 
 ### See It in Practice
 
-Explore the [jfoundry expense approval demo](https://github.com/xfoundries/jfoundry-expense-approval-demo),
+Explore the [jfoundry expense approval demo](https://github.com/huahill/jfoundry-expense-approval-demo),
 an end-to-end reference project that validates the workflow with a deliberately small business
 domain, complete architecture and integration paths, and maintained Hexagonal and Onion Simple
 variants.
@@ -173,7 +173,7 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 - [Adoption Readiness and Validated Scope](docs/i18n/en/integration/adoption-readiness.md)
 - [Support Policy](docs/release/support-policy.md)
 - [Supply-Chain Security](docs/release/supply-chain-security.md)
-- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)
+- [`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills)
 
 ### Capabilities
 
