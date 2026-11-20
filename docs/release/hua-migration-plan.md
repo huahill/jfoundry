@@ -1,91 +1,66 @@
-# Hua Identity Migration Plan
+# JFoundry Identity Migration
 
-Status: **pending**. Implementation must wait until the selected Maven 4 final release is available and the wrapper/CI baseline has been validated against it.
+Status: **in progress**. Revised on 2026-11-20. The product name stays `jfoundry`.
 
-This document records the complete migration from the current `xfoundries/jfoundry` identity to the `huahill/hua` identity. It is a breaking migration, not a compatibility alias or a repository copy.
+This replaces the earlier proposal to rename the repository, modules, artifacts, packages, configuration, and tables to `hua`. That product rename is rejected. `hua` is the organization name, not the framework name.
 
-## Approved target identity
+Maven 4.0.0 final is still unpublished. The wrapper remains Maven `4.0.0-rc-7`. The baseline bump stays blocked and is not part of the identity change.
 
-| Concern | Target |
-| --- | --- |
-| GitHub organization | `huahill` |
-| GitHub repository | `hua` |
-| Maven namespace/groupId | `io.github.huahill` |
-| Java package root | `io.huahill.*` |
-| Project-owned module/artifact prefix | `hua-` |
-| First release after migration | `0.1.0` |
+## Target identity
 
-Maven coordinates and Java packages intentionally use different roots. `io.github.huahill` is tied to the GitHub-verifiable Central namespace; `io.huahill.*` keeps the Java API under the organization's reverse-domain namespace.
+| Concern | Target | Progress |
+| --- | --- | --- |
+| GitHub organization | `huahill` | Done. `xfoundries/jfoundry` redirects to `huahill/jfoundry`. |
+| GitHub repository | `jfoundry` | Kept. Do not rename the repository to `hua`. |
+| Maven groupId | `io.github.huahill` | Implemented locally. Not pushed or merged. |
+| Artifact and module names | `jfoundry-*` | Kept. |
+| Java package root | `io.huahill.jfoundry.*` | Implemented locally. Not pushed or merged. |
+| Configuration, environment variables, and tables | `jfoundry.*`, `JFOUNDRY_*`, `jfoundry_*` | Kept. |
+| Reactor version | `1.8.0-SNAPSHOT` | Kept. Do not reset the line to `0.1.0`. |
+| Publishing server and GitHub environment | `jfoundry` | Kept. |
 
-## Prerequisites outside the repository
+Maven coordinates and Java packages use different roots. `io.github.huahill:jfoundry-*` is the Central coordinate. `io.huahill.jfoundry.*` is the Java API. The `io.github.huahill` namespace already publishes `vadmin-*`; this framework must not publish `hua-*` artifacts there.
 
-- [ ] Transfer `xfoundries/jfoundry` to the `huahill` organization and rename it to `hua` through GitHub's transfer flow. Do not create a new repository and push a copy.
-- [ ] Verify that the transfer preserves stars, forks, issues, pull requests, wiki, projects, Actions history, tags, releases, release assets, and the old URL redirect.
-- [ ] Confirm that the destination repository is not an unrelated non-empty repository. Back up any existing destination content before taking an irreversible action.
-- [ ] Register and verify the `io.github.huahill` namespace in Sonatype Central Portal.
-- [ ] Confirm the migrated repository's publishing environment still has Central and GPG credentials. Keep the internal publishing server/environment identifier stable during this migration unless operations explicitly changes it.
+## Progress
 
-## Repository changes
+### Done
 
-### 1. Maven 4 baseline
+- [x] Transfer the repository to the `huahill` organization without renaming it.
+- [x] Confirm `io.github.huahill` is a verified Central namespace. It already contains `vadmin-*`.
+- [x] Change the reactor `groupId` from `io.github.xfoundries` to `io.github.huahill` on local branch `codex/huahill-jfoundry-coordinates`, commit `7ae7773d`.
+- [x] Move Java sources and imports from `org.jfoundry` to `io.huahill.jfoundry` in that same commit, including ArchUnit rules, metadata, and release lookups for the current reactor.
+- [x] Point project URL and SCM metadata at `https://github.com/huahill/jfoundry`.
+- [x] Leave already published `io.github.xfoundries:jfoundry-*` artifacts unchanged. The one-time `jfoundry-spring-boot-parent:1.0.0` remediation still targets the old coordinate.
+- [x] Run `mvn validate`, plus the domain module, ArchUnit, and Spring Boot parent POM tests: 190 tests passed. Full `mvn test` and `scripts/verify-ci-matrix.sh` have not been run.
 
-- [ ] Select the exact Maven 4 final release and record it in `docs/release/compatibility.md`.
-- [ ] Update `.mvn/wrapper/`, `mvnw`, `mvnw.cmd`, and all CI Maven setup together.
-- [ ] Pass `mvn validate`, Maven 4 model checks, Consumer POM checks, and wrapper checks before identity edits.
-- [ ] Do not proceed while only a release candidate or mixed Maven 4 baseline is available.
+### Not started
 
-### 2. Maven coordinates and project metadata
+- [ ] Push `codex/huahill-jfoundry-coordinates` and review it in its own pull request. This pull request tracks the decision only.
+- [ ] Select Maven 4.0.0 final, record it in `docs/release/compatibility.md`, and update the wrapper and CI together.
+- [ ] Decide whether to publish relocation POMs for the old `io.github.xfoundries:jfoundry-*` coordinates. Relocation cannot preserve Java package compatibility, and existing releases must not be overwritten.
+- [ ] Confirm the existing `jfoundry` publishing environment still has Central and GPG credentials that can publish `io.github.huahill`.
 
-- [ ] Change project-owned `io.github.xfoundries` coordinates to `io.github.huahill` in the root POM, every child POM, BOM, fixture, script, and generated publication check.
-- [ ] Rename the root parent artifact `jfoundry-parent` to `hua-parent`.
-- [ ] Set the first migrated reactor version to `0.1.0`.
-- [ ] Change project URL, SCM connection, developer connection, release workflow URLs, Central lookup paths, release evidence, and documentation to `https://github.com/huahill/hua`.
-- [ ] Keep old `io.github.xfoundries:*` coordinates only where needed for historical documentation or explicitly tested relocation POMs. Never overwrite or delete existing releases.
+### Rejected
 
-### 3. Complete module and artifact rename
+- [x] Rename the GitHub repository from `jfoundry` to `hua`.
+- [x] Rename modules and artifacts from `jfoundry-*` to `hua-*`.
+- [x] Use `io.huahill.*` without the `jfoundry` segment, or move source trees to `org/huahill`.
+- [x] Rename product configuration, environment variables, resource paths, or persisted table names.
+- [x] Reset the first migrated release to `0.1.0`.
 
-- [ ] Generate and review an old-path → new-path and old-artifactId → new-artifactId inventory before renaming anything.
-- [ ] Rename source grouping directories: `jfoundry-boms/` → `hua-boms/`, `jfoundry-core/` → `hua-core/`, and `jfoundry-runtime/` → `hua-runtime/`.
-- [ ] Rename every project-owned child directory and Maven artifact beginning with `jfoundry-` to `hua-`, including foundation/module/runtime BOMs, architecture, domain, application, infrastructure, Jakarta, Spring, Quarkus, Helidon, parent, starter, runtime, deployment, and integration-test modules.
-- [ ] Update reactor membership, all relative paths, parent references, dependency declarations, BOM imports, dependency-management keys, profiles, plugin configuration, test fixtures, scripts, IDE metadata, and workflow paths.
-- [ ] Preserve capability names and runtime decomposition; this is a vocabulary change, not a module-boundary redesign.
-- [ ] Rename the module architecture Drawio/SVG assets and update all references, then regenerate the SVG from Drawio.
+## Verification before merge of the identity change
 
-### 4. Product-facing configuration and resources
-
-- [ ] Inventory and review every product-owned `jfoundry.*` property, `JFOUNDRY_*` environment variable, endpoint, metric/log category, resource path, and default table name.
-- [ ] Rename those identifiers to `hua` equivalents where they are part of the public product identity; leave third-party properties and protocol names unchanged.
-- [ ] Update Spring configuration metadata, Native Image reachability metadata, service-loader resources, runtime probes, examples, and test fixtures together.
-- [ ] Treat SQL resource paths and persisted table names as data migrations. Provide explicit `ALTER TABLE`/migration guidance instead of silently changing defaults and losing existing data.
-- [ ] Add checks that reject stale project-owned identifiers outside historical migration documentation.
-
-### 5. Java package migration
-
-- [ ] Rename Java source/test directory trees `.../org/jfoundry/...` to `.../org/huahill/...`.
-- [ ] Change declarations and imports from `org.jfoundry.*` to `io.huahill.*`, preserving the existing subpackage layout and type names.
-- [ ] Update ArchUnit rules, package convention tests, Service Loader entries, reflection configuration, Native Image metadata, logging categories, and all package-sensitive fixtures.
-- [ ] Add an inventory check that fails if project-owned source/resources still reference `org.jfoundry`.
-
-### 6. Documentation and compatibility guidance
-
-- [ ] Update `README.md`, `README_ZH.md`, all English/Chinese integration and implementation guides, release docs, examples, badges, and repository links.
-- [ ] Document the full mapping `io.github.xfoundries:*` + `org.jfoundry.*` + `jfoundry-*` → `io.github.huahill:*` + `io.huahill.*` + `hua-*`.
-- [ ] Document that coordinate, artifact, package, configuration, endpoint, resource, and persisted-identifier changes are incompatible and require consumer/data migration.
-- [ ] Decide and test whether old-coordinate relocation POMs will be published. Relocation cannot preserve Java package compatibility.
-- [ ] Update `AGENTS.md` and the local maintenance guidance if renamed module paths or diagram paths are referenced there. Do not rename third-party names or upstream project identifiers.
-
-## Verification and delivery
-
-- [ ] Run `git diff --check` and documentation verification.
-- [ ] Run `mvn validate`, focused module/ArchUnit tests, then `mvn test` on the Maven 4 final baseline.
-- [ ] Run the affected release-POM, Consumer POM, dependency-boundary, workflow, supply-chain, and Maven model verification scripts.
-- [ ] Run `scripts/verify-ci-matrix.sh` when Java 25 is available, including Spring, Quarkus, Helidon, JVM middleware, and Native Image stages required by the changed modules.
-- [ ] Inspect produced POMs, BOMs, source JARs, Javadocs, service metadata, and publication paths for stale identity values.
-- [ ] Commit on a short-lived `codex/<scope>` branch based on `origin/main`, push with an explicit upstream, open a pull request, and integrate only after the server-side `Merge gate` passes using Rebase and merge.
+- [x] `git diff --check`.
+- [x] `mvn validate` on the current Maven `4.0.0-rc-7` baseline.
+- [x] Focused domain, ArchUnit, and Spring Boot parent POM tests.
+- [ ] Release-POM, Consumer POM, dependency-boundary, workflow, and supply-chain verification scripts.
+- [ ] `mvn test` and, when Java 25 is available, `scripts/verify-ci-matrix.sh`.
+- [ ] Inspect produced POMs, BOMs, source JARs, Javadocs, and service metadata for a stale `io.github.xfoundries` or `org.jfoundry` identity outside historical remediation.
+- [ ] Integrate the identity change with GitHub's Squash and merge after the server-side `Merge gate` passes.
 
 ## Explicit non-goals
 
 - Do not delete or rewrite existing Git tags, GitHub releases, or Maven Central artifacts.
-- Do not silently introduce compatibility aliases for renamed Java packages or persisted tables.
-- Do not redesign Onion/Hexagonal module boundaries or runtime capability decomposition as part of the rename.
+- Do not publish compatibility aliases for the renamed Java packages.
+- Do not redesign module boundaries or runtime capability decomposition.
 - Do not rename third-party coordinates, upstream technology names, or the `jMolecules` project.
