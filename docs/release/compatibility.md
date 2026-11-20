@@ -78,7 +78,9 @@ capability set and operational environment.
 
 ## Managed Compatibility Exceptions
 
-JFoundry keeps exceptional overrides narrow and owned by the BOM for the affected ecosystem:
+JFoundry keeps exceptional overrides narrow and owned by the BOM for the affected ecosystem. This
+section records each override's rationale at line level; exact override versions live in the owning
+BOM or build parent, and exact per-release versions live in the CI logs and release evidence.
 
 - The MyBatis-Plus Spring Boot starter owns its `org.mybatis:mybatis-spring` bridge version; JFoundry
   does not override that transitive dependency independently.
@@ -86,21 +88,23 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
   supported JFoundry stack.
 - Foundation manages `org.javassist:javassist` because RocketMQ's transitive Reflections line otherwise
   selects an older POM that produces Maven 4 model warnings.
-- `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` 2.22 override.
-  Quarkus 3.40.1 manages the Jackson 2 annotation line at 2.21, but Foundation's Jackson 3.2 line
-  requires `com.fasterxml.jackson.core:jackson-annotations` 2.22, including `JsonApplyView`. The
-  override is declared before the Quarkus BOM import because Maven keeps the first managed coordinate.
+- `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` override; the owning BOM
+  contains the exact override version. Quarkus 3.40.x manages the Jackson 2 annotation line at 2.21,
+  but Foundation's Jackson 3.2 line requires `com.fasterxml.jackson.core:jackson-annotations` 2.22,
+  including `JsonApplyView`. The override is declared before the Quarkus BOM import because Maven
+  keeps the first managed coordinate.
 - `jfoundry-helidon-dependencies` keeps a Helidon-local Jackson annotations override and the
   `groovy-all` override required by Maven release dependency validation. The owning BOM contains
   the exact override versions.
-- `jfoundry-helidon-dependencies` also pins `org.testcontainers:testcontainers` to 2.0.5.
-  Helidon 4.5.5 manages Testcontainers 1.21.4, whose core brings `junit:junit` and makes Surefire
-  treat JUnit Jupiter tags as JUnit 4 categories. Foundation manages the Testcontainers 2.0 module
-  coordinates; this override keeps the shared core coordinate on that line.
-- The Helidon reactor directly manages `hibernate-core` 7.4.13.Final, `jakarta.persistence-api` 3.2.0,
-  and `jboss-logging` 3.6.1.Final ahead of the Helidon BOM import. Helidon 4.5.5 would otherwise select
-  Hibernate 6.3, JPA 3.1.0, and jboss-logging 3.5.3.Final. The override is build-local and is not
-  published in `jfoundry-helidon-dependencies`.
+- `jfoundry-helidon-dependencies` also pins `org.testcontainers:testcontainers` to the
+  Foundation-managed 2.0 line. Helidon 4.5.x manages the 1.21 line, whose core brings `junit:junit`
+  and makes Surefire treat JUnit Jupiter tags as JUnit 4 categories. This override keeps the shared
+  core coordinate on the Foundation line.
+- The Helidon reactor directly manages `hibernate-core`, `jakarta.persistence-api`, and
+  `jboss-logging` ahead of the Helidon BOM import; the Helidon build parent contains the exact
+  override versions. Helidon 4.5.x would otherwise select the Hibernate 6.3 / JPA 3.1 /
+  jboss-logging 3.5 line. The override is build-local and is not published in
+  `jfoundry-helidon-dependencies`.
 
 These exceptions are dependency-management decisions, not claims that JFoundry supplies an adapter for
 every library managed by a runtime platform.
