@@ -11,23 +11,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-application-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-outbox-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-outbox-spring</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-jackson</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
         </dependency>
         <dependency>
@@ -56,12 +56,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
             <scope>test</scope>
         </dependency>
@@ -76,12 +76,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-spring</artifactId>
             <scope>test</scope>
         </dependency>

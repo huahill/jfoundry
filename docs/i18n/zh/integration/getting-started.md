@@ -37,7 +37,7 @@ JFoundry 落地指导。
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -63,15 +63,15 @@ JFoundry 落地指导。
 ```xml
 <dependencies>
     <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-domain</artifactId>
     </dependency>
     <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-hexagonal</artifactId>
     </dependency>
     <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-architecture-test</artifactId>
         <scope>test</scope>
     </dependency>

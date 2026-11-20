@@ -2,13 +2,13 @@
   "groups": [
     {
       "name": "jfoundry.outbox",
-      "type": "org.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties",
-      "sourceType": "org.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties"
+      "type": "io.huahill.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties",
+      "sourceType": "io.huahill.jfoundry.autoconfigure.outbox.JfoundryOutboxProperties"
     },
     {
       "name": "jfoundry.outbox.dispatcher",
-      "type": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties",
-      "sourceType": "org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties"
+      "type": "io.huahill.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties",
+      "sourceType": "io.huahill.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherProperties"
     },
     {
       "name": "jfoundry.outbox.recovery",

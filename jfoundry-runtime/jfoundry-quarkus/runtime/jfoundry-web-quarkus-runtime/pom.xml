@@ -20,11 +20,11 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-web-jaxrs</artifactId>
         </dependency>
         <dependency>

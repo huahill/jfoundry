@@ -8,7 +8,7 @@ adoption guide, not a general production certification. The assessment date is 2
 
 | Repository | Role |
 |------------|------|
-| [xfoundries/jfoundry](https://github.com/xfoundries/jfoundry) | Optional Java runtime and implementation framework for DDD-oriented business applications |
+| [huahill/jfoundry](https://github.com/huahill/jfoundry) | Optional Java runtime and implementation framework for DDD-oriented business applications |
 | [xfoundries/domain-architecture-skills](https://github.com/xfoundries/domain-architecture-skills) | Design-time plugin for domain modeling, architecture decisions, and optional jfoundry landing |
 | [xfoundries/jfoundry-expense-approval-demo](https://github.com/xfoundries/jfoundry-expense-approval-demo) | End-to-end validation project using a deliberately small business domain and a complete integration path |
 

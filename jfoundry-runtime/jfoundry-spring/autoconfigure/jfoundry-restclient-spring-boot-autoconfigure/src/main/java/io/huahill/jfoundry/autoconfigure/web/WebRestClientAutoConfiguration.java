@@ -1,0 +1,38 @@
+package io.huahill.jfoundry.autoconfigure.web;
+
+import io.huahill.jfoundry.http.HttpLoggingPolicy;
+import io.huahill.jfoundry.http.spring.client.HttpOperationRequestProcessor;
+import io.huahill.jfoundry.web.spring.client.RestClientSupport;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.restclient.RestClientCustomizer;
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.client.support.RestClientHttpServiceGroupConfigurer;
+import org.springframework.web.service.invoker.HttpServiceProxyFactory;
+
+/// Configures JFoundry's outbound `RestClient` support for Spring Boot-managed builders.
+@AutoConfiguration(afterName = "org.springframework.boot.restclient.autoconfigure.RestClientAutoConfiguration")
+@ConditionalOnClass({RestClient.class, RestClientCustomizer.class, RestClientSupport.class})
+@EnableConfigurationProperties(JfoundryWebProperties.class)
+public class WebRestClientAutoConfiguration {
+
+    /// Applies the configured JFoundry response handling and HTTP logging detail to each builder.
+    @Bean
+    @ConditionalOnMissingBean(name = "jfoundryWebRestClientCustomizer")
+    public RestClientCustomizer jfoundryWebRestClientCustomizer(JfoundryWebProperties properties) {
+        var logging = properties.getRestClient().getLogging();
+        var maxBodyBytes = HttpLoggingPolicy.maxBodyBytes(logging.getMaxBodyBytes());
+        return builder -> RestClientSupport.configure(builder, logging.getLevel(), logging.getFormat(),
+                logging.getIncludedHeaders(), maxBodyBytes);
+    }
+
+    /// Names each HTTP interface call for {@link io.huahill.jfoundry.http.spring.client.HttpLoggingInterceptor}.
+    @Bean
+    @ConditionalOnClass(HttpServiceProxyFactory.class)
+    public RestClientHttpServiceGroupConfigurer jfoundryHttpOperationLoggingConfigurer() {
+        return groups -> groups.forEachProxyFactory((group, factory) -> HttpOperationRequestProcessor.apply(factory));
+    }
+}

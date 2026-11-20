@@ -15,12 +15,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-quarkus-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-application-core</artifactId>
         </dependency>
         <dependency>

@@ -78,7 +78,7 @@ requires at least one selected-style marker, not every possible role or ring in 
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-architecture-test</artifactId>
     <scope>test</scope>
 </dependency>

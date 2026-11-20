@@ -9,7 +9,7 @@
     <name>jfoundry-restclient-quarkus-runtime</name>
     <description>Quarkus runtime integration for JFoundry REST client logging.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-restclient-jaxrs</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-restclient-jaxrs</artifactId></dependency>
         <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-rest-client</artifactId></dependency>
         <dependency><groupId>org.slf4j</groupId><artifactId>slf4j-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>

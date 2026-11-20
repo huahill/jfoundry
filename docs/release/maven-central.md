@@ -1,10 +1,10 @@
 # Maven Central Release
 
-This project has Maven Central publishing infrastructure for the public `xfoundries/jfoundry` repository.
+This project has Maven Central publishing infrastructure for the public `huahill/jfoundry` repository.
 
 ## Metadata
 
-The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/jfoundry`. Published Maven coordinates use the verified Central namespace `io.github.xfoundries`, while Java API packages remain under `org.jfoundry.*`.
+The root POM publishes URL and SCM metadata for `https://github.com/huahill/jfoundry`. Releases from this line use `io.github.huahill:jfoundry-*`, while Java API packages remain under `io.huahill.jfoundry.*`. Artifacts already published as `io.github.xfoundries:jfoundry-*` stay at those coordinates and are not relocated or overwritten.
 
 ## Prerequisites
 
@@ -17,8 +17,8 @@ The root POM publishes URL and SCM metadata for `https://github.com/xfoundries/j
   does not add a project or runtime dependency.
 - PyYAML 6 for the Python-based GitHub workflow and Dependabot policy checks. CI installs it in the
   documentation-check job; local runs can use `python3 -m pip install --user 'PyYAML>=6,<7'`.
-- A Sonatype Central Portal account with publishing rights for `io.github.xfoundries`.
-- SNAPSHOT publishing enabled for the `io.github.xfoundries` namespace if publishing development snapshots.
+- A Sonatype Central Portal account with publishing rights for `io.github.huahill`.
+- SNAPSHOT publishing enabled for the `io.github.huahill` namespace if publishing development snapshots.
 - For local release dry-runs, a Maven server entry named `jfoundry` in `~/.m2/settings.xml`.
 - For GitHub Actions publishing, use the repository environment `jfoundry` with these secrets:
   - `CENTRAL_USERNAME`: Sonatype Central Portal username or publishing token username.
@@ -117,7 +117,7 @@ Maven 4.1 model; the generated tree is disposable and is never committed or tagg
 
 Every JFoundry publication POM, including the independent BOM POMs, configures the Central publishing
 plugin with `autoPublish=true` and `waitUntil=PUBLISHED`. The workflow then verifies that Maven
-Central's content repository resolves the exact `io.github.xfoundries:jfoundry-parent` POM for the
+Central's content repository resolves the exact `io.github.huahill:jfoundry-parent` POM for the
 release version. It never creates the GitHub Release before that consumer-visible availability check
 passes.
 

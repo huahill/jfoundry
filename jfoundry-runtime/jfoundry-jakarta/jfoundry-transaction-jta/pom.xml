@@ -14,7 +14,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-core</artifactId>
         </dependency>
         <dependency>

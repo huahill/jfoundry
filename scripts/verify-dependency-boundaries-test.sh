@@ -131,7 +131,7 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-foundation-dependencies</artifactId>
                 <version>1.0.0</version>
                 <type>pom</type>
@@ -146,7 +146,7 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-dependencies</artifactId>
                 <version>1.0.0</version>
                 <type>pom</type>

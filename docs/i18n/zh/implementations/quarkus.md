@@ -20,14 +20,14 @@ JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能�
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-quarkus-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -38,7 +38,7 @@ JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能�
 
 <dependencies>
     <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
     </dependency>
 </dependencies>
@@ -164,7 +164,7 @@ transactionRunner.run(() -> {
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-outbox-jpa-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -182,7 +182,7 @@ transactionRunner.run(() -> {
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-outbox-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -213,7 +213,7 @@ worker 运行时，恢复和清理走同一套定时器。恢复会按 `jfoundry
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-kafka-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -239,7 +239,7 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-rabbitmq-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -285,7 +285,7 @@ jfoundry.domain.event.dispatch.outbox.enabled=true
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-inbox-jpa-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -306,7 +306,7 @@ Quarkus REST 应用需要共享 RFC 9457 错误契约时，添加 `jfoundry-web-
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-web-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -354,7 +354,7 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 `jfoundry-web-quarkus-runtime` 会注册 Quarkus REST 请求/响应 filter 与 reader/writer interceptor。
 入站日志通过 `jfoundry.web.quarkus.logging.level` 配置，默认值为 `NONE`。布局使用
 `jfoundry.web.quarkus.logging.format`，默认值为 `HUMAN`。启用后的事件通过
-`org.jfoundry.http.quarkus.HttpLoggingProvider` category 以 `INFO` 输出。
+`io.huahill.jfoundry.http.quarkus.HttpLoggingProvider` category 以 `INFO` 输出。
 
 出站日志需要添加 `jfoundry-restclient-quarkus-runtime`。它会引入 Quarkus MicroProfile REST Client
 扩展，并把 provider 自动注册到每个 REST Client builder。出站日志使用

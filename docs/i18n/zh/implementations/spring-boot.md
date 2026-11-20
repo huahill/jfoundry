@@ -17,7 +17,7 @@ Spring Boot Parent，设置 Java 25，并已经按正确顺序导入 `jfoundry-s
 
 ```xml
 <parent>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
     <version>${jfoundry.version}</version>
 </parent>
@@ -36,14 +36,14 @@ Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-s
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -158,10 +158,10 @@ matrix、model attribute 和 multipart 错误只包含 `detail`。对象级约�
 `RestClientSupport.configure(builder)`，并通过 `RestClientSupport.execute(...)` 执行选定调用。非成功响应会转换为
 `HttpResponseException`。异常原样保留完整的响应正文字节，不解析、不改写。诊断消息另附一段原文预览，最多 400 字节或
 200 个字符，不脱敏。这段预览不是返回给调用方的问题详情。HTTP 诊断日志仍使用各自的脱敏策略。传输和响应解码失败会转换为
-带有安全失败类别的 `HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `org.jfoundry.http` 导入，Spring 日志支持从
-`org.jfoundry.http.spring` 导入，执行链拦截器从
-`org.jfoundry.http.spring.client` 导入，`RestClient` API 从 `org.jfoundry.web.spring.client` 导入。原来的
-`org.jfoundry.web.spring` 位置不提供转发别名。
+带有安全失败类别的 `HttpRequestException`。`HttpLoggingLevel` 与 `HttpLoggingFormat` 从 `io.huahill.jfoundry.http` 导入，Spring 日志支持从
+`io.huahill.jfoundry.http.spring` 导入，执行链拦截器从
+`io.huahill.jfoundry.http.spring.client` 导入，`RestClient` API 从 `io.huahill.jfoundry.web.spring.client` 导入。原来的
+`io.huahill.jfoundry.web.spring` 位置不提供转发别名。
 
 Spring Boot 应用可以使用 `jfoundry-restclient-spring-boot-starter`，并通过
 `jfoundry.web.rest-client.logging.level` 选择 `NONE`、`BASIC`、`HEADERS` 或 `FULL`，默认值为 `NONE`。

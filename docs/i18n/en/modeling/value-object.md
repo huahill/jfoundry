@@ -1,7 +1,7 @@
 # Value Object Guide
 
 jfoundry value objects are ordinary Java types that implement
-`org.jfoundry.domain.valueobject.ValueObject`. Records are the preferred representation because
+`io.huahill.jfoundry.domain.valueobject.ValueObject`. Records are the preferred representation because
 they are final, immutable, and provide `equals`/`hashCode` by default.
 
 ```java

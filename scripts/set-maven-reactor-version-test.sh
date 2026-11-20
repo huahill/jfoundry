@@ -12,7 +12,7 @@ cat > "${fixture_root}/pom.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.1.0">
     <modelVersion>4.1.0</modelVersion>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>fixture-parent</artifactId>
     <version>1.0.0</version>
     <properties><project.build.outputTimestamp>2026-08-23T16:38:25Z</project.build.outputTimestamp></properties>
@@ -23,7 +23,7 @@ cat > "${fixture_root}/module/pom.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.1.0">
     <modelVersion>4.1.0</modelVersion>
-    <parent><groupId>io.github.xfoundries</groupId><artifactId>fixture-parent</artifactId><version>1.0.0</version><relativePath>../pom.xml</relativePath></parent>
+    <parent><groupId>io.github.huahill</groupId><artifactId>fixture-parent</artifactId><version>1.0.0</version><relativePath>../pom.xml</relativePath></parent>
     <artifactId>fixture-module</artifactId>
     <!-- This comment must survive the version update. -->
 </project>
@@ -31,13 +31,13 @@ XML
 cat > "${fixture_root}/standalone/pom.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.1.0">
-    <modelVersion>4.1.0</modelVersion><groupId>io.github.xfoundries</groupId><artifactId>fixture-bom</artifactId><version>1.0.0</version><packaging>pom</packaging>
+    <modelVersion>4.1.0</modelVersion><groupId>io.github.huahill</groupId><artifactId>fixture-bom</artifactId><version>1.0.0</version><packaging>pom</packaging>
 </project>
 XML
 cat > "${fixture_root}/spring-parent/pom.xml" <<'XML'
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.1.0">
-    <modelVersion>4.1.0</modelVersion><groupId>io.github.xfoundries</groupId><artifactId>fixture-spring-parent</artifactId><version>1.0.0</version>
+    <modelVersion>4.1.0</modelVersion><groupId>io.github.huahill</groupId><artifactId>fixture-spring-parent</artifactId><version>1.0.0</version>
     <properties><jfoundry.version>1.0.0</jfoundry.version><project.build.outputTimestamp>2026-08-23T16:38:24Z</project.build.outputTimestamp></properties>
 </project>
 XML

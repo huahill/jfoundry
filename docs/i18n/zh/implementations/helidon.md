@@ -20,14 +20,14 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-helidon-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -97,7 +97,7 @@ Helidon `MessageSender`。Helidon 没有 SmallRye 或 Vert.x 消息栈，因此�
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-kafka-helidon</artifactId>
 </dependency>
 ```
@@ -112,7 +112,7 @@ topic 与 key，将有界传播条目复制为 Kafka header，并把失败映射
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId>
 </dependency>
 ```
@@ -148,7 +148,7 @@ JSON 标量、数组和对象类型。
 
 同一 Web 模块还会注册 JAX-RS 请求/响应 filter 与 reader/writer interceptor，用于诊断日志。入站日志使用
 `jfoundry.web.helidon.logging.level`，默认值为 `NONE`。布局使用 `jfoundry.web.helidon.logging.format`，默认值为 `HUMAN`。启用后的事件通过
-`org.jfoundry.http.helidon.HttpLoggingProvider` 以 `INFO` 输出。
+`io.huahill.jfoundry.http.helidon.HttpLoggingProvider` 以 `INFO` 输出。
 
 `jfoundry-restclient-helidon` 会引入 `helidon-microprofile-rest-client`，并把 JFoundry provider 自动注册到每个
 MicroProfile REST Client builder。出站日志使用 `jfoundry.web.rest-client.logging.level`，默认值为 `NONE`，布局使用

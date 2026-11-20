@@ -10,7 +10,7 @@
     <name>jfoundry-http-jaxrs</name>
     <description>Shared JAX-RS HTTP logging mechanics for Jakarta-based JFoundry runtimes.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-web</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-web</artifactId></dependency>
         <dependency><groupId>jakarta.ws.rs</groupId><artifactId>jakarta.ws.rs-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>jakarta.json</groupId><artifactId>jakarta.json-api</artifactId><scope>provided</scope></dependency>
         <dependency><groupId>org.eclipse.microprofile.config</groupId><artifactId>microprofile-config-api</artifactId><scope>provided</scope></dependency>

@@ -1,6 +1,6 @@
 [
   {
-    "name": "org.jfoundry.helidon.integration.ProblemDetailsResource$DeploymentRequest",
+    "name": "io.huahill.jfoundry.helidon.integration.ProblemDetailsResource$DeploymentRequest",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
     "allPublicMethods": true

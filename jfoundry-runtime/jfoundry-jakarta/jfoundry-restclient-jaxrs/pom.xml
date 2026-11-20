@@ -9,7 +9,7 @@
     <name>jfoundry-restclient-jaxrs</name>
     <description>Shared outbound JAX-RS REST client adapter for Jakarta-based JFoundry runtimes.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-http-jaxrs</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-http-jaxrs</artifactId></dependency>
         <dependency><groupId>jakarta.ws.rs</groupId><artifactId>jakarta.ws.rs-api</artifactId><scope>provided</scope></dependency>
     </dependencies>
 </project>
