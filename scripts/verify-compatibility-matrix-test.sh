@@ -53,7 +53,6 @@ write_matrix() {
 
 | Platform | Supported line | Version source |
 |----------|----------------|----------------|
-| Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
 | Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
@@ -64,7 +63,6 @@ MARKDOWN
 write_fixture() {
     local fixture="$1"
 
-    write_pom "${fixture}" "jfoundry-spring-boot-dependencies" "spring-boot.version" "4.1.1"
     write_pom "${fixture}" "jfoundry-spring-cloud-dependencies" "spring-cloud.version" "2025.1.3"
     python3 - "${fixture}/jfoundry-boms/jfoundry-spring-cloud-dependencies/pom.xml" <<'PY'
 import sys
@@ -116,6 +114,26 @@ sed -i.bak '/| Spring Cloud Alibaba |/d' \
 rm "${missing_platform_fixture}/docs/release/compatibility.md.bak"
 assert_rejects_with_message "${missing_platform_fixture}" \
     "missing platform row: Spring Cloud Alibaba"
+
+# Spring Boot-only follows the current stable Spring Boot line and is validated by the full CI
+# matrix instead, so a Spring Boot row in the table is informational and must not be verified
+# against any BOM property.
+boot_row_ignored_fixture="${temp_dir}/boot-row-ignored"
+write_fixture "${boot_row_ignored_fixture}"
+python3 - "${boot_row_ignored_fixture}/docs/release/compatibility.md" <<'PY'
+import sys
+from pathlib import Path
+path = Path(sys.argv[1])
+content = path.read_text()
+marker = "| Spring Cloud |"
+content = content.replace(
+    marker,
+    "| Spring Boot-only | 9.9.x | `jfoundry-spring-boot-dependencies` |\n" + marker,
+    1,
+)
+path.write_text(content)
+PY
+assert_accepts "${boot_row_ignored_fixture}"
 
 assert_accepts "${ROOT_DIR}"
 
