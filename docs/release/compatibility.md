@@ -86,7 +86,7 @@ JFoundry keeps exceptional overrides narrow and owned by the BOM for the affecte
   supported JFoundry stack.
 - Foundation manages `org.javassist:javassist` because RocketMQ's transitive Reflections line otherwise
   selects an older POM that produces Maven 4 model warnings.
-- `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` 2.22 override.
+- `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` 2.23 override.
   Quarkus 3.40.1 manages the Jackson 2 annotation line at 2.21, but Foundation's Jackson 3.2 line
   requires `com.fasterxml.jackson.core:jackson-annotations` 2.22, including `JsonApplyView`. The
   override is declared before the Quarkus BOM import because Maven keeps the first managed coordinate.
