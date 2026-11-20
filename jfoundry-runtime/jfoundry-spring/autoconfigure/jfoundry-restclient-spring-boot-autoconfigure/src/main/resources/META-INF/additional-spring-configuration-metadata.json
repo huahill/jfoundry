@@ -2,20 +2,20 @@
   "groups": [
     {
       "name": "jfoundry.web.rest-client",
-      "type": "org.jfoundry.autoconfigure.web.JfoundryWebProperties$RestClient",
-      "sourceType": "org.jfoundry.autoconfigure.web.JfoundryWebProperties"
+      "type": "io.huahill.jfoundry.autoconfigure.web.JfoundryWebProperties$RestClient",
+      "sourceType": "io.huahill.jfoundry.autoconfigure.web.JfoundryWebProperties"
     }
   ],
   "properties": [
     {
       "name": "jfoundry.web.rest-client.logging.level",
-      "type": "org.jfoundry.http.HttpLoggingLevel",
+      "type": "io.huahill.jfoundry.http.HttpLoggingLevel",
       "defaultValue": "NONE",
       "description": "Outbound RestClient logging detail: NONE, BASIC, HEADERS, or FULL. Logging is emitted at INFO when enabled."
     },
     {
       "name": "jfoundry.web.rest-client.logging.format",
-      "type": "org.jfoundry.http.HttpLoggingFormat",
+      "type": "io.huahill.jfoundry.http.HttpLoggingFormat",
       "defaultValue": "HUMAN",
       "description": "Outbound RestClient logging layout: HUMAN for Feign-style --> request and <-- response lines, with bodies on one line and END HTTP closers; INLINE for one-line key=value events."
     },

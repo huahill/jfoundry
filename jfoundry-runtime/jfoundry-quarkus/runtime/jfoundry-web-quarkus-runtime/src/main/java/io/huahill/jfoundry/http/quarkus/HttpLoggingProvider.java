@@ -1,0 +1,43 @@
+package io.huahill.jfoundry.http.quarkus;
+
+import jakarta.annotation.Priority;
+import jakarta.ws.rs.Priorities;
+import jakarta.ws.rs.container.PreMatching;
+import jakarta.ws.rs.ext.Provider;
+import io.huahill.jfoundry.http.jaxrs.web.AbstractJaxRsServerHttpLoggingProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.function.BooleanSupplier;
+import java.util.function.LongSupplier;
+
+/// Registers shared JAX-RS HTTP logging with Quarkus REST.
+@Provider
+@PreMatching
+@Priority(Priorities.USER - 200)
+public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingProvider {
+
+    /// Configuration key for inbound Quarkus REST logging detail.
+    public static final String SERVER_LOGGING_LEVEL = "jfoundry.web.quarkus.logging.level";
+
+    /// Configuration key for inbound Quarkus REST logging layout.
+    public static final String SERVER_LOGGING_FORMAT = "jfoundry.web.quarkus.logging.format";
+
+    /// Configuration key for inbound Quarkus REST included headers.
+    public static final String SERVER_LOGGING_INCLUDED_HEADERS = "jfoundry.web.quarkus.logging.included-headers";
+
+    /// Configuration key for the inbound Quarkus REST body-byte limit.
+    public static final String SERVER_LOGGING_MAX_BODY_BYTES = "jfoundry.web.quarkus.logging.max-body-bytes";
+
+    private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingProvider.class);
+
+    /// Creates a provider that reads the current MicroProfile configuration for each request.
+    public HttpLoggingProvider() {
+        this(LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, SERVER_LOGGING_INCLUDED_HEADERS,
+                SERVER_LOGGING_MAX_BODY_BYTES, infoEnabled, nanoTime, LOG::info);
+    }
+}

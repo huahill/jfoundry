@@ -47,7 +47,7 @@
                 <version>${helidon.hibernate.jboss-logging.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-helidon-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>

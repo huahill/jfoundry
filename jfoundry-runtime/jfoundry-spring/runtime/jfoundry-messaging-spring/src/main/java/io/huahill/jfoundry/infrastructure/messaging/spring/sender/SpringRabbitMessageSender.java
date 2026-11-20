@@ -1,0 +1,30 @@
+package io.huahill.jfoundry.infrastructure.messaging.spring.sender;
+
+import io.huahill.jfoundry.application.messaging.MessageSender;
+import io.huahill.jfoundry.application.messaging.OutboundMessage;
+import io.huahill.jfoundry.application.messaging.SendResult;
+import org.springframework.amqp.rabbit.core.RabbitOperations;
+
+/// Spring RabbitMQ-backed {@link MessageSender}.
+public class SpringRabbitMessageSender implements MessageSender {
+
+    private final RabbitOperations rabbitOperations;
+
+    public SpringRabbitMessageSender(RabbitOperations rabbitOperations) {
+        this.rabbitOperations = rabbitOperations;
+    }
+
+    @Override
+    public SendResult send(OutboundMessage message) {
+        try {
+            rabbitOperations.convertAndSend(message.topic(), message.payloadKey(), message.payload(), outbound -> {
+                message.applyHeaders((key, value) -> outbound.getMessageProperties().getHeaders().put(key, value));
+                return outbound;
+            });
+            return SendResult.ok();
+        } catch (Exception exception) {
+            Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
+            return SendResult.fail(cause.getMessage());
+        }
+    }
+}

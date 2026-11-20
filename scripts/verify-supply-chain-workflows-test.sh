@@ -687,7 +687,7 @@ updates:
       interval: weekly
     groups:
       jfoundry-maven-patches:
-        patterns: [org.jfoundry:*]
+        patterns: [io.huahill.jfoundry:*]
         update-types: [patch]
     ignore:
       - dependency-name: org.example:manual-policy

@@ -9,7 +9,7 @@
   <description>Quarkus build-time registration for the jfoundry RabbitMQ MessageSender adapter.</description>
   <dependencies>
     <dependency>
-      <groupId>io.github.xfoundries</groupId>
+      <groupId>io.github.huahill</groupId>
       <artifactId>jfoundry-messaging-rabbitmq-quarkus-runtime</artifactId>
       <version>${project.version}</version>
     </dependency>

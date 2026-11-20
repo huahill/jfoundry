@@ -7,9 +7,9 @@
     <name>jfoundry-domain-event-persistence-bridge-quarkus-runtime</name>
     <description>Quarkus runtime adapter for the Domain Event persistence bridge.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-core</artifactId></dependency>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-persistence-core</artifactId></dependency>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-persistence-bridge</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-domain-event-core</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-persistence-core</artifactId></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-domain-event-persistence-bridge</artifactId></dependency>
         <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-arc</artifactId></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
         <dependency><groupId>org.assertj</groupId><artifactId>assertj-core</artifactId><scope>test</scope></dependency>

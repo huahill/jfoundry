@@ -15,7 +15,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-kafka-quarkus-runtime</artifactId>
             <version>${project.version}</version>
         </dependency>

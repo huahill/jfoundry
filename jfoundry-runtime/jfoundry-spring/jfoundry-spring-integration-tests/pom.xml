@@ -15,137 +15,137 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-architecture-test</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-outbox-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-inbox-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-persistence-core</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-persistence-bridge</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-persistence-jpa</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-jackson</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-inbox-mybatis-plus</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-jpa</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-inbox-jpa</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-persistence-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-webmvc-spring</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-restclient-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-spring-boot-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-inbox-spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-persistence-spring-boot-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
@@ -406,71 +406,71 @@
             <id>native-mybatis-plus</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-domain</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-transaction-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-domain-event-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-domain-event-outbox-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-messaging-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-messaging-jackson</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-domain-event-spring</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-messaging-spring</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-transaction-spring</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-persistence-spring</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-persistence-spring-boot-autoconfigure</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-persistence-core</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-domain-event-persistence-bridge</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-persistence-mybatis-plus</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-starter</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-outbox-mybatis-plus-spring-boot-starter</artifactId>
                 </dependency>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-inbox-mybatis-plus-spring-boot-starter</artifactId>
                 </dependency>
                 <dependency>
@@ -540,7 +540,7 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
-                            <mainClass>org.jfoundry.integration.nativeimage.mybatisplus.NativeMybatisPlusApplication</mainClass>
+                            <mainClass>io.huahill.jfoundry.integration.nativeimage.mybatisplus.NativeMybatisPlusApplication</mainClass>
                         </configuration>
                         <executions>
                             <execution>
@@ -588,7 +588,7 @@
             <id>native-redisson</id>
             <dependencies>
                 <dependency>
-                    <groupId>io.github.xfoundries</groupId>
+                    <groupId>io.github.huahill</groupId>
                     <artifactId>jfoundry-lock-redisson-spring-boot-starter</artifactId>
                 </dependency>
             </dependencies>
@@ -640,7 +640,7 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
-                            <mainClass>org.jfoundry.integration.nativeimage.redisson.NativeRedissonLockApplication</mainClass>
+                            <mainClass>io.huahill.jfoundry.integration.nativeimage.redisson.NativeRedissonLockApplication</mainClass>
                         </configuration>
                         <executions>
                             <execution>

@@ -5,7 +5,7 @@
 ```java
 package com.mysoft.ci.env.valueobject;
 
-import org.jfoundry.domain.valueobject.ValueObject;
+import io.huahill.jfoundry.domain.valueobject.ValueObject;
 import java.math.BigDecimal;
 
 public record Money(BigDecimal amount, String currency) implements ValueObject {

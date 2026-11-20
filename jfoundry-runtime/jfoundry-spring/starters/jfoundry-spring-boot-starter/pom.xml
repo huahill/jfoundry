@@ -49,10 +49,10 @@
                                         jfoundry-spring-boot-starter must stay lightweight. Use dedicated capability starters for distributed locks, Outbox, Inbox, MyBatis-Plus, brokers.
                                     </message>
                                     <excludes>
-                                        <exclude>io.github.xfoundries:jfoundry-lock-*</exclude>
-                                        <exclude>io.github.xfoundries:jfoundry-outbox-*</exclude>
-                                        <exclude>io.github.xfoundries:jfoundry-inbox-*</exclude>
-                                        <exclude>io.github.xfoundries:jfoundry-persistence-mybatis-plus</exclude>
+                                        <exclude>io.github.huahill:jfoundry-lock-*</exclude>
+                                        <exclude>io.github.huahill:jfoundry-outbox-*</exclude>
+                                        <exclude>io.github.huahill:jfoundry-inbox-*</exclude>
+                                        <exclude>io.github.huahill:jfoundry-persistence-mybatis-plus</exclude>
                                         <exclude>com.baomidou:*</exclude>
                                         <exclude>org.mybatis:*</exclude>
                                         <exclude>org.springframework.kafka:*</exclude>

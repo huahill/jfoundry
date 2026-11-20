@@ -15,13 +15,13 @@ trap 'rm -rf "${temp_dir}"' EXIT
 
 fixture_repo="${temp_dir}/repository"
 fixture_version="1.0.0"
-fixture_pom_dir="${fixture_repo}/io/github/xfoundries/jfoundry-domain/${fixture_version}"
+fixture_pom_dir="${fixture_repo}/io/github/huahill/jfoundry-domain/${fixture_version}"
 mkdir -p "${fixture_pom_dir}"
 
 cat > "${fixture_pom_dir}/jfoundry-domain-${fixture_version}.pom" <<'XML'
 <project>
   <parent>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-parent</artifactId>
     <version>1.0.0</version>
   </parent>
@@ -38,19 +38,19 @@ fi
 cat > "${fixture_pom_dir}/jfoundry-domain-${fixture_version}.pom" <<'XML'
 <project>
   <artifactId>jfoundry-domain</artifactId>
-  <url>https://github.com/xfoundries/jfoundry</url>
+  <url>https://github.com/huahill/jfoundry</url>
   <licenses></licenses>
   <developers></developers>
   <scm></scm>
 </project>
 XML
 
-starter_dir="${fixture_repo}/io/github/xfoundries/jfoundry-webmvc-spring-boot-starter/${fixture_version}"
+starter_dir="${fixture_repo}/io/github/huahill/jfoundry-webmvc-spring-boot-starter/${fixture_version}"
 mkdir -p "${starter_dir}"
 cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom" <<'XML'
 <project>
   <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
-  <url>https://github.com/xfoundries/jfoundry</url>
+  <url>https://github.com/huahill/jfoundry</url>
   <licenses></licenses>
   <developers></developers>
   <scm></scm>
@@ -58,12 +58,12 @@ cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom
 XML
 
 for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry-spring-cloud-dependencies; do
-    artifact_dir="${fixture_repo}/io/github/xfoundries/${artifact}/${fixture_version}"
+    artifact_dir="${fixture_repo}/io/github/huahill/${artifact}/${fixture_version}"
     mkdir -p "${artifact_dir}"
     cat > "${artifact_dir}/${artifact}-${fixture_version}.pom" <<XML
 <project>
   <artifactId>${artifact}</artifactId>
-  <url>https://github.com/xfoundries/jfoundry</url>
+  <url>https://github.com/huahill/jfoundry</url>
   <licenses></licenses>
   <developers></developers>
   <scm></scm>
@@ -72,7 +72,7 @@ for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry
 XML
 done
 
-spring_boot_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
+spring_boot_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
 python3 - "${spring_boot_bom_fixture}" <<'PY'
 import sys
 from pathlib import Path
@@ -82,11 +82,11 @@ content = content.replace("  <dependencyManagement>", "  <properties><spring-boo
 path.write_text(content)
 PY
 
-cloud_bom_fixture="${fixture_repo}/io/github/xfoundries/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
+cloud_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
 cat > "${cloud_bom_fixture}" <<'XML'
 <project>
   <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-  <url>https://github.com/xfoundries/jfoundry</url>
+  <url>https://github.com/huahill/jfoundry</url>
   <licenses></licenses>
   <developers></developers>
   <scm></scm>
@@ -136,7 +136,7 @@ write_parent() {
     local runtime_bom="$3"
     local first_import="$4"
     local second_import="$5"
-    local parent_dir="${fixture_repo}/io/github/xfoundries/${parent_artifact}/${fixture_version}"
+    local parent_dir="${fixture_repo}/io/github/huahill/${parent_artifact}/${fixture_version}"
 
     mkdir -p "${parent_dir}"
     cat > "${parent_dir}/${parent_artifact}-${fixture_version}.pom" <<XML
@@ -147,7 +147,7 @@ write_parent() {
     <version>${boot_version}</version>
   </parent>
   <artifactId>${parent_artifact}</artifactId>
-  <url>https://github.com/xfoundries/jfoundry</url>
+  <url>https://github.com/huahill/jfoundry</url>
   <licenses></licenses>
   <developers></developers>
   <scm></scm>
@@ -157,14 +157,14 @@ write_parent() {
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>${first_import}</artifactId>
         <version>\${jfoundry.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
       <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>${second_import}</artifactId>
         <version>\${jfoundry.version}</version>
         <type>pom</type>

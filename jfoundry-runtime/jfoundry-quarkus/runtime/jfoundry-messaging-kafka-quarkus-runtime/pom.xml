@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-messaging-core</artifactId>
         </dependency>
         <dependency>

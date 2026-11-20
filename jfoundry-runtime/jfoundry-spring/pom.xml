@@ -27,7 +27,7 @@
                 <version>${jfoundry.spring.rocketmq-client.version}</version>
             </dependency>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-spring-boot-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>

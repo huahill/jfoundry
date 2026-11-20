@@ -2,7 +2,7 @@
 <persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.0">
     <persistence-unit name="jfoundry-outbox-jpa-test" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-        <class>org.jfoundry.infrastructure.outbox.jpa.JpaOutboxMessageEntity</class>
+        <class>io.huahill.jfoundry.infrastructure.outbox.jpa.JpaOutboxMessageEntity</class>
         <properties>
             <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
             <property name="jakarta.persistence.jdbc.url"

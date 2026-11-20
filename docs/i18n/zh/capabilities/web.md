@@ -186,10 +186,10 @@ Ant 风格 `*`、`**`、`?` pattern；Spring 会先移除 Servlet context path�
 错误仍由该客户端处理。非成功响应保持客户端自己的异常，通常是 `jakarta.ws.rs.WebApplicationException`；传输失败
 保持为 `jakarta.ws.rs.ProcessingException`。
 
-API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 与 `HttpLoggingFormat` 位于 `org.jfoundry.http`，Spring 专属的
-`HttpLoggingSupport` 位于 `org.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `org.jfoundry.http.spring.client`，
-`RestClient` 外观与转换后的异常位于 `org.jfoundry.web.spring.client`。这些新位置替代原来的
-`org.jfoundry.web.spring` 位置，不提供兼容别名；`ProblemDetailRenderer` 仍位于原包。
+API 现在按抽象层级组织。跨运行时的 `HttpLoggingLevel` 与 `HttpLoggingFormat` 位于 `io.huahill.jfoundry.http`，Spring 专属的
+`HttpLoggingSupport` 位于 `io.huahill.jfoundry.http.spring`，`HttpLoggingInterceptor` 位于 `io.huahill.jfoundry.http.spring.client`，
+`RestClient` 外观与转换后的异常位于 `io.huahill.jfoundry.web.spring.client`。这些新位置替代原来的
+`io.huahill.jfoundry.web.spring` 位置，不提供兼容别名；`ProblemDetailRenderer` 仍位于原包。
 
 出站日志默认使用 `NONE`。应用可通过 `RestClientSupport.configure(builder, HttpLoggingLevel)` 选择四种级别；
 Spring Boot 管理的 builder 使用同样默认值为 `NONE` 的
