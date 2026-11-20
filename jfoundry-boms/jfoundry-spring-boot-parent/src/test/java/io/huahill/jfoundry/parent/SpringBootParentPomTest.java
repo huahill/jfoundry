@@ -170,7 +170,8 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isTrue();
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
-        assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isTrue();
+        assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
+        assertThat(property(boot, "jmolecules-integrations.version")).isNull();
         assertThat(managesDependency(boot, "org.apache.kafka", "kafka-clients")).isFalse();
         assertThat(managesDependency(boot, "com.rabbitmq", "amqp-client")).isFalse();
         assertThat(managesDependency(boot, "org.apache.rocketmq", "rocketmq-client")).isFalse();
@@ -191,9 +192,20 @@ class SpringBootParentPomTest {
             assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
             assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
                     .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring"))
-                    .isEqualTo(springLine == boot);
+            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
         }
+    }
+
+    @Test
+    void foundationLeavesPlatformOwnedCommonsCoordinatesToTheRuntimeBoms() throws Exception {
+        Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
+
+        assertThat(managesDependency(foundation, "commons-codec", "commons-codec")).isFalse();
+        assertThat(managesDependency(foundation, "org.apache.commons", "commons-lang3")).isFalse();
+        assertThat(managesDependency(foundation, "com.github.ben-manes.caffeine", "caffeine")).isFalse();
+        assertThat(property(foundation, "commons-codec.version")).isNull();
+        assertThat(property(foundation, "commons-lang3.version")).isNull();
+        assertThat(property(foundation, "caffeine.version")).isNull();
     }
 
     @Test
