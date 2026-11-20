@@ -15,7 +15,7 @@ trap 'rm -rf "${temp_dir}"' EXIT
 
 fixture_repo="${temp_dir}/repository"
 fixture_version="1.0.0"
-fixture_pom_dir="${fixture_repo}/io/huahill/jfoundry-domain/${fixture_version}"
+fixture_pom_dir="${fixture_repo}/io/github/huahill/jfoundry-domain/${fixture_version}"
 mkdir -p "${fixture_pom_dir}"
 
 cat > "${fixture_pom_dir}/jfoundry-domain-${fixture_version}.pom" <<'XML'
@@ -45,7 +45,7 @@ cat > "${fixture_pom_dir}/jfoundry-domain-${fixture_version}.pom" <<'XML'
 </project>
 XML
 
-starter_dir="${fixture_repo}/io/huahill/jfoundry-webmvc-spring-boot-starter/${fixture_version}"
+starter_dir="${fixture_repo}/io/github/huahill/jfoundry-webmvc-spring-boot-starter/${fixture_version}"
 mkdir -p "${starter_dir}"
 cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom" <<'XML'
 <project>
@@ -72,7 +72,7 @@ for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry
 XML
 done
 
-spring_boot_bom_fixture="${fixture_repo}/io/huahill/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
+spring_boot_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
 python3 - "${spring_boot_bom_fixture}" <<'PY'
 import sys
 from pathlib import Path
@@ -82,7 +82,7 @@ content = content.replace("  <dependencyManagement>", "  <properties><spring-boo
 path.write_text(content)
 PY
 
-cloud_bom_fixture="${fixture_repo}/io/huahill/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
+cloud_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
 cat > "${cloud_bom_fixture}" <<'XML'
 <project>
   <artifactId>jfoundry-spring-cloud-dependencies</artifactId>

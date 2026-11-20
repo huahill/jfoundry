@@ -133,7 +133,7 @@ cat >> "${complete_workflow}" <<'YAML'
         run: |
           central_status="$(
             curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head \
-              'https://repo.maven.apache.org/maven2/io/huahill/jfoundry-parent/1.0.0/jfoundry-parent-${RELEASE_VERSION}.pom'
+              'https://repo.maven.apache.org/maven2/io/github/huahill/jfoundry-parent/1.0.0/jfoundry-parent-${RELEASE_VERSION}.pom'
           )"
           case "${central_status}" in
             200) echo "already_published=true" ;;
