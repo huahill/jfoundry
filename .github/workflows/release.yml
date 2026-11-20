@@ -162,7 +162,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          central_pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
+          central_pom_url="https://repo.maven.apache.org/maven2/io/huahill/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
           central_status="$(
             curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head "${central_pom_url}"
           )"
@@ -234,7 +234,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.release_source.outputs.version }}
         run: |
           set -euo pipefail
-          printf 'Maven Central already contains io.github.xfoundries:jfoundry-parent:%s. Deployment was not retried.\n' \
+          printf 'Maven Central already contains io.github.huahill:jfoundry-parent:%s. Deployment was not retried.\n' \
             "${RELEASE_VERSION}" > central-deploy.log
 
       - name: Verify Maven Central publication
@@ -245,7 +245,7 @@ jobs:
           set -euo pipefail
 
           for attempt in $(seq 1 40); do
-            central_pom_url="https://repo.maven.apache.org/maven2/io/github/xfoundries/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
+            central_pom_url="https://repo.maven.apache.org/maven2/io/huahill/jfoundry-parent/${RELEASE_VERSION}/jfoundry-parent-${RELEASE_VERSION}.pom"
             central_status="$(
               curl --silent --show-error --output /dev/null --write-out '%{http_code}' --head \
                 --connect-timeout 5 --max-time 5 "${central_pom_url}"
@@ -264,7 +264,7 @@ jobs:
             sleep 10
           done
 
-          echo "Maven Central did not expose io.github.xfoundries:jfoundry-parent:${RELEASE_VERSION} within 10 minutes." >&2
+          echo "Maven Central did not expose io.github.huahill:jfoundry-parent:${RELEASE_VERSION} within 10 minutes." >&2
           exit 1
 
       - name: Capture Maven Central deployment details
@@ -276,7 +276,7 @@ jobs:
           mkdir -p release-evidence
           {
             echo "release_version=${{ steps.release_source.outputs.version }}"
-            echo "central_repository_group=io.github.xfoundries"
+            echo "central_repository_group=io.github.huahill"
             echo "central_repository_artifact=jfoundry-parent"
             echo "central_repository_published=${{ steps.central_publication_complete.outputs.published }}"
             echo
@@ -313,7 +313,7 @@ jobs:
             target="release-evidence/consumer-poms/${relative_pom}"
             mkdir -p "$(dirname "${target}")"
             cp "${pom}" "${target}"
-          done < <(find "${CONSUMER_POM_REPOSITORY}/io/github/xfoundries" -name '*.pom' ! -name '*-build.pom' -type f | sort)
+          done < <(find "${CONSUMER_POM_REPOSITORY}/io/github/huahill" -name '*.pom' ! -name '*-build.pom' -type f | sort)
           signature_count=0
           while IFS= read -r signature; do
             module="${signature#./}"

@@ -1,0 +1,38 @@
+package io.huahill.jfoundry.autoconfigure.messaging.rocketmq;
+
+import org.apache.rocketmq.client.producer.MQProducer;
+import io.huahill.jfoundry.application.messaging.MessageSender;
+import io.huahill.jfoundry.application.messaging.SendResult;
+import io.huahill.jfoundry.infrastructure.messaging.spring.sender.SpringRocketMessageSender;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+class RocketMessageSenderAutoConfigurationTest {
+
+    private final ApplicationContextRunner runner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(
+                    RocketMessageSenderAutoConfiguration.class))
+            .withBean(MQProducer.class, () -> mock(MQProducer.class));
+
+    @Test
+    void createsRocketMessageSenderWhenProducerExists() {
+        runner.run(context -> {
+            assertThat(context).hasSingleBean(MessageSender.class);
+            assertThat(context.getBean(MessageSender.class)).isInstanceOf(SpringRocketMessageSender.class);
+        });
+    }
+
+    @Test
+    void backsOffWhenUserProvidesMessageSender() {
+        runner.withBean(MessageSender.class, () -> outbound -> SendResult.ok())
+                .run(context -> {
+                    assertThat(context).hasSingleBean(MessageSender.class);
+                    assertThat(context).doesNotHaveBean(SpringRocketMessageSender.class);
+                });
+    }
+
+}

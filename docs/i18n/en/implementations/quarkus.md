@@ -23,14 +23,14 @@ runtime extension descriptor; applications must not add it directly.
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-quarkus-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -41,7 +41,7 @@ runtime extension descriptor; applications must not add it directly.
 
 <dependencies>
     <dependency>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
     </dependency>
 </dependencies>
@@ -187,7 +187,7 @@ Add `jfoundry-outbox-jpa-quarkus-runtime` alongside Quarkus Hibernate ORM:
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-outbox-jpa-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -208,7 +208,7 @@ state-transition runtime:
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-outbox-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -244,7 +244,7 @@ of `MessageSender`:
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-kafka-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -272,7 +272,7 @@ Add `jfoundry-messaging-rabbitmq-quarkus-runtime` for a default RabbitMQ `Messag
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-rabbitmq-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -326,7 +326,7 @@ Quarkus Hibernate ORM:
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-inbox-jpa-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -352,7 +352,7 @@ supported runtimes are in [Web](../capabilities/web.md):
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-web-quarkus-runtime</artifactId>
 </dependency>
 ```
@@ -407,7 +407,7 @@ threads need an explicit Quarkus context-propagation mechanism.
 
 `jfoundry-web-quarkus-runtime` registers a Quarkus REST request/response filter and reader/writer
 interceptors. Configure inbound logging with `jfoundry.web.quarkus.logging.level`; it defaults to
-`NONE`. Layout uses `jfoundry.web.quarkus.logging.format`, defaulting to `HUMAN`. Enabled events use the `org.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
+`NONE`. Layout uses `jfoundry.web.quarkus.logging.format`, defaulting to `HUMAN`. Enabled events use the `io.huahill.jfoundry.http.quarkus.HttpLoggingProvider` category at `INFO`.
 
 Add `jfoundry-restclient-quarkus-runtime` for outbound logging. It includes the Quarkus MicroProfile
 REST Client extension and registers the provider with every REST Client builder. Outbound logging

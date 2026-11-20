@@ -1,4 +1,4 @@
-org.jfoundry.autoconfigure.inbox.InboxMybatisPlusAutoConfiguration
-org.jfoundry.autoconfigure.inbox.InboxJpaEntityScanAutoConfiguration
-org.jfoundry.autoconfigure.inbox.InboxJpaAutoConfiguration
-org.jfoundry.autoconfigure.inbox.InboxAutoConfiguration
+io.huahill.jfoundry.autoconfigure.inbox.InboxMybatisPlusAutoConfiguration
+io.huahill.jfoundry.autoconfigure.inbox.InboxJpaEntityScanAutoConfiguration
+io.huahill.jfoundry.autoconfigure.inbox.InboxJpaAutoConfiguration
+io.huahill.jfoundry.autoconfigure.inbox.InboxAutoConfiguration

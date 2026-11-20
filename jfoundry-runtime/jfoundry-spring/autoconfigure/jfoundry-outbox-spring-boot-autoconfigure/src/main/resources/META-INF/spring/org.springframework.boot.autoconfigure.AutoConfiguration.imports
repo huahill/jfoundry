@@ -1,5 +1,5 @@
-org.jfoundry.autoconfigure.outbox.OutboxTemplateAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaEntityScanAutoConfiguration
-org.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration
-org.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration
+io.huahill.jfoundry.autoconfigure.outbox.OutboxTemplateAutoConfiguration
+io.huahill.jfoundry.autoconfigure.outbox.persistence.OutboxMybatisPlusAutoConfiguration
+io.huahill.jfoundry.autoconfigure.outbox.persistence.OutboxJpaEntityScanAutoConfiguration
+io.huahill.jfoundry.autoconfigure.outbox.persistence.OutboxJpaAutoConfiguration
+io.huahill.jfoundry.autoconfigure.outbox.dispatcher.OutboxDispatcherAutoConfiguration

@@ -1,2 +1,2 @@
-org.jfoundry.autoconfigure.persistence.mybatis.MybatisPlusAuditAutoConfiguration
-org.jfoundry.autoconfigure.persistence.mybatis.MybatisPlusNativeRuntimeHintsAutoConfiguration
+io.huahill.jfoundry.autoconfigure.persistence.mybatis.MybatisPlusAuditAutoConfiguration
+io.huahill.jfoundry.autoconfigure.persistence.mybatis.MybatisPlusNativeRuntimeHintsAutoConfiguration

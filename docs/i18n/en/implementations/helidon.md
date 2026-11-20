@@ -24,14 +24,14 @@ it does not manage JFoundry module versions:
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-helidon-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -115,7 +115,7 @@ application `MessageSender` as an enabled `@Alternative` with a priority greater
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-kafka-helidon</artifactId>
 </dependency>
 ```
@@ -131,7 +131,7 @@ propagation entries as Kafka headers, and maps failures to `SendResult`.
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId>
 </dependency>
 ```
@@ -175,7 +175,7 @@ provider, such as `jersey-media-json-binding` for JSON-B.
 The same Web module registers a JAX-RS request/response filter and reader/writer interceptors for
 diagnostic logging. Inbound logging uses `jfoundry.web.helidon.logging.level`, defaulting to `NONE`.
 Layout uses `jfoundry.web.helidon.logging.format`, defaulting to `HUMAN`.
-Enabled events use `INFO` for `org.jfoundry.http.helidon.HttpLoggingProvider`.
+Enabled events use `INFO` for `io.huahill.jfoundry.http.helidon.HttpLoggingProvider`.
 
 `jfoundry-restclient-helidon` includes `helidon-microprofile-rest-client` and automatically registers
 the JFoundry provider with every MicroProfile REST Client builder. Outbound logging uses

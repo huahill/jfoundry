@@ -1,0 +1,264 @@
+package io.huahill.jfoundry.autoconfigure;
+
+import io.huahill.jfoundry.application.event.DomainEventContext;
+import io.huahill.jfoundry.application.event.DomainEventDispatchCoordinator;
+import io.huahill.jfoundry.application.event.DomainEventDispatcher;
+import io.huahill.jfoundry.domain.entity.agg.BaseAggregateRoot;
+import io.huahill.jfoundry.domain.event.EventRecordable;
+import io.huahill.jfoundry.autoconfigure.event.DomainEventDispatchAutoConfiguration;
+import io.huahill.jfoundry.autoconfigure.event.DomainEventDispatchInterceptor;
+import io.huahill.jfoundry.autoconfigure.event.DomainEventPersistenceAutoConfiguration;
+import io.huahill.jfoundry.autoconfigure.event.DomainEventScope;
+import io.huahill.jfoundry.autoconfigure.event.SpringEventDispatchAutoConfiguration;
+import io.huahill.jfoundry.infrastructure.event.spring.dispatcher.SpringApplicationEventDispatcher;
+import io.huahill.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
+import org.jmolecules.ddd.types.Identifier;
+import org.junit.jupiter.api.Test;
+import org.springframework.aop.Advisor;
+import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.aop.framework.ProxyFactory;
+import org.springframework.boot.autoconfigure.AutoConfigurations;
+import org.springframework.boot.autoconfigure.aop.AopAutoConfiguration;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.test.context.FilteredClassLoader;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+class DomainEventDispatchAutoConfigurationTest {
+
+    private final ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+            .withConfiguration(AutoConfigurations.of(
+                    AopAutoConfiguration.class,
+                    DomainEventPersistenceAutoConfiguration.class,
+                    SpringEventDispatchAutoConfiguration.class,
+                    DomainEventDispatchAutoConfiguration.class))
+            .withBean(ApplicationEventPublisher.class, () -> event -> {
+            });
+
+    @Test
+    void defaultConfigurationRegistersSpringDispatcher() {
+        contextRunner.run(context -> {
+            assertThat(context).hasSingleBean(DomainEventScope.class);
+            assertThat(context).hasSingleBean(DomainEventContext.class);
+            assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+            assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+            assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+            assertThat(context).hasBean("domainEventDispatchAdvisor");
+            assertThat(context.getBean("domainEventDispatchAdvisor")).isInstanceOf(Advisor.class);
+        });
+    }
+
+    @Test
+    void applicationDispatcherRemainsAdditive() {
+        contextRunner
+                .withUserConfiguration(ApplicationDispatcherConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(2);
+                    assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).hasBean("domainEventDispatchAdvisor");
+                });
+    }
+
+    @Test
+    void applicationSpringDispatcherReplacesTheAutoConfiguredDispatcher() {
+        contextRunner
+                .withUserConfiguration(ApplicationSpringDispatcherConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context.getBean(SpringApplicationEventDispatcher.class))
+                            .isInstanceOf(ApplicationSpringDispatcher.class);
+                    assertThat(context.getBeansOfType(DomainEventDispatcher.class)).hasSize(1);
+                });
+    }
+
+    @Test
+    void missingSpringDispatcherLeavesDispatchInfrastructureAbsent() {
+        contextRunner
+                .withClassLoader(new FilteredClassLoader(SpringApplicationEventDispatcher.class))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DomainEventScope.class);
+                    assertThat(context).hasSingleBean(DomainEventContext.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatcher.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).doesNotHaveBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).doesNotHaveBean("domainEventDispatchAdvisor");
+                });
+    }
+
+    @Test
+    void legacyDomainEventEnabledPropertyDoesNotDisableDispatchInfrastructure() {
+        contextRunner
+                .withPropertyValues("jfoundry.domain.event.enabled=false")
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DomainEventScope.class);
+                    assertThat(context).hasSingleBean(DomainEventContext.class);
+                    assertThat(context).hasSingleBean(SpringApplicationEventDispatcher.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchCoordinator.class);
+                    assertThat(context).hasSingleBean(DomainEventDispatchInterceptor.class);
+                    assertThat(context).hasBean("domainEventDispatchAdvisor");
+                });
+    }
+
+    @Test
+    void missingPersistenceModuleDoesNotBreakEventDispatch() {
+        contextRunner
+                .withClassLoader(new FilteredClassLoader("io.huahill.jfoundry.infrastructure.persistence"))
+                .run(context -> {
+                    assertThat(context).hasSingleBean(DomainEventScope.class);
+                    assertThat(context).hasSingleBean(DomainEventContext.class);
+                    assertThat(context).doesNotHaveBean("domainEventContextBeanPostProcessorRegistrar");
+                });
+    }
+
+    @Test
+    void injectsDomainEventContextIntoPersistenceRepositories() {
+        contextRunner
+                .withUserConfiguration(PersistenceRepositoryConfiguration.class)
+                .run(context -> {
+                    TestPersistenceRepository repository = context.getBean(TestPersistenceRepository.class);
+                    RecordingDomainEventContext domainEventContext = context.getBean(RecordingDomainEventContext.class);
+                    TestAggregate aggregate = TestAggregate.create("order-1");
+
+                    repository.add(aggregate);
+
+                    assertThat(domainEventContext.registeredAggregates).containsExactly(aggregate);
+                });
+    }
+
+    @Test
+    void persistenceRepositoriesSkipRegistrationWhenDomainEventContextIsAbsent() {
+        new ApplicationContextRunner()
+                .withConfiguration(AutoConfigurations.of(DomainEventPersistenceAutoConfiguration.class))
+                .withUserConfiguration(PersistenceRepositoryOnlyConfiguration.class)
+                .run(context -> {
+                    assertThat(context).doesNotHaveBean(DomainEventContext.class);
+                    TestPersistenceRepository repository = context.getBean(TestPersistenceRepository.class);
+                    assertThatCode(() -> repository.add(TestAggregate.create("order-1")))
+                            .doesNotThrowAnyException();
+                });
+    }
+
+    @Test
+    void aggregateRepositoryLifecycleMethodsRemainAdvisableWithClassBasedProxies() {
+        AtomicInteger interceptedCalls = new AtomicInteger();
+        ProxyFactory proxyFactory = new ProxyFactory(new TestPersistenceRepository());
+        proxyFactory.setProxyTargetClass(true);
+        proxyFactory.addAdvice((MethodBeforeAdvice) (method, args, target) -> {
+            if (method.getName().equals("add")) {
+                interceptedCalls.incrementAndGet();
+            }
+        });
+        TestPersistenceRepository repository = (TestPersistenceRepository) proxyFactory.getProxy();
+
+        repository.add(TestAggregate.create("order-1"));
+
+        assertThat(interceptedCalls).hasValue(1);
+    }
+
+    @Configuration
+    static class ApplicationDispatcherConfiguration {
+
+        @Bean
+        DomainEventDispatcher domainEventDispatcher() {
+            return events -> {
+            };
+        }
+    }
+
+    @Configuration
+    static class ApplicationSpringDispatcherConfiguration {
+
+        @Bean
+        ApplicationSpringDispatcher springApplicationEventDispatcher() {
+            return new ApplicationSpringDispatcher(event -> {
+            });
+        }
+    }
+
+    static final class ApplicationSpringDispatcher extends SpringApplicationEventDispatcher {
+
+        ApplicationSpringDispatcher(ApplicationEventPublisher eventPublisher) {
+            super(eventPublisher);
+        }
+    }
+
+    @Configuration
+    static class PersistenceRepositoryConfiguration {
+
+        @Bean
+        RecordingDomainEventContext recordingDomainEventContext() {
+            return new RecordingDomainEventContext();
+        }
+
+        @Bean
+        TestPersistenceRepository testPersistenceRepository() {
+            return new TestPersistenceRepository();
+        }
+    }
+
+    @Configuration
+    static class PersistenceRepositoryOnlyConfiguration {
+
+        @Bean
+        TestPersistenceRepository testPersistenceRepository() {
+            return new TestPersistenceRepository();
+        }
+    }
+
+    static final class RecordingDomainEventContext implements DomainEventContext {
+
+        private final List<EventRecordable> registeredAggregates = new ArrayList<>();
+
+        @Override
+        public void register(EventRecordable aggregate) {
+            registeredAggregates.add(aggregate);
+        }
+    }
+
+    static class TestPersistenceRepository
+            extends AbstractAggregateRepository<TestAggregate, TestAggregateId> {
+
+        @Override
+        protected TestAggregate doFindById(TestAggregateId id) {
+            return null;
+        }
+
+        @Override
+        protected void doAdd(TestAggregate aggregate) {
+        }
+
+        @Override
+        protected void doModify(TestAggregate aggregate) {
+        }
+
+        @Override
+        protected void doRemove(TestAggregate aggregate) {
+        }
+    }
+
+    static final class TestAggregate extends BaseAggregateRoot<TestAggregate, TestAggregateId> {
+
+        private TestAggregate(TestAggregateId id) {
+            super(id);
+        }
+
+        static TestAggregate create(String id) {
+            return new TestAggregate(new TestAggregateId(id));
+        }
+    }
+
+    record TestAggregateId(String value) implements Identifier, Serializable {
+    }
+
+}

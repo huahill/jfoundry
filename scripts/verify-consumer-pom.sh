@@ -10,7 +10,7 @@ fi
 repository="$1"
 version="$2"
 maven4_bin="${3:-}"
-group_path="io/github/xfoundries"
+group_path="io/github/huahill"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 xml_query() {
@@ -187,20 +187,20 @@ if [[ -n "${maven4_bin}" ]]; then
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.xfoundries.verification</groupId>
+    <groupId>io.github.huahill.verification</groupId>
     <artifactId>boot-consumer-pom-smoke</artifactId>
     <version>1.0.0</version>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-spring-boot-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
@@ -210,7 +210,7 @@ if [[ -n "${maven4_bin}" ]]; then
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
@@ -233,20 +233,20 @@ XML
         <version>4.0.7</version>
         <relativePath/>
     </parent>
-    <groupId>io.github.xfoundries.verification</groupId>
+    <groupId>io.github.huahill.verification</groupId>
     <artifactId>cloud-consumer-pom-smoke</artifactId>
     <version>1.0.0</version>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
@@ -256,7 +256,7 @@ XML
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
@@ -278,7 +278,7 @@ XML
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>io.github.xfoundries</groupId>
+        <groupId>io.github.huahill</groupId>
         <artifactId>jfoundry-spring-boot-parent</artifactId>
         <version>${version}</version>
         <relativePath/>
@@ -287,7 +287,7 @@ XML
     <version>0.0.1-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
         </dependency>
     </dependencies>

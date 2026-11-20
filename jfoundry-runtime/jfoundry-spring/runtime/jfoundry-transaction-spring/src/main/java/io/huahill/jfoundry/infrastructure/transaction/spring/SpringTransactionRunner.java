@@ -1,0 +1,48 @@
+package io.huahill.jfoundry.infrastructure.transaction.spring;
+
+import io.huahill.jfoundry.application.transaction.TransactionCallback;
+import io.huahill.jfoundry.application.transaction.TransactionOptions;
+import io.huahill.jfoundry.application.transaction.TransactionPropagation;
+import io.huahill.jfoundry.application.transaction.TransactionRunner;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
+
+import java.util.Objects;
+
+/**
+ * Spring {@link TransactionTemplate}-based adapter for {@link TransactionRunner}.
+ */
+public class SpringTransactionRunner implements TransactionRunner {
+
+    private final PlatformTransactionManager transactionManager;
+
+    public SpringTransactionRunner(PlatformTransactionManager transactionManager) {
+        this.transactionManager = Objects.requireNonNull(transactionManager, "transactionManager must not be null");
+    }
+
+    @Override
+    public <T> T call(TransactionOptions options, TransactionCallback<T> callback) {
+        Objects.requireNonNull(options, "options must not be null");
+        Objects.requireNonNull(callback, "callback must not be null");
+
+        TransactionTemplate template = new TransactionTemplate(transactionManager);
+        template.setReadOnly(options.readOnly());
+        template.setPropagationBehavior(toSpringPropagation(options.propagation()));
+        options.name().ifPresent(template::setName);
+        options.timeout().ifPresent(timeout -> template.setTimeout(Math.toIntExact(timeout.toSeconds())));
+
+        return template.execute(status -> callback.execute());
+    }
+
+    private static int toSpringPropagation(TransactionPropagation propagation) {
+        return switch (propagation) {
+            case REQUIRED -> TransactionDefinition.PROPAGATION_REQUIRED;
+            case REQUIRES_NEW -> TransactionDefinition.PROPAGATION_REQUIRES_NEW;
+            case SUPPORTS -> TransactionDefinition.PROPAGATION_SUPPORTS;
+            case MANDATORY -> TransactionDefinition.PROPAGATION_MANDATORY;
+            case NOT_SUPPORTED -> TransactionDefinition.PROPAGATION_NOT_SUPPORTED;
+            case NEVER -> TransactionDefinition.PROPAGATION_NEVER;
+        };
+    }
+}

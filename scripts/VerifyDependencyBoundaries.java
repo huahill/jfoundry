@@ -131,12 +131,12 @@ public final class VerifyDependencyBoundaries {
     }
 
     private static boolean isDisallowedRuntimeBomImport(String coordinate) {
-        return coordinate.equals("io.github.xfoundries:jfoundry-dependencies")
-                || coordinate.equals("io.github.xfoundries:jfoundry-foundation-dependencies")
-                || coordinate.equals("io.github.xfoundries:jfoundry-spring-boot-dependencies")
-                || coordinate.equals("io.github.xfoundries:jfoundry-spring-cloud-dependencies")
-                || coordinate.equals("io.github.xfoundries:jfoundry-quarkus-dependencies")
-                || coordinate.equals("io.github.xfoundries:jfoundry-helidon-dependencies");
+        return coordinate.equals("io.github.huahill:jfoundry-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-foundation-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-spring-boot-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-spring-cloud-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-quarkus-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-helidon-dependencies");
     }
 
     private static ModuleKind classify(Path relativePath) {

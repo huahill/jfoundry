@@ -8,7 +8,7 @@ line. Pre-release versions, including release candidates, are not production sup
 ## Reporting A Vulnerability
 
 Do not open a public issue for a suspected vulnerability. Report it through a
-[GitHub private security advisory](https://github.com/xfoundries/jfoundry/security/advisories/new).
+[GitHub private security advisory](https://github.com/huahill/jfoundry/security/advisories/new).
 Include a minimal reproduction, affected artifacts and versions, impact, and any known mitigation.
 
 The maintainers target acknowledgement within three business days and an initial triage decision

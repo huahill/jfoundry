@@ -226,11 +226,11 @@ response remains the client's own exception, normally `jakarta.ws.rs.WebApplicat
 transport failure remains `jakarta.ws.rs.ProcessingException`.
 
 The APIs are organized by abstraction level. Import the cross-runtime `HttpLoggingLevel` and
-`HttpLoggingFormat` from `org.jfoundry.http`, Spring's `HttpLoggingSupport` from `org.jfoundry.http.spring`,
-`HttpLoggingInterceptor` from `org.jfoundry.http.spring.client`, and the
-`RestClient` facade and translated exceptions from `org.jfoundry.web.spring.client`. These replace the
-old `org.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
-remains in `org.jfoundry.web.spring`.
+`HttpLoggingFormat` from `io.huahill.jfoundry.http`, Spring's `HttpLoggingSupport` from `io.huahill.jfoundry.http.spring`,
+`HttpLoggingInterceptor` from `io.huahill.jfoundry.http.spring.client`, and the
+`RestClient` facade and translated exceptions from `io.huahill.jfoundry.web.spring.client`. These replace the
+old `io.huahill.jfoundry.web.spring` locations; no compatibility aliases are provided. `ProblemDetailRenderer`
+remains in `io.huahill.jfoundry.web.spring`.
 
 Outbound logging defaults to `NONE`. Applications can select all four levels through
 `RestClientSupport.configure(builder, HttpLoggingLevel)`. Spring Boot-managed builders use

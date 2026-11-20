@@ -7,8 +7,8 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.junit.ArchTests;
 import com.tngtech.archunit.lang.ArchRule;
-import org.jfoundry.test.archunit.HexagonalAdapterPackageConvention;
-import org.jfoundry.test.archunit.JFoundryRules;
+import io.huahill.jfoundry.test.archunit.HexagonalAdapterPackageConvention;
+import io.huahill.jfoundry.test.archunit.JFoundryRules;
 
 @AnalyzeClasses(packages = "com.mysoft.ci")
 class CiArchitectureTest {
@@ -61,9 +61,9 @@ class CiArchitectureTest {
 | 规则 | 作用 |
 |------|------|
 | `framework_should_use_jmolecules_architecture_annotations_internally` | JFoundry 框架内部直接使用 jMolecules 架构注解，不依赖 JFoundry 包装注解；包装注解作为业务项目门面保留 |
-| `domain_packages_should_be_onion_domain_ring` | `org.jfoundry.domain..` 必须标注 Onion 简化 `DomainRing` |
-| `application_packages_should_be_onion_application_ring` | `org.jfoundry.application..` 必须标注 Onion 简化 `ApplicationRing` |
-| `infrastructure_packages_should_be_onion_infrastructure_ring` | `org.jfoundry.infrastructure..` 必须标注 Onion 简化 `InfrastructureRing` |
+| `domain_packages_should_be_onion_domain_ring` | `io.huahill.jfoundry.domain..` 必须标注 Onion 简化 `DomainRing` |
+| `application_packages_should_be_onion_application_ring` | `io.huahill.jfoundry.application..` 必须标注 Onion 简化 `ApplicationRing` |
+| `infrastructure_packages_should_be_onion_infrastructure_ring` | `io.huahill.jfoundry.infrastructure..` 必须标注 Onion 简化 `InfrastructureRing` |
 
 ### CqrsRules 与 HexagonalConventionRules
 
@@ -169,7 +169,7 @@ ArchTests aggregateRepositoryRules = JFoundryRules.aggregateRepositoryConvention
 
 ```xml
 <dependency>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-architecture-test</artifactId>
     <version>1.0.1</version>
     <scope>test</scope>

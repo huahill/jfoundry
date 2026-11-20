@@ -15,11 +15,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain-event-jta</artifactId>
         </dependency>
         <dependency>
@@ -32,13 +32,13 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Keep parallel reactors from augmenting tests before the transaction deployment module is built. -->
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
             <version>${project.version}</version>
             <type>pom</type>

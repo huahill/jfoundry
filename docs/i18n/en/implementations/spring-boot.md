@@ -25,7 +25,7 @@ parent must not import those two BOMs again.
 
 ```xml
 <parent>
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-spring-boot-parent</artifactId>
     <version>${jfoundry.version}</version>
 </parent>
@@ -46,14 +46,14 @@ Use an application or standard Maven parent compatible with the supported Spring
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -233,8 +233,8 @@ appends a raw preview of that body, limited to 400 bytes or 200 characters, with
 it. The preview is not a caller-facing problem detail. HTTP diagnostic logs keep their separate redaction
 policy. Transport and response-decoding failures become an `HttpRequestException` with a safe failure kind.
 Import `HttpLoggingLevel` and `HttpLoggingFormat` from
-`org.jfoundry.http`, Spring's logging support from `org.jfoundry.http.spring`, the execution-chain interceptor from `org.jfoundry.http.spring.client`, and
-the `RestClient` APIs from `org.jfoundry.web.spring.client`. The former `org.jfoundry.web.spring`
+`io.huahill.jfoundry.http`, Spring's logging support from `io.huahill.jfoundry.http.spring`, the execution-chain interceptor from `io.huahill.jfoundry.http.spring.client`, and
+the `RestClient` APIs from `io.huahill.jfoundry.web.spring.client`. The former `io.huahill.jfoundry.web.spring`
 locations have no forwarding aliases.
 
 Spring Boot applications can use `jfoundry-restclient-spring-boot-starter` and set

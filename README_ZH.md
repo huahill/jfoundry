@@ -111,7 +111,7 @@ JFoundry 的能力可以独立选择。一个典型应用通常只选择适合�
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -125,7 +125,7 @@ JFoundry 的能力可以独立选择。一个典型应用通常只选择适合�
 
 ```java
 // Money.java
-import org.jfoundry.domain.valueobject.ValueObject;
+import io.huahill.jfoundry.domain.valueobject.ValueObject;
 
 import java.math.BigDecimal;
 
@@ -143,7 +143,7 @@ public record OrderId(String value) implements Identifier {
 
 ```java
 // Order.java
-import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
+import io.huahill.jfoundry.domain.entity.agg.BaseAggregateRoot;
 
 public final class Order extends BaseAggregateRoot<Order, OrderId> {
 

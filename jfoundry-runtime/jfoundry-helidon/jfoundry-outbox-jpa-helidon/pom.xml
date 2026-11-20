@@ -7,7 +7,7 @@
   <artifactId>jfoundry-outbox-jpa-helidon</artifactId><name>jfoundry-outbox-jpa-helidon</name>
   <dependencies>
     <dependency><groupId>io.helidon.microprofile.cdi</groupId><artifactId>helidon-microprofile-cdi</artifactId></dependency>
-    <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-outbox-jpa</artifactId></dependency>
+    <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-outbox-jpa</artifactId></dependency>
     <dependency><groupId>jakarta.persistence</groupId><artifactId>jakarta.persistence-api</artifactId><scope>provided</scope></dependency>
     <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.assertj</groupId><artifactId>assertj-core</artifactId><scope>test</scope></dependency>

@@ -8,7 +8,7 @@
     <name>jfoundry-domain-event-outbox-quarkus-deployment</name>
     <description>Quarkus build-time registration for Domain Event to Outbox adapters.</description>
     <dependencies>
-        <dependency><groupId>io.github.xfoundries</groupId><artifactId>jfoundry-domain-event-outbox-quarkus-runtime</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-domain-event-outbox-quarkus-runtime</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-arc-deployment</artifactId></dependency>
         <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-core-deployment</artifactId></dependency>
         <dependency><groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><scope>test</scope></dependency>

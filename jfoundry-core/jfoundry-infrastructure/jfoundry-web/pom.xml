@@ -9,11 +9,11 @@
     <description>Runtime-neutral Web and RFC 9457 problem semantics for jfoundry errors.</description>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-domain</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-application-core</artifactId>
         </dependency>
         <dependency>

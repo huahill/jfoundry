@@ -92,9 +92,9 @@ Practical rules:
 
 jfoundry framework internals use Onion simplified:
 
-- `org.jfoundry.domain..` is the domain ring.
-- `org.jfoundry.application..` is the application ring.
-- `org.jfoundry.infrastructure..` is the infrastructure ring.
+- `io.huahill.jfoundry.domain..` is the domain ring.
+- `io.huahill.jfoundry.application..` is the application ring.
+- `io.huahill.jfoundry.infrastructure..` is the infrastructure ring.
 
 Use jMolecules architecture annotations internally. The JFoundry wrapper annotations remain public facades for business projects.
 

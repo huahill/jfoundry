@@ -7,7 +7,7 @@
 
 | 仓库 | 职责 |
 |------|------|
-| [xfoundries/jfoundry](https://github.com/xfoundries/jfoundry) | 面向 DDD 业务应用的可选 Java 运行时与实现框架 |
+| [huahill/jfoundry](https://github.com/huahill/jfoundry) | 面向 DDD 业务应用的可选 Java 运行时与实现框架 |
 | [xfoundries/domain-architecture-skills](https://github.com/xfoundries/domain-architecture-skills) | 负责领域建模、架构决策和可选 jfoundry 落地的设计期插件 |
 | [xfoundries/jfoundry-expense-approval-demo](https://github.com/xfoundries/jfoundry-expense-approval-demo) | 使用刻意简化的业务领域验证完整架构和集成链路的端到端项目 |
 

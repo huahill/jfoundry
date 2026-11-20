@@ -11,7 +11,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
@@ -28,7 +28,7 @@
             <artifactId>mybatis-plus-jsqlparser</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-outbox-mybatis-plus</artifactId>
         </dependency>
     </dependencies>

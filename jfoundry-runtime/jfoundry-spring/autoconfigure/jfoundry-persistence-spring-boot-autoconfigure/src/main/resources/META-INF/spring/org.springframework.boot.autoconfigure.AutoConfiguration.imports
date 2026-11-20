@@ -1,3 +1,3 @@
-org.jfoundry.autoconfigure.persistence.PersistenceFailureAutoConfiguration
-org.jfoundry.autoconfigure.persistence.AggregatePersistenceContextAutoConfiguration
-org.jfoundry.autoconfigure.persistence.AuditStampingAutoConfiguration
+io.huahill.jfoundry.autoconfigure.persistence.PersistenceFailureAutoConfiguration
+io.huahill.jfoundry.autoconfigure.persistence.AggregatePersistenceContextAutoConfiguration
+io.huahill.jfoundry.autoconfigure.persistence.AuditStampingAutoConfiguration

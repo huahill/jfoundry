@@ -5,7 +5,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
 
-    <groupId>io.github.xfoundries</groupId>
+    <groupId>io.github.huahill</groupId>
     <artifactId>jfoundry-parent</artifactId>
     <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -43,10 +43,10 @@
         <project.build.outputTimestamp>2026-08-28T08:08:36Z</project.build.outputTimestamp>
         <maven.compiler.release>25</maven.compiler.release>
 
-        <jfoundry.release.url>https://github.com/xfoundries/jfoundry</jfoundry.release.url>
-        <jfoundry.release.scm.connection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.connection>
-        <jfoundry.release.scm.developerConnection>scm:git:https://github.com/xfoundries/jfoundry.git</jfoundry.release.scm.developerConnection>
-        <jfoundry.release.scm.url>https://github.com/xfoundries/jfoundry</jfoundry.release.scm.url>
+        <jfoundry.release.url>https://github.com/huahill/jfoundry</jfoundry.release.url>
+        <jfoundry.release.scm.connection>scm:git:https://github.com/huahill/jfoundry.git</jfoundry.release.scm.connection>
+        <jfoundry.release.scm.developerConnection>scm:git:https://github.com/huahill/jfoundry.git</jfoundry.release.scm.developerConnection>
+        <jfoundry.release.scm.url>https://github.com/huahill/jfoundry</jfoundry.release.scm.url>
 
         <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
@@ -97,7 +97,7 @@
         <dependencies>
             <!-- Internal build management for JFoundry modules; runtime BOMs belong to runtime boundaries. -->
             <dependency>
-                <groupId>io.github.xfoundries</groupId>
+                <groupId>io.github.huahill</groupId>
                 <artifactId>jfoundry-dependencies</artifactId>
                 <version>${project.version}</version>
                 <type>pom</type>

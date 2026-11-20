@@ -116,7 +116,7 @@ Every application imports the runtime-neutral BOM, then adds only the starters a
 <dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>io.github.xfoundries</groupId>
+            <groupId>io.github.huahill</groupId>
             <artifactId>jfoundry-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
@@ -130,7 +130,7 @@ Every application imports the runtime-neutral BOM, then adds only the starters a
 
 ```java
 // Money.java
-import org.jfoundry.domain.valueobject.ValueObject;
+import io.huahill.jfoundry.domain.valueobject.ValueObject;
 
 import java.math.BigDecimal;
 
@@ -148,7 +148,7 @@ public record OrderId(String value) implements Identifier {
 
 ```java
 // Order.java
-import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
+import io.huahill.jfoundry.domain.entity.agg.BaseAggregateRoot;
 
 public final class Order extends BaseAggregateRoot<Order, OrderId> {
 

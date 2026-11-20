@@ -1,0 +1,25 @@
+package io.huahill.jfoundry.quarkus.integration;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import io.huahill.jfoundry.application.transaction.TransactionRunner;
+
+@Path("/jfoundry/transaction")
+@ApplicationScoped
+public class TransactionRunnerResource {
+
+    private final TransactionRunner transactionRunner;
+
+    public TransactionRunnerResource(TransactionRunner transactionRunner) {
+        this.transactionRunner = transactionRunner;
+    }
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    public String execute() {
+        return transactionRunner.call(() -> "committed");
+    }
+}
