@@ -1,6 +1,9 @@
-package org.jfoundry.infrastructure.persistence;
+package org.jfoundry.infrastructure.persistence.mybatis;
 
 import org.jfoundry.domain.entity.agg.BaseAggregateRoot;
+import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
+import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserver;
+import org.jfoundry.infrastructure.persistence.AggregatePersistenceObserverAware;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
 import org.junit.jupiter.api.Test;
@@ -14,9 +17,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class DataMapperTest {
+class MybatisPlusDataMapperTest {
 
-    private final DataMapper<TestEntity, TestId, TestData, String> dataMapper = new DataMapper<>() {
+    private final MybatisPlusDataMapper<TestEntity, TestId, TestData, String> dataMapper = new MybatisPlusDataMapper<>() {
         @Override
         public TestData toData(TestEntity entity) {
             TestData data = new TestData();
@@ -72,7 +75,7 @@ class DataMapperTest {
 
     @Test
     void publicPersistenceAbstractionsShouldUseJavaStyleTypeParameterNames() {
-        assertThat(typeParameterNames(DataMapper.class)).containsExactly("T", "ID", "D", "K");
+        assertThat(typeParameterNames(MybatisPlusDataMapper.class)).containsExactly("T", "ID", "D", "K");
         assertThat(typeParameterNames(AbstractAggregateRepository.class)).containsExactly("T", "ID");
     }
 
@@ -97,7 +100,7 @@ class DataMapperTest {
     record TestId(String value) implements Identifier, Serializable {
     }
 
-    private static final class TestData extends AggregateData<String> {
+    private static final class TestData extends MybatisPlusAggregateData<String> {
         private String name;
     }
 

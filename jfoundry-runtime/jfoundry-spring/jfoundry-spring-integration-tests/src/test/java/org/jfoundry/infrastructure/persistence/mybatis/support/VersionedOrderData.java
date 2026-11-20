@@ -4,12 +4,12 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
-import org.jfoundry.infrastructure.persistence.AggregateData;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAggregateData;
 
 import java.time.Instant;
 
 @TableName("versioned_order")
-public class VersionedOrderData extends AggregateData<String> {
+public class VersionedOrderData extends MybatisPlusAggregateData<String> {
 
     @TableId(type = IdType.INPUT)
     private String id;

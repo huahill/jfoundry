@@ -47,8 +47,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 /// Records inbound Servlet HTTP activity without delaying or replacing application I/O.
 ///
 /// Logging is inactive unless this type's logger is enabled at `INFO`. `FULL` uses tee wrappers that forward
-/// bytes immediately and retain no more than 8 KiB. Synchronous duration ends when the filter chain returns;
-/// asynchronous duration ends on terminal complete, error, or timeout and does not measure client receipt.
+/// bytes immediately and retain no more than the configured body-byte limit. Synchronous duration ends when
+/// the filter chain returns; asynchronous duration ends on terminal complete, error, or timeout and does not
+/// measure client receipt.
 public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingFilter.class);
@@ -62,6 +63,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
     private final Predicate<HttpServletRequest> excludedRequest;
 
     private final List<String> includedHeaders;
+
+    private final int maxBodyBytes;
 
     private final BooleanSupplier infoEnabled;
 
@@ -95,31 +98,50 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
     /// Creates a filter with the requested logging detail, layout, exclusions, and included headers.
     public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format,
             Predicate<HttpServletRequest> excludedRequest, Collection<String> includedHeaders) {
-        this(level, format, excludedRequest, includedHeaders, LOG::isInfoEnabled, System::nanoTime);
+        this(level, format, excludedRequest, includedHeaders, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES,
+                LOG::isInfoEnabled, System::nanoTime);
+    }
+
+    /// Creates a filter with the requested logging detail, layout, exclusions, included headers, and body-byte
+    /// limit.
+    ///
+    /// The same limit applies to the request body and the response body.
+    public HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format,
+            Predicate<HttpServletRequest> excludedRequest, Collection<String> includedHeaders, int maxBodyBytes) {
+        this(level, format, excludedRequest, includedHeaders, maxBodyBytes, LOG::isInfoEnabled, System::nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this(level, HttpLoggingFormat.INLINE, request -> false, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
-                infoEnabled, nanoTime);
+                HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, Predicate<HttpServletRequest> excludedRequest,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
         this(level, HttpLoggingFormat.INLINE, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
-                infoEnabled, nanoTime);
+                HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
             BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        this(level, format, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS, infoEnabled, nanoTime);
+        this(level, format, excludedRequest, HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS,
+                HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES, infoEnabled, nanoTime);
     }
 
     HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
             Collection<String> includedHeaders, BooleanSupplier infoEnabled, LongSupplier nanoTime) {
+        this(level, format, excludedRequest, includedHeaders, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES,
+                infoEnabled, nanoTime);
+    }
+
+    HttpLoggingFilter(HttpLoggingLevel level, HttpLoggingFormat format, Predicate<HttpServletRequest> excludedRequest,
+            Collection<String> includedHeaders, int maxBodyBytes, BooleanSupplier infoEnabled,
+            LongSupplier nanoTime) {
         this.level = Objects.requireNonNull(level, "level must not be null");
         this.format = Objects.requireNonNull(format, "format must not be null");
         this.excludedRequest = Objects.requireNonNull(excludedRequest, "excludedRequest must not be null");
         this.includedHeaders = List.copyOf(Objects.requireNonNull(includedHeaders, "includedHeaders must not be null"));
+        this.maxBodyBytes = HttpLoggingPolicy.maxBodyBytes(maxBodyBytes);
         this.infoEnabled = Objects.requireNonNull(infoEnabled, "infoEnabled must not be null");
         this.nanoTime = Objects.requireNonNull(nanoTime, "nanoTime must not be null");
     }
@@ -155,7 +177,8 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         var state = (RequestState) request.getAttribute(STATE_ATTRIBUTE);
         if (state == null) {
-            state = new RequestState(request, response, this.level, this.format, this.includedHeaders, this.nanoTime);
+            state = new RequestState(request, response, this.level, this.format, this.includedHeaders,
+                    this.maxBodyBytes, this.nanoTime);
             request.setAttribute(STATE_ATTRIBUTE, state);
             state.logRequest(request);
         }
@@ -194,13 +217,15 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
         private final List<String> includedHeaders;
 
+        private final int maxBodyBytes;
+
         private final LongSupplier nanoTime;
 
         private final long startedAt;
 
         private final BodyCapture requestBody;
 
-        private final BodyCapture responseBody = new BodyCapture(false);
+        private final BodyCapture responseBody;
 
         private final AtomicBoolean terminal = new AtomicBoolean();
 
@@ -208,7 +233,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                 Collections.newSetFromMap(new IdentityHashMap<>()));
 
         private RequestState(HttpServletRequest request, HttpServletResponse response, HttpLoggingLevel level,
-                HttpLoggingFormat format, List<String> includedHeaders, LongSupplier nanoTime) {
+                HttpLoggingFormat format, List<String> includedHeaders, int maxBodyBytes, LongSupplier nanoTime) {
             this.method = request.getMethod();
             this.uri = requestUri(request);
             this.response = response;
@@ -216,9 +241,11 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             this.level = level;
             this.format = format;
             this.includedHeaders = includedHeaders;
+            this.maxBodyBytes = maxBodyBytes;
             this.nanoTime = nanoTime;
             this.startedAt = nanoTime.getAsLong();
-            this.requestBody = new BodyCapture(request.getContentLengthLong() <= 0);
+            this.requestBody = new BodyCapture(request.getContentLengthLong() <= 0, maxBodyBytes);
+            this.responseBody = new BodyCapture(false, maxBodyBytes);
         }
 
         private boolean requestEnded;
@@ -247,7 +274,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
                     this.level.includesBodies()
                             ? HttpLoggingSupport.describeBody(this.response.getContentType(),
                                     this.responseBody.bytes(), this.responseBody.complete(),
-                                    this.responseBody.truncated()) : null));
+                                    this.responseBody.truncated(), this.maxBodyBytes) : null));
             logAll(HttpLogFormatter.end(this.format, false));
         }
 
@@ -287,7 +314,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             if (this.level.includesBodies()) {
                 logAll(HttpLogFormatter.requestBody(this.format, HttpLoggingSide.SERVER, this.method, this.uri,
                         HttpLoggingSupport.describeBody(this.requestContentType, this.requestBody.bytes(),
-                                this.requestBody.complete(), this.requestBody.truncated())));
+                                this.requestBody.complete(), this.requestBody.truncated(), this.maxBodyBytes)));
             }
         }
 
@@ -556,19 +583,22 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
 
     private static final class BodyCapture {
 
+        private final int maxBodyBytes;
+
         private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
         private boolean complete;
 
         private boolean truncated;
 
-        private BodyCapture(boolean complete) {
+        private BodyCapture(boolean complete, int maxBodyBytes) {
             this.complete = complete;
+            this.maxBodyBytes = maxBodyBytes;
         }
 
         private synchronized void write(int value) {
             this.complete = false;
-            if (this.bytes.size() < HttpLoggingSupport.MAX_BODY_BYTES) {
+            if (this.bytes.size() < this.maxBodyBytes) {
                 this.bytes.write(value);
             } else {
                 this.truncated = true;
@@ -579,7 +609,7 @@ public final class HttpLoggingFilter extends OncePerRequestFilter {
             if (length > 0) {
                 this.complete = false;
             }
-            var remaining = HttpLoggingSupport.MAX_BODY_BYTES - this.bytes.size();
+            var remaining = this.maxBodyBytes - this.bytes.size();
             if (remaining <= 0) {
                 this.truncated = true;
                 return;

@@ -307,6 +307,35 @@ class HttpLoggingInterceptorTest {
                 "HTTP client response: method=<unavailable>, uri=<unavailable>, status=200, duration=1ms");
     }
 
+    @Test
+    void fullLoggingAppliesTheConfiguredBodyByteLimit() throws IOException {
+        var within = new TrackingResponse(HttpStatus.OK, "{\"value\":\"" + "x".repeat(9_000) + "\"}");
+        within.headers().setContentType(MediaType.APPLICATION_JSON);
+        var withinInterceptor = new HttpLoggingInterceptor(HttpLoggingLevel.FULL, HttpLoggingFormat.INLINE,
+                List.of("*"), 16 * 1024, () -> true, nanos(0, 1_000_000));
+
+        var actual = withinInterceptor.intercept(REQUEST, new byte[0], (request, body) -> within);
+        actual.getBody().readAllBytes();
+        actual.close();
+
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP client response body:")
+                && message.contains("body={\"value\":\""));
+
+        var logsBefore = logs.list.size();
+        var oversized = new TrackingResponse(HttpStatus.OK, "{\"value\":\"" + "x".repeat(20_000) + "\"}");
+        oversized.headers().setContentType(MediaType.APPLICATION_JSON);
+        var oversizedInterceptor = new HttpLoggingInterceptor(HttpLoggingLevel.FULL, HttpLoggingFormat.INLINE,
+                List.of("*"), 16 * 1024, () -> true, nanos(0, 1_000_000));
+
+        var oversizedActual = oversizedInterceptor.intercept(REQUEST, new byte[0], (request, body) -> oversized);
+        oversizedActual.getBody().readAllBytes();
+        oversizedActual.close();
+
+        assertThat(messages().subList(logsBefore, logs.list.size()))
+                .anyMatch(message -> message.startsWith("HTTP client response body:")
+                        && message.contains("body=<truncated at 16384 bytes>"));
+    }
+
     private List<String> messages() {
         return logs.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
     }

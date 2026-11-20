@@ -66,6 +66,27 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     }
 
     @Test
+    void bindsDefaultAndConfiguredMaxBodyBytesOntoTheFilter() {
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=FULL").run(context -> {
+            assertThat(context.getBean(JfoundryWebMvcProperties.class).getLogging().getMaxBodyBytes())
+                    .isEqualTo(HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+            assertThat(maxBodyBytes(registration(context))).isEqualTo(HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+        });
+        runner.withPropertyValues("jfoundry.web.mvc.logging.level=FULL",
+                "jfoundry.web.mvc.logging.max-body-bytes=16384")
+                .run(context -> assertThat(maxBodyBytes(registration(context))).isEqualTo(16 * 1024));
+    }
+
+    @Test
+    void rejectsBodyByteLimitsOutsideTheSupportedRange() {
+        for (var invalid : new String[]{"0", "-1", "65537"}) {
+            runner.withPropertyValues("jfoundry.web.mvc.logging.level=FULL",
+                    "jfoundry.web.mvc.logging.max-body-bytes=" + invalid)
+                    .run(context -> assertThat(context).hasFailed());
+        }
+    }
+
+    @Test
     void excludesDefaultHealthPathsAfterContextPath() throws Exception {
         runner.withPropertyValues("jfoundry.web.mvc.logging.level=BASIC")
                 .run(context -> {
@@ -259,6 +280,10 @@ class WebMvcHttpLoggingAutoConfigurationTest {
     @SuppressWarnings("unchecked")
     private static List<String> includedHeaders(FilterRegistrationBean<HttpLoggingFilter> registration) {
         return (List<String>) ReflectionTestUtils.getField(registration.getFilter(), "includedHeaders");
+    }
+
+    private static int maxBodyBytes(FilterRegistrationBean<HttpLoggingFilter> registration) {
+        return (int) ReflectionTestUtils.getField(registration.getFilter(), "maxBodyBytes");
     }
 
     @Configuration(proxyBeanMethods = false)

@@ -71,6 +71,8 @@ require_text "workflow_dispatch:"
 require_text "release_tag:"
 require_text 'ref: ${{ inputs.release_tag }}'
 require_text 'test "${GITHUB_REF}" = "refs/heads/main"'
+require_text "github.actor == 'github-actions[bot]'"
+require_text 'gh workflow run prepare-snapshot.yml --repo "${GITHUB_REPOSITORY}" --ref main'
 require_text "Verify immutable release source"
 require_text "Verify complete CI"
 require_text 'test "${{ inputs.release_tag }}" = "v${version}"'
@@ -173,6 +175,7 @@ fi
 forbid_text "versions-maven-plugin"
 forbid_text "versions:set"
 forbid_text "git push"
+forbid_text "tags:"
 forbid_text "Verify Maven 4 Central readiness"
 forbid_text "MAVEN_CENTRAL_MAVEN4_READY"
 forbid_text "Maven 4 final"

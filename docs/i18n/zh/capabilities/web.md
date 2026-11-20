@@ -225,9 +225,16 @@ Spring `WebClient`，响应式调用不属于此契约。
 所有运行时都以 `INFO` 输出 HTTP 交换事件，`NONE` 会将其关闭。`BASIC` 记录 request 与 response 事件，
 包含移除 query 后的 method/URI、状态和耗时，且不创建 body 包装器。`HEADERS` 额外记录配置的 header
 子集，并以不区分大小写的方式脱敏授权信息、凭证、cookie、token、secret 与
-API key。`FULL` 再额外记录 JSON body；JSON body 会执行嵌套字段脱敏，最多
-保留 8 KiB，非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
+API key。`FULL` 再额外记录 JSON body；JSON body 会执行嵌套字段脱敏，最多保留配置的
+body 字节上限，默认 8 KiB；非 JSON、格式错误、未完整消费或超限 body 只记录安全描述。捕获会立即转发字节，且日志失败不能
 改变 HTTP 处理。
+
+每个日志落点的请求 body 与响应 body 共享同一个字节上限。可通过
+`jfoundry.web.mvc.logging.max-body-bytes`、`jfoundry.web.rest-client.logging.max-body-bytes`、
+`jfoundry.web.quarkus.logging.max-body-bytes` 或 `jfoundry.web.helidon.logging.max-body-bytes`
+在调试较大的列表或详情负载时调高或调低该上限。取值范围为 1 到 65536；Spring Boot 对范围外的值
+启动失败，Quarkus 与 Helidon 则会收敛到该范围。仍然超限的 body 只输出
+`<truncated at N bytes>`，不会输出残缺 JSON，因此不会暴露无法解析片段中的凭证。
 
 布局与明细相互独立。启用日志后默认使用 `HUMAN`：按 Feign 的方式输出，请求首行带 method 与 URI，同一块后续行
 不再重复它们，请求行以 `-->` 开头，响应行以 `<--` 开头，JSON body 仍保持在一行，每一侧以 `END HTTP` 收尾。

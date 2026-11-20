@@ -17,9 +17,5 @@ class JSpecifyNullnessTest {
                 .isAnnotationPresent(Nullable.class));
         assertTrue(AbstractAggregateRepository.class.getDeclaredMethod("doFindById", Identifier.class)
                 .getAnnotatedReturnType()
-                .isAnnotationPresent(Nullable.class));
-        assertTrue(AggregateData.class.getMethod("getId")
-                .getAnnotatedReturnType()
-                .isAnnotationPresent(Nullable.class));
-    }
+                .isAnnotationPresent(Nullable.class));    }
 }

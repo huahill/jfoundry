@@ -184,7 +184,9 @@ Security 常规注册之前。应用可以提供自己的 `HttpLoggingFilter` �
 替换，或使用 `*` 在脱敏后输出全部 header。
 
 入站时长在同步链完成，或异步请求进入 complete、error、timeout 终态时结束。`FULL` 使用 tee 包装器立即转发
-请求与响应字节，并最多保留 8 KiB；该时长不表示客户端何时收到流式响应。两个方向都以 `INFO` 输出 request、
+请求与响应字节，并最多保留配置的 body 字节上限；该时长不表示客户端何时收到流式响应。每个日志落点的两个方向共享
+同一个上限，默认 8 KiB，通过 `jfoundry.web.mvc.logging.max-body-bytes` 与
+`jfoundry.web.rest-client.logging.max-body-bytes` 配置，取值范围为 1 到 65536，范围外的值会导致启动失败。两个方向都以 `INFO` 输出 request、
 header、body 与 response 明细，始终移除 URI query，并脱敏敏感 header 与嵌套 JSON 字段；不安全的 body
 表示会被省略。`HUMAN` 按 Feign 方式用 `-->` / `<--` 区分请求与响应：method 与 URI 只出现在请求首行，body 仍一行，每一侧以 `END HTTP` 收尾；`INLINE` 保留紧凑的单行事件。这些日志用于补充而不是替代
 Micrometer 指标/追踪与应用拥有的业务审计事件。

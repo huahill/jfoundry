@@ -7,7 +7,7 @@
 
     <groupId>io.github.xfoundries</groupId>
     <artifactId>jfoundry-parent</artifactId>
-    <version>1.7.0-SNAPSHOT</version>
+    <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>jfoundry-parent</name>
@@ -50,14 +50,14 @@
 
         <maven-compiler-plugin.version>3.16.0</maven-compiler-plugin.version>
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
-        <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.6.0</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.6.1</maven-failsafe-plugin.version>
         <maven-deploy-plugin.version>3.2.0</maven-deploy-plugin.version>
         <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-dependency-plugin.version>3.11.0</maven-dependency-plugin.version>
-        <maven-enforcer-plugin.version>3.6.3</maven-enforcer-plugin.version>
+        <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
         <cyclonedx-maven-plugin.version>2.9.3</cyclonedx-maven-plugin.version>
@@ -66,11 +66,11 @@
 
         <!-- Framework-neutral versions. Import BOMs here; do not pin coordinates a runtime BOM owns. -->
         <junit-jupiter.version>6.1.3</junit-jupiter.version>
-        <jackson3.version>3.2.4</jackson3.version>
+        <jackson3.version>3.3.0</jackson3.version>
         <mockito-bom.version>5.24.0</mockito-bom.version>
         <assertj-bom.version>3.27.7</assertj-bom.version>
         <slf4j-bom.version>2.0.20</slf4j-bom.version>
-        <opentelemetry.version>1.67.0</opentelemetry.version>
+        <opentelemetry.version>1.68.0</opentelemetry.version>
     </properties>
 
     <subprojects>

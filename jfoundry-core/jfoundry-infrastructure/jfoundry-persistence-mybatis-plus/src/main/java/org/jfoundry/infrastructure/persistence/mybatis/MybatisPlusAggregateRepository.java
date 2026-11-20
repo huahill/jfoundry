@@ -8,10 +8,8 @@ import com.baomidou.mybatisplus.core.metadata.TableInfoHelper;
 import org.apache.ibatis.reflection.SystemMetaObject;
 import org.jfoundry.application.exception.ConflictException;
 import org.jfoundry.infrastructure.persistence.AbstractAggregateRepository;
-import org.jfoundry.infrastructure.persistence.AggregateData;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContext;
 import org.jfoundry.infrastructure.persistence.AggregatePersistenceContextAware;
-import org.jfoundry.infrastructure.persistence.DataMapper;
 import org.jfoundry.infrastructure.persistence.PersistenceStateKey;
 import org.jmolecules.ddd.types.AggregateRoot;
 import org.jmolecules.ddd.types.Identifier;
@@ -24,9 +22,13 @@ import org.jspecify.annotations.Nullable;
 
 /// MyBatis-Plus persistence base for an aggregate whose root is represented by one data object.
 /// <p>
-/// The default implementation stores a single data object. Adapters for multi-table aggregates may
-/// override the complete {@code do*} operations and use the protected operation methods to retain
-/// root persistence, optional optimistic locking, and persistence-context tracking.
+/// The default implementation stores a single data object. {@code doAdd}, {@code doModify}, and
+/// {@code doRemove} are final so a subclass cannot replace a versioned root update with a
+/// primary-key write. Multi-table adapters finish that same aggregate write in {@link #afterInsert},
+/// {@link #afterUpdate}, and {@link #afterRemove}. Those steps run only after the root statement
+/// has accepted the aggregate instance loaded or added in this persistence context, and before
+/// persistence state is recorded. A failure stays in the surrounding transaction with the root
+/// statement.
 ///
 /// @param <T> aggregate root type
 /// @param <ID> aggregate identifier type
@@ -35,7 +37,7 @@ import org.jspecify.annotations.Nullable;
 public abstract class MybatisPlusAggregateRepository<
         T extends AggregateRoot<T, ID>,
         ID extends Identifier,
-        D extends AggregateData<K>,
+        D extends MybatisPlusAggregateData<K>,
         K extends Serializable>
         extends AbstractAggregateRepository<T, ID>
         implements AggregatePersistenceContextAware {
@@ -43,20 +45,20 @@ public abstract class MybatisPlusAggregateRepository<
     protected final BaseMapper<D> mapper;
     private final Function<T, D> toRootData;
     private final Function<ID, K> toDataId;
-    private final @Nullable DataMapper<T, ID, D, K> dataMapper;
+    private final @Nullable MybatisPlusDataMapper<T, ID, D, K> dataMapper;
     private final @Nullable Class<D> dataType;
     private final PersistenceStateKey<VersionState> versionKey;
     private @Nullable AggregatePersistenceContext persistenceContext;
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
-            DataMapper<T, ID, D, K> dataMapper) {
+            MybatisPlusDataMapper<T, ID, D, K> dataMapper) {
         this(mapper, dataMapper::toData, dataMapper::toDataId, dataMapper, null);
     }
 
     protected MybatisPlusAggregateRepository(
             BaseMapper<D> mapper,
-            @Nullable DataMapper<T, ID, D, K> dataMapper,
+            @Nullable MybatisPlusDataMapper<T, ID, D, K> dataMapper,
             @Nullable Class<D> dataType) {
         this(mapper, dataMapper::toData, dataMapper::toDataId, dataMapper, dataType);
     }
@@ -73,7 +75,7 @@ public abstract class MybatisPlusAggregateRepository<
             BaseMapper<D> mapper,
             Function<T, D> toRootData,
             Function<ID, K> toDataId,
-            DataMapper<T, ID, D, K> dataMapper,
+            MybatisPlusDataMapper<T, ID, D, K> dataMapper,
             Class<D> dataType) {
         this.mapper = Objects.requireNonNull(mapper, "Mapper must not be null.");
         this.toRootData = Objects.requireNonNull(
@@ -88,7 +90,7 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     /// Bidirectional data mapper available to single-data subclasses.
-    protected final DataMapper<T, ID, D, K> dataMapper() {
+    protected final MybatisPlusDataMapper<T, ID, D, K> dataMapper() {
         if (dataMapper == null) {
             throw new IllegalStateException(
                     "This repository does not define reverse data mapping.");
@@ -123,9 +125,29 @@ public abstract class MybatisPlusAggregateRepository<
         return aggregate;
     }
 
+    /// Writes the rest of the aggregate after the root insert succeeds and before state is tracked.
+    ///
+    /// A failure stays in the surrounding transaction with the root insert.
+    protected void afterInsert(T aggregate, D rootData) {
+    }
+
+    /// Writes the rest of the aggregate after the root update succeeds and before state advances.
+    ///
+    /// This step does not run when this persistence context did not load or add the aggregate
+    /// instance, or when the versioned root update conflicts. A failure stays in the surrounding
+    /// transaction with the root update.
+    protected void afterUpdate(T aggregate, D rootData) {
+    }
+
+    /// Finishes aggregate removal after the root row is deleted.
+    ///
+    /// A failure stays in the surrounding transaction with the root removal.
+    protected void afterRemove(T aggregate) {
+    }
+
     @Override
-    protected void doAdd(T aggregate) {
-        insertAggregate(aggregate, toRootData.apply(aggregate), ignored -> { });
+    protected final void doAdd(T aggregate) {
+        insertAggregate(aggregate, toRootData.apply(aggregate), data -> afterInsert(aggregate, data));
     }
 
     /// Inserts the root data and additional aggregate state before tracking persistence state.
@@ -161,8 +183,8 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     @Override
-    protected void doModify(T aggregate) {
-        updateAggregate(aggregate, toRootData.apply(aggregate), ignored -> { });
+    protected final void doModify(T aggregate) {
+        updateAggregate(aggregate, toRootData.apply(aggregate), data -> afterUpdate(aggregate, data));
     }
 
     /// Updates the root data, completes additional writes, and then advances tracked state.
@@ -195,8 +217,8 @@ public abstract class MybatisPlusAggregateRepository<
     }
 
     @Override
-    protected void doRemove(T aggregate) {
-        deleteAggregate(aggregate, () -> { });
+    protected final void doRemove(T aggregate) {
+        deleteAggregate(aggregate, () -> afterRemove(aggregate));
     }
 
     /// Deletes the root data before completing any additional removal work.

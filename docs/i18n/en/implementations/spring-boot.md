@@ -262,8 +262,12 @@ health exclusion. Matching removes the Servlet context and servlet paths before 
 to replace it, or use `*` to include every header after redaction.
 
 Inbound duration ends when the synchronous chain completes or the async request reaches terminal
-complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain at
-most 8 KiB for `FULL`; this does not measure when the client receives a streamed response. Both
+complete, error, or timeout. Tee wrappers forward request and response bytes immediately and retain
+at most the configured body-byte limit for `FULL`; this does not measure when the client receives a
+streamed response. Both directions share one limit per logging site, 8 KiB by default, configured
+through `jfoundry.web.mvc.logging.max-body-bytes` and
+`jfoundry.web.rest-client.logging.max-body-bytes` with a supported range of 1 through 65536; values
+outside that range fail startup. Both
 directions emit request, headers, body, and response details at `INFO`, always remove URI queries,
 redact sensitive headers and nested JSON fields, and omit unsafe body representations. `HUMAN` renders
 those details as Feign-style `-->` / `<--` blocks: method and URI appear only on the request start line, bodies stay on one line, and each side closes with `END HTTP`; `INLINE` keeps compact one-line events. These logs supplement rather than replace Micrometer

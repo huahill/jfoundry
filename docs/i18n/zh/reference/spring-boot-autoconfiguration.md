@@ -101,7 +101,9 @@ Bean 注入默认记录器。应用通常只需提供这些映射，无需替换
   Spring Boot 的 Jackson 2 兼容模块。
 - 分布式锁是显式能力。默认 Spring Boot 启动器不会引入 Redisson。
 - 入站与出站 HTTP 日志相互独立。两者都以 `INFO` 分类输出事件，移除 URI query，脱敏凭证、cookie、token、
-  secret 与 API key，并将 `FULL` JSON body 捕获限制为 8 KiB。客户端时长在响应 header 到达时结束；Servlet
+  secret 与 API key，并将 `FULL` JSON body 捕获限制为通过 `jfoundry.web.mvc.logging.max-body-bytes` 或
+  `jfoundry.web.rest-client.logging.max-body-bytes` 配置的上限，默认 8 KiB、最大 65536；取值超出
+  1 到 65536 时启动失败。客户端时长在响应 header 到达时结束；Servlet
   时长在同步或异步终态完成时结束。两者都不是端到端客户端延迟，也不是业务审计事件。
 - 对于 Spring Boot Native Image，`jfoundry.outbox.dispatcher.enabled` 在 AOT 时求值。构建时设为
   `false` 后，不能再靠启动参数打开 worker。

@@ -14,7 +14,7 @@ PLATFORMS = [
     ("Spring Boot-only", "jfoundry-spring-boot-dependencies", "spring-boot.version"),
     ("Spring Cloud", "jfoundry-spring-cloud-dependencies", "spring-cloud.version"),
     ("Spring Cloud Alibaba", "jfoundry-spring-cloud-dependencies", "spring-cloud-alibaba.version"),
-    ("Quarkus", "jfoundry-quarkus-dependencies", "quarkus.version"),
+    ("Quarkus", "jfoundry-quarkus-dependencies", "quarkus.platform.version"),
     ("Helidon MP", "jfoundry-helidon-dependencies", "helidon.version"),
 ]
 

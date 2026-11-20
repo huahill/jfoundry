@@ -370,6 +370,34 @@ class HttpLoggingFilterTest {
                 .contains("duration=3ms");
     }
 
+    @Test
+    void fullLoggingAppliesTheConfiguredBodyByteLimit() throws Exception {
+        var largeBody = ("{\"value\":\"" + "x".repeat(9_000) + "\"}").getBytes(StandardCharsets.UTF_8);
+        var request = request(new byte[0]);
+        var response = new MockHttpServletResponse();
+        var filter = new HttpLoggingFilter(HttpLoggingLevel.FULL, HttpLoggingFormat.INLINE, req -> false,
+                List.of("*"), 16 * 1024, () -> true, nanos(0, 1_000_000, 0, 1_000_000));
+
+        filter.doFilter(request, response, (actualRequest, actualResponse) -> {
+            actualResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            actualResponse.getOutputStream().write(largeBody);
+        });
+
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP server response body:")
+                && message.contains("body={\"value\":\""));
+
+        var beyondLimit = ("{\"value\":\"" + "x".repeat(20_000) + "\"}").getBytes(StandardCharsets.UTF_8);
+        var oversizedRequest = request(beyondLimit);
+        oversizedRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        var oversizedResponse = new MockHttpServletResponse();
+        filter.doFilter(oversizedRequest, oversizedResponse, (actualRequest, actualResponse) -> {
+            actualRequest.getInputStream().readAllBytes();
+        });
+
+        assertThat(messages()).anyMatch(message -> message.startsWith("HTTP server request body:")
+                && message.contains("body=<truncated at 16384 bytes>"));
+    }
+
     private List<String> messages() {
         return logs.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
     }

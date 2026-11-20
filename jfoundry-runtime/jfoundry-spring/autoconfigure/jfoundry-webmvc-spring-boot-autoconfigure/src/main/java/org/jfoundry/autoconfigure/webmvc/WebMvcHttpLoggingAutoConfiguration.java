@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletRequest;
 import org.jfoundry.http.HttpLoggingLevel;
+import org.jfoundry.http.HttpLoggingPolicy;
 import org.jfoundry.web.spring.filter.HttpLoggingFilter;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -40,7 +41,8 @@ public class WebMvcHttpLoggingAutoConfiguration {
             JfoundryWebMvcProperties properties) {
         var registration = new FilterRegistrationBean<>(new HttpLoggingFilter(properties.getLogging().getLevel(),
                 properties.getLogging().getFormat(), excludedRequest(properties.getLogging().getExcludedPaths()),
-                properties.getLogging().getIncludedHeaders()));
+                properties.getLogging().getIncludedHeaders(),
+                HttpLoggingPolicy.maxBodyBytes(properties.getLogging().getMaxBodyBytes())));
         registration.setName("jfoundryHttpLoggingFilter");
         registration.setOrder(DEFAULT_FILTER_ORDER);
         registration.setAsyncSupported(true);

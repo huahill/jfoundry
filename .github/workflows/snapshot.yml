@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Java and Maven Central credentials
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: 25
@@ -62,6 +62,74 @@ jobs:
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
-        run: >
-          ./mvnw -B -DskipTests deploy
-          -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
+        run: |
+          set -euo pipefail
+
+          # Central Portal blocks the runner after a few dozen snapshot modules. Further requests
+          # during that block refresh it, so publish in small chunks and wait quietly between them.
+          chunk_size=20
+          quiet_seconds=600
+          max_attempts=3
+          order_log="${RUNNER_TEMP}/snapshot-reactor-order.log"
+          deploy_log="${RUNNER_TEMP}/snapshot-deploy.log"
+
+          ./mvnw -B -DskipTests validate | tee "${order_log}"
+          mapfile -t artifacts < <(sed -nE 's/.*< [^:>]+:([^ >]+) >.*/\1/p' "${order_log}" | awk '!seen[$0]++')
+          if (( ${#artifacts[@]} == 0 )); then
+            echo "Could not read the Maven reactor order." >&2
+            exit 1
+          fi
+
+          ./mvnw -B -DskipTests install
+
+          deploy_chunk() {
+            ./mvnw -B -T 1 -DskipTests -nsu deploy \
+              -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/ \
+              -Daether.connector.basic.parallelPut=false \
+              -Daether.connector.basic.upstreamThreads=1 \
+              -Daether.transport.http.maxConnectionsPerRoute=1 \
+              -pl "$1"
+          }
+
+          index=0
+          total="${#artifacts[@]}"
+          while (( index < total )); do
+            selector=""
+            chunk_end=$(( index + chunk_size ))
+            if (( chunk_end > total )); then
+              chunk_end="${total}"
+            fi
+            for (( cursor = index; cursor < chunk_end; cursor++ )); do
+              if [[ -n "${selector}" ]]; then
+                selector+=","
+              fi
+              selector+=":${artifacts[cursor]}"
+            done
+
+            echo "Publishing Central snapshot chunk $(( index / chunk_size + 1 )): ${selector}"
+            attempt=1
+            while true; do
+              set +e
+              deploy_chunk "${selector}" 2>&1 | tee "${deploy_log}"
+              status="${PIPESTATUS[0]}"
+              set -e
+              if [[ "${status}" -eq 0 ]]; then
+                break
+              fi
+              if ! grep -Eq 'status=429|error-1015|Error 1015' "${deploy_log}"; then
+                exit "${status}"
+              fi
+              if (( attempt >= max_attempts )); then
+                exit "${status}"
+              fi
+              echo "Central Portal rate limited snapshot chunk $(( index / chunk_size + 1 )) (attempt ${attempt}/${max_attempts}). Waiting ${quiet_seconds}s before retrying the same chunk."
+              sleep "${quiet_seconds}"
+              attempt=$(( attempt + 1 ))
+            done
+
+            index="${chunk_end}"
+            if (( index < total )); then
+              echo "Waiting ${quiet_seconds}s before the next Central snapshot deploy chunk."
+              sleep "${quiet_seconds}"
+            fi
+          done

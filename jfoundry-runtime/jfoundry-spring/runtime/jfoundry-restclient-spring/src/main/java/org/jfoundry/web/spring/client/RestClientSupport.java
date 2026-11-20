@@ -46,12 +46,21 @@ public final class RestClientSupport {
     /// Configures a `RestClient` builder with safe response handling, logging detail, layout, and included headers.
     public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel,
             HttpLoggingFormat loggingFormat, Collection<String> includedHeaders) {
+        return configure(builder, loggingLevel, loggingFormat, includedHeaders,
+                HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+    }
+
+    /// Configures a `RestClient` builder with safe response handling, logging detail, layout, included headers,
+    /// and the body-byte limit shared by logged request and response bodies.
+    public static RestClient.Builder configure(RestClient.Builder builder, HttpLoggingLevel loggingLevel,
+            HttpLoggingFormat loggingFormat, Collection<String> includedHeaders, int maxBodyBytes) {
         var configuredBuilder = Objects.requireNonNull(builder, "builder must not be null")
                 .defaultStatusHandler(new HttpResponseErrorHandler());
         var level = Objects.requireNonNull(loggingLevel, "loggingLevel must not be null");
         var format = Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
         if (level != HttpLoggingLevel.NONE) {
-            configuredBuilder.requestInterceptor(new HttpLoggingInterceptor(level, format, includedHeaders));
+            configuredBuilder.requestInterceptor(
+                    new HttpLoggingInterceptor(level, format, includedHeaders, maxBodyBytes));
         }
         return configuredBuilder;
     }

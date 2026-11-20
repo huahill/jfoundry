@@ -158,21 +158,29 @@ including standalone BOM modules.
 Publish the current development version locally with:
 
 ```bash
-./mvnw -DskipTests deploy \
-  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
+./mvnw -T 1 -DskipTests -nsu deploy \
+  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/ \
+  -Daether.connector.basic.parallelPut=false \
+  -Daether.connector.basic.upstreamThreads=1 \
+  -Daether.transport.http.maxConnectionsPerRoute=1
 ```
+
+`.mvn/maven.config` otherwise selects `-T 1C`. `-T 1` only publishes one reactor module at a time.
+Resolver still uploads that module's JAR, POM, sources, Javadoc, and checksums together: the
+default is `aether.connector.basic.parallelPut=true` with five upstream threads. Central Portal
+answers that burst with Cloudflare error 1015 (HTTP 429). `-nsu` avoids refreshing snapshot
+metadata while publishing. Requests made during an active block refresh the block, so wait for it
+to expire instead of retrying immediately.
 
 The current reactor version must end with `-SNAPSHOT`. Do not use the release workflow for
 SNAPSHOTs; it intentionally rejects SNAPSHOT versions.
 
 GitHub Actions publishes SNAPSHOTs through `.github/workflows/snapshot.yml`. It runs when `main`
 is pushed and can also be started manually from the Actions tab. The workflow verifies that the
-current root version is a SNAPSHOT before deploying:
-
-```bash
-./mvnw -B -DskipTests deploy \
-  -DaltDeploymentRepository=jfoundry::https://central.sonatype.com/repository/maven-snapshots/
-```
+current root version is a SNAPSHOT before deploying. It installs the reactor locally, then publishes
+20 modules at a time with the single-thread command above. It waits 10 minutes before the next
+chunk. A chunk that still receives error 1015 is retried after the same quiet wait; earlier chunks
+are not published again.
 
 Consumers must add the Central Portal snapshots repository to resolve these versions:
 
@@ -194,17 +202,26 @@ Consumers must add the Central Portal snapshots repository to resolve these vers
 ## GitHub Release Publishing
 
 1. Merge the committed release-version change after the complete CI matrix passes.
-2. Create and push an annotated tag such as `v1.0.0-RC1` for that exact commit.
-3. From the `main` branch, manually run the `Release` workflow with `release_tag=v1.0.0-RC1` and
-   approve the `jfoundry` environment when its reviewers have inspected the candidate. The workflow
-   rejects runs started from a tag or any other branch so that it always uses the current reviewed
-   release workflow definition while checking out the immutable release tag as its source.
+2. Create and push an annotated tag for that exact commit. A stable tag has the form `vX.Y.Z`,
+   with no prerelease suffix. A prerelease tag keeps its suffix, for example `v1.0.0-RC1`.
+3. Pushing the stable tag starts `Dispatch stable release`. That workflow has no Central or signing
+   secrets. It verifies that the tag is annotated and reachable from `main`, then starts the trusted
+   `Release` workflow on `main` with `release_tag` set to the tag. Approve the `jfoundry` environment
+   when its reviewers have inspected the candidate. The publish job rejects a run whose workflow ref
+   is not `refs/heads/main`, so publication always uses the reviewed workflow definition and then
+   checks out the immutable tag as its source. Prerelease tags do not start the dispatcher. For a
+   prerelease, or to retry a publication, manually run `Release` from the Actions page on `main`
+   with the exact `release_tag` and approve the environment again.
 4. Wait for the workflow to publish Central, verify public availability, upload and attest release
    evidence, and create the GitHub Release. The Release display title matches the immutable tag exactly,
    including its leading `v`; rerunning the workflow also restores that title if it was edited manually.
 5. After a successful stable release, `Prepare next SNAPSHOT` creates a short-lived branch and pull
    request for the next minor `-SNAPSHOT` development version. Review and merge that PR before the
    next development changes. The workflow skips prerelease tags and does not write directly to `main`.
+   A release started by the tag dispatcher also dispatches this preparation from the trusted `Release`
+   workflow. GitHub does not deliver `workflow_run` for a run that `GITHUB_TOKEN` started, so the
+   explicit dispatch preserves the same pull-request handoff. A release started manually from the
+   Actions page still uses the `workflow_run` trigger.
 
 Retry an interrupted workflow only when its immutable source remains correct. If the release source
 must change, choose a new version and repeat the immutable-tag process; never move an existing tag.

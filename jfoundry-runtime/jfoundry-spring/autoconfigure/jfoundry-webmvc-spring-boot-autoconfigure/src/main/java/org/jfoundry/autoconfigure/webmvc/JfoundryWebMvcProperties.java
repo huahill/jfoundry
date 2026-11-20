@@ -41,6 +41,8 @@ public class JfoundryWebMvcProperties {
 
         private List<String> includedHeaders = List.copyOf(HttpLoggingPolicy.DEFAULT_INCLUDED_HEADERS);
 
+        private int maxBodyBytes = HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES;
+
         /// Returns the detail recorded for inbound Servlet HTTP logs.
         public HttpLoggingLevel getLevel() {
             return level;
@@ -79,6 +81,17 @@ public class JfoundryWebMvcProperties {
         /// Sets header names included in inbound HTTP logs. The configured list replaces the default.
         public void setIncludedHeaders(List<String> includedHeaders) {
             this.includedHeaders = includedHeaders;
+        }
+
+        /// Returns the maximum number of body bytes retained in inbound HTTP logs.
+        public int getMaxBodyBytes() {
+            return maxBodyBytes;
+        }
+
+        /// Sets the maximum number of body bytes retained in inbound HTTP logs, from 1 through
+        /// `{@value HttpLoggingPolicy#ABSOLUTE_MAX_BODY_BYTES}`.
+        public void setMaxBodyBytes(int maxBodyBytes) {
+            this.maxBodyBytes = maxBodyBytes;
         }
     }
 

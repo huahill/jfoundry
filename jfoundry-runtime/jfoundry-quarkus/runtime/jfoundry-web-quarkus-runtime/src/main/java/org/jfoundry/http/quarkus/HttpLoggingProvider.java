@@ -26,6 +26,9 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     /// Configuration key for inbound Quarkus REST included headers.
     public static final String SERVER_LOGGING_INCLUDED_HEADERS = "jfoundry.web.quarkus.logging.included-headers";
 
+    /// Configuration key for the inbound Quarkus REST body-byte limit.
+    public static final String SERVER_LOGGING_MAX_BODY_BYTES = "jfoundry.web.quarkus.logging.max-body-bytes";
+
     private static final Logger LOG = LoggerFactory.getLogger(HttpLoggingProvider.class);
 
     /// Creates a provider that reads the current MicroProfile configuration for each request.
@@ -34,7 +37,7 @@ public final class HttpLoggingProvider extends AbstractJaxRsServerHttpLoggingPro
     }
 
     HttpLoggingProvider(BooleanSupplier infoEnabled, LongSupplier nanoTime) {
-        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, SERVER_LOGGING_INCLUDED_HEADERS, infoEnabled, nanoTime,
-                LOG::info);
+        super(SERVER_LOGGING_LEVEL, SERVER_LOGGING_FORMAT, SERVER_LOGGING_INCLUDED_HEADERS,
+                SERVER_LOGGING_MAX_BODY_BYTES, infoEnabled, nanoTime, LOG::info);
     }
 }

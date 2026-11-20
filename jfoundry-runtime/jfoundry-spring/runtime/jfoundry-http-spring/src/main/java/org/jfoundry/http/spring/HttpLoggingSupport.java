@@ -20,8 +20,8 @@ import tools.jackson.databind.node.ObjectNode;
 /// Applies the security policy shared by Spring HTTP client and server logging adapters.
 ///
 /// This type removes URI queries, redacts sensitive headers and JSON fields, accepts JSON media types only,
-/// and describes body completeness without retaining more than 8 KiB. It does not execute protocol operations
-/// or emit logs.
+/// and describes body completeness without retaining more than the configured body-byte limit. It does not
+/// execute protocol operations or emit logs.
 public final class HttpLoggingSupport {
 
     /// Maximum number of body bytes retained for diagnostic logging.
@@ -74,6 +74,14 @@ public final class HttpLoggingSupport {
 
     /// Describes a captured body without exposing non-JSON, malformed, incomplete, or oversized content.
     public static String describeBody(String contentType, byte[] body, boolean complete, boolean truncated) {
+        return describeBody(contentType, body, complete, truncated, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+    }
+
+    /// Describes a captured body without exposing non-JSON, malformed, incomplete, or oversized content.
+    ///
+    /// Bodies longer than `maxBodyBytes` are reported as truncated without rendering partial content.
+    public static String describeBody(String contentType, byte[] body, boolean complete, boolean truncated,
+            int maxBodyBytes) {
         MediaType mediaType = null;
         if (contentType != null) {
             try {
@@ -82,17 +90,25 @@ public final class HttpLoggingSupport {
                 return "<omitted: invalid content-type>";
             }
         }
-        return describeBody(mediaType, body, complete, truncated);
+        return describeBody(mediaType, body, complete, truncated, maxBodyBytes);
     }
 
     /// Describes a captured body without exposing non-JSON, malformed, incomplete, or oversized content.
     public static String describeBody(MediaType contentType, byte[] body, boolean complete, boolean truncated) {
+        return describeBody(contentType, body, complete, truncated, HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+    }
+
+    /// Describes a captured body without exposing non-JSON, malformed, incomplete, or oversized content.
+    ///
+    /// Bodies longer than `maxBodyBytes` are reported as truncated without rendering partial content.
+    public static String describeBody(MediaType contentType, byte[] body, boolean complete, boolean truncated,
+            int maxBodyBytes) {
         Objects.requireNonNull(body, "body must not be null");
         if (!complete) {
             return "<not fully consumed>";
         }
-        if (truncated || body.length > MAX_BODY_BYTES) {
-            return "<truncated at " + MAX_BODY_BYTES + " bytes>";
+        if (truncated || body.length > maxBodyBytes) {
+            return "<truncated at " + maxBodyBytes + " bytes>";
         }
         if (body.length == 0) {
             return "<empty>";

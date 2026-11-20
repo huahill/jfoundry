@@ -84,6 +84,34 @@ class WebRestClientAutoConfigurationTest {
     }
 
     @Test
+    void bindsDefaultAndConfiguredMaxBodyBytesToRestClientBuilder() {
+        contextRunner
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=FULL")
+                .run(context -> {
+                    var interceptor = configuredInterceptor(context);
+                    assertThat(context.getBean(JfoundryWebProperties.class).getRestClient().getLogging()
+                            .getMaxBodyBytes()).isEqualTo(HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+                    assertThat(ReflectionTestUtils.getField(interceptor, "maxBodyBytes"))
+                            .isEqualTo(HttpLoggingPolicy.DEFAULT_MAX_BODY_BYTES);
+                });
+        contextRunner
+                .withPropertyValues("jfoundry.web.rest-client.logging.level=FULL",
+                        "jfoundry.web.rest-client.logging.max-body-bytes=16384")
+                .run(context -> assertThat(ReflectionTestUtils.getField(configuredInterceptor(context),
+                        "maxBodyBytes")).isEqualTo(16 * 1024));
+    }
+
+    @Test
+    void rejectsBodyByteLimitsOutsideTheSupportedRange() {
+        for (var invalid : new String[]{"0", "-1", "65537"}) {
+            contextRunner
+                    .withPropertyValues("jfoundry.web.rest-client.logging.level=FULL",
+                            "jfoundry.web.rest-client.logging.max-body-bytes=" + invalid)
+                    .run(context -> assertThat(context).hasFailed());
+        }
+    }
+
+    @Test
     void appliesConfiguredLoggingLevelToBootManagedBuilder() {
         contextRunner
                 .withPropertyValues("jfoundry.web.rest-client.logging.level=HEADERS")

@@ -418,7 +418,11 @@ diagnostic default, and `*` includes every header after redaction. Spring `WebCl
 supported by this adapter.
 
 All URIs exclude query, user-info, and fragment data. Sensitive headers and nested JSON fields are
-redacted case-insensitively, and `FULL` retains at most 8 KiB. Client duration ends when response
+redacted case-insensitively, and `FULL` retains at most the configured body-byte limit, 8 KiB by
+default. Each logging site shares one limit between request and response bodies; configure
+`jfoundry.web.quarkus.logging.max-body-bytes` inbound or
+`jfoundry.web.rest-client.logging.max-body-bytes` outbound, with values clamped into 1 through 65536.
+Client duration ends when response
 headers arrive; response-body logging occurs after consumption or close. Jakarta REST exposes no
 portable transport-failure callback, so the adapter does not use runtime-private hooks to claim
 Spring-equivalent client failure logging. It also does not translate a non-success response into

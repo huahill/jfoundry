@@ -33,11 +33,14 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
 
     private final String loggingIncludedHeaders;
 
+    private final String loggingMaxBodyBytes;
+
     /// Creates the shared server provider implementation.
     protected AbstractJaxRsServerHttpLoggingProvider(
             String loggingLevel,
             String loggingFormat,
             String loggingIncludedHeaders,
+            String loggingMaxBodyBytes,
             BooleanSupplier infoEnabled,
             LongSupplier nanoTime,
             InfoLogger logger) {
@@ -46,6 +49,8 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         this.loggingFormat = java.util.Objects.requireNonNull(loggingFormat, "loggingFormat must not be null");
         this.loggingIncludedHeaders = java.util.Objects.requireNonNull(loggingIncludedHeaders,
                 "loggingIncludedHeaders must not be null");
+        this.loggingMaxBodyBytes = java.util.Objects.requireNonNull(loggingMaxBodyBytes,
+                "loggingMaxBodyBytes must not be null");
     }
 
     @Override
@@ -59,14 +64,15 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
         }
         var format = configuredFormat(this.loggingFormat);
         var includedHeaders = configuredIncludedHeaders(this.loggingIncludedHeaders);
+        var maxBodyBytes = configuredMaxBodyBytes(this.loggingMaxBodyBytes);
         var state = new ServerState(request.getMethod(), HttpLoggingPolicy.withoutQuery(
-                request.getUriInfo().getRequestUri()), level, format, includedHeaders, nanoTime());
+                request.getUriInfo().getRequestUri()), level, format, includedHeaders, maxBodyBytes, nanoTime());
         request.setProperty(SERVER_STATE, state);
         logAll(HttpLogFormatter.request(format, HttpLoggingSide.SERVER, state.method(), state.uri(),
                 level.includesHeaders()
                         ? HttpLoggingPolicy.describeHeaders(request.getHeaders(), includedHeaders) : null));
         if (level.includesBodies()) {
-            var body = bodyLog(request.getMediaType(), description -> {
+            var body = bodyLog(request.getMediaType(), maxBodyBytes, description -> {
                 logAll(HttpLogFormatter.requestBody(
                         format, HttpLoggingSide.SERVER, state.method(), state.uri(), description));
                 logAll(HttpLogFormatter.end(format, true));
@@ -93,7 +99,7 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
                         : null,
                 null));
         if (state.level().includesBodies()) {
-            var body = bodyLog(response.getMediaType(), description -> {
+            var body = bodyLog(response.getMediaType(), state.maxBodyBytes(), description -> {
                 logAll(HttpLogFormatter.responseBody(
                         state.format(), HttpLoggingSide.SERVER, state.method(), state.uri(), response.getStatus(),
                         description));
@@ -119,7 +125,7 @@ public abstract class AbstractJaxRsServerHttpLoggingProvider extends AbstractJax
     }
 
     private record ServerState(String method, String uri, HttpLoggingLevel level, HttpLoggingFormat format,
-            java.util.List<String> includedHeaders, long startedAt) {
+            java.util.List<String> includedHeaders, int maxBodyBytes, long startedAt) {
     }
 
     private void logAll(java.util.List<String> messages) {

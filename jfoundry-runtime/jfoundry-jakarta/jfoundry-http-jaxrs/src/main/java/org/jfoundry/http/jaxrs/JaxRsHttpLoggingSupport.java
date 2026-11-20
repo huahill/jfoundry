@@ -21,7 +21,7 @@ final class JaxRsHttpLoggingSupport {
             return "<not fully consumed>";
         }
         if (body.truncated()) {
-            return "<truncated at " + HttpLoggingPolicy.MAX_BODY_BYTES + " bytes>";
+            return "<truncated at " + body.maxBodyBytes() + " bytes>";
         }
         if (body.bytes().length == 0) {
             return "<empty>";
@@ -77,14 +77,20 @@ final class JaxRsHttpLoggingSupport {
 
     static final class BodyCapture {
 
+        private final int maxBodyBytes;
+
         private final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
 
         private boolean complete;
 
         private boolean truncated;
 
+        BodyCapture(int maxBodyBytes) {
+            this.maxBodyBytes = HttpLoggingPolicy.maxBodyBytes(maxBodyBytes);
+        }
+
         void capture(int value) {
-            if (this.bytes.size() < HttpLoggingPolicy.MAX_BODY_BYTES) {
+            if (this.bytes.size() < this.maxBodyBytes) {
                 this.bytes.write(value);
             } else {
                 this.truncated = true;
@@ -92,7 +98,7 @@ final class JaxRsHttpLoggingSupport {
         }
 
         void capture(byte[] source, int offset, int length) {
-            var remaining = HttpLoggingPolicy.MAX_BODY_BYTES - this.bytes.size();
+            var remaining = this.maxBodyBytes - this.bytes.size();
             var retained = Math.clamp(remaining, 0, length);
             this.bytes.write(source, offset, retained);
             if (retained < length) {
@@ -114,6 +120,10 @@ final class JaxRsHttpLoggingSupport {
 
         boolean truncated() {
             return this.truncated;
+        }
+
+        int maxBodyBytes() {
+            return this.maxBodyBytes;
         }
     }
 }

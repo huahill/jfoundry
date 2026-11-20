@@ -1,6 +1,6 @@
 package org.jfoundry.autoconfigure.persistence.mybatis;
 
-import org.jfoundry.infrastructure.persistence.AggregateData;
+import org.jfoundry.infrastructure.persistence.mybatis.MybatisPlusAggregateData;
 import org.junit.jupiter.api.Test;
 import org.springframework.aot.hint.MemberCategory;
 import org.springframework.aot.hint.RuntimeHints;
@@ -12,19 +12,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MybatisPlusNativeRuntimeHintsTest {
 
     @Test
-    void registersAggregateDataIdForMybatisPlusNativeImageMapping() throws Exception {
+    void registersMybatisPlusAggregateDataIdForMybatisPlusNativeImageMapping() throws Exception {
         RuntimeHints hints = new RuntimeHints();
 
         new MybatisPlusNativeRuntimeHints().registerHints(hints, getClass().getClassLoader());
 
         assertThat(RuntimeHintsPredicates.reflection()
-                .onFieldAccess(AggregateData.class, "id")
+                .onFieldAccess(MybatisPlusAggregateData.class, "id")
                 .test(hints)).isTrue();
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(AggregateData.class, "getId")
+                .onMethodInvocation(MybatisPlusAggregateData.class, "getId")
                 .test(hints)).isTrue();
         assertThat(RuntimeHintsPredicates.reflection()
-                .onMethodInvocation(AggregateData.class, "setId")
+                .onMethodInvocation(MybatisPlusAggregateData.class, "setId")
                 .test(hints)).isTrue();
     }
 

@@ -102,7 +102,7 @@ def verify_dependabot(root: Path) -> None:
     ]
     expected_groups = {
         "jfoundry-spring-boot-platform": {"patterns": spring_boot_patterns, "update-types": ["patch", "minor"]},
-        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns, "update-types": ["patch", "minor"]},
+        "jfoundry-quarkus-platform": {"patterns": quarkus_patterns},
         "jfoundry-maven-patches": {"patterns": ["*"], "update-types": ["patch"]},
         "jfoundry-maven-minors": {"patterns": ["*"], "update-types": ["minor"]},
     }
@@ -113,7 +113,7 @@ def verify_dependabot(root: Path) -> None:
             if name == "jfoundry-spring-boot-platform":
                 fail(f"{prefix}: jfoundry-spring-boot-platform must group the complete supported coordinate set for patch and minor updates")
             if name == "jfoundry-quarkus-platform":
-                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set for patch and minor updates")
+                fail(f"{prefix}: jfoundry-quarkus-platform must group the complete supported coordinate set without update-types")
             if name == "jfoundry-maven-patches":
                 fail(f"{prefix}: jfoundry-maven-patches must group all remaining patch updates")
             fail(f"{prefix}: jfoundry-maven-minors must group all remaining minor updates")
@@ -204,7 +204,7 @@ def verify_auto_merge(root: Path) -> None:
 
 def main() -> None:
     root = Path(sys.argv[1] if len(sys.argv) > 1 else ".").expanduser().resolve()
-    required_files = [".github/dependabot.yml", ".github/workflows/codeql.yml", ".github/workflows/release.yml", ".github/workflows/ci.yml", ".github/workflows/snapshot.yml", ".github/workflows/prepare-snapshot.yml", ".github/workflows/auto-merge-dependabot.yml"]
+    required_files = [".github/dependabot.yml", ".github/workflows/codeql.yml", ".github/workflows/release.yml", ".github/workflows/dispatch-stable-release.yml", ".github/workflows/ci.yml", ".github/workflows/snapshot.yml", ".github/workflows/prepare-snapshot.yml", ".github/workflows/auto-merge-dependabot.yml"]
     for relative in required_files:
         if not (root / relative).is_file():
             fail(f"Supply-chain configuration is missing: {relative}")
@@ -213,7 +213,18 @@ def main() -> None:
         ".github/workflows/codeql.yml": ["security-events: write", "github/codeql-action/init", "github/codeql-action/analyze", "language: java-kotlin", "build-mode: manual", "language: actions", "build-mode: none", "build-mode: ${{ matrix.build-mode }}", "actions/setup-java", "java-version: 25", "-pl '!jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests'"],
         ".github/workflows/ci.yml": ["name: Dependency Review", "actions/dependency-review-action", "fail-on-severity: high", "needs.dependency-review.result", "Test Consumer POM verification", "bash scripts/verify-consumer-pom-test.sh", "Verify release POM metadata", "bash scripts/verify-release-pom-metadata.sh", "bash scripts/verify-maven-4-model.sh", "bash scripts/verify-maven-4-model-test.sh", "bash scripts/set-maven-reactor-version-test.sh", "bash scripts/verify-release-pom-metadata-test.sh", "Verify reactor Consumer POMs", '-Dmaven.repo.local="${consumer_pom_repository}" install', 'bash scripts/verify-consumer-pom.sh "${consumer_pom_repository}" "${version}"', '"$(pwd)/mvnw"', "bash scripts/verify-dependency-boundaries.sh", "bash scripts/verify-dependency-boundaries-test.sh"],
         ".github/workflows/release.yml": ["actions/upload-artifact", "release-evidence"],
-        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'"],
+        ".github/workflows/dispatch-stable-release.yml": [
+            "push:",
+            "tags:",
+            "v[0-9]+.[0-9]+.[0-9]+",
+            "actions: write",
+            "contents: read",
+            r"^v[0-9]+\.[0-9]+\.[0-9]+$",
+            "git cat-file -t",
+            "git merge-base --is-ancestor",
+            'gh workflow run release.yml --repo "${GITHUB_REPOSITORY}" --ref main -f "release_tag=${RELEASE_TAG}"',
+        ],
+        ".github/workflows/snapshot.yml": ["bash scripts/maven-project-version.sh", "is_snapshot=true", "if: steps.version.outputs.is_snapshot == 'true'", "./mvnw -B -T 1 -DskipTests -nsu deploy", "-Daether.connector.basic.parallelPut=false", "-Daether.connector.basic.upstreamThreads=1", "-Daether.transport.http.maxConnectionsPerRoute=1", "status=429|error-1015|Error 1015", "Waiting ${quiet_seconds}s before the next Central snapshot deploy chunk."],
         ".github/workflows/prepare-snapshot.yml": ["workflow_run:", "workflows:", "- Release", "git tag --points-at", "contents: write", "pull-requests: write", "scripts/set-maven-reactor-version.py", "git push --set-upstream origin", "gh pr create"],
     }
     verify_ci(root)
@@ -230,6 +241,17 @@ def main() -> None:
     prepare_source = (root / ".github/workflows/prepare-snapshot.yml").read_text(encoding="utf-8")
     if "versions:set" in prepare_source or "jfoundry-boms/jfoundry-spring-cloud-parent/pom.xml" in prepare_source:
         fail("prepare-snapshot.yml contains a forbidden release mutation")
+    dispatch_source = (root / ".github/workflows/dispatch-stable-release.yml").read_text(encoding="utf-8")
+    for forbidden in ("CENTRAL_USERNAME", "CENTRAL_PASSWORD", "GPG_PRIVATE_KEY", "GPG_PASSPHRASE", "environment:", "git push", "id-token:", "secrets.", "./mvnw", " deploy"):
+        if forbidden in dispatch_source:
+            fail(f"dispatch-stable-release.yml must not contain: {forbidden}")
+    release_source = (root / ".github/workflows/release.yml").read_text(encoding="utf-8")
+    if "tags:" in release_source or "git push" in release_source:
+        fail("release.yml must not accept tag triggers or push Git refs")
+    if "github.actor == 'github-actions[bot]'" not in release_source:
+        fail("release.yml must dispatch snapshot preparation only for token-triggered releases")
+    if 'gh workflow run prepare-snapshot.yml --repo "${GITHUB_REPOSITORY}" --ref main' not in release_source:
+        fail("release.yml must dispatch snapshot preparation from the trusted main workflow")
     snapshot_source = (root / ".github/workflows/snapshot.yml").read_text(encoding="utf-8")
     if "-DforceStdout | tail -n 1" in snapshot_source:
         fail(".github/workflows/snapshot.yml must not use bare Maven 4 version extraction")

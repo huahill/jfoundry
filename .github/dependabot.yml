@@ -34,13 +34,15 @@ updates:
           - org.springframework.boot:spring-boot-starter-parent
           - org.springframework.boot:spring-boot-maven-plugin
         update-types: [patch, minor]
+      # Do not set update-types. Dependabot compares only major.minor.patch, so a
+      # Quarkus platform build such as 3.40.1.2 matches none of those levels and
+      # is opened as a separate pull request for each coordinate.
       jfoundry-quarkus-platform:
         patterns:
           - io.quarkus.platform:quarkus-bom
           - io.quarkus:quarkus-extension-maven-plugin
           - io.quarkus:quarkus-extension-processor
           - io.quarkus:quarkus-maven-plugin
-        update-types: [patch, minor]
       jfoundry-maven-patches:
         patterns: ["*"]
         update-types: [patch]

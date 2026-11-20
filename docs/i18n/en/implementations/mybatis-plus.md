@@ -5,15 +5,20 @@ and [reliable messaging](../capabilities/reliable-messaging.md) contracts with M
 
 ## Aggregate Persistence
 
-Persistence data objects extend `AggregateData<K>` and use database-friendly IDs. A
-`DataMapper` converts IDs, data, and aggregates at the repository boundary. The complete default is
-one `AggregateData`, one `DataMapper`, and one `BaseMapper` through
-`MybatisPlusAggregateRepository`.
+Persistence data objects extend `MybatisPlusAggregateData<K>` and use database-friendly IDs. A
+`MybatisPlusDataMapper` converts IDs, data, and aggregates at the repository boundary. The complete
+default is one `MybatisPlusAggregateData`, one `MybatisPlusDataMapper`, and one `BaseMapper`
+through `MybatisPlusAggregateRepository`.
 
-For a multi-table aggregate with a MyBatis-Plus root record, override the complete `do*` operation
-and use `loadAggregate`, `insertAggregate`, `updateAggregate`, and `deleteAggregate` when their
-root persistence and context behavior fit. Otherwise extend `AbstractAggregateRepository`. The
-business adapter remains responsible for restoration and dependent-record synchronization.
+For a multi-table aggregate with a MyBatis-Plus root record, `doAdd`, `doModify`, and `doRemove`
+are final. Synchronize dependent rows in `afterInsert`, `afterUpdate`, and `afterRemove`. Those
+steps are the remainder of the same aggregate write: the root statement has succeeded, and the
+aggregate write has not finished. They run only after the root statement accepts the aggregate
+instance loaded or added in the current persistence context, and before persistence state is
+recorded. A failure stays in the surrounding transaction with the root statement. `doFindById` may
+still delegate to `loadAggregate` when restoration needs dependent rows. Otherwise extend
+`AbstractAggregateRepository`. The business adapter remains responsible for restoration and
+dependent-record synchronization.
 
 For persistence-owned optimistic locking, annotate the root data version with `@Version`, configure
 `OptimisticLockerInnerInterceptor`, and pass the data class to `MybatisPlusAggregateRepository`.

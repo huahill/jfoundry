@@ -15,8 +15,16 @@ import java.util.stream.Collectors;
 /// Defines the runtime-neutral security limits for JFoundry HTTP diagnostic logging.
 public final class HttpLoggingPolicy {
 
+    /// Default maximum number of body bytes retained for one request or response body.
+    public static final int DEFAULT_MAX_BODY_BYTES = 8 * 1024;
+
+    /// Hard ceiling for a configured body-byte limit.
+    public static final int ABSOLUTE_MAX_BODY_BYTES = 64 * 1024;
+
     /// Maximum number of body bytes retained for diagnostic logging.
-    public static final int MAX_BODY_BYTES = 8 * 1024;
+    ///
+    /// This is the default shared by one logging site's request body and response body.
+    public static final int MAX_BODY_BYTES = DEFAULT_MAX_BODY_BYTES;
 
     /// Replacement used for sensitive values.
     public static final String REDACTED = "<redacted>";
@@ -44,6 +52,20 @@ public final class HttpLoggingPolicy {
             "password", "refresh_token", "secret", "token", "credential", "credentials");
 
     private HttpLoggingPolicy() {
+    }
+
+    /// Returns `maxBodyBytes` when it is inside the supported range.
+    ///
+    /// The same limit applies to the request body and the response body at one logging site.
+    ///
+    /// @throws IllegalArgumentException when `maxBodyBytes` is outside `1` through
+    /// `{@value #ABSOLUTE_MAX_BODY_BYTES}`
+    public static int maxBodyBytes(int maxBodyBytes) {
+        if (maxBodyBytes < 1 || maxBodyBytes > ABSOLUTE_MAX_BODY_BYTES) {
+            throw new IllegalArgumentException(
+                    "maxBodyBytes must be between 1 and " + ABSOLUTE_MAX_BODY_BYTES);
+        }
+        return maxBodyBytes;
     }
 
     /// Returns the URI without user information, query, or fragment data.
