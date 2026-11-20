@@ -2,24 +2,27 @@
 
 This document defines the supported platform lines, validated capability scope, and known limitations
 for the current JFoundry development line. Runtime BOM POMs are the executable source of exact
-platform versions. The table below records stable support lines and their owning BOMs;
-`scripts/verify-compatibility-matrix.sh` keeps those boundaries aligned with the BOMs without coupling
-documentation to patch-level updates.
+platform versions. Spring Boot-only follows the current stable Spring Boot line and is validated by the
+full CI matrix on every bump, so no Boot line is pinned here. The table below records the composite
+platform lines and their owning BOMs; `scripts/verify-compatibility-matrix.sh` keeps those boundaries
+aligned with the BOMs without coupling documentation to patch-level updates.
 
 ## Runtime Platform Baselines
 
 | Platform | Supported line | Version source |
 |----------|----------------|----------------|
-| Spring Boot-only | 4.1.x | `jfoundry-spring-boot-dependencies` |
 | Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
 | Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
-Spring Cloud applications use Spring Boot 4.0.x; the current consumer compatibility check uses Spring
-Boot 4.0.7. The Cloud BOM deliberately does not manage Spring Boot, so the application parent remains
-the version source for that part of the combination. Boot-only applications use Spring Boot 4.1.x and
-must not combine the Boot-only and Cloud runtime BOMs.
+Spring Cloud follows the upstream train, and a Cloud application pairs it with whatever Spring Boot
+line that train supports; the Cloud BOM deliberately does not manage Spring Boot, so the application
+parent remains the version source for that part of the combination. Spring Cloud Alibaba (the Nacos
+ecosystem) publishes behind the Spring Cloud train, so a new Spring Cloud line is adopted together
+with its matching Alibaba train — the two rows above move in one change, which is what the
+verification below enforces. Boot-only applications use the current stable Spring Boot line and must
+not combine the Boot-only and Cloud runtime BOMs.
 
 Helidon's upstream line is JDK-aligned: Tip releases at major 27 and later require the JDK their
 major number names, while Helidon 4.5 remains the supported long-term line. The Java 25 baseline

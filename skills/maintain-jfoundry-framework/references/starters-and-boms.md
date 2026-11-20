@@ -79,9 +79,11 @@ application still declares each selected starter or client explicitly.
 `jfoundry-spring-boot-dependencies` manages only the supported Boot-only Spring Boot line. The separate
 `jfoundry-spring-cloud-dependencies` line manages the supported Spring Cloud and Spring Cloud Alibaba
 line; the Cloud application's parent or another explicit BOM manages Spring Boot. Runtime BOM POMs are
-the executable source of exact platform versions. `docs/release/compatibility.md` records stable
-supported lines and owning BOMs, and is checked against the BOMs in CI without requiring a documentation
-change for every patch release. CI logs and release evidence retain the exact versions used by each
+the executable source of exact platform versions. `docs/release/compatibility.md` records the
+composite supported lines and owning BOMs — Spring Boot-only follows the current stable Spring Boot
+line and is validated by the full CI matrix instead — and is checked against the BOMs in CI without
+requiring a documentation change for every patch release. CI logs and release evidence retain the
+exact versions used by each
 immutable commit or tag. This allows a Cloud application to add an appropriate Cloud starter without a
 version while keeping the choice of configuration server, service discovery, traffic management, or
 other platform capability explicit in the application.
