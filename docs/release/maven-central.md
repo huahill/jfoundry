@@ -129,24 +129,16 @@ Maven versions with a prerelease qualifier, such as `1.0.0-RC1`, produce a GitHu
 are explicitly excluded from GitHub's Latest release selection. A release without such a qualifier
 is published as the normal stable GitHub Release.
 
-## One-Time Spring Boot Parent 1.0.0 Remediation
+## One-Time Spring Boot Parent 1.0.0 Remediation (Completed)
 
-`.github/workflows/publish-spring-boot-parent-1.0.0.yml` is a temporary, manual-only remediation
-for the previously absent `io.github.xfoundries:jfoundry-spring-boot-parent:1.0.0` POM. It may run
-only from `main`, requires the exact `PUBLISH_JFOUNDRY_SPRING_BOOT_PARENT_1_0_0` confirmation value,
-and uses the protected `jfoundry` environment. The workflow requires that the Parent POM returns
-`404` from Maven Central while the already published `jfoundry-dependencies:1.0.0` and the historical
-`jfoundry-spring-dependencies:1.0.0` POMs both return `200`. The latter coordinate belongs only to
-the 1.0.0 remediation precondition; current releases use the separate
-`jfoundry-spring-boot-dependencies` and `jfoundry-spring-cloud-dependencies` lines.
-
-It signs and deploys only `jfoundry-boms/jfoundry-spring-boot-parent/pom.xml`, waits for the new POM
-to become visible, and uploads an attested evidence archive. After publication succeeds, it force
-updates `v1.0.0` to the reviewed `main` commit, deletes the existing `v1.0.0` GitHub Release, and
-creates a new release for that tag. It must never redeploy an existing `1.0.0` coordinate. After
-Central publication is confirmed and the workflow evidence is retained, remove this workflow and
-`scripts/verify-spring-boot-parent-remediation-workflow.sh` in a follow-up change. Future framework
-changes must use a new version line.
+The previously absent `io.github.xfoundries:jfoundry-spring-boot-parent:1.0.0` POM is now published
+to Maven Central. The temporary manual remediation workflow
+(`.github/workflows/publish-spring-boot-parent-1.0.0.yml`) and its verification script
+(`scripts/verify-spring-boot-parent-remediation-workflow.sh`) were removed afterwards: the workflow
+guard requires the Parent POM to return `404`, so it can never run again now that the coordinate
+returns `200`. No evidence archive is attached to the `v1.0.0` GitHub Release; Maven Central itself
+is the record of the publication. The old `io.github.xfoundries` coordinates stay as published and
+future framework releases use the `io.github.huahill` lines.
 
 ## Publish SNAPSHOTs
 
