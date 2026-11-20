@@ -6,7 +6,7 @@
 
 - [接入指南](integration/getting-started.md)
 - [采用就绪度与已验证范围](integration/adoption-readiness.md)
-- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)：在 JFoundry 落地之前，可选使用的 AI 辅助领域建模与架构工作流。
+- [`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills)：在 JFoundry 落地之前，可选使用的 AI 辅助领域建模与架构工作流。
 
 ## 能力
 
