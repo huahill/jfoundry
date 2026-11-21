@@ -8,7 +8,7 @@ linked from its owning runtime guide rather than presented as a technology-selec
 
 - [Getting Started](integration/getting-started.md)
 - [Adoption Readiness and Validated Scope](integration/adoption-readiness.md)
-- [`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills): optional AI-assisted domain modeling and architecture workflow before JFoundry landing.
+- [`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills): optional AI-assisted domain modeling and architecture workflow before JFoundry landing.
 
 ## Capabilities
 

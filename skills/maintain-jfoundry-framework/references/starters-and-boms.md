@@ -105,16 +105,19 @@ When adding a module or third-party dependency, update the narrowest relevant BO
 For a third-party component family used by runtime adapters, split ownership by coordinate rather than
 placing the entire family in Foundation. Foundation manages only the family's runtime-neutral artifacts.
 The matching runtime BOM manages runtime starters, deployment artifacts, and runtime-specific Native
-Image integrations, using the same compatible component version when appropriate. MyBatis-Plus,
-Redisson, and jMolecules Integrations follow this rule: their neutral artifacts remain in
-Foundation while their Spring-specific artifacts belong in `jfoundry-spring-boot-dependencies`.
+Image integrations, using the same compatible component version when appropriate. MyBatis-Plus and
+Redisson follow this rule: their neutral artifacts remain in Foundation while their Spring-specific
+artifacts belong in `jfoundry-spring-boot-dependencies`.
 Quarkus Redisson extension coordinates `redisson-quarkus-33` and `redisson-quarkus-33-deployment`
 belong in `jfoundry-quarkus-dependencies`. The Helidon integration coordinate `redisson-helidon-40`
 belongs in `jfoundry-helidon-dependencies`.
 Do not re-declare coordinates already managed by an imported BOM unless JFoundry needs an explicit,
-verified version override. Foundation imports `jmolecules-bom` for runtime-neutral jMolecules and
-jMolecules Integrations artifacts such as `jmolecules-archunit` and `jmolecules-jackson3`; keep
-`jmolecules-spring` in `jfoundry-spring-boot-dependencies`.
+verified version override. Foundation imports `jmolecules-bom` for the whole jMolecules Integrations
+family, including the Spring-specific `jmolecules-spring`; no runtime BOM re-declares that coordinate.
+Foundation also does not manage a coordinate that every supported runtime platform BOM already manages
+and that no JFoundry module uses; `commons-codec`, `commons-lang3`, and `caffeine` are intentionally
+absent because the runtime platform BOMs own those lines. `commons-collections4` stays in Foundation
+because no runtime platform BOM manages it.
 Do not separately override a starter's transitive dependencies unless JFoundry has an explicit,
 documented compatibility reason and verifies the replacement combination. In particular,
 `org.mybatis:mybatis-spring` follows `mybatis-plus-spring-boot4-starter` and is not managed by a

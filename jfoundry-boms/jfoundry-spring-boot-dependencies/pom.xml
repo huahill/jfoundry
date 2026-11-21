@@ -29,7 +29,6 @@
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
         <spring-boot.version>4.2.0</spring-boot.version>
-        <jmolecules-integrations.version>0.33.0</jmolecules-integrations.version>
         <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
         <redisson.version>4.8.0</redisson.version>
     </properties>
@@ -42,11 +41,6 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jmolecules.integrations</groupId>
-                <artifactId>jmolecules-spring</artifactId>
-                <version>${jmolecules-integrations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>

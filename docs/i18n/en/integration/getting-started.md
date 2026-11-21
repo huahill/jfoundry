@@ -11,7 +11,7 @@ tests enforce. It is a business-project decision, not a consequence of choosing 
 Helidon.
 
 For AI-assisted development, use
-[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills) and start
+[`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills) and start
 with `$domain-architecture-workflow`. This is the recommended path for non-trivial business projects.
 The workflow starts from requirements and project evidence, performs domain modeling, decides
 whether a full architecture style is justified, selects Hexagonal or Onion when appropriate, and

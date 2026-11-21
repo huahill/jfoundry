@@ -9,8 +9,8 @@ adoption guide, not a general production certification. The assessment date is 2
 | Repository | Role |
 |------------|------|
 | [huahill/jfoundry](https://github.com/huahill/jfoundry) | Optional Java runtime and implementation framework for DDD-oriented business applications |
-| [xfoundries/domain-architecture-skills](https://github.com/xfoundries/domain-architecture-skills) | Design-time plugin for domain modeling, architecture decisions, and optional jfoundry landing |
-| [xfoundries/jfoundry-expense-approval-demo](https://github.com/xfoundries/jfoundry-expense-approval-demo) | End-to-end validation project using a deliberately small business domain and a complete integration path |
+| [huahill/domain-architecture-skills](https://github.com/huahill/domain-architecture-skills) | Design-time plugin for domain modeling, architecture decisions, and optional jfoundry landing |
+| [huahill/jfoundry-expense-approval-demo](https://github.com/huahill/jfoundry-expense-approval-demo) | End-to-end validation project using a deliberately small business domain and a complete integration path |
 
 The plugin and framework have different responsibilities. The plugin guides decisions and remains
 useful when a project does not select jfoundry. jfoundry is an optional implementation choice after
@@ -88,7 +88,7 @@ invariants, or bounded contexts model the business correctly.
 
 ## Validation Evidence
 
-The [expense approval demo](https://github.com/xfoundries/jfoundry-expense-approval-demo)
+The [expense approval demo](https://github.com/huahill/jfoundry-expense-approval-demo)
 was intentionally kept light in business complexity while exercising a complete architecture and
 integration path. The same business rules, database model, integration contracts, and acceptance
 scenarios were validated with separately maintained Hexagonal and Onion Simple variants. At the

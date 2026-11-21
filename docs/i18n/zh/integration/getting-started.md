@@ -8,7 +8,7 @@ JFoundry 的核心模块不依赖 Spring、Quarkus 或 Helidon。接入应先从
 架构风格决定代码边界、依赖方向和架构测试规则。它是业务项目的决策，不由 Spring、Quarkus 或 Helidon 决定。
 
 使用 AI 辅助编程时，推荐安装
-[`domain-architecture-skills`](https://github.com/xfoundries/domain-architecture-skills)，并从
+[`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills)，并从
 `$domain-architecture-workflow` 开始。用户无需预先选择架构风格；工作流会从需求和项目证据出发完成领域建模，判断
 是否需要完整架构风格，需要时选择 Hexagonal 或 Onion，并单独判断是否需要 CQRS。随后，它会生成可追溯的
 JFoundry 落地指导。
