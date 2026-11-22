@@ -228,8 +228,8 @@ mp.messaging.outgoing.jfoundry-kafka.key.serializer=org.apache.kafka.common.seri
 mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
 
-`MessageSender.send(topic, payloadKey, payload)` 会为每一条 Kafka 记录动态设置 topic 与 key，因此
-`@Externalized` 和 `@AggregateRouting` 仍决定 Outbox 路由。通道名称只是基础设施配置，并非业务目的地。
+`MessageSender.send(topic, payloadKey, payload)` 会为每一条 Kafka 记录动态设置 topic 与 key。
+`@Externalized` 或 `@MessageRouting` 提供静态主题，消息 key 只来自 `DomainEventExternalizer`。通道名称只是基础设施配置，并非业务目的地。
 适配器会等待消息代理确认，并将失败映射为 `SendResult`；投递超时由 Kafka 客户端与连接器原生属性配置。
 它是 Quarkus CDI 默认 Bean，应用可以用自己的 `MessageSender` 覆盖。
 
@@ -252,7 +252,7 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 ## 自动领域事件外部化
 
 `jfoundry-domain-event-outbox-quarkus-runtime` 提供显式的自动外部化装配。它提供可替换的
-`ExternalizationRuleResolver`、`AggregateRoutingResolver`、`DomainEventOutboxRecorder` 和领域事件
+`ExternalizationRuleResolver`、`DomainEventOutboxRecorder` 和领域事件
 Outbox 派发器默认 CDI Bean。通用的 `PayloadSerializer` 与 `OutboxTemplate` 由
 `jfoundry-outbox-quarkus-runtime` 提供；完整组合需要同时选择两个运行时模块。两个模块都不会添加
 Outbox 存储或消息代理客户端；应单独加入例如 `jfoundry-outbox-jpa-quarkus-runtime` 的存储能力。
@@ -263,8 +263,7 @@ Outbox 存储或消息代理客户端；应单独加入例如 `jfoundry-outbox-j
 jfoundry.domain.event.dispatch.outbox.enabled=true
 ```
 
-对每个预期作为集成事件的类型添加 `@Externalized("<topic>")`。需要把聚合类型、id 或版本写入 Outbox 行时，添加
-`@AggregateRouting`；在未指定路由 key 时，解析出的聚合 id 也会成为默认消息 key。没有 `@Externalized` 的事件不会被记录。
+对每个预期作为集成事件的类型添加 `@Externalized("<topic>")`。`@MessageRouting` 可以替换这个静态主题。这两个注解都不提供消息 key 或聚合元数据；Outbox 行需要这些值时，提供 `DomainEventExternalizer`。没有 `@Externalized` 的事件不会被记录，除非外部化器选中了它。
 应用可以声明自己的 CDI Bean 覆盖默认序列化器或记录器。
 
 当聚合在活跃 JTA 事务中注册时，自动外部化会在该事务的 `beforeCompletion` 阶段记录 Outbox 行。因此，即使

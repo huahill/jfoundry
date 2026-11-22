@@ -16,6 +16,6 @@ class DomainEventExternalizationResourceIT {
                 .get("/jfoundry/domain-event-externalization")
                 .then()
                 .statusCode(200)
-                .body(org.hamcrest.Matchers.equalTo("orders.created:order-1:PENDING:true:true"));
+                .body(org.hamcrest.Matchers.equalTo("orders.created:null:PENDING:true:true"));
     }
 }

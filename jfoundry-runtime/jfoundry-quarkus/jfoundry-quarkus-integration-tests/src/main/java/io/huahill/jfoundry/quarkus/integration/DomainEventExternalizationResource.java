@@ -10,7 +10,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import io.huahill.jfoundry.application.ApplicationService;
 import io.huahill.jfoundry.application.event.DomainEventContext;
-import io.huahill.jfoundry.application.event.externalization.AggregateRouting;
 import io.huahill.jfoundry.application.transaction.TransactionRunner;
 import io.huahill.jfoundry.domain.entity.agg.BaseAggregateRoot;
 import io.huahill.jfoundry.domain.event.BaseDomainEvent;
@@ -99,11 +98,6 @@ public class DomainEventExternalizationResource {
     }
 
     @Externalized("orders.created")
-    @AggregateRouting(type = "order", id = "orderId")
     static final class ExternalizedOrderCreated extends BaseDomainEvent {
-
-        public String getOrderId() {
-            return "order-1";
-        }
     }
 }

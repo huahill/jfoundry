@@ -1,7 +1,5 @@
 package io.huahill.jfoundry.application.event.outbox;
 
-import io.huahill.jfoundry.application.event.externalization.AggregateRouting;
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizer;
 import io.huahill.jfoundry.application.event.externalization.ExternalizedEvent;
@@ -33,55 +31,41 @@ class DefaultDomainEventOutboxRecorderTest {
     private final DefaultDomainEventOutboxRecorder outboxRecorder = new DefaultDomainEventOutboxRecorder(
             repository,
             event -> "{}",
-            new ExternalizationRuleResolver(),
-            new AggregateRoutingResolver());
+            new ExternalizationRuleResolver());
 
     @Externalized("order.created")
-    @AggregateRouting(type = "Order", id = "orderId", version = "version")
     static class OrderCreatedEvent implements DomainEvent {
-        public String getOrderId() {
-            return "order-1";
-        }
-
-        public long getVersion() {
-            return 7L;
-        }
     }
 
     @Externalized("order.created")
-    @MessageRouting(topic = "order.created", key = "tenantId")
-    @AggregateRouting(type = "Order", id = "orderId")
-    static class ExplicitKeyEvent implements DomainEvent {
-        public String getTenantId() {
-            return "tenant-1";
-        }
-
-        public String getOrderId() {
-            return "order-2";
-        }
+    @MessageRouting(topic = "orders.v1")
+    static class RoutedTopicEvent implements DomainEvent {
     }
 
     @Test
-    void storesAggregateMetadataAndUsesAggregateIdAsFallbackPayloadKey() {
+    void recordsExternalizedEventWithoutInferringKeyOrAggregateMetadata() {
         outboxRecorder.record(List.of(new OrderCreatedEvent()));
 
         OutboxMessage entry = repository.lastAppended();
         assertThat(entry.getTopic()).isEqualTo("order.created");
         assertThat(entry.getPayloadType()).isEqualTo("order.created");
-        assertThat(entry.getPayloadKey()).isEqualTo("order-1");
-        assertThat(entry.getAggregateType()).isEqualTo("Order");
-        assertThat(entry.getAggregateId()).isEqualTo("order-1");
-        assertThat(entry.getAggregateVersion()).isEqualTo(7L);
+        assertThat(entry.getPayloadKey()).isNull();
+        assertThat(entry.getAggregateType()).isNull();
+        assertThat(entry.getAggregateId()).isNull();
+        assertThat(entry.getAggregateVersion()).isNull();
     }
 
     @Test
-    void explicitPayloadKeyWinsOverAggregateId() {
-        outboxRecorder.record(List.of(new ExplicitKeyEvent()));
+    void messageRoutingReplacesTopicWithoutInferringAKey() {
+        outboxRecorder.record(List.of(new RoutedTopicEvent()));
 
         OutboxMessage entry = repository.lastAppended();
-        assertThat(entry.getPayloadType()).isEqualTo("order.created");
-        assertThat(entry.getPayloadKey()).isEqualTo("tenant-1");
-        assertThat(entry.getAggregateId()).isEqualTo("order-2");
+        assertThat(entry.getTopic()).isEqualTo("orders.v1");
+        assertThat(entry.getPayloadType()).isEqualTo("orders.v1");
+        assertThat(entry.getPayloadKey()).isNull();
+        assertThat(entry.getAggregateType()).isNull();
+        assertThat(entry.getAggregateId()).isNull();
+        assertThat(entry.getAggregateVersion()).isNull();
     }
 
     @Test
@@ -165,7 +149,6 @@ class DefaultDomainEventOutboxRecorderTest {
                 countingStore(storeResolutions),
                 countingSerializer(serializerResolutions),
                 new ExternalizationRuleResolver(),
-                new AggregateRoutingResolver(),
                 new DomainEventExternalizationResolver(List.of()));
 
         recorder.record(List.of(new InternalEvent()));
@@ -183,7 +166,6 @@ class DefaultDomainEventOutboxRecorderTest {
                 countingStore(storeResolutions),
                 countingSerializer(serializerResolutions),
                 new ExternalizationRuleResolver(),
-                new AggregateRoutingResolver(),
                 new DomainEventExternalizationResolver(List.of(new EmptyMappedExternalizer())));
 
         recorder.record(List.of(new MappedOrderPlaced()));
@@ -201,7 +183,6 @@ class DefaultDomainEventOutboxRecorderTest {
                 countingStore(storeResolutions),
                 countingSerializer(serializerResolutions),
                 new ExternalizationRuleResolver(),
-                new AggregateRoutingResolver(),
                 new DomainEventExternalizationResolver(List.of(new MultiDestinationExternalizer())));
 
         recorder.record(List.of(new MappedOrderPlaced(), new OrderCreatedEvent()));
@@ -227,7 +208,6 @@ class DefaultDomainEventOutboxRecorderTest {
                 repository,
                 payload -> "serialized:" + payload.getClass().getSimpleName(),
                 new ExternalizationRuleResolver(),
-                new AggregateRoutingResolver(),
                 new DomainEventExternalizationResolver(List.of(externalizer)));
     }
 

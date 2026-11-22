@@ -9,7 +9,9 @@ import java.lang.annotation.Target;
 /// Message routing metadata. This has higher priority than
 /// {@link org.jmolecules.event.annotation.Externalized#value()}.
 /// <p>
-/// This annotation only declares routing metadata such as topic and key.
+/// This annotation only replaces the static destination topic. It does not
+/// select a message key or aggregate metadata; those values are supplied by a
+/// {@link DomainEventExternalizer}.
 /// Whether the event is externalized is still controlled by {@code @Externalized}.
 /// If an event class has {@code @MessageRouting} without {@code @Externalized},
 /// the resolver logs a warning but does not fail.
@@ -20,8 +22,4 @@ public @interface MessageRouting {
 
     /// Externalization target topic.
     String topic();
-
-    /// Routing-key property expression. The root object is the event instance.
-    /// An empty string means there is no routing key.
-    String key() default "";
 }
