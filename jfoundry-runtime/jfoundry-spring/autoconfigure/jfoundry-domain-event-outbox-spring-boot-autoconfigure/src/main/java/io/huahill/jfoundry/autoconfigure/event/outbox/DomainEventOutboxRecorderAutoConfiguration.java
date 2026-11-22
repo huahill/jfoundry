@@ -1,6 +1,5 @@
 package io.huahill.jfoundry.autoconfigure.event.outbox;
 
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizer;
 import io.huahill.jfoundry.application.event.externalization.ExternalizationRuleResolver;
@@ -41,25 +40,17 @@ public class DomainEventOutboxRecorderAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(AggregateRoutingResolver.class)
-    public AggregateRoutingResolver aggregateRoutingResolver() {
-        return new AggregateRoutingResolver();
-    }
-
-    @Bean
     @ConditionalOnBean({OutboxMessageStore.class, PayloadSerializer.class})
     @ConditionalOnMissingBean(DomainEventOutboxRecorder.class)
     public DefaultDomainEventOutboxRecorder domainEventOutboxRecorder(
             OutboxMessageStore outboxRepository,
             ExternalizationRuleResolver ruleResolver,
-            AggregateRoutingResolver aggregateRoutingResolver,
             PayloadSerializer serializer,
             List<DomainEventExternalizer<?>> externalizers) {
         return new DefaultDomainEventOutboxRecorder(
                 outboxRepository,
                 serializer,
                 ruleResolver,
-                aggregateRoutingResolver,
                 new DomainEventExternalizationResolver(externalizers));
     }
 

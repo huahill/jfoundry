@@ -1,7 +1,5 @@
 package io.huahill.jfoundry.application.event.outbox;
 
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingMetadata;
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
 import io.huahill.jfoundry.application.event.externalization.ExternalizedEvent;
 import io.huahill.jfoundry.application.event.externalization.ExternalizationRule;
@@ -24,63 +22,49 @@ import java.util.function.Supplier;
 /// This component persists matching events as broker-neutral {@link OutboxMessage}
 /// records in the current transaction. Mapped destinations receive their own Outbox
 /// event ids; {@code @Externalized} rows store the destination topic as
-/// {@code payloadType}. It does not dispatch messages to brokers.
+/// {@code payloadType} and do not infer a message key or aggregate metadata.
+/// It does not dispatch messages to brokers.
 public final class DefaultDomainEventOutboxRecorder implements DomainEventOutboxRecorder {
 
     private final Supplier<OutboxMessageStore> outboxMessageStore;
     private final Supplier<PayloadSerializer> payloadSerializer;
     private final ExternalizationRuleResolver ruleResolver;
-    private final AggregateRoutingResolver aggregateRoutingResolver;
     private final DomainEventExternalizationResolver externalizationResolver;
 
     public DefaultDomainEventOutboxRecorder(OutboxMessageStore outboxMessageStore,
                                             PayloadSerializer payloadSerializer,
                                             ExternalizationRuleResolver ruleResolver) {
-        this(outboxMessageStore, payloadSerializer, ruleResolver, new AggregateRoutingResolver());
-    }
-
-    public DefaultDomainEventOutboxRecorder(OutboxMessageStore outboxMessageStore,
-                                            PayloadSerializer payloadSerializer,
-                                            ExternalizationRuleResolver ruleResolver,
-                                            AggregateRoutingResolver aggregateRoutingResolver) {
-        this(outboxMessageStore, payloadSerializer, ruleResolver, aggregateRoutingResolver,
+        this(outboxMessageStore, payloadSerializer, ruleResolver,
                 new DomainEventExternalizationResolver(List.of()));
     }
 
     public DefaultDomainEventOutboxRecorder(OutboxMessageStore outboxMessageStore,
                                             PayloadSerializer payloadSerializer,
                                             ExternalizationRuleResolver ruleResolver,
-                                            AggregateRoutingResolver aggregateRoutingResolver,
                                             DomainEventExternalizationResolver externalizationResolver) {
         this(asSupplier(outboxMessageStore, "outboxMessageStore must not be null"),
                 asSupplier(payloadSerializer, "payloadSerializer must not be null"),
                 ruleResolver,
-                aggregateRoutingResolver,
                 externalizationResolver);
     }
 
     public DefaultDomainEventOutboxRecorder(Supplier<OutboxMessageStore> outboxMessageStore,
                                             PayloadSerializer payloadSerializer,
                                             ExternalizationRuleResolver ruleResolver,
-                                            AggregateRoutingResolver aggregateRoutingResolver,
                                             DomainEventExternalizationResolver externalizationResolver) {
         this(outboxMessageStore,
                 asSupplier(payloadSerializer, "payloadSerializer must not be null"),
                 ruleResolver,
-                aggregateRoutingResolver,
                 externalizationResolver);
     }
 
     public DefaultDomainEventOutboxRecorder(Supplier<OutboxMessageStore> outboxMessageStore,
                                             Supplier<PayloadSerializer> payloadSerializer,
                                             ExternalizationRuleResolver ruleResolver,
-                                            AggregateRoutingResolver aggregateRoutingResolver,
                                             DomainEventExternalizationResolver externalizationResolver) {
         this.outboxMessageStore = Objects.requireNonNull(outboxMessageStore, "outboxMessageStore must not be null");
         this.payloadSerializer = Objects.requireNonNull(payloadSerializer, "payloadSerializer must not be null");
         this.ruleResolver = Objects.requireNonNull(ruleResolver, "ruleResolver must not be null");
-        this.aggregateRoutingResolver = Objects.requireNonNull(aggregateRoutingResolver,
-                "aggregateRoutingResolver must not be null");
         this.externalizationResolver = Objects.requireNonNull(externalizationResolver,
                 "externalizationResolver must not be null");
     }
@@ -109,21 +93,16 @@ public final class DefaultDomainEventOutboxRecorder implements DomainEventOutbox
         if (rule == null) {
             return;
         }
-        AggregateRoutingMetadata aggregate = aggregateRoutingResolver.resolve(event).orElse(null);
-        String payloadKey = rule.payloadKey();
-        if (payloadKey == null && aggregate != null) {
-            payloadKey = aggregate.aggregateId();
-        }
         session.store().append(OutboxMessage.newPending(
                 resolveEventId(event),
                 rule.topic(),
-                payloadKey,
+                null,
                 rule.topic(),
                 session.serializer().serialize(event),
                 resolveOccurredAt(event),
-                aggregate != null ? aggregate.aggregateType() : null,
-                aggregate != null ? aggregate.aggregateId() : null,
-                aggregate != null ? aggregate.aggregateVersion() : null));
+                null,
+                null,
+                null));
     }
 
     private void recordMapped(RecordingSession session, DomainEvent sourceEvent,

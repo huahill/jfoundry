@@ -260,8 +260,9 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 ```
 
 `MessageSender.send(topic, payloadKey, payload)` dynamically sets the Kafka topic and key for each
-record, so `@Externalized` and `@AggregateRouting` continue to determine Outbox routing. The channel
-name is infrastructure configuration, not a business destination. The adapter waits for broker
+record. `@Externalized` or `@MessageRouting` supplies the static topic, while a message key comes
+only from `DomainEventExternalizer`. The channel name is infrastructure configuration, not a business
+destination. The adapter waits for broker
 acknowledgement and maps failures to `SendResult`. Configure delivery timeouts through the Kafka
 client and connector properties. It is a Quarkus CDI default bean, so an application can replace it
 with its own `MessageSender`.
@@ -286,7 +287,7 @@ connection timeouts. The CDI default bean is replaceable with an application `Me
 ## Automatic Domain-Event Externalization
 
 `jfoundry-domain-event-outbox-quarkus-runtime` supplies the explicit automatic externalization assembly. It
-produces replaceable defaults for `ExternalizationRuleResolver`, `AggregateRoutingResolver`, and
+produces replaceable defaults for `ExternalizationRuleResolver` and
 `DomainEventOutboxRecorder`, plus the Domain Event Outbox dispatcher. The generic
 `jfoundry-outbox-quarkus-runtime` supplies `PayloadSerializer` and `OutboxTemplate`; select both
 runtime modules for the complete composition. Neither module adds an Outbox store or a broker client;
@@ -299,10 +300,10 @@ integration contract:
 jfoundry.domain.event.dispatch.outbox.enabled=true
 ```
 
-Mark each intended integration event with `@Externalized("<topic>")`. Add `@AggregateRouting` when
-the aggregate type, id, or version should be retained with the Outbox row; the resolved aggregate id
-also becomes the default message key when no routing key is specified. Events without
-`@Externalized` are not recorded. Applications can replace the default serializer or recorder with
+Mark each intended integration event with `@Externalized("<topic>")`. `@MessageRouting` can replace
+that static topic. Neither annotation supplies a message key or aggregate metadata; provide a
+`DomainEventExternalizer` when the Outbox row needs those values. Events without
+`@Externalized` are not recorded, unless an externalizer selects them. Applications can replace the default serializer or recorder with
 their own CDI bean.
 
 When an aggregate is registered while a JTA transaction is active, automatic externalization records

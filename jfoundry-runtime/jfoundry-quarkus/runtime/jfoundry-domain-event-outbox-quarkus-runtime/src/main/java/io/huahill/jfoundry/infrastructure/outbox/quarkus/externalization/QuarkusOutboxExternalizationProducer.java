@@ -5,7 +5,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizer;
 import io.huahill.jfoundry.application.event.externalization.ExternalizationRuleResolver;
@@ -26,23 +25,15 @@ public final class QuarkusOutboxExternalizationProducer {
 
     @Produces
     @DefaultBean
-    AggregateRoutingResolver aggregateRoutingResolver() {
-        return new AggregateRoutingResolver();
-    }
-
-    @Produces
-    @DefaultBean
     DomainEventOutboxRecorder domainEventOutboxRecorder(
             Instance<OutboxMessageStore> outboxMessageStore,
             PayloadSerializer payloadSerializer,
             ExternalizationRuleResolver ruleResolver,
-            AggregateRoutingResolver aggregateRoutingResolver,
             @Any Instance<DomainEventExternalizer<?>> externalizers) {
         return new DefaultDomainEventOutboxRecorder(
                 () -> require(outboxMessageStore, "Automatic domain-event externalization requires an OutboxMessageStore CDI bean"),
                 payloadSerializer,
                 ruleResolver,
-                aggregateRoutingResolver,
                 new DomainEventExternalizationResolver(externalizers.stream().toList()));
     }
 

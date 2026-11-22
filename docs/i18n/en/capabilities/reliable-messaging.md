@@ -70,8 +70,11 @@ runtime, application business code does not normally call `drainEvents()`. That 
 framework-neutral handoff SPI for runtime integrations and deliberate manual dispatch.
 
 There are two automatic externalization paths. Mark a deliberately stable public domain-event
-contract with `@Externalized` to serialize that event directly. For a versioned integration contract,
-provide a `DomainEventExternalizer<E>` bean: it maps an automatically captured domain event to zero or
+contract with `@Externalized` to serialize that event directly. `@Externalized` and
+`@MessageRouting` declare only a static topic; they do not read event properties, and an
+annotation-recorded row has no message key or aggregate metadata. For a versioned integration
+contract, or whenever a key or aggregate type, id, and version are required, provide a
+`DomainEventExternalizer<E>` bean: it maps an automatically captured domain event to zero or
 more `ExternalizedEvent` values, and the framework serializes and appends them in the current
 transaction. Each mapped value supplies a stable `payloadType`, payload, topic, key, and optional
 aggregate metadata. The source event supplies the origin event id and `occurredAt`; each
