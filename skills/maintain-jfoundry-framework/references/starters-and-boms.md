@@ -10,8 +10,8 @@ create a published parent or inheritance boundary.
   parent. It may import JUnit, Jackson, OpenTelemetry, SLF4J, Mockito, and AssertJ BOMs for compiling JFoundry itself, but must not pin those GAs
   directly, or Maven would override the nearer runtime BOM. Give those BOM versions property names the runtime platform does not use.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
-  the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
-  `jfoundry-dependencies`.
+  the supported Spring Boot parent declared in its POM and imports only `jfoundry-spring-boot-dependencies`,
+  which carries the aggregate BOM for Boot consumers.
 - `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
   pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
   BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
@@ -38,16 +38,16 @@ create a published parent or inheritance boundary.
   runtime starters, deployment artifacts, runtime-specific Native Image integrations, or platform
   stacks such as JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ clients,
   Hibernate, and JDBC drivers.
-- `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
-  foundation and module BOMs and is the required JFoundry BOM for every external application.
+  framework-neutral JFoundry module coordinates and Foundation dependencies, and is the required
+  JFoundry BOM for every external application.
   Applications with a platform parent still import it; Foundation no longer fights that parent for
   JUnit or Jackson versions.
-- `jfoundry-spring-boot-dependencies`, `jfoundry-spring-cloud-dependencies`,
-  `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` are standalone runtime BOMs.
-  They do not import `jfoundry-dependencies` or `jfoundry-foundation-dependencies`; they manage only
-  their runtime platform ecosystem. The aggregate `jfoundry-dependencies` BOM is the single public
-  entry point for runtime-neutral, Foundation-managed coordinates.
+- `jfoundry-spring-boot-dependencies` is the standalone Spring Boot consumer BOM. It imports
+  `jfoundry-dependencies` and manages Spring Boot runtime modules. `jfoundry-spring-cloud-dependencies`,
+  `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` remain platform/runtime BOMs
+  that do not import the aggregate BOM. Quarkus and Helidon import `jfoundry-jakarta-dependencies`
+  for their shared portable Jakarta adapters; consumers still import `jfoundry-dependencies` separately.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and

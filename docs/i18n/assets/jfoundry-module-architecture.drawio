@@ -43,7 +43,7 @@
         <mxCell id="infrastructure" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;strokeWidth=2;fontColor=#78350F;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;jfoundry-infrastructure&lt;/b&gt;&lt;br&gt;&lt;br&gt;persistence and message stores&lt;br&gt;event-neutral observer + persistence bridge&lt;br&gt;serialization, locks, observability&lt;br&gt;job execution and Web semantics" vertex="1">
           <mxGeometry height="175" width="300" x="1170" y="515" as="geometry" />
         </mxCell>
-        <mxCell id="consumer-note" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontColor=#475569;" value="Consumers select domain and application capabilities, architecture modules as needed, and framework-neutral adapters directly." vertex="1">
+        <mxCell id="consumer-note" parent="1" style="text;html=1;align=center;verticalAlign=middle;fontSize=13;fontColor=#475569;" value="Consumers select jfoundry-dependencies plus one runtime BOM; runtime BOMs manage runtime-specific JFoundry modules." vertex="1">
           <mxGeometry height="40" width="1200" x="200" y="745" as="geometry" />
         </mxCell>
 
@@ -53,7 +53,7 @@
         <mxCell id="core-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Core dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;jfoundry-dependencies&lt;br&gt;foundation and modules BOMs" vertex="1">
           <mxGeometry height="125" width="650" x="90" y="925" as="geometry" />
         </mxCell>
-        <mxCell id="runtime-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Runtime dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Boot / Spring Cloud / Quarkus / Helidon BOMs&lt;br&gt;jfoundry-spring-boot-parent&lt;br&gt;jfoundry-quarkus-build (internal)" vertex="1">
+        <mxCell id="runtime-boms" parent="1" style="rounded=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F3F4F6;strokeColor=#6B7280;strokeWidth=2;fontColor=#374151;fontSize=14;align=center;verticalAlign=middle;spacing=10;" value="&lt;b&gt;Runtime dependency management&lt;/b&gt;&lt;br&gt;&lt;br&gt;Spring Boot / Spring Cloud / Jakarta / Quarkus / Helidon BOMs&lt;br&gt;runtime-specific JFoundry modules&lt;br&gt;jfoundry-spring-boot-parent&lt;br&gt;jfoundry-quarkus-build (internal)" vertex="1">
           <mxGeometry height="125" width="650" x="860" y="925" as="geometry" />
         </mxCell>
 

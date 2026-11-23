@@ -103,10 +103,12 @@ including JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ
 and JDBC drivers. Those versions follow the selected runtime. The root `jfoundry-parent` may import JUnit, Jackson, OpenTelemetry, SLF4J, Mockito, and AssertJ BOMs for compiling JFoundry itself.
 It must not pin those GAs directly, or Maven would override the nearer runtime BOM. The BOM version properties use names the runtime platform does not already define.
 
-Each runtime BOM owns its own ecosystem: `jfoundry-spring-boot-dependencies` owns Spring Boot and
-Spring-specific integration coordinates, `jfoundry-quarkus-dependencies` owns Quarkus coordinates, and
-`jfoundry-helidon-dependencies` owns Helidon coordinates. Runtime BOMs remain independent and must not
-import Foundation or another runtime BOM. A runtime BOM may carry a narrow, documented compatibility
+The public `jfoundry-dependencies` BOM owns DDD, architecture-style, and framework-neutral modules.
+Runtime BOMs own their matching runtime modules: `jfoundry-spring-boot-dependencies` owns Spring
+Boot integration coordinates, `jfoundry-quarkus-dependencies` owns Quarkus coordinates, and
+`jfoundry-helidon-dependencies` owns Helidon coordinates. Quarkus and Helidon import the shared
+`jfoundry-jakarta-dependencies` BOM for portable Jakarta adapters. Runtime BOMs remain independent
+from the aggregate and Foundation BOMs. A runtime BOM may carry a narrow, documented compatibility
 override when its official platform BOM would otherwise break a Foundation-managed neutral component;
 the Helidon and Quarkus Jackson annotations overrides, and the Helidon Testcontainers core override, are such exceptions.
 

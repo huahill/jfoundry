@@ -77,7 +77,8 @@ public final class VerifyDependencyBoundaries {
         if (module == ModuleKind.JAKARTA && (spring || quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "jakarta-cross-runtime-dependency"));
         }
-        if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOM) && (quarkus || helidon)) {
+        if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOOT_BOM
+                || module == ModuleKind.SPRING_CLOUD_BOM) && (quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "spring-cross-runtime-dependency"));
         }
         if ((module == ModuleKind.QUARKUS || module == ModuleKind.QUARKUS_BOM) && (spring || helidon)) {
@@ -86,7 +87,7 @@ public final class VerifyDependencyBoundaries {
         if ((module == ModuleKind.HELIDON || module == ModuleKind.HELIDON_BOM) && (spring || quarkus)) {
             violations.add(format(pom, coordinate, context, "helidon-cross-runtime-dependency"));
         }
-        if (isRuntimeBom(module) && isDisallowedRuntimeBomImport(coordinate)) {
+        if (isRuntimeBom(module) && isDisallowedRuntimeBomImport(module, coordinate)) {
             violations.add(format(pom, coordinate, context, "runtime-bom-import"));
         }
     }
@@ -125,16 +126,29 @@ public final class VerifyDependencyBoundaries {
     }
 
     private static boolean isRuntimeBom(ModuleKind module) {
-        return module == ModuleKind.SPRING_BOM
+        return module == ModuleKind.SPRING_BOOT_BOM
+                || module == ModuleKind.SPRING_CLOUD_BOM
+                || module == ModuleKind.JAKARTA_BOM
                 || module == ModuleKind.QUARKUS_BOM
                 || module == ModuleKind.HELIDON_BOM;
     }
 
-    private static boolean isDisallowedRuntimeBomImport(String coordinate) {
+    private static boolean isDisallowedRuntimeBomImport(ModuleKind module, String coordinate) {
+        if (module == ModuleKind.SPRING_BOOT_BOM) {
+            return !coordinate.equals("io.github.huahill:jfoundry-dependencies") && isJfoundryBom(coordinate);
+        }
+        if (module == ModuleKind.QUARKUS_BOM || module == ModuleKind.HELIDON_BOM) {
+            return !coordinate.equals("io.github.huahill:jfoundry-jakarta-dependencies") && isJfoundryBom(coordinate);
+        }
+        return isJfoundryBom(coordinate);
+    }
+
+    private static boolean isJfoundryBom(String coordinate) {
         return coordinate.equals("io.github.huahill:jfoundry-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-foundation-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-spring-boot-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-spring-cloud-dependencies")
+                || coordinate.equals("io.github.huahill:jfoundry-jakarta-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-quarkus-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-helidon-dependencies");
     }
@@ -144,8 +158,14 @@ public final class VerifyDependencyBoundaries {
         if (path.startsWith("jfoundry-core/")) {
             return ModuleKind.CORE;
         }
-        if (path.startsWith("jfoundry-boms/jfoundry-spring-") && path.endsWith("-dependencies")) {
-            return ModuleKind.SPRING_BOM;
+        if (path.startsWith("jfoundry-boms/jfoundry-spring-boot-dependencies")) {
+            return ModuleKind.SPRING_BOOT_BOM;
+        }
+        if (path.startsWith("jfoundry-boms/jfoundry-spring-cloud-dependencies")) {
+            return ModuleKind.SPRING_CLOUD_BOM;
+        }
+        if (path.startsWith("jfoundry-boms/jfoundry-jakarta-dependencies")) {
+            return ModuleKind.JAKARTA_BOM;
         }
         if (path.startsWith("jfoundry-boms/jfoundry-quarkus-dependencies")) {
             return ModuleKind.QUARKUS_BOM;
@@ -245,6 +265,6 @@ public final class VerifyDependencyBoundaries {
 
     private enum ModuleKind {
         CORE, FOUNDATION_BOM, JAKARTA, SPRING, QUARKUS, HELIDON,
-        SPRING_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
+        SPRING_BOOT_BOM, SPRING_CLOUD_BOM, JAKARTA_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
     }
 }

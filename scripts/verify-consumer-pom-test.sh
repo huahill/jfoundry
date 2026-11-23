@@ -57,7 +57,7 @@ cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom
 </project>
 XML
 
-for artifact in jfoundry-dependencies jfoundry-spring-boot-dependencies jfoundry-spring-cloud-dependencies; do
+for artifact in jfoundry-dependencies jfoundry-jakarta-dependencies jfoundry-spring-boot-dependencies jfoundry-spring-cloud-dependencies; do
     artifact_dir="${fixture_repo}/io/github/huahill/${artifact}/${fixture_version}"
     mkdir -p "${artifact_dir}"
     cat > "${artifact_dir}/${artifact}-${fixture_version}.pom" <<XML
@@ -73,14 +73,20 @@ XML
 done
 
 spring_boot_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-boot-dependencies/${fixture_version}/jfoundry-spring-boot-dependencies-${fixture_version}.pom"
-python3 - "${spring_boot_bom_fixture}" <<'PY'
-import sys
-from pathlib import Path
-path = Path(sys.argv[1])
-content = path.read_text()
-content = content.replace("  <dependencyManagement>", "  <properties><spring-boot.version>9.8.7</spring-boot.version></properties>\n  <dependencyManagement>", 1)
-path.write_text(content)
-PY
+cat > "${spring_boot_bom_fixture}" <<'XML'
+<project>
+  <artifactId>jfoundry-spring-boot-dependencies</artifactId>
+  <url>https://github.com/huahill/jfoundry</url>
+  <licenses></licenses>
+  <developers></developers>
+  <scm></scm>
+  <properties><spring-boot.version>9.8.7</spring-boot.version></properties>
+  <dependencyManagement><dependencies>
+    <dependency><artifactId>jfoundry-dependencies</artifactId><type>pom</type><scope>import</scope></dependency>
+    <dependency><artifactId>spring-boot-dependencies</artifactId><type>pom</type><scope>import</scope></dependency>
+  </dependencies></dependencyManagement>
+</project>
+XML
 
 cloud_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
 cat > "${cloud_bom_fixture}" <<'XML'
@@ -135,7 +141,7 @@ write_parent() {
     local boot_version="$2"
     local runtime_bom="$3"
     local first_import="$4"
-    local second_import="$5"
+    local second_import="${5:-}"
     local parent_dir="${fixture_repo}/io/github/huahill/${parent_artifact}/${fixture_version}"
 
     mkdir -p "${parent_dir}"
@@ -163,6 +169,7 @@ write_parent() {
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+$(if [[ -n "${second_import}" ]]; then cat <<SECOND
       <dependency>
         <groupId>io.github.huahill</groupId>
         <artifactId>${second_import}</artifactId>
@@ -170,13 +177,15 @@ write_parent() {
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+SECOND
+fi)
     </dependencies>
   </dependencyManagement>
 </project>
 XML
 }
 
-write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies
 assert_accepts
 
 write_parent jfoundry-spring-boot-parent 4.0.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
@@ -185,7 +194,7 @@ write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-cloud-dependencie
 assert_rejects "a Spring Boot parent that imports the Cloud runtime BOM"
 write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-dependencies jfoundry-spring-boot-dependencies
 assert_rejects "a Spring Boot parent that imports the core BOM before the runtime BOM"
-write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
+write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies
 
 assert_accepts_without_xmllint
 

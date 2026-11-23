@@ -17,8 +17,8 @@ owning runtime BOM supplies the exact Helidon patch version used by each release
 ## Dependency Composition
 
 Import the Helidon BOM before the core JFoundry BOM, using the same JFoundry version for both. The Helidon BOM manages
-the selected Helidon platform ecosystem and its narrow Jackson annotations compatibility alignment;
-it does not manage JFoundry module versions:
+the selected Helidon platform ecosystem, Helidon module versions, and its narrow Jackson annotations compatibility
+alignment. It imports `jfoundry-jakarta-dependencies` for the portable Jakarta adapters:
 
 ```xml
 <dependencyManagement>

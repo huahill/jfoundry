@@ -55,10 +55,15 @@ capabilities it needs:
 - Quarkus and Helidon applications import their matching runtime BOM before
   `jfoundry-dependencies`.
 
-Runtime BOMs manage platform ecosystem versions only. They do not add runtime capabilities to the
-classpath, manage JFoundry module versions, or import Foundation. Foundation supplies only
+Runtime BOMs manage their platform ecosystem and matching JFoundry runtime module versions. They do
+not add runtime capabilities to the classpath or import Foundation. Foundation supplies only
 runtime-neutral coordinates the platform BOM does not already own. Applications still select each
 starter, adapter, database, and broker explicitly.
+
+The aggregate `jfoundry-dependencies` BOM manages framework-neutral JFoundry modules. Spring Boot,
+Quarkus, and Helidon BOMs manage their matching JFoundry runtime modules; the shared
+`jfoundry-jakarta-dependencies` BOM is imported by the Quarkus and Helidon BOMs for portable Jakarta
+adapters. These management entries do not add capabilities to the application classpath.
 
 ## Validated Capability Scope
 

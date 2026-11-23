@@ -14,7 +14,8 @@ JAX-RS 和 Hibernate API 都应停留在 domain 和 application 代码之外。
 ## 依赖组合
 
 依次导入版本相同的 Helidon BOM 与核心 JFoundry BOM。Helidon BOM 管理所选 Helidon
-平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本：
+平台生态、Helidon 模块版本以及范围严格的 Jackson annotations 兼容性对齐，并通过
+`jfoundry-jakarta-dependencies` 管理可移植 Jakarta 适配器：
 
 ```xml
 <dependencyManagement>

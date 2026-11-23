@@ -4,16 +4,14 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 ## 公共前置依赖
 
-所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理，它管理 JFoundry 核心、架构和框架无关适配器的版本。
-使用 JFoundry Boot Parent 时由 Parent 自动导入，否则应用需要显式导入。它属于 `<dependencyManagement>`，不是运行时
-依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。通过 `jfoundry-dependencies` 导入的 Foundation
-不会再声明选定 Spring Boot Parent 已经管理的 JUnit、Jackson、Mockito 等平台栈。
+`jfoundry-dependencies` 管理 JFoundry 核心、DDD、架构风格和框架无关适配器模块。独立的
+`jfoundry-spring-boot-dependencies` 消费者 BOM 会将它与 Spring Boot BOM 一起导入。Cloud BOM 保持平台专属，
+因此 Cloud 应用需要显式导入 `jfoundry-dependencies`。这些 BOM 都放在 `<dependencyManagement>` 中，不是运行时依赖。
 
 ## Spring Boot
 
 仅使用 Spring Boot 的应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent。该 Parent 继承受支持的
-Spring Boot Parent，设置 Java 25，并已经按正确顺序导入 `jfoundry-spring-boot-dependencies` 与
-`jfoundry-dependencies`；使用该 Parent 时不需要再次手动导入这两个 BOM。
+Spring Boot Parent，设置 Java 25，并已经导入 `jfoundry-spring-boot-dependencies`；使用该 Parent 时不需要再次手动导入该 BOM。
 
 ```xml
 <parent>
@@ -57,8 +55,8 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 不得同时导入 `jfoundry-spring-boot-dependencies` 与 `jfoundry-spring-cloud-dependencies`。Cloud BOM 只管理平台生态，
 不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
 
-保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)先导入
-`jfoundry-spring-boot-dependencies`，再导入 `jfoundry-dependencies`，并自行管理 Java 与 Spring Boot 版本。
+保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)单独导入
+`jfoundry-spring-boot-dependencies`，并自行管理 Java 版本。
 
 其它能力都需要显式选择，从而使应用的数据源、投递、调度和分布式锁决策保持清晰。
 

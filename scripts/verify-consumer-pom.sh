@@ -111,15 +111,14 @@ require_imported_bom_before() {
 
 require_exact_imported_boms() {
     local pom="$1"
-    local first_artifact="$2"
-    local second_artifact="$3"
     local actual
     local expected
 
+    shift
     actual="$(xml_query imported-artifact-ids "${pom}")"
-    expected="$(printf '%s\n%s' "${first_artifact}" "${second_artifact}")"
+    expected="$(printf '%s\n' "$@")"
     if [[ "${actual}" != "${expected}" ]]; then
-        echo "Consumer POM must import exactly ${first_artifact} then ${second_artifact}: ${pom}" >&2
+        echo "Consumer POM must import exactly the expected BOM sequence: ${pom}" >&2
         exit 1
     fi
 }
@@ -150,22 +149,22 @@ verify_spring_parent() {
     fi
     verify_metadata "${pom}"
     require_text "${pom}" "<jfoundry.version>${version}</jfoundry.version>"
-    require_text "${pom}" "<artifactId>jfoundry-dependencies</artifactId>"
     require_text "${pom}" "<artifactId>${runtime_bom}</artifactId>"
     require_text "${pom}" '<version>${jfoundry.version}</version>'
     forbid_text "${pom}" '${project.version}'
     forbid_text "${pom}" "jfoundry-spring-dependencies"
     require_parent_coordinate "${pom}" "org.springframework.boot" "spring-boot-starter-parent" "${boot_version}"
-    require_imported_bom_before "${pom}" "${runtime_bom}" "jfoundry-dependencies"
-    require_exact_imported_boms "${pom}" "${runtime_bom}" "jfoundry-dependencies"
+    require_exact_imported_boms "${pom}" "${runtime_bom}"
 }
 
 verify_flattened_module "jfoundry-domain"
 verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
+verify_independent_bom "jfoundry-jakarta-dependencies"
 verify_independent_bom "jfoundry-spring-boot-dependencies"
-verify_spring_cloud_bom
 spring_boot_bom_pom="$(pom_path "jfoundry-spring-boot-dependencies")"
+require_exact_imported_boms "${spring_boot_bom_pom}" "jfoundry-dependencies" "spring-boot-dependencies"
+verify_spring_cloud_bom
 spring_boot_version="$(xml_query property-value "${spring_boot_bom_pom}" "spring-boot.version")"
 if [[ -z "${spring_boot_version}" ]]; then
     echo "Consumer POM must define spring-boot.version: ${spring_boot_bom_pom}" >&2

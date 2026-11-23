@@ -28,10 +28,8 @@ JFoundry 落地指导。
 
 ## 2. 配置核心 BOM 与架构依赖
 
-所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理。它是 JFoundry 公共 BOM，用于管理核心模块、架构模块和
-框架无关适配器的版本；使用 `jfoundry-spring-boot-parent` 时由该 Parent 自动导入，否则应用需要显式导入。它放在
-`<dependencyManagement>` 中，不是运行时依赖。它不会再声明选定运行时平台 BOM 已经管理的 JUnit、Jackson
-等平台栈：
+所有外部应用使用 `jfoundry-dependencies` 管理核心模块、DDD、架构风格和框架无关适配器。Spring Boot 消费者 BOM 会包含它；
+Cloud、Quarkus 和 Helidon 应用则与对应运行时 BOM 一起显式导入。它放在 `<dependencyManagement>` 中，不是运行时依赖：
 
 ```xml
 <dependencyManagement>
@@ -82,8 +80,8 @@ JFoundry 落地指导。
 
 ## 3. 选择运行时
 
-每个运行时都有独立的 BOM 和基础入口，不应混用。应用保留自有 Maven Parent 时，先导入对应的运行时 BOM，再导入
-`jfoundry-dependencies`；使用 JFoundry Boot Parent 时由 Parent 管理这两个 BOM。具体 Parent、BOM 和依赖组合见各运行时指南。
+每个运行时都有独立的 BOM 和基础入口，不应混用。应用选择 `jfoundry-dependencies` 与一个对应的运行时 BOM；
+使用 JFoundry Boot Parent 时由 Parent 导入独立的 Spring Boot 消费者 BOM。具体 Parent、BOM 和依赖组合见各运行时指南。
 
 | 运行时 | 基础入口 | 接入说明 |
 |---|---|---|
