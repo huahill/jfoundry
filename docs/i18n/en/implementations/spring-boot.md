@@ -36,8 +36,8 @@ base starter as the transaction starter.
 ## Spring Cloud
 
 An application that needs Spring Cloud or Spring Cloud Alibaba must not use the JFoundry Boot parent.
-Use an application or standard Maven parent compatible with the supported Spring Cloud versions, then import
-the Spring Boot runtime BOM followed by the Cloud BOM:
+Use an application or standard Maven parent compatible with the chosen Spring Cloud line, then import
+JFoundry's Boot integration BOM followed by the official Cloud and Alibaba BOMs:
 
 ```xml
 <dependencyManagement>
@@ -50,9 +50,16 @@ the Spring Boot runtime BOM followed by the Cloud BOM:
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+            <version>${spring-cloud-alibaba.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -60,9 +67,9 @@ the Spring Boot runtime BOM followed by the Cloud BOM:
 </dependencyManagement>
 ```
 
-The Spring Boot BOM manages Spring Boot and Spring-specific JFoundry modules; the Cloud BOM manages
-Spring Cloud and Spring Cloud Alibaba. Import both for a Cloud application. The Cloud BOM does not
-add Cloud starters or imply that JFoundry provides an adapter for every Cloud component.
+The JFoundry Boot BOM manages Spring Boot and Spring-specific JFoundry modules. Spring Cloud and
+Spring Cloud Alibaba remain official upstream BOM choices. The application owns the compatibility
+combination and should select versions from the upstream release-train matrix.
 
 An application retaining another parent while using Spring Boot without Spring Cloud should import
 `jfoundry-spring-boot-dependencies` by itself as described in

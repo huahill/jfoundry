@@ -77,8 +77,7 @@ public final class VerifyDependencyBoundaries {
         if (module == ModuleKind.JAKARTA && (spring || quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "jakarta-cross-runtime-dependency"));
         }
-        if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOOT_BOM
-                || module == ModuleKind.SPRING_CLOUD_BOM) && (quarkus || helidon)) {
+        if ((module == ModuleKind.SPRING || module == ModuleKind.SPRING_BOOT_BOM) && (quarkus || helidon)) {
             violations.add(format(pom, coordinate, context, "spring-cross-runtime-dependency"));
         }
         if ((module == ModuleKind.QUARKUS || module == ModuleKind.QUARKUS_BOM) && (spring || helidon)) {
@@ -127,7 +126,6 @@ public final class VerifyDependencyBoundaries {
 
     private static boolean isRuntimeBom(ModuleKind module) {
         return module == ModuleKind.SPRING_BOOT_BOM
-                || module == ModuleKind.SPRING_CLOUD_BOM
                 || module == ModuleKind.JAKARTA_BOM
                 || module == ModuleKind.QUARKUS_BOM
                 || module == ModuleKind.HELIDON_BOM;
@@ -147,7 +145,6 @@ public final class VerifyDependencyBoundaries {
         return coordinate.equals("io.github.huahill:jfoundry-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-foundation-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-spring-boot-dependencies")
-                || coordinate.equals("io.github.huahill:jfoundry-spring-cloud-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-jakarta-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-quarkus-dependencies")
                 || coordinate.equals("io.github.huahill:jfoundry-helidon-dependencies");
@@ -160,9 +157,6 @@ public final class VerifyDependencyBoundaries {
         }
         if (path.startsWith("jfoundry-boms/jfoundry-spring-boot-dependencies")) {
             return ModuleKind.SPRING_BOOT_BOM;
-        }
-        if (path.startsWith("jfoundry-boms/jfoundry-spring-cloud-dependencies")) {
-            return ModuleKind.SPRING_CLOUD_BOM;
         }
         if (path.startsWith("jfoundry-boms/jfoundry-jakarta-dependencies")) {
             return ModuleKind.JAKARTA_BOM;
@@ -265,6 +259,6 @@ public final class VerifyDependencyBoundaries {
 
     private enum ModuleKind {
         CORE, FOUNDATION_BOM, JAKARTA, SPRING, QUARKUS, HELIDON,
-        SPRING_BOOT_BOM, SPRING_CLOUD_BOM, JAKARTA_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
+        SPRING_BOOT_BOM, JAKARTA_BOM, QUARKUS_BOM, HELIDON_BOM, OTHER
     }
 }
