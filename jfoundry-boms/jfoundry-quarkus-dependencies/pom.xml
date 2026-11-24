@@ -38,6 +38,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-jakarta-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Align Quarkus Jackson 2 annotations with Foundation's Jackson 3 line.
                  Quarkus 3.40.1 pins jackson-annotations 2.21, which omits JsonApplyView. -->
             <dependency>
@@ -62,6 +69,181 @@
                 <artifactId>redisson-quarkus-33-deployment</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-quarkus</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-web-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-web-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-kafka-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-kafka-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-rabbitmq-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-rabbitmq-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-jpa-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-jpa-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-jpa-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-jpa-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-jpa-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-jpa-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-redisson-quarkus-runtime</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-redisson-quarkus-deployment</artifactId>
+        <version>${project.version}</version>
+      </dependency>
         </dependencies>
     </dependencyManagement>
     <profiles>

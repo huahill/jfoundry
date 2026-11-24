@@ -15,8 +15,9 @@ Applications select the Quarkus runtime modules rather than assembling these sha
 ## Dependency Setup
 
 Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
-required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions and a narrow Jackson annotations compatibility alignment;
-it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
+required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem
+versions, Quarkus runtime/deployment module versions, and a narrow Jackson annotations compatibility
+alignment. It imports `jfoundry-jakarta-dependencies` for the portable Jakarta adapters. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
 
 ```xml

@@ -34,6 +34,13 @@
     </properties>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Spring Boot manages versions only; applications select starters explicitly. -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -57,6 +64,271 @@
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-http-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-webmvc-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-observability-spring</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-spring</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-jpa-spring-boot-support</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-observability-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-webmvc-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-spring-boot-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-observability-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-kafka-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-rocketmq-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-messaging-rabbitmq-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-redisson-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-mybatis-plus-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-outbox-jpa-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-mybatis-plus-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-inbox-jpa-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-mybatis-plus-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-jpa-spring-boot-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
         </dependencies>
     </dependencyManagement>
     <profiles>

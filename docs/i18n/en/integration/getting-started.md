@@ -34,10 +34,10 @@ optional pattern for genuine command/query asymmetry, not a third primary style.
 
 ## 2. Configure The Core BOM And Architecture Dependencies
 
-Every external application must have `jfoundry-dependencies` in its dependency management. It is the
-public JFoundry BOM for core modules, architecture modules, and framework-neutral adapters. The
-supported `jfoundry-spring-boot-parent` imports it for applications that do not use Spring Cloud; other applications
-must import it explicitly. It belongs in `<dependencyManagement>` and is not a runtime dependency.
+Every external application uses `jfoundry-dependencies` for core modules, DDD, architecture styles,
+and framework-neutral adapters. The standalone Spring Boot consumer BOM includes it; Cloud, Quarkus,
+and Helidon applications import it explicitly alongside their runtime BOM. It belongs in
+`<dependencyManagement>` and is not a runtime dependency.
 It does not re-declare JUnit, Jackson, or other stacks already owned by the selected runtime platform BOM:
 
 ```xml
@@ -92,10 +92,10 @@ dependencies.
 
 ## 3. Select A Runtime
 
-Each runtime has its own BOM and base entry point; do not mix runtime BOMs. When an application keeps
-its own Maven parent, import the matching runtime BOM before `jfoundry-dependencies`; the supported
-JFoundry Boot parent manages both for Spring Boot applications that do not use Spring Cloud. See the runtime guide for its Parent,
-BOM, and dependency composition.
+Each runtime has its own BOM and base entry point; do not mix runtime BOMs. Applications select
+`jfoundry-dependencies` plus exactly one matching runtime BOM. The supported JFoundry Boot parent
+imports the standalone Spring Boot consumer BOM. See the runtime guide for its Parent, BOM, and
+dependency composition.
 
 | Runtime | Base entry point | Setup guide |
 |---|---|---|

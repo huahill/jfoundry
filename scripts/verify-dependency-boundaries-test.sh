@@ -154,8 +154,24 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
             </dependency>
         </dependencies>
     </dependencyManagement>'
-expect_rejected "invalid-aggregate-import" "runtime-bom-import"
+expect_allowed "allowed-aggregate-import"
 
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
+write_pom "jfoundry-boms/jfoundry-spring-cloud-dependencies" '
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-dependencies</artifactId>
+                <version>1.0.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>'
+expect_rejected "invalid-cloud-aggregate-import" "runtime-bom-import"
+
+rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-cloud-dependencies"
 rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
 write_pom "jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/invalid-helidon-test" '
     <dependencies>

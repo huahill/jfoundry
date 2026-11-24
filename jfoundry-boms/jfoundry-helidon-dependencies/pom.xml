@@ -39,6 +39,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-jakarta-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Align Helidon's Jackson annotations with Foundation's Jackson 3 line. -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -74,6 +81,77 @@
                 <artifactId>redisson-helidon-40</artifactId>
                 <version>${redisson.version}</version>
             </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-helidon</artifactId>
+        <version>${project.version}</version>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-transaction-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-lock-redisson-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-persistence-bridge-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-domain-event-outbox-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-persistence-jpa-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-restclient-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>io.github.huahill</groupId>
+        <artifactId>jfoundry-web-helidon</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-outbox-helidon</artifactId><version>${project.version}</version></dependency>
+
+      <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-outbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
+
+      <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-inbox-jpa-helidon</artifactId><version>${project.version}</version></dependency>
+
+      <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-messaging-kafka-helidon</artifactId><version>${project.version}</version></dependency>
+
+      <dependency><groupId>io.github.huahill</groupId><artifactId>jfoundry-messaging-rabbitmq-helidon</artifactId><version>${project.version}</version></dependency>
         </dependencies>
     </dependencyManagement>
     <profiles>
