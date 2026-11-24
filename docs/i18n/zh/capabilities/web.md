@@ -157,9 +157,9 @@ throw new DomainRuleViolationException("order.quota-exceeded", 2, 2);
 
 ### 运行时参考
 
-- [Spring Boot 运行时装配](../implementations/spring-boot.md)说明自动配置与 Spring MVC 替换规则。
-- [Quarkus 运行时集成](../implementations/quarkus.md)说明扩展组合与 Quarkus REST 行为。
-- [Helidon MP 运行时集成](../implementations/helidon.md)说明 CDI 与 JAX-RS 行为。
+- [Spring Boot 运行时装配](../runtimes/spring-boot.md)说明自动配置与 Spring MVC 替换规则。
+- [Quarkus 运行时集成](../runtimes/quarkus.md)说明扩展组合与 Quarkus REST 行为。
+- [Helidon MP 运行时集成](../runtimes/helidon.md)说明 CDI 与 JAX-RS 行为。
 
 ## 请求关联
 

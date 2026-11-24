@@ -18,7 +18,7 @@ MyBatis-Plus 适配器是运行时无关的，但不是开箱即用的运行时�
 
 Spring Boot 可通过 `jfoundry-persistence-mybatis-plus-spring-boot-starter` 装配该能力。Quarkus 当前没有
 jfoundry MyBatis-Plus 运行时集成；不要从运行时无关适配器推导出该支持。已支持的 Spring Boot
-装配见 [Spring Boot](spring-boot.md)，Quarkus 当前能力范围见 [Quarkus](quarkus.md)。
+装配见 [Spring Boot](../runtimes/spring-boot.md)，Quarkus 当前能力范围见 [Quarkus](../runtimes/quarkus.md)。
 
 对于实现 `AuditStampHolder` 的持久化数据对象，该 Spring Boot 启动器还会注册
 `MybatisPlusAuditMetaObjectHandler`。应用自行定义字段及 MyBatis-Plus 映射注解；该处理器使用
@@ -32,4 +32,4 @@ jfoundry MyBatis-Plus 运行时集成；不要从运行时无关适配器推导�
 
 在 Spring Boot 下，默认 Outbox 派发器和 Inbox 模板使用 `TransactionRunner` 包裹各自的数据库阶段。即使单次 MyBatis 映射器调用可以自行提交，这仍不可省略：处理器与 Inbox 的 `PROCESSED` 状态迁移必须保持原子性。
 
-运行时装配和用户替换行为见 [Spring Boot](spring-boot.md)，条件和配置项见[参考](../reference/spring-boot-autoconfiguration.md)。
+运行时装配和用户替换行为见 [Spring Boot](../runtimes/spring-boot.md)，条件和配置项见[参考](../reference/spring-boot-autoconfiguration.md)。

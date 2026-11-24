@@ -103,7 +103,7 @@ JFoundry Boot BOM 管理 Spring Boot 与 Spring 专属 JFoundry 模块。Spring 
 
 持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-mybatis-plus-spring-boot-starter` 装配业务聚合的 MyBatis-Plus 持久化能力，并为实现 `AuditStampHolder` 的数据对象装配默认技术审计处理器；JPA 对应启动器则装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
 
-二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器；业务数据与可靠消息存储通常使用相同的持久化技术。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](mybatis-plus.md) 与 [JPA](jpa.md) 实现指南。
+二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器；业务数据与可靠消息存储通常使用相同的持久化技术。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](../persistence/mybatis-plus.md) 与 [JPA](../persistence/jpa.md) 实现指南。
 
 ## 可靠消息
 

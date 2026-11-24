@@ -143,7 +143,7 @@ Both are deliberately separate from reliable messaging stores. Add the matching 
 starter only after the use case requires durable external publication or consumer idempotency;
 normally use the same persistence technology for business data and the reliable messaging store.
 Aggregate mapping, optimistic-locking, and repository-shape decisions remain in the
-[JPA](jpa.md) and [MyBatis-Plus](mybatis-plus.md) implementation guides.
+[JPA](../persistence/jpa.md) and [MyBatis-Plus](../persistence/mybatis-plus.md) implementation guides.
 
 ## Reliable Messaging
 

@@ -21,14 +21,11 @@
 
 ## 持久化实现
 
-- [MyBatis-Plus](implementations/mybatis-plus.md)
-- [JPA](implementations/jpa.md)
+- [持久化实现指南](persistence/index.md)
 
 ## 运行时集成
 
-- [Spring Boot 运行时装配](implementations/spring-boot.md)
-- [Quarkus 运行时集成](implementations/quarkus.md)
-- [Helidon MP 运行时集成](implementations/helidon.md)
+- [运行时集成指南](runtimes/index.md)
 
 ## 框架语义
 

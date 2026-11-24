@@ -62,8 +62,8 @@ public class Order extends BaseAggregateRoot<Order, OrderId> {
 该可选路径使用 `@Externalized`、`DomainEventExternalizer`、`DomainEventOutboxRecorder`
 或 `OutboxTemplate`，详见[可靠消息](../capabilities/reliable-messaging.md)。
 
-运行时分发装配见 [Spring Boot](../implementations/spring-boot.md)、
-[Quarkus](../implementations/quarkus.md) 与 [Helidon MP](../implementations/helidon.md)
+运行时分发装配见 [Spring Boot](../runtimes/spring-boot.md)、
+[Quarkus](../runtimes/quarkus.md) 与 [Helidon MP](../runtimes/helidon.md)
 指南。
 
 模块职责是刻意拆开的：`jfoundry-domain-event-core` 是领域事件能力，`jfoundry-outbox-core` 是通用 Outbox 能力，

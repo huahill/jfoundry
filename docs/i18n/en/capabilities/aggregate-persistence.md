@@ -33,8 +33,8 @@ business conflict.
 
 | Need | Guide |
 |------|-------|
-| One JPA-managed entity graph per aggregate and JPA optimistic locking | [JPA](../implementations/jpa.md) |
-| MyBatis-Plus data objects, repositories, wrappers, and optimistic locking | [MyBatis-Plus](../implementations/mybatis-plus.md) |
+| One JPA-managed entity graph per aggregate and JPA optimistic locking | [JPA](../persistence/jpa.md) |
+| MyBatis-Plus data objects, repositories, wrappers, and optimistic locking | [MyBatis-Plus](../persistence/mybatis-plus.md) |
 
-For Spring Boot runtime assembly and user bean overrides, see [Spring Boot](../implementations/spring-boot.md).
+For Spring Boot runtime assembly and user bean overrides, see [Spring Boot](../runtimes/spring-boot.md).
 The starter catalog, properties, and condition lookup are in [Spring Boot Auto-configuration](../reference/spring-boot-autoconfiguration.md).

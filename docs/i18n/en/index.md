@@ -23,14 +23,11 @@ linked from its owning runtime guide rather than presented as a technology-selec
 
 ## Persistence Implementations
 
-- [JPA](implementations/jpa.md)
-- [MyBatis-Plus](implementations/mybatis-plus.md)
+- [Persistence Implementation Guide](persistence/index.md)
 
 ## Runtime Integrations
 
-- [Spring Boot Runtime Assembly](implementations/spring-boot.md)
-- [Quarkus Runtime Integration](implementations/quarkus.md)
-- [Helidon MP Runtime Integration](implementations/helidon.md)
+- [Runtime Integration Guide](runtimes/index.md)
 
 ## Framework Semantics
 

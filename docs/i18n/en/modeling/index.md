@@ -14,5 +14,5 @@ Related runtime topics live elsewhere:
 
 - Aggregate mapping and persistence adapters: [Aggregate Persistence](../capabilities/aggregate-persistence.md)
 - Transactional Outbox and Inbox: [Reliable Messaging](../capabilities/reliable-messaging.md)
-- Runtime event dispatch wiring: [Spring Boot](../implementations/spring-boot.md),
-  [Quarkus](../implementations/quarkus.md), and [Helidon MP](../implementations/helidon.md)
+- Runtime event dispatch wiring: [Spring Boot](../runtimes/spring-boot.md),
+  [Quarkus](../runtimes/quarkus.md), and [Helidon MP](../runtimes/helidon.md)

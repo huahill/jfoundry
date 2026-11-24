@@ -152,11 +152,11 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 
 | Need | Guide |
 |------|-------|
-| JPA Outbox and Inbox stores, including database-specific Inbox claiming | [JPA](../implementations/jpa.md) |
-| MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| Quarkus Outbox runtime and Kafka delivery, with optional Domain Event Outbox composition | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox runtime and Kafka or RabbitMQ delivery, with optional Domain Event Outbox composition | [Helidon MP](../implementations/helidon.md) |
-| Spring Boot capability assembly and dispatcher configuration | [Spring Boot](../implementations/spring-boot.md) |
+| JPA Outbox and Inbox stores, including database-specific Inbox claiming | [JPA](../persistence/jpa.md) |
+| MyBatis-Plus Outbox and Inbox stores | [MyBatis-Plus](../persistence/mybatis-plus.md) |
+| Quarkus Outbox runtime and Kafka delivery, with optional Domain Event Outbox composition | [Quarkus](../runtimes/quarkus.md) |
+| Helidon MP Outbox runtime and Kafka or RabbitMQ delivery, with optional Domain Event Outbox composition | [Helidon MP](../runtimes/helidon.md) |
+| Spring Boot capability assembly and dispatcher configuration | [Spring Boot](../runtimes/spring-boot.md) |
 
 Use [Spring Boot Auto-configuration](../reference/spring-boot-autoconfiguration.md) as the lookup
 for starters, properties, and registration conditions.

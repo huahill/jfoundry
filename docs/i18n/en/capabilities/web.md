@@ -188,11 +188,11 @@ Two limits are deliberate:
 
 ### Runtime Reference
 
-- [Spring Boot Runtime Assembly](../implementations/spring-boot.md) covers auto-configuration and
+- [Spring Boot Runtime Assembly](../runtimes/spring-boot.md) covers auto-configuration and
   Spring MVC replacement rules.
-- [Quarkus Runtime Integration](../implementations/quarkus.md) covers extension composition and
+- [Quarkus Runtime Integration](../runtimes/quarkus.md) covers extension composition and
   Quarkus REST behavior.
-- [Helidon MP Runtime Integration](../implementations/helidon.md) covers CDI and JAX-RS behavior.
+- [Helidon MP Runtime Integration](../runtimes/helidon.md) covers CDI and JAX-RS behavior.
 
 ## Request Correlation
 

@@ -85,9 +85,9 @@ Cloud、Quarkus 和 Helidon 应用则与对应运行时 BOM 一起显式导入�
 
 | 运行时 | 基础入口 | 接入说明 |
 |---|---|---|
-| Spring Boot | 按需选择 Spring Boot 能力启动器；基础 starter 通常由能力启动器传递引入 | [Spring Boot 运行时装配](../implementations/spring-boot.md) |
-| Quarkus | `jfoundry-transaction-quarkus-runtime` 及其他能力扩展 | [Quarkus 运行时集成](../implementations/quarkus.md) |
-| Helidon MP | 按能力选择 `jfoundry-transaction-helidon`、`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon` | [Helidon MP 运行时集成](../implementations/helidon.md) |
+| Spring Boot | 按需选择 Spring Boot 能力启动器；基础 starter 通常由能力启动器传递引入 | [Spring Boot 运行时装配](../runtimes/spring-boot.md) |
+| Quarkus | `jfoundry-transaction-quarkus-runtime` 及其他能力扩展 | [Quarkus 运行时集成](../runtimes/quarkus.md) |
+| Helidon MP | 按能力选择 `jfoundry-transaction-helidon`、`jfoundry-domain-event-helidon` 与 `jfoundry-persistence-helidon` | [Helidon MP 运行时集成](../runtimes/helidon.md) |
 
 运行时入口只负责装配，不应进入领域或应用代码。
 

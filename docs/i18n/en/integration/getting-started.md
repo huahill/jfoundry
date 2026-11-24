@@ -99,9 +99,9 @@ dependency composition.
 
 | Runtime | Base entry point | Setup guide |
 |---|---|---|
-| Spring Boot | Select the required Spring Boot capability starter; the shared baseline is usually transitive | [Spring Boot Runtime Assembly](../implementations/spring-boot.md) |
-| Quarkus | `jfoundry-transaction-quarkus-runtime` and other capability extensions | [Quarkus Runtime Integration](../implementations/quarkus.md) |
-| Helidon MP | Select `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon` by capability | [Helidon MP Runtime Integration](../implementations/helidon.md) |
+| Spring Boot | Select the required Spring Boot capability starter; the shared baseline is usually transitive | [Spring Boot Runtime Assembly](../runtimes/spring-boot.md) |
+| Quarkus | `jfoundry-transaction-quarkus-runtime` and other capability extensions | [Quarkus Runtime Integration](../runtimes/quarkus.md) |
+| Helidon MP | Select `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon` by capability | [Helidon MP Runtime Integration](../runtimes/helidon.md) |
 
 Runtime entry points assemble capabilities; they do not belong in domain or application code.
 

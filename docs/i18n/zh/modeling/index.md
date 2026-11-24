@@ -11,5 +11,5 @@
 
 - 聚合映射与持久化适配器：[聚合持久化](../capabilities/aggregate-persistence.md)
 - Transactional Outbox 与 Inbox：[可靠消息](../capabilities/reliable-messaging.md)
-- 运行时事件分发装配：[Spring Boot](../implementations/spring-boot.md)、
-  [Quarkus](../implementations/quarkus.md) 与 [Helidon MP](../implementations/helidon.md)
+- 运行时事件分发装配：[Spring Boot](../runtimes/spring-boot.md)、
+  [Quarkus](../runtimes/quarkus.md) 与 [Helidon MP](../runtimes/helidon.md)
