@@ -371,48 +371,16 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 非成功响应转换成 `HttpResponseException`，或把传输失败转换成 `HttpRequestException`；这两种异常只属于 Spring
 `RestClient`。
 
-## PostgreSQL 中间件验证
+## 验证
 
-运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL。它验证 Quarkus 的
-`TransactionRunner`、JPA Outbox 存储和数据源装配确实会在 PostgreSQL 中持久化 Outbox
-记录，而不是使用内存测试数据库。该配置档保持显式启用，因此普通模块测试不需要 Docker：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -am -Pjvm-integration verify
-```
-
-## 原生镜像验证
-
-仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。每个
-`@QuarkusIntegrationTest` 都使用 `PostgreSqlIntegrationTestProfile`：它启动 PostgreSQL，并把数据源种类设为
-`postgresql`。这些测试通过 HTTP 入口，针对原生可执行文件验证 `TransactionRunner`、JPA 聚合持久化、领域事件分发、Inbox，以及 Outbox 的持久化、派发、恢复和清理。
-
-### 本地 CI 对齐验证
-
-使用 Java 25 和 Docker 在本地运行两个 Quarkus CI 阶段。在 Linux 上，原生阶段使用与 CI 相同的容器构建；在
-macOS 上，它使用本地 GraalVM，因为 Linux 容器生成的可执行文件无法在宿主机运行：
+Quarkus 中间件和原生镜像声明由直接的 Quarkus 集成测试模块验证。支持范围和上游限制见
+[兼容矩阵](../../../release/compatibility.md)。
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
-
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。基础原生阶段不包含 Redisson。
-Redis 锁验证是独立阶段，因此缺少 Redisson 地址不会破坏默认应用：
-
-```bash
-JAVA_25_HOME=/path/to/java-25 \
-GRAALVM_HOME=/path/to/graalvm-25 \
-bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
-```
-
-该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。
-
-通用 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
-`bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
 ## 当前范围
 

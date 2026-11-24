@@ -200,56 +200,13 @@ Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约�
 
 ## 验证
 
-运行时本地的集成配置档会验证 Spring Boot 装配、启动器依赖边界、自动配置，以及通过
-Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 RabbitMQ：
+Spring 运行时支持由直接运行时集成测试和 CI 配置档验证。中间件、原生镜像、MyBatis-Plus 和
+Redisson 的具体声明见[兼容矩阵](../../../release/compatibility.md)。
 
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pit verify
-```
-
-同一模块还包含面向受支持 Spring Boot 版本的最小 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
-CI 随后启动可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`。这构成基础 Spring Boot 启动器与
-Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消息代理、锁或调度器适配器。各项能力必须先具备
-独立的原生镜像集成验证，才能声明受支持：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative package
-```
-
-`native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
-原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
-业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
-`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
-PostgreSQL；不认证 JPA、消息代理或 Redisson。精确测试版本记录在
-[兼容矩阵](../../../release/compatibility.md)。此外，它还会
-通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储。
-持久化、Outbox 和 Inbox 启动器提供 `mybatis-plus-spring-boot-native-image`；该配置档不再声明这个 Baomidou 坐标：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative-mybatis-plus verify
-```
-
-`native-redisson` 配置档单独认证 Redisson 4.6.1 锁 starter 与 Redis 的组合。测试在 JVM 进程中
-启动 Redis，启动生成的原生可执行程序，并验证 JFoundry `LockExecutor` 能获取和释放分布式锁。
-这些配置档不认证其他 Redis、消息代理或持久化组合。业务应用的事件载荷由应用序列化时，仍需为其类型
-提供 Spring AOT binding hints。
-
-### 本地 CI 对齐验证
-
-使用 Java 25、Docker 和 GraalVM Native Image 在本地运行全部 Spring CI 阶段：
+具备 Java 25、Docker 和 GraalVM 时，可运行全部 Spring 验证：
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
-
-使用 `--stage middleware`、`--stage native`、`--stage native-mybatis-plus` 或 `--stage native-redisson`
-可以只运行一个阶段。通用
-`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。
