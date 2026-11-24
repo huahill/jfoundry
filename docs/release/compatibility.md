@@ -43,7 +43,25 @@ that ignore floor in the same change that raises the Java baseline.
 
 ## Consumer Composition
 
-Consumers choose one runtime path. Spring Boot uses the JFoundry Boot parent or BOM; Spring Cloud uses the JFoundry Boot BOM plus the official Cloud and Alibaba BOMs; Quarkus and Helidon use their matching runtime BOM with `jfoundry-dependencies`. Runtime BOMs manage versions only; applications still select capabilities explicitly.
+Every business application imports `jfoundry-dependencies` and adds only the runtime BOM and
+capabilities it needs:
+
+- Spring Boot-only applications use `jfoundry-spring-boot-dependencies` or
+  `jfoundry-spring-boot-parent`.
+- Spring Cloud applications use their own compatible Spring Boot parent and import
+  `jfoundry-spring-boot-dependencies` followed by the official Spring Cloud and Alibaba BOMs.
+- Quarkus and Helidon applications import their matching runtime BOM before
+  `jfoundry-dependencies`.
+
+Runtime BOMs manage their platform ecosystem and matching JFoundry runtime module versions. They do
+not add runtime capabilities to the classpath or import Foundation. Foundation supplies only
+runtime-neutral coordinates the platform BOM does not already own. Applications still select each
+starter, adapter, database, and broker explicitly.
+
+The aggregate `jfoundry-dependencies` BOM manages framework-neutral JFoundry modules. Spring Boot,
+Quarkus, and Helidon BOMs manage their matching JFoundry runtime modules; the shared
+`jfoundry-jakarta-dependencies` BOM is imported by the Quarkus and Helidon BOMs for portable Jakarta
+adapters. These management entries do not add capabilities to the application classpath.
 
 ## Validated Capability Scope
 
