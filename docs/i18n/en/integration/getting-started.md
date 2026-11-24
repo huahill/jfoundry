@@ -1,44 +1,16 @@
 # Getting Started
 
-JFoundry's core modules do not depend on Spring, Quarkus, or Helidon. Start from business needs and
-complete the domain and architecture decisions first, then select core capabilities and a runtime
-integration at the application's outer edge.
+JFoundry keeps domain, application, and architecture choices independent from the application runtime. Use this path to choose the boundaries first, then select one runtime and the capabilities it needs.
 
-## 1. Choose An Onboarding Path
+## 1. Choose the architecture style
 
-Architecture style determines code boundaries, dependency direction, and the rules that architecture
-tests enforce. It is a business-project decision, not a consequence of choosing Spring, Quarkus, or
-Helidon.
+Choose Hexagonal, Onion Simple, Onion Classical, or no full style according to the business project's needs. Do not mix Hexagonal and Onion in one analysis scope; CQRS is an optional pattern. Use `jfoundry-architecture-test` to verify the chosen style. See [Architecture Styles](../framework/architecture-styles.md).
 
-For AI-assisted development, use
-[`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills) and start
-with `$domain-architecture-workflow`. This is the recommended path for non-trivial business projects.
-The workflow starts from requirements and project evidence, performs domain modeling, decides
-whether a full architecture style is justified, selects Hexagonal or Onion when appropriate, and
-evaluates CQRS separately. It then produces traceable JFoundry landing guidance. Do not select the
-architecture style before invoking the workflow.
+For AI-assisted development, the optional [`domain-architecture-skills`](https://github.com/huahill/domain-architecture-skills) workflow can make the same decision from requirements and project evidence.
 
-For manual onboarding, make the architecture decision directly:
+## 2. Add the core BOM
 
-| Choice | Use when | JFoundry entry point |
-|---|---|---|
-| Hexagonal | Inputs, outputs, ports, and adapters need explicit direction. | `jfoundry-hexagonal` and `JFoundryRules.hexagonalStrict()` |
-| Onion Simple | The main goal is inward dependencies and a protected domain core. | `jfoundry-onion` and `JFoundryRules.onionSimple()` |
-| Onion Classical | The team deliberately needs finer domain model, domain service, and application service rings. | `jfoundry-onion` and `JFoundryRules.onionClassical()` |
-| No full style yet | The scope is simple CRUD or a short-lived prototype with few business invariants. | Keep only the boundaries the project needs. |
-
-After the AI-assisted or manual decision, protect the selected style with
-`jfoundry-architecture-test`. Do not mix Hexagonal and Onion in the same analysis scope. CQRS is an
-optional pattern for genuine command/query asymmetry, not a third primary style. See
-[Architecture Styles](../framework/architecture-styles.md) for the complete manual decision guide.
-
-## 2. Configure The Core BOM And Architecture Dependencies
-
-Every external application uses `jfoundry-dependencies` for core modules, DDD, architecture styles,
-and framework-neutral adapters. The standalone Spring Boot consumer BOM includes it; Cloud, Quarkus,
-and Helidon applications import it explicitly alongside their runtime BOM. It belongs in
-`<dependencyManagement>` and is not a runtime dependency.
-It does not re-declare JUnit, Jackson, or other stacks already owned by the selected runtime platform BOM:
+Every application uses `jfoundry-dependencies` for DDD, architecture styles, application contracts, and framework-neutral adapters. The Spring Boot parent includes it through the Boot consumer BOM; other applications import it explicitly with their runtime BOM.
 
 ```xml
 <dependencyManagement>
@@ -54,63 +26,18 @@ It does not re-declare JUnit, Jackson, or other stacks already owned by the sele
 </dependencyManagement>
 ```
 
-Then add dependencies by responsibility:
+Select `jfoundry-domain`, `jfoundry-application-core`, one architecture-style module, and `jfoundry-architecture-test` as needed. Persistence, messaging, Outbox, Inbox, and locks remain explicit capabilities.
 
-| Responsibility | Starting dependency |
-|---|---|
-| Domain model | `jfoundry-domain` |
-| Application services | `jfoundry-application-core` |
-| Primary architecture style | Choose one: `jfoundry-hexagonal` or `jfoundry-onion` |
-| Architecture verification | `jfoundry-architecture-test` in test scope |
-| Technical implementation | Select framework-neutral JPA, MyBatis-Plus, messaging, or other adapters as needed |
+## 3. Choose a runtime
 
-For example, a Hexagonal project directly depends on its domain module and architecture facade, then
-uses the architecture rules in test scope. Replace `jfoundry-hexagonal` with `jfoundry-onion` for an
-Onion project:
-
-```xml
-<dependencies>
-    <dependency>
-        <groupId>io.github.huahill</groupId>
-        <artifactId>jfoundry-domain</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>io.github.huahill</groupId>
-        <artifactId>jfoundry-hexagonal</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>io.github.huahill</groupId>
-        <artifactId>jfoundry-architecture-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-</dependencies>
-```
-
-Domain and application modules must not depend on a concrete runtime. Persistence, messaging,
-Outbox, Inbox, and other capabilities also remain explicit choices rather than implicit base
-dependencies.
-
-## 3. Select A Runtime
-
-Each runtime has its own BOM and base entry point; do not mix runtime BOMs. Applications select
-`jfoundry-dependencies` plus exactly one matching runtime BOM. The supported JFoundry Boot parent
-imports the standalone Spring Boot consumer BOM. See the runtime guide for its Parent, BOM, and
-dependency composition.
-
-| Runtime | Base entry point | Setup guide |
+| Runtime | Consumer entry point | Guide |
 |---|---|---|
-| Spring Boot | Select the required Spring Boot capability starter; the shared baseline is usually transitive | [Spring Boot Runtime Assembly](../runtimes/spring-boot.md) |
-| Quarkus | `jfoundry-transaction-quarkus-runtime` and other capability extensions | [Quarkus Runtime Integration](../runtimes/quarkus.md) |
-| Helidon MP | Select `jfoundry-transaction-helidon`, `jfoundry-domain-event-helidon`, and `jfoundry-persistence-helidon` by capability | [Helidon MP Runtime Integration](../runtimes/helidon.md) |
+| Spring Boot | `jfoundry-spring-boot-parent` or `jfoundry-spring-boot-dependencies` | [Spring Boot](../runtimes/spring-boot.md) |
+| Quarkus | `jfoundry-dependencies` plus `jfoundry-quarkus-dependencies` | [Quarkus](../runtimes/quarkus.md) |
+| Helidon MP | `jfoundry-dependencies` plus `jfoundry-helidon-dependencies` | [Helidon MP](../runtimes/helidon.md) |
 
-Runtime entry points assemble capabilities; they do not belong in domain or application code.
+Choose one runtime path. Runtime modules stay outside domain and application code.
 
-## 4. Add Capabilities As Needed
+## 4. Select capabilities
 
-Use the [Capability Catalog](../capabilities/index.md) to select aggregate persistence, transactions,
-Web, messaging, Outbox/Inbox, distributed locks, or observability. Each capability page lists the
-matching entry points and current support scope for every runtime.
-
-Before implementation, continue with [Modeling](../modeling/index.md) for value objects, domain
-events, and repository contracts. Before production adoption, review
-[Adoption Readiness and Validated Scope](adoption-readiness.md).
+Start from the [Capability Catalog](../capabilities/index.md), then choose the matching runtime entry point and persistence implementation. Use [Persistence Implementations](../persistence/index.md) for JPA and MyBatis-Plus details. Before production adoption, review [Adoption Readiness and Validated Scope](adoption-readiness.md).
