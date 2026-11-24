@@ -31,8 +31,8 @@ create a published parent or inheritance boundary.
   the only Maven ignore rule: `io.helidon:helidon-dependencies` ignores JDK-aligned Tip versions
   `>= 27` while the Java baseline is 25; move the floor in the same change that raises the baseline.
 - Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
-  line and explicitly import `jfoundry-spring-cloud-dependencies`
-  before `jfoundry-dependencies`.
+  line and explicitly import `jfoundry-spring-boot-dependencies` before
+  `jfoundry-spring-cloud-dependencies`.
 - `jfoundry-foundation-dependencies` manages low-level, runtime-neutral dependency versions and
   coordinates that the selected runtime platform BOM does not already own. It does not manage
   runtime starters, deployment artifacts, runtime-specific Native Image integrations, or platform

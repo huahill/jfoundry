@@ -51,7 +51,7 @@ capabilities it needs:
 - Spring Boot-only applications use `jfoundry-spring-boot-dependencies` or
   `jfoundry-spring-boot-parent`.
 - Spring Cloud applications use their own compatible Spring Boot parent and import
-  `jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`.
+  `jfoundry-spring-boot-dependencies` before `jfoundry-spring-cloud-dependencies`.
 - Quarkus and Helidon applications import their matching runtime BOM before
   `jfoundry-dependencies`.
 

@@ -27,22 +27,21 @@ Outbox 等业务能力。通常直接选择所需的能力启动器；它会按�
 ## Spring Cloud
 
 需要 Spring Cloud 或 Spring Cloud Alibaba 的应用不能使用上面的 JFoundry Boot Parent。应用应使用与受支持
-Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-spring-cloud-dependencies`，再导入
-`jfoundry-dependencies`：
+Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 Spring Boot 运行时 BOM，再导入 Cloud BOM：
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+            <artifactId>jfoundry-spring-boot-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
+            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
@@ -51,9 +50,8 @@ Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-s
 </dependencyManagement>
 ```
 
-Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 Parent 或另一个显式 Boot BOM 管理。
-不得同时导入 `jfoundry-spring-boot-dependencies` 与 `jfoundry-spring-cloud-dependencies`。Cloud BOM 只管理平台生态，
-不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
+Spring Boot BOM 管理 Spring Boot 与 Spring 专属 JFoundry 模块，Cloud BOM 管理 Spring Cloud 与 Spring Cloud Alibaba。
+Cloud 应用需要同时导入二者。Cloud BOM 不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
 
 保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)单独导入
 `jfoundry-spring-boot-dependencies`，并自行管理 Java 版本。

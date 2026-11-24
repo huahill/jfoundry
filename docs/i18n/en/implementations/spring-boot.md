@@ -37,21 +37,21 @@ base starter as the transaction starter.
 
 An application that needs Spring Cloud or Spring Cloud Alibaba must not use the JFoundry Boot parent.
 Use an application or standard Maven parent compatible with the supported Spring Cloud versions, then import
-`jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`:
+the Spring Boot runtime BOM followed by the Cloud BOM:
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+            <artifactId>jfoundry-spring-boot-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
             <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
+            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
@@ -60,11 +60,9 @@ Use an application or standard Maven parent compatible with the supported Spring
 </dependencyManagement>
 ```
 
-The Cloud BOM manages Spring Cloud and Spring Cloud Alibaba; Spring Boot remains managed by the
-application parent or another explicit Boot BOM. Do not import both
-`jfoundry-spring-boot-dependencies` and `jfoundry-spring-cloud-dependencies`. The Cloud BOM manages
-the platform ecosystem only; it does not add Cloud starters or imply that JFoundry provides an
-adapter for every Cloud component.
+The Spring Boot BOM manages Spring Boot and Spring-specific JFoundry modules; the Cloud BOM manages
+Spring Cloud and Spring Cloud Alibaba. Import both for a Cloud application. The Cloud BOM does not
+add Cloud starters or imply that JFoundry provides an adapter for every Cloud component.
 
 An application retaining another parent while using Spring Boot without Spring Cloud should import
 `jfoundry-spring-boot-dependencies` by itself as described in

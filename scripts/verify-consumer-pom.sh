@@ -239,14 +239,14 @@ XML
         <dependencies>
             <dependency>
                 <groupId>io.github.huahill</groupId>
-                <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+                <artifactId>jfoundry-spring-boot-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.github.huahill</groupId>
-                <artifactId>jfoundry-dependencies</artifactId>
+                <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
                 <version>${version}</version>
                 <type>pom</type>
                 <scope>import</scope>
