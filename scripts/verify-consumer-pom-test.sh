@@ -57,7 +57,7 @@ cat > "${starter_dir}/jfoundry-webmvc-spring-boot-starter-${fixture_version}.pom
 </project>
 XML
 
-for artifact in jfoundry-dependencies jfoundry-jakarta-dependencies jfoundry-spring-boot-dependencies jfoundry-spring-cloud-dependencies; do
+for artifact in jfoundry-dependencies jfoundry-jakarta-dependencies jfoundry-spring-boot-dependencies; do
     artifact_dir="${fixture_repo}/io/github/huahill/${artifact}/${fixture_version}"
     mkdir -p "${artifact_dir}"
     cat > "${artifact_dir}/${artifact}-${fixture_version}.pom" <<XML
@@ -85,23 +85,6 @@ cat > "${spring_boot_bom_fixture}" <<'XML'
     <dependency><artifactId>jfoundry-dependencies</artifactId><type>pom</type><scope>import</scope></dependency>
     <dependency><artifactId>spring-boot-dependencies</artifactId><type>pom</type><scope>import</scope></dependency>
   </dependencies></dependencyManagement>
-</project>
-XML
-
-cloud_bom_fixture="${fixture_repo}/io/github/huahill/jfoundry-spring-cloud-dependencies/${fixture_version}/jfoundry-spring-cloud-dependencies-${fixture_version}.pom"
-cat > "${cloud_bom_fixture}" <<'XML'
-<project>
-  <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-  <url>https://github.com/huahill/jfoundry</url>
-  <licenses></licenses>
-  <developers></developers>
-  <scm></scm>
-  <dependencyManagement>
-    <dependencies>
-      <dependency><artifactId>spring-cloud-dependencies</artifactId></dependency>
-      <dependency><artifactId>spring-cloud-alibaba-dependencies</artifactId></dependency>
-    </dependencies>
-  </dependencyManagement>
 </project>
 XML
 
@@ -190,8 +173,6 @@ assert_accepts
 
 write_parent jfoundry-spring-boot-parent 4.0.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies jfoundry-dependencies
 assert_rejects "a Spring Boot parent with the Cloud-line Boot version"
-write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-cloud-dependencies jfoundry-spring-cloud-dependencies jfoundry-dependencies
-assert_rejects "a Spring Boot parent that imports the Cloud runtime BOM"
 write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-dependencies jfoundry-spring-boot-dependencies
 assert_rejects "a Spring Boot parent that imports the core BOM before the runtime BOM"
 write_parent jfoundry-spring-boot-parent 9.8.7 jfoundry-spring-boot-dependencies jfoundry-spring-boot-dependencies

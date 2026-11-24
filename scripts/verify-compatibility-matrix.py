@@ -12,11 +12,9 @@ import xml.etree.ElementTree as ET
 
 # Spring Boot-only deliberately has no row: it follows the current stable Spring Boot line and every
 # bump is validated by the full CI matrix, so no Boot line is pinned in documentation. The rows below
-# are the composite or externally constrained lines: Spring Cloud pairs with its Alibaba/Nacos train,
-# Quarkus and Helidon carry their own major-line constraints.
+# are the JFoundry-owned runtime lines. Spring Cloud and Alibaba remain upstream platform choices
+# documented in the matrix but are not owned by a JFoundry Cloud BOM.
 PLATFORMS = [
-    ("Spring Cloud", "jfoundry-spring-cloud-dependencies", "spring-cloud.version"),
-    ("Spring Cloud Alibaba", "jfoundry-spring-cloud-dependencies", "spring-cloud-alibaba.version"),
     ("Quarkus", "jfoundry-quarkus-dependencies", "quarkus.platform.version"),
     ("Helidon MP", "jfoundry-helidon-dependencies", "helidon.version"),
 ]

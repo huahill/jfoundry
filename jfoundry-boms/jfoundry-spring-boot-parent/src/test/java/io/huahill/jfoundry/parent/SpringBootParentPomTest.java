@@ -115,7 +115,6 @@ class SpringBootParentPomTest {
                 Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-jakarta-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
         String reactorVersion = childText(
@@ -152,7 +151,6 @@ class SpringBootParentPomTest {
     void springRuntimeBomOwnsSpringSpecificComponentFamilies() throws Exception {
         Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
         Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
-        Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isFalse();
@@ -191,18 +189,8 @@ class SpringBootParentPomTest {
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.huahill", "jfoundry-foundation-dependencies", "${project.version}"));
-        assertThat(importedBoms(cloud)).doesNotContain(
-                new Coordinate("io.github.huahill", "jfoundry-foundation-dependencies", "${project.version}"));
-        for (Document springLine : List.of(boot, cloud)) {
-            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
-            assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
-        }
+        assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
+        assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
     }
 
     @Test
@@ -264,17 +252,6 @@ class SpringBootParentPomTest {
         assertThat(managedArtifactIds(helidon)).containsSubsequence(
                 "helidon-dependencies",
                 "redisson-helidon-40");
-    }
-
-    @Test
-    void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
-        Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
-
-        assertThat(child(child(document.getDocumentElement(), "properties"), "spring-boot.version"))
-                .isNull();
-        assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("org.springframework.cloud", "spring-cloud-dependencies", "${spring-cloud.version}"),
-                new Coordinate("com.alibaba.cloud", "spring-cloud-alibaba-dependencies", "${spring-cloud-alibaba.version}"));
     }
 
     @Test

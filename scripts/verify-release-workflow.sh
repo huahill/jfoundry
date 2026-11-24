@@ -11,7 +11,6 @@ bom_pom_files=(
     "jfoundry-boms/jfoundry-helidon-dependencies/pom.xml"
     "jfoundry-boms/jfoundry-quarkus-dependencies/pom.xml"
     "jfoundry-boms/jfoundry-spring-boot-dependencies/pom.xml"
-    "jfoundry-boms/jfoundry-spring-cloud-dependencies/pom.xml"
 )
 
 if [[ ! -f "${workflow_file}" ]]; then
