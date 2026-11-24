@@ -19,13 +19,13 @@ Quarkus 环境中，加入 `jfoundry-transaction-quarkus-runtime`、`jfoundry-pe
 `AggregatePersistenceContext`。应使用 `TransactionRunner` 作为事务边界，业务代码无需创建或设置该上下文。
 JPA Quarkus capability 会翻译已知 Hibernate 可用性失败，应用可以使用自己的 CDI
 `PersistenceFailureTranslator` 覆盖它。
-运行时装配要求见 [Quarkus](quarkus.md)。
+运行时装配要求见 [Quarkus](../runtimes/quarkus.md)。
 
 Helidon MP 环境中，加入 `jfoundry-persistence-jpa-helidon`，再配置应用自己的 Helidon CDI
 JPA/Hibernate 集成、数据源和持久化单元。该构件会引入 `jfoundry-persistence-jpa` 与
 `jfoundry-persistence-helidon`；后者提供事务绑定的持久化上下文，Helidon JPA 构件则补充已识别的
 Hibernate 可用性失败转换。
-显式依赖组合和原生镜像限制见 [Helidon MP](helidon.md)。
+显式依赖组合和原生镜像限制见 [Helidon MP](../runtimes/helidon.md)。
 
 ### 直接装配 JPA 或 Hibernate
 
@@ -42,23 +42,23 @@ JPQL 是面向实体及其字段的可移植查询语言。Hibernate 会把普�
 Quarkus 的 JPA Outbox 存储加入 `jfoundry-outbox-jpa-quarkus-runtime`。它会把
 `JpaOutboxMessageEntity` 注册到默认 persistence unit，并提供默认 CDI `OutboxMessageStore`；应用提供的 CDI
 `OutboxMessageStore` 优先。此项仅为存储装配，不会加入派发器、调度器、序列化器、自动事件外部化或 Inbox
-支持。依赖配置和原生镜像验证见 [Quarkus](quarkus.md)。
+支持。依赖配置和原生镜像验证见 [Quarkus](../runtimes/quarkus.md)。
 
 Quarkus 的 Outbox 派发加入 `jfoundry-outbox-quarkus-runtime`，并提供真实的 CDI `MessageSender`。
 `JdkOutboxWorker` 默认开启；仅记录进程才设置 `jfoundry.outbox.dispatcher.enabled=false`。worker 不会引入消息代理客户端或回退发送器。
-派发配置见 [Quarkus](quarkus.md)。
+派发配置见 [Quarkus](../runtimes/quarkus.md)。
 
 Quarkus 的 JPA Inbox 存储加入 `jfoundry-inbox-jpa-quarkus-runtime`。它会把
 `JpaInboxMessageEntity` 注册到默认 persistence unit，并提供默认 CDI `JpaInboxClaimStrategy`、
 `InboxMessageStore` 和 `InboxTemplate` Bean。默认领取策略只支持 PostgreSQL 与 MySQL；其他数据库应声明
 `JpaInboxClaimStrategy`。应用提供的 `JpaInboxClaimStrategy`、`InboxMessageStore` 或 `InboxTemplate` 优先。
 此项仅为存储装配，不会加入派发器、调度器、序列化器、自动事件外部化或启动器。依赖配置和原生镜像
-验证见 [Quarkus](quarkus.md)。
+验证见 [Quarkus](../runtimes/quarkus.md)。
 
 Helidon MP 中，加入 `jfoundry-outbox-jpa-helidon` 可暴露 JPA `OutboxMessageStore`；加入
 `jfoundry-inbox-jpa-helidon` 可暴露 `JpaInboxClaimStrategy`、`InboxMessageStore` 和
 `InboxTemplate`。两者都要求应用提供 JPA 集成和迁移。若要启用定时派发和自动事件外部化，还需单独加入
-`jfoundry-outbox-helidon`。CDI 替代实现的替换规则与原生镜像范围见 [Helidon MP](helidon.md)。
+`jfoundry-outbox-helidon`。CDI 替代实现的替换规则与原生镜像范围见 [Helidon MP](../runtimes/helidon.md)。
 
 实体注册不等于 schema 管理。将匹配的 Outbox 或 Inbox SQL 模板复制到应用自己的迁移流程并在那里维护；不要依赖 Hibernate schema 自动生成功能创建或演进 jfoundry 表。
 
@@ -68,4 +68,4 @@ JPA Inbox 内置原子领取策略只支持 PostgreSQL 和 MySQL。其他数据�
 
 自定义领取策略实现 `boolean tryClaim(EntityManager entityManager, String messageId, String consumerName, String claimToken, Instant now)`。它必须以给定的令牌和领取时间原子创建 `PROCESSING` 行，并在消息已存在时返回 `false`；目标数据库必须具有并发重复投递测试。原生 JPA/Hibernate 的 Outbox 和 Inbox 装配必须应用[可靠消息](../capabilities/reliable-messaging.md)描述的事务边界。
 
-运行时装配和配置见 [Spring Boot](spring-boot.md)、[Quarkus](quarkus.md)、[Helidon MP](helidon.md)和[自动配置参考](../reference/spring-boot-autoconfiguration.md)。
+运行时装配和配置见 [Spring Boot](../runtimes/spring-boot.md)、[Quarkus](../runtimes/quarkus.md)、[Helidon MP](../runtimes/helidon.md)和[自动配置参考](../reference/spring-boot-autoconfiguration.md)。

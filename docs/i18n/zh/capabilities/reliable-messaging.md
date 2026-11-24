@@ -93,10 +93,10 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 
 | 需求 | 指南 |
 |------|------|
-| MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../implementations/jpa.md) |
-| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../implementations/helidon.md) |
-| Spring Boot 能力装配和派发器配置 | [Spring Boot](../implementations/spring-boot.md) |
+| MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../persistence/mybatis-plus.md) |
+| JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../persistence/jpa.md) |
+| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../runtimes/quarkus.md) |
+| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../runtimes/helidon.md) |
+| Spring Boot 能力装配和派发器配置 | [Spring Boot](../runtimes/spring-boot.md) |
 
 启动器、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。

@@ -2,7 +2,7 @@
 
 This is lookup material for Spring Boot entry points, configuration properties, and bean conditions.
 For behavioral contracts, start with [capabilities](../capabilities/aggregate-persistence.md); for
-technology-specific setup, use the [implementation guides](../implementations/spring-boot.md).
+technology-specific setup, use the [implementation guides](../runtimes/spring-boot.md).
 
 ## Starter Entry Points
 

@@ -30,13 +30,13 @@ transaction-scoped `AggregatePersistenceContext` from the jfoundry Quarkus exten
 `TransactionRunner` as the transaction boundary; do not create or set the context in business code.
 The JPA Quarkus capability translates known Hibernate availability failures and can be replaced with
 an application CDI `PersistenceFailureTranslator`.
-See [Quarkus](quarkus.md) for the runtime assembly requirements.
+See [Quarkus](../runtimes/quarkus.md) for the runtime assembly requirements.
 
 For Helidon MP, add `jfoundry-persistence-jpa-helidon`, then configure the application's
 Helidon CDI JPA/Hibernate integration, datasource, and persistence unit. This artifact brings in
 `jfoundry-persistence-jpa` and `jfoundry-persistence-helidon`; the latter supplies the
 transaction-bound persistence context, while the Helidon JPA artifact adds the recognized Hibernate
-availability-failure translation. See [Helidon MP](helidon.md) for its explicit dependency composition and Native Image
+availability-failure translation. See [Helidon MP](../runtimes/helidon.md) for its explicit dependency composition and Native Image
 limitations.
 
 ### Direct JPA Or Hibernate Assembly
@@ -63,13 +63,13 @@ For Quarkus JPA Outbox storage, add `jfoundry-outbox-jpa-quarkus-runtime`. It re
 `JpaOutboxMessageEntity` with the default persistence unit and supplies a default CDI
 `OutboxMessageStore`; an application-provided CDI `OutboxMessageStore` takes precedence. This is
 storage assembly only: it does not add a dispatcher, scheduler, serializer, automatic event
-externalization, or Inbox support. See [Quarkus](quarkus.md) for dependency setup and native-image
+externalization, or Inbox support. See [Quarkus](../runtimes/quarkus.md) for dependency setup and native-image
 verification.
 
 For Quarkus Outbox dispatching, add `jfoundry-outbox-quarkus-runtime` and provide a real CDI
 `MessageSender`. `JdkOutboxWorker` is on by default; set `jfoundry.outbox.dispatcher.enabled=false`
 only for recorder-only processes. The worker does not add a broker client or a fallback sender. See
-[Quarkus](quarkus.md) for dispatch configuration.
+[Quarkus](../runtimes/quarkus.md) for dispatch configuration.
 
 For Quarkus JPA Inbox storage, add `jfoundry-inbox-jpa-quarkus-runtime`. It registers
 `JpaInboxMessageEntity` with the default persistence unit and supplies default CDI
@@ -77,14 +77,14 @@ For Quarkus JPA Inbox storage, add `jfoundry-inbox-jpa-quarkus-runtime`. It regi
 supports PostgreSQL and MySQL only; declare `JpaInboxClaimStrategy` for another database. An
 application-provided `JpaInboxClaimStrategy`, `InboxMessageStore`, or `InboxTemplate` takes
 precedence. This is storage assembly only: it does not add a dispatcher, scheduler, serializer,
-automatic event externalization, or a starter. See [Quarkus](quarkus.md) for dependency setup and
+automatic event externalization, or a starter. See [Quarkus](../runtimes/quarkus.md) for dependency setup and
 native-image verification.
 
 For Helidon MP, add `jfoundry-outbox-jpa-helidon` to expose the JPA
 `OutboxMessageStore`, and add `jfoundry-inbox-jpa-helidon` to expose
 `JpaInboxClaimStrategy`, `InboxMessageStore`, and `InboxTemplate`. Both require the application's
 JPA integration and migrations. Add `jfoundry-outbox-helidon` separately for opt-in
-scheduled dispatch and automatic externalization. See [Helidon MP](helidon.md) for the CDI
+scheduled dispatch and automatic externalization. See [Helidon MP](../runtimes/helidon.md) for the CDI
 alternative replacement rule and native-image scope.
 
 Entity registration is not schema management. Copy the matching Outbox or Inbox SQL template into
@@ -108,5 +108,5 @@ return `false` for an existing delivery; include a concurrent duplicate-delivery
 database. Raw JPA/Hibernate Outbox and Inbox assembly must apply the transaction boundaries described
 by [reliable messaging](../capabilities/reliable-messaging.md).
 
-For runtime assembly and configuration, see [Spring Boot](spring-boot.md), [Quarkus](quarkus.md),
-[Helidon MP](helidon.md), and the [auto-configuration reference](../reference/spring-boot-autoconfiguration.md).
+For runtime assembly and configuration, see [Spring Boot](../runtimes/spring-boot.md), [Quarkus](../runtimes/quarkus.md),
+[Helidon MP](../runtimes/helidon.md), and the [auto-configuration reference](../reference/spring-boot-autoconfiguration.md).

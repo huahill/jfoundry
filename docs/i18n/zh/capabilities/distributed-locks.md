@@ -33,7 +33,7 @@ Quarkus 和 Helidon 使用 Jakarta EL 求值。写成 `#{orderId}` 或 `order:#{
 
 用例同时需要分布式锁和事务时，应先获取锁，再在临界区内调用 `TransactionRunner`。这样可以避免在等待分布式锁期间提前打开数据库事务。
 
-Spring Boot 运行时装配、所选锁客户端集成、用户覆盖和注解配置见 [Spring Boot 运行时装配](../implementations/spring-boot.md)。精确的启动器、配置项和自动配置条件见 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)。
+Spring Boot 运行时装配、所选锁客户端集成、用户覆盖和注解配置见 [Spring Boot 运行时装配](../runtimes/spring-boot.md)。精确的启动器、配置项和自动配置条件见 [Spring Boot 自动配置参考](../reference/spring-boot-autoconfiguration.md)。
 
 ## Quarkus
 

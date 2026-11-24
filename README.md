@@ -100,13 +100,13 @@ This composition model keeps the default footprint small while allowing the fram
 
 - **Choose a capability**: start with the [Capability Catalog](docs/i18n/en/capabilities/index.md) to map a business need to its supported runtime dependency.
 - **Architecture and modeling**: start with [Getting Started](docs/i18n/en/integration/getting-started.md), then select an [architecture style](docs/i18n/en/framework/architecture-styles.md) and review [modeling conventions](docs/i18n/en/modeling/index.md).
-- **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md).
+- **Aggregate persistence**: read [Aggregate Persistence](docs/i18n/en/capabilities/aggregate-persistence.md), then choose the peer implementation that fits the project: [JPA](docs/i18n/en/persistence/jpa.md) or [MyBatis-Plus](docs/i18n/en/persistence/mybatis-plus.md).
 - **Web**: read [Web](docs/i18n/en/capabilities/web.md), then select RFC 9457 Problem Details or runtime-specific HTTP server and REST Client diagnostic logging.
 - **Message delivery**: read [Message Delivery](docs/i18n/en/capabilities/message-delivery.md) to select a direct Kafka, RabbitMQ, RocketMQ, or application-owned transport adapter.
-- **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/implementations/jpa.md) or [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md) guide.
-- **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
-- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md) for explicit extension composition, CDI transactions, Problem Details and HTTP logging, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
-- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, Kafka and RabbitMQ delivery, Problem Details, and HTTP logging. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
+- **Reliable messaging**: read [Reliable Messaging](docs/i18n/en/capabilities/reliable-messaging.md), then choose its JPA or MyBatis-Plus store from the corresponding [JPA](docs/i18n/en/persistence/jpa.md) or [MyBatis-Plus](docs/i18n/en/persistence/mybatis-plus.md) guide.
+- **Spring Boot**: use [Spring Boot Runtime Assembly](docs/i18n/en/runtimes/spring-boot.md) for starter-based, conditional auto-configuration of selected capabilities; see the [Spring Boot auto-configuration reference](docs/i18n/en/reference/spring-boot-autoconfiguration.md) for its properties, conditions, and bean precedence.
+- **Quarkus**: use [Quarkus Runtime Integration](docs/i18n/en/runtimes/quarkus.md) for explicit extension composition, CDI transactions, Problem Details and HTTP logging, domain-event dispatch, JPA-backed reliable messaging, Kafka and RabbitMQ delivery, and Native Image verification.
+- **Helidon MP**: use [Helidon MP Runtime Integration](docs/i18n/en/runtimes/helidon.md) for explicit CDI/JTA, JPA, Outbox/Inbox, Kafka and RabbitMQ delivery, Problem Details, and HTTP logging. Its Native Image support currently verifies CDI/Web only; Helidon Narayana JTA Native execution remains experimental upstream.
 
 ## Minimal Setup
 
@@ -187,14 +187,14 @@ public final class Order extends BaseAggregateRoot<Order, OrderId> {
 
 ### Persistence Implementations
 
-- [JPA](docs/i18n/en/implementations/jpa.md)
-- [MyBatis-Plus](docs/i18n/en/implementations/mybatis-plus.md)
+- [JPA](docs/i18n/en/persistence/jpa.md)
+- [MyBatis-Plus](docs/i18n/en/persistence/mybatis-plus.md)
 
 ### Runtime Integrations
 
-- [Spring Boot Runtime Assembly](docs/i18n/en/implementations/spring-boot.md)
-- [Quarkus Runtime Integration](docs/i18n/en/implementations/quarkus.md)
-- [Helidon MP Runtime Integration](docs/i18n/en/implementations/helidon.md)
+- [Spring Boot Runtime Assembly](docs/i18n/en/runtimes/spring-boot.md)
+- [Quarkus Runtime Integration](docs/i18n/en/runtimes/quarkus.md)
+- [Helidon MP Runtime Integration](docs/i18n/en/runtimes/helidon.md)
 
 ### Framework Semantics
 

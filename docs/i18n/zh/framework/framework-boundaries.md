@@ -112,7 +112,7 @@ CI 在 Maven 测试前运行 `scripts/verify-dependency-boundaries.sh`。该 XML
 
 `jfoundry-outbox-jpa` 和 `jfoundry-inbox-jpa` 是运行时无关的 Jakarta Persistence 适配器。它们实现 Outbox 和 Inbox 存储 SPI，不要求 Spring 或 Spring Boot。它们的 Spring Boot 启动器，即 `jfoundry-outbox-jpa-spring-boot-starter` 和 `jfoundry-inbox-jpa-spring-boot-starter`，是显式能力选择；通用 `jfoundry-persistence-jpa-spring-boot-starter` 只提供业务 JPA 运行时装配，不会引入任一存储。
 
-实现机制和数据库限制属于 [JPA 实现指南](../implementations/jpa.md)。能力状态模型和 SQL 模板策略属于[可靠消息](../capabilities/reliable-messaging.md)。
+实现机制和数据库限制属于 [JPA 实现指南](../persistence/jpa.md)。能力状态模型和 SQL 模板策略属于[可靠消息](../capabilities/reliable-messaging.md)。
 
 ## 合并验证
 

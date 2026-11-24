@@ -143,7 +143,7 @@ Both are deliberately separate from reliable messaging stores. Add the matching 
 starter only after the use case requires durable external publication or consumer idempotency;
 normally use the same persistence technology for business data and the reliable messaging store.
 Aggregate mapping, optimistic-locking, and repository-shape decisions remain in the
-[JPA](jpa.md) and [MyBatis-Plus](mybatis-plus.md) implementation guides.
+[JPA](../persistence/jpa.md) and [MyBatis-Plus](../persistence/mybatis-plus.md) implementation guides.
 
 ## Reliable Messaging
 
@@ -284,62 +284,14 @@ Auto-configured defaults are replaceable. Application beans take precedence for 
 
 ## Verification
 
-The runtime-local integration profile validates Spring Boot assembly, starter dependency boundaries,
-auto-configuration, and middleware paths against Testcontainers services, including MySQL, PostgreSQL,
-Kafka, and RabbitMQ:
+Spring runtime support is validated by the runtime-local integration tests and CI stages. The exact
+middleware, Native Image, MyBatis-Plus, and Redisson claims are recorded in the
+[compatibility matrix](../../../release/compatibility.md).
 
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pit verify
-```
-
-The same module also contains a minimal AOT consumer for the supported Spring Boot version. On GraalVM Native Image, the
-`native` profile builds it and CI starts the executable, then verifies `GET /jfoundry/native/ready`
-returns `ready`. This is the Native Image support claim for the base Spring Boot starter and Web MVC
-assembly. It does not certify optional persistence, broker, lock, or scheduler adapters; each such
-capability needs its own Native Image integration verification before it can be claimed as supported:
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative package
-```
-
-The `native-mybatis-plus` profile separately certifies the Spring Boot MyBatis-Plus persistence
-starter on GraalVM Native Image. It starts PostgreSQL in the JVM test process, launches the generated
-Native executable, and verifies an insert, reload, update, and reload of a business-defined
-`AuditStampHolder`,
-including automatic `createdAt`, `createdBy`, `lastModifiedAt`, and `lastModifiedBy` filling. This
-claim applies to the supported Spring Boot and MyBatis-Plus versions with PostgreSQL; it does not certify
-JPA, brokers, or Redisson. Exact tested versions are recorded in the
-[compatibility matrix](../../../release/compatibility.md). It also verifies the built-in MyBatis-Plus Outbox and Inbox
-stores through append, paginated claim, idempotent claim, and processed-state operations. The persistence, Outbox,
-and Inbox starters supply `mybatis-plus-spring-boot-native-image`; this profile does not declare that Baomidou
-coordinate:
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative-mybatis-plus verify
-```
-
-The `native-redisson` profile separately certifies the Redisson 4.6.1 lock starter with Redis. It
-starts Redis in the JVM test process, launches the generated Native executable, and verifies that
-the JFoundry `LockExecutor` acquires and releases a distributed lock. These profiles do not certify
-other Redis, broker, or persistence combinations. Native applications must also register their own
-event payload types for Spring AOT binding when those types are serialized by the application.
-
-### CI-Aligned Local Verification
-
-Run all Spring CI stages locally with Java 25, Docker, and GraalVM Native Image:
+Run the full Spring verification locally with Java 25, Docker, and GraalVM when available:
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
-
-Use `--stage middleware`, `--stage native`, `--stage native-mybatis-plus`, or `--stage native-redisson`
-to run one stage. The general
-`scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.

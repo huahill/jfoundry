@@ -18,7 +18,7 @@
 
 | 需求 | 指南 |
 |------|------|
-| MyBatis-Plus 数据对象、仓储、查询包装器和乐观锁 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| 每个聚合一个由 JPA 管理的实体图以及 JPA 乐观锁 | [JPA](../implementations/jpa.md) |
+| MyBatis-Plus 数据对象、仓储、查询包装器和乐观锁 | [MyBatis-Plus](../persistence/mybatis-plus.md) |
+| 每个聚合一个由 JPA 管理的实体图以及 JPA 乐观锁 | [JPA](../persistence/jpa.md) |
 
-Spring Boot 运行时装配和用户 Bean 覆盖见 [Spring Boot](../implementations/spring-boot.md)。启动器目录、配置项和条件查询见 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。
+Spring Boot 运行时装配和用户 Bean 覆盖见 [Spring Boot](../runtimes/spring-boot.md)。启动器目录、配置项和条件查询见 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。

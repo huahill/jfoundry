@@ -173,7 +173,7 @@ Spring Boot starters, `jfoundry-outbox-jpa-spring-boot-starter` and
 `jfoundry-persistence-jpa-spring-boot-starter` provides business JPA runtime assembly only and adds neither
 store.
 
-Implementation mechanics and database limitations belong in the [JPA implementation guide](../implementations/jpa.md).
+Implementation mechanics and database limitations belong in the [JPA implementation guide](../persistence/jpa.md).
 The capability state model and SQL-template policy belong in [Reliable Messaging](../capabilities/reliable-messaging.md).
 
 ## Merge Verification

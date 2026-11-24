@@ -431,54 +431,17 @@ Spring-equivalent client failure logging. It also does not translate a non-succe
 `HttpResponseException` or a transport failure into `HttpRequestException`; those types belong to
 Spring `RestClient`.
 
-## PostgreSQL Middleware Verification
+## Verification
 
-The runtime-local JVM integration profile starts PostgreSQL through Testcontainers. It verifies that
-the Quarkus `TransactionRunner`, JPA Outbox store, and Quarkus datasource wiring persist an Outbox
-record in PostgreSQL rather than an in-memory test database. The profile is deliberately opt-in so a
-regular module test does not require Docker:
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -am -Pjvm-integration verify
-```
-
-## Native Image Verification
-
-The repository's Quarkus native CI job installs the full reactor and then builds a separate consumer
-application with Quarkus container Native Image build. Every `@QuarkusIntegrationTest` uses
-`PostgreSqlIntegrationTestProfile`, which starts PostgreSQL and sets the datasource kind to
-`postgresql`. Those tests exercise `TransactionRunner`, JPA aggregate persistence, domain-event
-dispatch, Inbox, and Outbox persistence, dispatch, recovery, and cleanup through HTTP against the
-native executable.
-
-### CI-Aligned Local Verification
-
-Run the Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
-build as CI. On macOS, it uses local GraalVM because a Linux container executable cannot run on the
-host:
+Quarkus middleware and Native Image claims are validated by the direct Quarkus integration-test
+module. The supported scope and upstream limitations are recorded in the
+[compatibility matrix](../../../release/compatibility.md).
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
-
-Use `--stage middleware` or `--stage native` to run one stage. The base native stage does not include
-Redisson. Redis lock verification is separate, so a missing Redisson address cannot break
-the default application:
-
-```bash
-JAVA_25_HOME=/path/to/java-25 \
-GRAALVM_HOME=/path/to/graalvm-25 \
-bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
-```
-
-That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile.
-
-To run all supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment
-variables set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 

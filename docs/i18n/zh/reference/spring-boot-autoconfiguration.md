@@ -1,6 +1,6 @@
 # Spring Boot 自动配置总览
 
-本文是 Spring Boot 入口、配置项和 Bean 装配条件的查询材料。行为契约请先看[能力页](../capabilities/aggregate-persistence.md)，技术相关配置请看[实现指南](../implementations/spring-boot.md)。
+本文是 Spring Boot 入口、配置项和 Bean 装配条件的查询材料。行为契约请先看[能力页](../capabilities/aggregate-persistence.md)，技术相关配置请看[实现指南](../runtimes/spring-boot.md)。
 
 ## 启动器入口
 

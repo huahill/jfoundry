@@ -48,7 +48,7 @@ When a use case needs both a distributed lock and a transaction, acquire the loc
 waiting for a distributed lock.
 
 For Spring Boot runtime assembly, selected lock-client integration, user overrides, and annotation
-configuration, see [Spring Boot Runtime Assembly](../implementations/spring-boot.md). The exact
+configuration, see [Spring Boot Runtime Assembly](../runtimes/spring-boot.md). The exact
 starter, property, and auto-configuration conditions are in the
 [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md).
 
