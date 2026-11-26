@@ -13,7 +13,7 @@ aligned with the BOMs without coupling documentation to patch-level updates.
 |----------|----------------|----------------|
 | Spring Cloud | 2025.1.x | `org.springframework.cloud:spring-cloud-dependencies` |
 | Spring Cloud Alibaba | 2025.1.x | `com.alibaba.cloud:spring-cloud-alibaba-dependencies` |
-| Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
+| Quarkus | 4.0.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
 Spring Cloud and Spring Cloud Alibaba are upstream platform choices. A Cloud application selects a
@@ -92,7 +92,7 @@ BOM or build parent, and exact per-release versions live in the CI logs and rele
 - Foundation manages `org.javassist:javassist` because RocketMQ's transitive Reflections line otherwise
   selects an older POM that produces Maven 4 model warnings.
 - `jfoundry-quarkus-dependencies` keeps a Quarkus-local `jackson-annotations` override; the owning BOM
-  contains the exact override version. Quarkus 3.40.x manages the Jackson 2 annotation line at 2.21,
+  contains the exact override version. Quarkus 4.0.x manages the Jackson 2 annotation line at 2.21,
   but Foundation's Jackson 3.2 line requires `com.fasterxml.jackson.core:jackson-annotations` 2.22,
   including `JsonApplyView`. The override is declared before the Quarkus BOM import because Maven
   keeps the first managed coordinate.
@@ -122,7 +122,7 @@ Maven 4.0.0-rc-7 quiet mode writes the distribution version to standard output b
 expression result. Release and snapshot workflows resolve `project.version` through
 `scripts/maven-project-version.sh`, which ignores that line and the older `[INFO] [stdout]` prefix.
 
-Quarkus 3.40.x test bootstrap still cannot load the Maven 4.1 `subprojects` workspace model on
+Quarkus 4.0.x test bootstrap still cannot load the Maven 4.1 `subprojects` workspace model on
 its own. JFoundry keeps `quarkus-maven-plugin:generate-code-tests` on the affected `@QuarkusTest`
 modules, the workaround accepted when
 [Quarkus issue #56270](https://github.com/quarkusio/quarkus/issues/56270) was closed. Upstream Maven 4

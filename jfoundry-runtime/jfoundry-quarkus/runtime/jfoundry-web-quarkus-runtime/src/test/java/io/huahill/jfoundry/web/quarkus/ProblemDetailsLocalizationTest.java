@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -102,6 +103,11 @@ class ProblemDetailsLocalizationTest {
             @Override
             public String getHeaderString(String name) {
                 return null;
+            }
+
+            @Override
+            public boolean containsHeaderString(String name, String valueRegExp, Predicate<String> valuePredicate) {
+                return false;
             }
 
             @Override
