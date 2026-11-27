@@ -53,8 +53,8 @@ write_matrix() {
 
 | Platform | Supported line | Version source |
 |----------|----------------|----------------|
-| Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
-| Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
+| Spring Cloud | 2025.1.x | `org.springframework.cloud:spring-cloud-dependencies` |
+| Spring Cloud Alibaba | 2025.1.x | `com.alibaba.cloud:spring-cloud-alibaba-dependencies` |
 | Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 MARKDOWN
@@ -63,15 +63,6 @@ MARKDOWN
 write_fixture() {
     local fixture="$1"
 
-    write_pom "${fixture}" "jfoundry-spring-cloud-dependencies" "spring-cloud.version" "2025.1.3"
-    python3 - "${fixture}/jfoundry-boms/jfoundry-spring-cloud-dependencies/pom.xml" <<'PY'
-import sys
-from pathlib import Path
-path = Path(sys.argv[1])
-content = path.read_text()
-content = content.replace("</properties>", "<spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version></properties>", 1)
-path.write_text(content)
-PY
     write_pom "${fixture}" "jfoundry-quarkus-dependencies" "quarkus.platform.version" "3.40.1"
     write_pom "${fixture}" "jfoundry-helidon-dependencies" "helidon.version" "4.5.3"
     write_matrix "${fixture}"
@@ -106,14 +97,6 @@ sed -i.bak 's/| Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |/| Quarkus |
 rm "${wrong_source_fixture}/docs/release/compatibility.md.bak"
 assert_rejects_with_message "${wrong_source_fixture}" \
     "Quarkus version source other-bom must be jfoundry-quarkus-dependencies"
-
-missing_platform_fixture="${temp_dir}/missing-platform"
-write_fixture "${missing_platform_fixture}"
-sed -i.bak '/| Spring Cloud Alibaba |/d' \
-    "${missing_platform_fixture}/docs/release/compatibility.md"
-rm "${missing_platform_fixture}/docs/release/compatibility.md.bak"
-assert_rejects_with_message "${missing_platform_fixture}" \
-    "missing platform row: Spring Cloud Alibaba"
 
 # Spring Boot-only follows the current stable Spring Boot line and is validated by the full CI
 # matrix instead, so a Spring Boot row in the table is informational and must not be verified

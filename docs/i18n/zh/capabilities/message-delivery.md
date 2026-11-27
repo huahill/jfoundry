@@ -24,6 +24,6 @@
 
 Spring Boot 中应用提供的 `MessageSender` Bean 优先于内置实现。Quarkus 将适配器作为可替换的 CDI 默认 Bean 提供。Helidon 将适配器作为优先级 `1` 的可替换 CDI alternative 提供。没有任何运行时集成会仅因存在 Outbox 就推断消息代理选择。
 
-启动器组合见 [Spring Boot 运行时装配](../implementations/spring-boot.md)，Quarkus 客户端配置见
-[Quarkus 运行时集成](../implementations/quarkus.md)，Helidon 原生 Kafka 与 RabbitMQ 客户端配置见
-[Helidon MP 运行时集成](../implementations/helidon.md)。
+启动器组合见 [Spring Boot 运行时装配](../runtimes/spring-boot.md)，Quarkus 客户端配置见
+[Quarkus 运行时集成](../runtimes/quarkus.md)，Helidon 原生 Kafka 与 RabbitMQ 客户端配置见
+[Helidon MP 运行时集成](../runtimes/helidon.md)。

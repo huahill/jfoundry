@@ -20,15 +20,11 @@ class ExternalizationRuleResolverTest {
     @Externalized("")
     @MessageRouting(topic = "env.app.install")
     static class EnvAppInstallEvent implements DomainEvent {
-        @SuppressWarnings("unused")
-        public String getEnvAppId() { return "app-1"; }
     }
 
     @Externalized("env.app.uninstall")
-    @MessageRouting(topic = "env.app.uninstall", key = "#this.envAppId")
+    @MessageRouting(topic = "orders.removed")
     static class EnvAppUninstallEvent implements DomainEvent {
-        @SuppressWarnings("unused")
-        public String getEnvAppId() { return "app-2"; }
     }
 
     @Externalized("")
@@ -48,7 +44,6 @@ class ExternalizationRuleResolverTest {
 
         assertThat(rule).isPresent();
         assertThat(rule.get().topic()).isEqualTo("env.created");
-        assertThat(rule.get().payloadKey()).isNull();
     }
 
     @Test
@@ -57,15 +52,14 @@ class ExternalizationRuleResolverTest {
 
         assertThat(rule).isPresent();
         assertThat(rule.get().topic()).isEqualTo("env.app.install");
-        assertThat(rule.get().payloadKey()).isNull();
     }
 
     @Test
-    void messageRoutingKeyPropertyPathIsEvaluated() {
+    void messageRoutingReplacesTheTopicWithoutAKey() {
         Optional<ExternalizationRule> rule = resolver.resolve(new EnvAppUninstallEvent());
 
         assertThat(rule).isPresent();
-        assertThat(rule.get().payloadKey()).isEqualTo("app-2");
+        assertThat(rule.get().topic()).isEqualTo("orders.removed");
     }
 
     @Test
@@ -84,18 +78,5 @@ class ExternalizationRuleResolverTest {
     void orphanMessageRoutingWithoutExternalizedReturnsEmpty() {
         // WARN log emitted; events not externalized.
         assertThat(resolver.resolve(new OrphanRoutingOnly())).isEmpty();
-    }
-
-    @Test
-    void invalidKeyPropertyPathDegradesToNull() {
-        // Use a separate test fixture
-        @Externalized("topic")
-        @MessageRouting(topic = "topic", key = "#this.nonexistent")
-        class BadSpelEvent implements DomainEvent {
-        }
-        Optional<ExternalizationRule> rule = resolver.resolve(new BadSpelEvent());
-
-        assertThat(rule).isPresent();
-        assertThat(rule.get().payloadKey()).isNull();
     }
 }

@@ -15,8 +15,9 @@ Applications select the Quarkus runtime modules rather than assembling these sha
 ## Dependency Setup
 
 Import the Quarkus BOM and the core JFoundry BOM with the same JFoundry version, then add the
-required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem versions and a narrow Jackson annotations compatibility alignment;
-it does not manage JFoundry module versions. The deployment artifact is discovered by Quarkus from the
+required capability extensions. `jfoundry-quarkus-dependencies` manages Quarkus platform ecosystem
+versions, Quarkus runtime/deployment module versions, and a narrow Jackson annotations compatibility
+alignment. It imports `jfoundry-jakarta-dependencies` for the portable Jakarta adapters. The deployment artifact is discovered by Quarkus from the
 runtime extension descriptor; applications must not add it directly.
 
 ```xml
@@ -260,8 +261,9 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 ```
 
 `MessageSender.send(topic, payloadKey, payload)` dynamically sets the Kafka topic and key for each
-record, so `@Externalized` and `@AggregateRouting` continue to determine Outbox routing. The channel
-name is infrastructure configuration, not a business destination. The adapter waits for broker
+record. `@Externalized` or `@MessageRouting` supplies the static topic, while a message key comes
+only from `DomainEventExternalizer`. The channel name is infrastructure configuration, not a business
+destination. The adapter waits for broker
 acknowledgement and maps failures to `SendResult`. Configure delivery timeouts through the Kafka
 client and connector properties. It is a Quarkus CDI default bean, so an application can replace it
 with its own `MessageSender`.
@@ -286,7 +288,7 @@ connection timeouts. The CDI default bean is replaceable with an application `Me
 ## Automatic Domain-Event Externalization
 
 `jfoundry-domain-event-outbox-quarkus-runtime` supplies the explicit automatic externalization assembly. It
-produces replaceable defaults for `ExternalizationRuleResolver`, `AggregateRoutingResolver`, and
+produces replaceable defaults for `ExternalizationRuleResolver` and
 `DomainEventOutboxRecorder`, plus the Domain Event Outbox dispatcher. The generic
 `jfoundry-outbox-quarkus-runtime` supplies `PayloadSerializer` and `OutboxTemplate`; select both
 runtime modules for the complete composition. Neither module adds an Outbox store or a broker client;
@@ -299,10 +301,10 @@ integration contract:
 jfoundry.domain.event.dispatch.outbox.enabled=true
 ```
 
-Mark each intended integration event with `@Externalized("<topic>")`. Add `@AggregateRouting` when
-the aggregate type, id, or version should be retained with the Outbox row; the resolved aggregate id
-also becomes the default message key when no routing key is specified. Events without
-`@Externalized` are not recorded. Applications can replace the default serializer or recorder with
+Mark each intended integration event with `@Externalized("<topic>")`. `@MessageRouting` can replace
+that static topic. Neither annotation supplies a message key or aggregate metadata; provide a
+`DomainEventExternalizer` when the Outbox row needs those values. Events without
+`@Externalized` are not recorded, unless an externalizer selects them. Applications can replace the default serializer or recorder with
 their own CDI bean.
 
 When an aggregate is registered while a JTA transaction is active, automatic externalization records
@@ -429,54 +431,17 @@ Spring-equivalent client failure logging. It also does not translate a non-succe
 `HttpResponseException` or a transport failure into `HttpRequestException`; those types belong to
 Spring `RestClient`.
 
-## PostgreSQL Middleware Verification
+## Verification
 
-The runtime-local JVM integration profile starts PostgreSQL through Testcontainers. It verifies that
-the Quarkus `TransactionRunner`, JPA Outbox store, and Quarkus datasource wiring persist an Outbox
-record in PostgreSQL rather than an in-memory test database. The profile is deliberately opt-in so a
-regular module test does not require Docker:
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -am -Pjvm-integration verify
-```
-
-## Native Image Verification
-
-The repository's Quarkus native CI job installs the full reactor and then builds a separate consumer
-application with Quarkus container Native Image build. Every `@QuarkusIntegrationTest` uses
-`PostgreSqlIntegrationTestProfile`, which starts PostgreSQL and sets the datasource kind to
-`postgresql`. Those tests exercise `TransactionRunner`, JPA aggregate persistence, domain-event
-dispatch, Inbox, and Outbox persistence, dispatch, recovery, and cleanup through HTTP against the
-native executable.
-
-### CI-Aligned Local Verification
-
-Run the Quarkus CI stages with Java 25 and Docker. On Linux, the native stage uses the same container
-build as CI. On macOS, it uses local GraalVM because a Linux container executable cannot run on the
-host:
+Quarkus middleware and Native Image claims are validated by the direct Quarkus integration-test
+module. The supported scope and upstream limitations are recorded in the
+[compatibility matrix](../../../release/compatibility.md).
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
-
-Use `--stage middleware` or `--stage native` to run one stage. The base native stage does not include
-Redisson. Redis lock verification is separate, so a missing Redisson address cannot break
-the default application:
-
-```bash
-JAVA_25_HOME=/path/to/java-25 \
-GRAALVM_HOME=/path/to/graalvm-25 \
-bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
-```
-
-That command runs the JVM `jvm-redisson` profile and then the `native-redisson` profile.
-
-To run all supported runtime checks, use `bash scripts/verify-runtime-ci.sh all` with both environment
-variables set. The general `scripts/verify-ci-matrix.sh` remains the Docker-free Java 25 baseline.
 
 ## Current Scope
 

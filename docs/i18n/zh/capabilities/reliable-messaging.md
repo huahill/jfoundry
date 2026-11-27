@@ -49,7 +49,7 @@ Outbox 由相互独立的选择组合而成。模块名中的 ORM 或调度器�
 
 自动收集不会从持久化变更或对象状态推断领域事实。聚合的业务行为使用 `recordEvent(...)` 显式记录事实；在自动运行时中，应用业务代码通常不调用 `drainEvents()`。该方法仍是运行时集成和刻意采用手工派发时使用的运行时无关交接 SPI。
 
-自动外部化提供两条路径。领域事件本身就是刻意维护的稳定公共契约时，可使用 `@Externalized` 直接序列化该事件。需要版本化集成契约时，应用提供 `DomainEventExternalizer<E>` Bean：它将已被自动收集的领域事件映射为零到多个 `ExternalizedEvent`，框架在当前事务中完成序列化和追加。每个映射结果提供稳定的 `payloadType`、载荷、主题、键和可选聚合元数据。源领域事件提供来源事件 ID 与 `occurredAt`；每条映射后的 Outbox 行拥有自己的 `event_id`。对于 `@Externalized` 事件，存储与线上的 `payloadType` 是目标主题。
+自动外部化提供两条路径。领域事件本身就是刻意维护的稳定公共契约时，可使用 `@Externalized` 直接序列化该事件。`@Externalized` 和 `@MessageRouting` 只声明静态主题，不会读取事件属性；因此注解路径写入的 Outbox 行没有消息 key，也没有聚合元数据。需要版本化集成契约，或者需要 key、聚合类型、id 和版本时，应用提供 `DomainEventExternalizer<E>` Bean：它将已被自动收集的领域事件映射为零到多个 `ExternalizedEvent`，框架在当前事务中完成序列化和追加。每个映射结果提供稳定的 `payloadType`、载荷、主题、键和可选聚合元数据。源领域事件提供来源事件 ID 与 `occurredAt`；每条映射后的 Outbox 行拥有自己的 `event_id`。对于 `@Externalized` 事件，存储与线上的 `payloadType` 是目标主题。
 
 匹配到外部化器时，其优先级高于 `@Externalized`，即使它有意返回空消息列表也是如此，因此同一个领域事件不会经由两条路径写入两次。没有匹配外部化器时，现有的显式注解路径保持不变。映射失败或映射元数据非法会使业务事务失败。对于并非来自已收集领域事件的集成消息，仍可使用 `OutboxTemplate`；它加入调用方事务，不会自行开启事务或同步发送。
 
@@ -93,10 +93,10 @@ jfoundry/sql/inbox/common/create_inbox_message.sql
 
 | 需求 | 指南 |
 |------|------|
-| MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../implementations/mybatis-plus.md) |
-| JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../implementations/jpa.md) |
-| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../implementations/quarkus.md) |
-| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../implementations/helidon.md) |
-| Spring Boot 能力装配和派发器配置 | [Spring Boot](../implementations/spring-boot.md) |
+| MyBatis-Plus Outbox 和 Inbox 存储 | [MyBatis-Plus](../persistence/mybatis-plus.md) |
+| JPA Outbox 和 Inbox 存储，包括数据库相关的 Inbox 领取策略 | [JPA](../persistence/jpa.md) |
+| Quarkus Outbox 运行时与 Kafka 投递，以及可选的领域事件 Outbox 组合 | [Quarkus](../runtimes/quarkus.md) |
+| Helidon MP Outbox 运行时与 Kafka 或 RabbitMQ 投递，以及可选的领域事件 Outbox 组合 | [Helidon MP](../runtimes/helidon.md) |
+| Spring Boot 能力装配和派发器配置 | [Spring Boot](../runtimes/spring-boot.md) |
 
 启动器、配置项和注册条件查询请使用 [Spring Boot 自动配置](../reference/spring-boot-autoconfiguration.md)。

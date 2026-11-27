@@ -4,16 +4,14 @@ Spring Boot 是运行时无关 jfoundry 核心的对等运行时集成。它通�
 
 ## 公共前置依赖
 
-所有外部应用都必须让 `jfoundry-dependencies` 参与依赖管理，它管理 JFoundry 核心、架构和框架无关适配器的版本。
-使用 JFoundry Boot Parent 时由 Parent 自动导入，否则应用需要显式导入。它属于 `<dependencyManagement>`，不是运行时
-依赖。Spring Boot 运行时 BOM 只管理 Spring 平台版本，不能替代它。通过 `jfoundry-dependencies` 导入的 Foundation
-不会再声明选定 Spring Boot Parent 已经管理的 JUnit、Jackson、Mockito 等平台栈。
+`jfoundry-dependencies` 管理 JFoundry 核心、DDD、架构风格和框架无关适配器模块。独立的
+`jfoundry-spring-boot-dependencies` 消费者 BOM 会将它与 Spring Boot BOM 一起导入。Cloud BOM 保持平台专属，
+因此 Cloud 应用需要显式导入 `jfoundry-dependencies`。这些 BOM 都放在 `<dependencyManagement>` 中，不是运行时依赖。
 
 ## Spring Boot
 
 仅使用 Spring Boot 的应用应将 `jfoundry-spring-boot-parent` 作为唯一 Maven Parent。该 Parent 继承受支持的
-Spring Boot Parent，设置 Java 25，并已经按正确顺序导入 `jfoundry-spring-boot-dependencies` 与
-`jfoundry-dependencies`；使用该 Parent 时不需要再次手动导入这两个 BOM。
+Spring Boot Parent，设置 Java 25，并已经导入 `jfoundry-spring-boot-dependencies`；使用该 Parent 时不需要再次手动导入该 BOM。
 
 ```xml
 <parent>
@@ -29,23 +27,29 @@ Outbox 等业务能力。通常直接选择所需的能力启动器；它会按�
 ## Spring Cloud
 
 需要 Spring Cloud 或 Spring Cloud Alibaba 的应用不能使用上面的 JFoundry Boot Parent。应用应使用与受支持
-Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-spring-cloud-dependencies`，再导入
-`jfoundry-dependencies`：
+Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 JFoundry Boot BOM，再导入官方 Cloud 与 Alibaba BOM：
 
 ```xml
 <dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+            <artifactId>jfoundry-spring-boot-dependencies</artifactId>
             <version>${jfoundry.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
         <dependency>
-            <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-dependencies</artifactId>
-            <version>${jfoundry.version}</version>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+            <version>${spring-cloud-alibaba.version}</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -53,12 +57,11 @@ Spring Cloud 版本兼容的自有或标准 Maven Parent，先导入 `jfoundry-s
 </dependencyManagement>
 ```
 
-Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 Parent 或另一个显式 Boot BOM 管理。
-不得同时导入 `jfoundry-spring-boot-dependencies` 与 `jfoundry-spring-cloud-dependencies`。Cloud BOM 只管理平台生态，
-不会自动引入 Cloud starter，也不表示 JFoundry 为每个 Cloud 组件提供适配器。
+JFoundry Boot BOM 管理 Spring Boot 与 Spring 专属 JFoundry 模块。Spring Cloud 与 Spring Cloud Alibaba 由官方 BOM 管理，
+应用自行按照上游 release train 兼容矩阵选择组合。
 
-保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)先导入
-`jfoundry-spring-boot-dependencies`，再导入 `jfoundry-dependencies`，并自行管理 Java 与 Spring Boot 版本。
+保留其它 Maven Parent 的 Boot 应用，也应按[接入指南](../integration/getting-started.md)单独导入
+`jfoundry-spring-boot-dependencies`，并自行管理 Java 版本。
 
 其它能力都需要显式选择，从而使应用的数据源、投递、调度和分布式锁决策保持清晰。
 
@@ -100,7 +103,7 @@ Cloud BOM 管理 Spring Cloud 和 Spring Cloud Alibaba；Spring Boot 由应用 P
 
 持久化启动器的名称表达它们装配的能力，而不只是引入的 ORM。`jfoundry-persistence-mybatis-plus-spring-boot-starter` 装配业务聚合的 MyBatis-Plus 持久化能力，并为实现 `AuditStampHolder` 的数据对象装配默认技术审计处理器；JPA 对应启动器则装配 JPA 聚合适配器、Spring 事务绑定的持久化上下文和 Spring Boot JPA 运行时。共享持久化自动配置提供 UTC 审计时间与空的操作者提供器；应用通常由安全集成提供 `AuditActorProvider`。
 
-二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器；业务数据与可靠消息存储通常使用相同的持久化技术。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](mybatis-plus.md) 与 [JPA](jpa.md) 实现指南。
+二者都与可靠消息存储明确分离。只有当用例需要可靠外部发布或消费端幂等时，才选择对应 Outbox 或 Inbox 启动器；业务数据与可靠消息存储通常使用相同的持久化技术。聚合映射、乐观锁和仓储形态见 [MyBatis-Plus](../persistence/mybatis-plus.md) 与 [JPA](../persistence/jpa.md) 实现指南。
 
 ## 可靠消息
 
@@ -197,56 +200,13 @@ Redisson 锁是可选项。仅当用例需要跨实例协调，且数据库约�
 
 ## 验证
 
-运行时本地的集成配置档会验证 Spring Boot 装配、启动器依赖边界、自动配置，以及通过
-Testcontainers 运行的中间件路径，包括 MySQL、PostgreSQL、Kafka 和 RabbitMQ：
+Spring 运行时支持由直接运行时集成测试和 CI 配置档验证。中间件、原生镜像、MyBatis-Plus 和
+Redisson 的具体声明见[兼容矩阵](../../../release/compatibility.md)。
 
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pit verify
-```
-
-同一模块还包含面向受支持 Spring Boot 版本的最小 AOT 使用方。在 GraalVM 原生镜像环境中，`native` 配置档会构建它，
-CI 随后启动可执行文件，并验证 `GET /jfoundry/native/ready` 返回 `ready`。这构成基础 Spring Boot 启动器与
-Web MVC 装配的原生镜像支持声明；它不认证可选的持久化、消息代理、锁或调度器适配器。各项能力必须先具备
-独立的原生镜像集成验证，才能声明受支持：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative package
-```
-
-`native-mybatis-plus` 配置档单独认证 Spring Boot MyBatis-Plus 持久化 starter 的 GraalVM
-原生镜像支持。测试在 JVM 进程中启动 PostgreSQL，启动生成的原生可执行程序，并验证
-业务自定义 `AuditStampHolder` 的插入、重新加载、更新和再次加载，以及自动填充的 `createdAt`、
-`createdBy`、`lastModifiedAt` 和 `lastModifiedBy`。该声明只适用于受支持的 Spring Boot、MyBatis-Plus 版本以及
-PostgreSQL；不认证 JPA、消息代理或 Redisson。精确测试版本记录在
-[兼容矩阵](../../../release/compatibility.md)。此外，它还会
-通过追加、分页认领、幂等认领和处理完成状态迁移验证内置的 MyBatis-Plus Outbox 与 Inbox 存储。
-持久化、Outbox 和 Inbox 启动器提供 `mybatis-plus-spring-boot-native-image`；该配置档不再声明这个 Baomidou 坐标：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests \
-  -am -Pnative-mybatis-plus verify
-```
-
-`native-redisson` 配置档单独认证 Redisson 4.6.1 锁 starter 与 Redis 的组合。测试在 JVM 进程中
-启动 Redis，启动生成的原生可执行程序，并验证 JFoundry `LockExecutor` 能获取和释放分布式锁。
-这些配置档不认证其他 Redis、消息代理或持久化组合。业务应用的事件载荷由应用序列化时，仍需为其类型
-提供 Spring AOT binding hints。
-
-### 本地 CI 对齐验证
-
-使用 Java 25、Docker 和 GraalVM Native Image 在本地运行全部 Spring CI 阶段：
+具备 Java 25、Docker 和 GraalVM 时，可运行全部 Spring 验证：
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh spring
 ```
-
-使用 `--stage middleware`、`--stage native`、`--stage native-mybatis-plus` 或 `--stage native-redisson`
-可以只运行一个阶段。通用
-`scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。

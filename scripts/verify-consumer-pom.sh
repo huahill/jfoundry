@@ -75,16 +75,6 @@ verify_independent_bom() {
     require_text "${pom}" "<dependencyManagement>"
 }
 
-verify_spring_cloud_bom() {
-    local pom
-    pom="$(pom_path "jfoundry-spring-cloud-dependencies")"
-    verify_independent_bom "jfoundry-spring-cloud-dependencies"
-    require_text "${pom}" "<artifactId>spring-cloud-dependencies</artifactId>"
-    require_text "${pom}" "<artifactId>spring-cloud-alibaba-dependencies</artifactId>"
-    forbid_text "${pom}" "<artifactId>spring-boot-dependencies</artifactId>"
-    forbid_text "${pom}" "<artifactId>jfoundry-foundation-dependencies</artifactId>"
-}
-
 require_imported_bom_before() {
     local pom="$1"
     local first_artifact="$2"
@@ -111,15 +101,14 @@ require_imported_bom_before() {
 
 require_exact_imported_boms() {
     local pom="$1"
-    local first_artifact="$2"
-    local second_artifact="$3"
     local actual
     local expected
 
+    shift
     actual="$(xml_query imported-artifact-ids "${pom}")"
-    expected="$(printf '%s\n%s' "${first_artifact}" "${second_artifact}")"
+    expected="$(printf '%s\n' "$@")"
     if [[ "${actual}" != "${expected}" ]]; then
-        echo "Consumer POM must import exactly ${first_artifact} then ${second_artifact}: ${pom}" >&2
+        echo "Consumer POM must import exactly the expected BOM sequence: ${pom}" >&2
         exit 1
     fi
 }
@@ -150,22 +139,21 @@ verify_spring_parent() {
     fi
     verify_metadata "${pom}"
     require_text "${pom}" "<jfoundry.version>${version}</jfoundry.version>"
-    require_text "${pom}" "<artifactId>jfoundry-dependencies</artifactId>"
     require_text "${pom}" "<artifactId>${runtime_bom}</artifactId>"
     require_text "${pom}" '<version>${jfoundry.version}</version>'
     forbid_text "${pom}" '${project.version}'
     forbid_text "${pom}" "jfoundry-spring-dependencies"
     require_parent_coordinate "${pom}" "org.springframework.boot" "spring-boot-starter-parent" "${boot_version}"
-    require_imported_bom_before "${pom}" "${runtime_bom}" "jfoundry-dependencies"
-    require_exact_imported_boms "${pom}" "${runtime_bom}" "jfoundry-dependencies"
+    require_exact_imported_boms "${pom}" "${runtime_bom}"
 }
 
 verify_flattened_module "jfoundry-domain"
 verify_flattened_module "jfoundry-webmvc-spring-boot-starter"
 verify_independent_bom "jfoundry-dependencies"
+verify_independent_bom "jfoundry-jakarta-dependencies"
 verify_independent_bom "jfoundry-spring-boot-dependencies"
-verify_spring_cloud_bom
 spring_boot_bom_pom="$(pom_path "jfoundry-spring-boot-dependencies")"
+require_exact_imported_boms "${spring_boot_bom_pom}" "jfoundry-dependencies" "spring-boot-dependencies"
 spring_boot_version="$(xml_query property-value "${spring_boot_bom_pom}" "spring-boot.version")"
 if [[ -z "${spring_boot_version}" ]]; then
     echo "Consumer POM must define spring-boot.version: ${spring_boot_bom_pom}" >&2
@@ -221,56 +209,6 @@ if [[ -n "${maven4_bin}" ]]; then
 </project>
 XML
 
-    cloud_consumer_pom="${temp_dir}/cloud-consumer-pom.xml"
-    cat > "${cloud_consumer_pom}" <<XML
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.7</version>
-        <relativePath/>
-    </parent>
-    <groupId>io.github.huahill.verification</groupId>
-    <artifactId>cloud-consumer-pom-smoke</artifactId>
-    <version>1.0.0</version>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.github.huahill</groupId>
-                <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
-                <version>${version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.github.huahill</groupId>
-                <artifactId>jfoundry-dependencies</artifactId>
-                <version>${version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <dependencies>
-        <dependency>
-            <groupId>io.github.huahill</groupId>
-            <artifactId>jfoundry-webmvc-spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.cloud</groupId>
-            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-        </dependency>
-    </dependencies>
-</project>
-XML
-
     spring_boot_parent_consumer_pom="${temp_dir}/spring-boot-parent-consumer-pom.xml"
     cat > "${spring_boot_parent_consumer_pom}" <<XML
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -295,7 +233,6 @@ XML
 XML
 
     "${maven4_bin}" -B -f "${boot_consumer_pom}" -Dmaven.repo.local="${repository}" compile
-    "${maven4_bin}" -B -f "${cloud_consumer_pom}" -Dmaven.repo.local="${repository}" compile
     "${maven4_bin}" -B -f "${spring_boot_parent_consumer_pom}" -Dmaven.repo.local="${repository}" compile
 fi
 

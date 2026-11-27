@@ -84,8 +84,8 @@ domain event must leave the process reliably. That optional path uses
 `OutboxTemplate`, and is documented in
 [Reliable Messaging](../capabilities/reliable-messaging.md).
 
-Runtime dispatch wiring lives in the [Spring Boot](../implementations/spring-boot.md),
-[Quarkus](../implementations/quarkus.md), and [Helidon MP](../implementations/helidon.md)
+Runtime dispatch wiring lives in the [Spring Boot](../runtimes/spring-boot.md),
+[Quarkus](../runtimes/quarkus.md), and [Helidon MP](../runtimes/helidon.md)
 guides.
 
 The module roles are deliberate: `jfoundry-domain-event-core` is the Domain

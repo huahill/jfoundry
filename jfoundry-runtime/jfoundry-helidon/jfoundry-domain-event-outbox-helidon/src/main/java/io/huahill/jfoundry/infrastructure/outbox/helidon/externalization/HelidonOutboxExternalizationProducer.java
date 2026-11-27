@@ -6,7 +6,6 @@ import jakarta.enterprise.inject.Alternative;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
-import io.huahill.jfoundry.application.event.externalization.AggregateRoutingResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizationResolver;
 import io.huahill.jfoundry.application.event.externalization.DomainEventExternalizer;
 import io.huahill.jfoundry.application.event.externalization.ExternalizationRuleResolver;
@@ -27,21 +26,14 @@ public final class HelidonOutboxExternalizationProducer {
     }
 
     @Produces
-    AggregateRoutingResolver aggregateRoutingResolver() {
-        return new AggregateRoutingResolver();
-    }
-
-    @Produces
     DomainEventOutboxRecorder domainEventOutboxRecorder(Instance<OutboxMessageStore> outboxMessageStore,
                                                          Instance<PayloadSerializer> payloadSerializer,
                                                          ExternalizationRuleResolver ruleResolver,
-                                                         AggregateRoutingResolver aggregateRoutingResolver,
                                                          @Any Instance<DomainEventExternalizer<?>> externalizers) {
         return new DefaultDomainEventOutboxRecorder(
                 () -> require(outboxMessageStore, "Automatic domain-event externalization requires an OutboxMessageStore CDI bean"),
                 () -> require(payloadSerializer, "Automatic domain-event externalization requires a PayloadSerializer CDI bean"),
                 ruleResolver,
-                aggregateRoutingResolver,
                 new DomainEventExternalizationResolver(externalizers.stream().toList()));
     }
 

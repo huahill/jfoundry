@@ -154,7 +154,7 @@ write_pom "jfoundry-boms/jfoundry-spring-boot-dependencies" '
             </dependency>
         </dependencies>
     </dependencyManagement>'
-expect_rejected "invalid-aggregate-import" "runtime-bom-import"
+expect_allowed "allowed-aggregate-import"
 
 rm -rf "${FIXTURE_ROOT}/jfoundry-boms/jfoundry-spring-boot-dependencies"
 write_pom "jfoundry-runtime/jfoundry-spring/jfoundry-spring-integration-tests/invalid-helidon-test" '

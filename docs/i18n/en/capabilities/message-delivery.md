@@ -40,7 +40,7 @@ its adapters as replaceable CDI defaults. Helidon supplies its adapters as repla
 alternatives at priority `1`. No runtime integration infers a broker choice merely from the presence
 of an Outbox.
 
-See [Spring Boot Runtime Assembly](../implementations/spring-boot.md) for starter composition,
-[Quarkus Runtime Integration](../implementations/quarkus.md) for its client configuration, and
-[Helidon MP Runtime Integration](../implementations/helidon.md) for native Kafka and RabbitMQ
+See [Spring Boot Runtime Assembly](../runtimes/spring-boot.md) for starter composition,
+[Quarkus Runtime Integration](../runtimes/quarkus.md) for its client configuration, and
+[Helidon MP Runtime Integration](../runtimes/helidon.md) for native Kafka and RabbitMQ
 client configuration.

@@ -23,8 +23,8 @@ When a method also needs a distributed lock, see [Distributed Locks](distributed
 advisor ordering.
 
 For Spring runtime assembly, user overrides, and annotation configuration, see
-[Spring Boot Runtime Assembly](../implementations/spring-boot.md). The exact starter, property, and
+[Spring Boot Runtime Assembly](../runtimes/spring-boot.md). The exact starter, property, and
 auto-configuration conditions are in the
 [Spring Boot Auto-configuration reference](../reference/spring-boot-autoconfiguration.md).
 For Quarkus CDI and Jakarta Transactions behavior, including options that are not portable to JTA,
-see [Quarkus Runtime Integration](../implementations/quarkus.md).
+see [Quarkus Runtime Integration](../runtimes/quarkus.md).

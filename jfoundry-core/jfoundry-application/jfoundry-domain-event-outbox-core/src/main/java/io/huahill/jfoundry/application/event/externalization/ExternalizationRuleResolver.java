@@ -34,8 +34,7 @@ public class ExternalizationRuleResolver {
             }
             return Optional.empty();
         }
-        @Nullable String payloadKey = evaluateKey(event, metadata.keyPath());
-        return Optional.of(new ExternalizationRule(Objects.requireNonNull(metadata.topic()), payloadKey));
+        return Optional.of(new ExternalizationRule(Objects.requireNonNull(metadata.topic())));
     }
 
     private ResolvedMetadata computeMetadata(Class<?> eventType) {
@@ -45,7 +44,7 @@ public class ExternalizationRuleResolver {
         boolean hasRouting = routing != null;
 
         if (!hasExternalized) {
-            return new ResolvedMetadata(false, hasRouting, null, null);
+            return new ResolvedMetadata(false, hasRouting, null);
         }
 
         String topic;
@@ -60,29 +59,9 @@ public class ExternalizationRuleResolver {
             }
             topic = externalizedValue;
         }
-
-        @Nullable String keyPath = null;
-        if (hasRouting && !routing.key().isEmpty()) {
-            keyPath = PropertyPathReader.normalize(routing.key());
-        }
-        return new ResolvedMetadata(true, false, topic, keyPath);
+        return new ResolvedMetadata(true, false, topic);
     }
 
-    private @Nullable String evaluateKey(DomainEvent event, @Nullable String keyPath) {
-        if (keyPath == null) {
-            return null;
-        }
-        try {
-            @Nullable Object value = PropertyPathReader.read(event, keyPath);
-            return value == null ? null : value.toString();
-        } catch (Exception e) {
-            log.warn("Failed to resolve @MessageRouting.key property path for event {}; payloadKey falls back to null. Cause: {}",
-                    event.getClass().getName(), e.getMessage());
-            return null;
-        }
-    }
-
-    private record ResolvedMetadata(boolean externalized, boolean routingOnly,
-                                    @Nullable String topic, @Nullable String keyPath) {
+    private record ResolvedMetadata(boolean externalized, boolean routingOnly, @Nullable String topic) {
     }
 }

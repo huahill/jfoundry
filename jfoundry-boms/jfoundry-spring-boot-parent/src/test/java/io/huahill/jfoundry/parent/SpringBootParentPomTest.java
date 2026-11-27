@@ -28,8 +28,7 @@ class SpringBootParentPomTest {
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "jfoundry.version"))
                 .isEqualTo(childText(parent.getDocumentElement(), "version"));
         assertThat(importedBoms(parent)).containsExactly(
-                new Coordinate("io.github.huahill", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"),
-                new Coordinate("io.github.huahill", "jfoundry-dependencies", "${jfoundry.version}"));
+                new Coordinate("io.github.huahill", "jfoundry-spring-boot-dependencies", "${jfoundry.version}"));
         assertThat(childText(child(parent.getDocumentElement(), "properties"), "java.version")).isEqualTo("25");
         assertThat(childText(child(parent.getDocumentElement(), "parent"), "relativePath"))
                 .as("an empty relativePath keeps the Spring parent external to Dependabot")
@@ -114,9 +113,8 @@ class SpringBootParentPomTest {
                 Path.of("..", "..", "pom.xml"),
                 Path.of("..", "jfoundry-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-modules-dependencies", "pom.xml"),
+                Path.of("..", "jfoundry-jakarta-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"),
-                Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"),
                 Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
         String reactorVersion = childText(
@@ -153,7 +151,6 @@ class SpringBootParentPomTest {
     void springRuntimeBomOwnsSpringSpecificComponentFamilies() throws Exception {
         Document foundation = document(Path.of("..", "jfoundry-foundation-dependencies", "pom.xml"));
         Document boot = document(Path.of("..", "jfoundry-spring-boot-dependencies", "pom.xml"));
-        Document cloud = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
 
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot4-starter")).isFalse();
         assertThat(managesDependency(foundation, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isFalse();
@@ -170,6 +167,16 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(boot, "com.baomidou", "mybatis-plus-spring-boot-native-image")).isTrue();
         assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-spring-boot-starter")).isTrue();
+        assertThat(managesDependency(boot, "io.github.huahill", "jfoundry-transaction-spring")).isTrue();
+        assertThat(managesDependency(boot, "io.github.huahill", "jfoundry-transaction-quarkus-runtime")).isFalse();
+        assertThat(managesDependency(boot, "io.github.huahill", "jfoundry-transaction-helidon")).isFalse();
+        assertThat(managesDependency(boot, "io.github.huahill", "jfoundry-domain-event-jta")).isFalse();
+        Document aggregate = document(Path.of("..", "jfoundry-dependencies", "pom.xml"));
+        assertThat(managesDependency(aggregate, "io.github.huahill", "jfoundry-application-core")).isTrue();
+        assertThat(managesDependency(aggregate, "io.github.huahill", "jfoundry-hexagonal")).isTrue();
+        assertThat(managesDependency(aggregate, "io.github.huahill", "jfoundry-onion")).isTrue();
+        assertThat(managesDependency(aggregate, "io.github.huahill", "jfoundry-webmvc-spring-boot-starter")).isFalse();
+        assertThat(managesDependency(aggregate, "io.github.huahill", "jfoundry-transaction-quarkus-runtime")).isFalse();
         assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
         assertThat(property(boot, "jmolecules-integrations.version")).isNull();
         assertThat(managesDependency(boot, "org.apache.kafka", "kafka-clients")).isFalse();
@@ -182,18 +189,8 @@ class SpringBootParentPomTest {
 
         assertThat(importedBoms(boot)).doesNotContain(
                 new Coordinate("io.github.huahill", "jfoundry-foundation-dependencies", "${project.version}"));
-        assertThat(importedBoms(cloud)).doesNotContain(
-                new Coordinate("io.github.huahill", "jfoundry-foundation-dependencies", "${project.version}"));
-        for (Document springLine : List.of(boot, cloud)) {
-            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot4-starter"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "com.baomidou", "mybatis-plus-spring-boot-native-image"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "org.mybatis", "mybatis-spring")).isFalse();
-            assertThat(managesDependency(springLine, "org.redisson", "redisson-spring-boot-starter"))
-                    .isEqualTo(springLine == boot);
-            assertThat(managesDependency(springLine, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
-        }
+        assertThat(managesDependency(boot, "org.mybatis", "mybatis-spring")).isFalse();
+        assertThat(managesDependency(boot, "org.jmolecules.integrations", "jmolecules-spring")).isFalse();
     }
 
     @Test
@@ -216,6 +213,9 @@ class SpringBootParentPomTest {
 
         assertThat(managesDependency(quarkus, "org.redisson", "redisson-quarkus-33")).isTrue();
         assertThat(managesDependency(quarkus, "org.redisson", "redisson-quarkus-33-deployment")).isTrue();
+        assertThat(managesDependency(quarkus, "io.github.huahill", "jfoundry-transaction-quarkus-runtime")).isTrue();
+        assertThat(managesDependency(quarkus, "io.github.huahill", "jfoundry-transaction-quarkus-deployment")).isTrue();
+        assertThat(managesDependency(quarkus, "io.github.huahill", "jfoundry-transaction-spring")).isFalse();
         assertThat(managesDependency(quarkus, "org.redisson", "redisson")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-quarkus-33")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-quarkus-33-deployment")).isFalse();
@@ -240,6 +240,8 @@ class SpringBootParentPomTest {
         Document quarkus = document(Path.of("..", "jfoundry-quarkus-dependencies", "pom.xml"));
 
         assertThat(managesDependency(helidon, "org.redisson", "redisson-helidon-40")).isTrue();
+        assertThat(managesDependency(helidon, "io.github.huahill", "jfoundry-transaction-helidon")).isTrue();
+        assertThat(managesDependency(helidon, "io.github.huahill", "jfoundry-transaction-spring")).isFalse();
         assertThat(managesDependency(helidon, "org.redisson", "redisson")).isFalse();
         assertThat(managesDependency(foundation, "org.redisson", "redisson-helidon-40")).isFalse();
         assertThat(managesDependency(boot, "org.redisson", "redisson-helidon-40")).isFalse();
@@ -250,17 +252,6 @@ class SpringBootParentPomTest {
         assertThat(managedArtifactIds(helidon)).containsSubsequence(
                 "helidon-dependencies",
                 "redisson-helidon-40");
-    }
-
-    @Test
-    void cloudBomOwnsOnlyCloudPlatformVersions() throws Exception {
-        Document document = document(Path.of("..", "jfoundry-spring-cloud-dependencies", "pom.xml"));
-
-        assertThat(child(child(document.getDocumentElement(), "properties"), "spring-boot.version"))
-                .isNull();
-        assertThat(importedBoms(document)).containsExactly(
-                new Coordinate("org.springframework.cloud", "spring-cloud-dependencies", "${spring-cloud.version}"),
-                new Coordinate("com.alibaba.cloud", "spring-cloud-alibaba-dependencies", "${spring-cloud-alibaba.version}"));
     }
 
     @Test
@@ -324,6 +315,7 @@ class SpringBootParentPomTest {
     void helidonRuntimeBuildUsesTheConsumerBomAsItsPlatformVersionSource() throws Exception {
         Document runtime = document(Path.of("..", "..", "jfoundry-runtime", "jfoundry-helidon", "pom.xml"));
         Document bom = document(Path.of("..", "jfoundry-helidon-dependencies", "pom.xml"));
+        Document jakarta = document(Path.of("..", "jfoundry-jakarta-dependencies", "pom.xml"));
 
         assertThat(property(runtime, "helidon.version")).isNull();
         assertThat(importedBoms(runtime)).containsExactly(
@@ -333,7 +325,13 @@ class SpringBootParentPomTest {
         assertThat(managesDependency(runtime, "com.rabbitmq", "amqp-client")).isFalse();
         assertThat(property(runtime, "hibernate.version")).isNull();
         assertThat(importedBoms(bom)).containsExactly(
+                new Coordinate("io.github.huahill", "jfoundry-jakarta-dependencies", "${project.version}"),
                 new Coordinate("io.helidon", "helidon-dependencies", "${helidon.version}"));
+        for (String artifactId : List.of(
+                "jfoundry-jakarta", "jfoundry-http-jaxrs", "jfoundry-restclient-jaxrs",
+                "jfoundry-web-jaxrs", "jfoundry-transaction-jta", "jfoundry-domain-event-jta", "jfoundry-lock-el")) {
+            assertThat(managesDependency(jakarta, "io.github.huahill", artifactId)).isTrue();
+        }
         Document rabbitmq = document(Path.of(
                 "..", "..", "jfoundry-runtime", "jfoundry-helidon",
                 "jfoundry-messaging-rabbitmq-helidon", "pom.xml"));

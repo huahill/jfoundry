@@ -42,7 +42,7 @@ version state, but their database operations still belong inside the application
 Spring Boot assembly is available through
 `jfoundry-persistence-mybatis-plus-spring-boot-starter`. Quarkus does not currently provide a
 jfoundry MyBatis-Plus runtime integration; do not infer one from the runtime-neutral adapter. See
-[Spring Boot](spring-boot.md) for the supported assembly and [Quarkus](quarkus.md) for its current
+[Spring Boot](../runtimes/spring-boot.md) for the supported assembly and [Quarkus](../runtimes/quarkus.md) for its current
 capability scope.
 
 For persistence data objects that implement `AuditStampHolder`, this Spring Boot starter also registers
@@ -66,5 +66,5 @@ Under Spring Boot, the default Outbox dispatcher and Inbox template use `Transac
 their database phases. This is required even though individual MyBatis mapper calls can otherwise
 commit independently: the handler and Inbox `PROCESSED` transition must remain atomic.
 
-For runtime assembly and user replacement behavior, see [Spring Boot](spring-boot.md). The
+For runtime assembly and user replacement behavior, see [Spring Boot](../runtimes/spring-boot.md). The
 [reference](../reference/spring-boot-autoconfiguration.md) lists conditions and properties.

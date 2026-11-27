@@ -45,11 +45,10 @@ updates:
       - "/"
       - "/jfoundry-boms/jfoundry-dependencies"
       - "/jfoundry-boms/jfoundry-foundation-dependencies"
+      - "/jfoundry-boms/jfoundry-jakarta-dependencies"
       - "/jfoundry-boms/jfoundry-helidon-dependencies"
-      - "/jfoundry-boms/jfoundry-modules-dependencies"
       - "/jfoundry-boms/jfoundry-quarkus-build/src/test/dependabot-reactor"
       - "/jfoundry-boms/jfoundry-spring-boot-parent/src/test/dependabot-reactor"
-      - "/jfoundry-boms/jfoundry-spring-cloud-dependencies"
     schedule:
       interval: weekly
     cooldown:

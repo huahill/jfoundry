@@ -13,7 +13,8 @@ JFoundry 的 Quarkus 集成由按能力划分的扩展组成。基础应用能�
 ## 依赖配置
 
 依次导入版本相同的 Quarkus BOM 与核心 JFoundry BOM，最后添加所需的能力扩展。
-`jfoundry-quarkus-dependencies` 管理 Quarkus 平台生态版本以及范围严格的 Jackson annotations 兼容性对齐，不管理 JFoundry 模块版本。Quarkus 会通过
+`jfoundry-quarkus-dependencies` 管理 Quarkus 平台生态、Quarkus 运行时与部署模块版本以及范围严格的 Jackson annotations 兼容性对齐，
+并通过 `jfoundry-jakarta-dependencies` 管理可移植 Jakarta 适配器。Quarkus 会通过
 运行时扩展描述符发现部署构件；应用不应直接添加部署构件。
 
 ```xml
@@ -228,8 +229,8 @@ mp.messaging.outgoing.jfoundry-kafka.key.serializer=org.apache.kafka.common.seri
 mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.serialization.StringSerializer
 ```
 
-`MessageSender.send(topic, payloadKey, payload)` 会为每一条 Kafka 记录动态设置 topic 与 key，因此
-`@Externalized` 和 `@AggregateRouting` 仍决定 Outbox 路由。通道名称只是基础设施配置，并非业务目的地。
+`MessageSender.send(topic, payloadKey, payload)` 会为每一条 Kafka 记录动态设置 topic 与 key。
+`@Externalized` 或 `@MessageRouting` 提供静态主题，消息 key 只来自 `DomainEventExternalizer`。通道名称只是基础设施配置，并非业务目的地。
 适配器会等待消息代理确认，并将失败映射为 `SendResult`；投递超时由 Kafka 客户端与连接器原生属性配置。
 它是 Quarkus CDI 默认 Bean，应用可以用自己的 `MessageSender` 覆盖。
 
@@ -252,7 +253,7 @@ mp.messaging.outgoing.jfoundry-kafka.value.serializer=org.apache.kafka.common.se
 ## 自动领域事件外部化
 
 `jfoundry-domain-event-outbox-quarkus-runtime` 提供显式的自动外部化装配。它提供可替换的
-`ExternalizationRuleResolver`、`AggregateRoutingResolver`、`DomainEventOutboxRecorder` 和领域事件
+`ExternalizationRuleResolver`、`DomainEventOutboxRecorder` 和领域事件
 Outbox 派发器默认 CDI Bean。通用的 `PayloadSerializer` 与 `OutboxTemplate` 由
 `jfoundry-outbox-quarkus-runtime` 提供；完整组合需要同时选择两个运行时模块。两个模块都不会添加
 Outbox 存储或消息代理客户端；应单独加入例如 `jfoundry-outbox-jpa-quarkus-runtime` 的存储能力。
@@ -263,8 +264,7 @@ Outbox 存储或消息代理客户端；应单独加入例如 `jfoundry-outbox-j
 jfoundry.domain.event.dispatch.outbox.enabled=true
 ```
 
-对每个预期作为集成事件的类型添加 `@Externalized("<topic>")`。需要把聚合类型、id 或版本写入 Outbox 行时，添加
-`@AggregateRouting`；在未指定路由 key 时，解析出的聚合 id 也会成为默认消息 key。没有 `@Externalized` 的事件不会被记录。
+对每个预期作为集成事件的类型添加 `@Externalized("<topic>")`。`@MessageRouting` 可以替换这个静态主题。这两个注解都不提供消息 key 或聚合元数据；Outbox 行需要这些值时，提供 `DomainEventExternalizer`。没有 `@Externalized` 的事件不会被记录，除非外部化器选中了它。
 应用可以声明自己的 CDI Bean 覆盖默认序列化器或记录器。
 
 当聚合在活跃 JTA 事务中注册时，自动外部化会在该事务的 `beforeCompletion` 阶段记录 Outbox 行。因此，即使
@@ -371,48 +371,16 @@ Jakarta REST 响应提供的非实体头；存在 `Allow` 时也会保留。它�
 非成功响应转换成 `HttpResponseException`，或把传输失败转换成 `HttpRequestException`；这两种异常只属于 Spring
 `RestClient`。
 
-## PostgreSQL 中间件验证
+## 验证
 
-运行时本地的 JVM 集成配置档会通过 Testcontainers 启动 PostgreSQL。它验证 Quarkus 的
-`TransactionRunner`、JPA Outbox 存储和数据源装配确实会在 PostgreSQL 中持久化 Outbox
-记录，而不是使用内存测试数据库。该配置档保持显式启用，因此普通模块测试不需要 Docker：
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-quarkus/jfoundry-quarkus-integration-tests \
-  -am -Pjvm-integration verify
-```
-
-## 原生镜像验证
-
-仓库的 Quarkus 原生镜像 CI 任务会安装完整 Reactor，再通过 Quarkus 容器原生镜像构建独立的使用方应用。每个
-`@QuarkusIntegrationTest` 都使用 `PostgreSqlIntegrationTestProfile`：它启动 PostgreSQL，并把数据源种类设为
-`postgresql`。这些测试通过 HTTP 入口，针对原生可执行文件验证 `TransactionRunner`、JPA 聚合持久化、领域事件分发、Inbox，以及 Outbox 的持久化、派发、恢复和清理。
-
-### 本地 CI 对齐验证
-
-使用 Java 25 和 Docker 在本地运行两个 Quarkus CI 阶段。在 Linux 上，原生阶段使用与 CI 相同的容器构建；在
-macOS 上，它使用本地 GraalVM，因为 Linux 容器生成的可执行文件无法在宿主机运行：
+Quarkus 中间件和原生镜像声明由直接的 Quarkus 集成测试模块验证。支持范围和上游限制见
+[兼容矩阵](../../../release/compatibility.md)。
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh quarkus
 ```
-
-使用 `--stage middleware` 或 `--stage native` 可以只运行一个阶段。基础原生阶段不包含 Redisson。
-Redis 锁验证是独立阶段，因此缺少 Redisson 地址不会破坏默认应用：
-
-```bash
-JAVA_25_HOME=/path/to/java-25 \
-GRAALVM_HOME=/path/to/graalvm-25 \
-bash scripts/verify-runtime-ci.sh quarkus --stage native-redisson
-```
-
-该命令先运行 JVM 的 `jvm-redisson` 配置档，再运行 `native-redisson` 配置档。
-
-通用 `scripts/verify-ci-matrix.sh` 仍然是无需 Docker 的 Java 25 基线验证。设置两个环境变量后，使用
-`bash scripts/verify-runtime-ci.sh all` 可以运行所有已支持的运行时检查。
 
 ## 当前范围
 

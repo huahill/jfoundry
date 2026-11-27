@@ -3,13 +3,12 @@
          child.project.url.inherit.append.path="false"
          xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
     <modelVersion>4.1.0</modelVersion>
-
     <groupId>io.github.huahill</groupId>
-    <artifactId>jfoundry-spring-cloud-dependencies</artifactId>
+    <artifactId>jfoundry-jakarta-dependencies</artifactId>
     <version>1.8.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>jfoundry-spring-cloud-dependencies</name>
-    <description>Spring Cloud platform dependency management BOM for jfoundry applications.</description>
+    <name>jfoundry-jakarta-dependencies</name>
+    <description>Dependency management BOM for portable Jakarta runtime adapters used by Quarkus and Helidon.</description>
     <url>${jfoundry.release.url}</url>
     <licenses><license><name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0.txt</url><distribution>repo</distribution></license></licenses>
     <developers><developer><id>youngledo</id><name>youngledo</name></developer></developers>
@@ -20,32 +19,51 @@
         <tag>v1.7.0</tag>
     </scm>
     <properties>
-        <project.build.outputTimestamp>2026-08-28T08:08:36Z</project.build.outputTimestamp>
+        <project.build.outputTimestamp>2026-08-28T08:08:35Z</project.build.outputTimestamp>
         <jfoundry.release.url>https://github.com/huahill/jfoundry</jfoundry.release.url>
         <jfoundry.release.scm.connection>scm:git:https://github.com/huahill/jfoundry.git</jfoundry.release.scm.connection>
-        <jfoundry.release.scm.developerConnection>scm:git:https://github.com/huahill/jfoundry.git</jfoundry.release.scm.developerConnection>
+        <jfoundry.release.scm.developerConnection>scm:git:ssh://git@github.com/huahill/jfoundry.git</jfoundry.release.scm.developerConnection>
         <jfoundry.release.scm.url>https://github.com/huahill/jfoundry</jfoundry.release.scm.url>
         <maven-enforcer-plugin.version>3.7.0</maven-enforcer-plugin.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
         <central-publishing-maven-plugin.version>0.12.0</central-publishing-maven-plugin.version>
-        <spring-cloud.version>2025.1.4</spring-cloud.version>
-        <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
     </properties>
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-jakarta</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${spring-cloud-alibaba.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-http-jaxrs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-restclient-jaxrs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-web-jaxrs</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-transaction-jta</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-domain-event-jta</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.huahill</groupId>
+                <artifactId>jfoundry-lock-el</artifactId>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

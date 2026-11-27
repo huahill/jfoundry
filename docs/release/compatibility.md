@@ -11,18 +11,16 @@ aligned with the BOMs without coupling documentation to patch-level updates.
 
 | Platform | Supported line | Version source |
 |----------|----------------|----------------|
-| Spring Cloud | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
-| Spring Cloud Alibaba | 2025.1.x | `jfoundry-spring-cloud-dependencies` |
+| Spring Cloud | 2025.1.x | `org.springframework.cloud:spring-cloud-dependencies` |
+| Spring Cloud Alibaba | 2025.1.x | `com.alibaba.cloud:spring-cloud-alibaba-dependencies` |
 | Quarkus | 3.40.x | `jfoundry-quarkus-dependencies` |
 | Helidon MP | 4.5.x | `jfoundry-helidon-dependencies` |
 
-Spring Cloud follows the upstream train, and a Cloud application pairs it with whatever Spring Boot
-line that train supports; the Cloud BOM deliberately does not manage Spring Boot, so the application
-parent remains the version source for that part of the combination. Spring Cloud Alibaba (the Nacos
-ecosystem) publishes behind the Spring Cloud train, so a new Spring Cloud line is adopted together
-with its matching Alibaba train — the two rows above move in one change, which is what the
-verification below enforces. Boot-only applications use the current stable Spring Boot line and must
-not combine the Boot-only and Cloud runtime BOMs.
+Spring Cloud and Spring Cloud Alibaba are upstream platform choices. A Cloud application selects a
+compatible Spring Boot parent or BOM, then imports the official Cloud and Alibaba BOMs alongside
+JFoundry's Spring Boot integration BOM. JFoundry records the upstream lines here but does not publish
+a Cloud wrapper or claim ownership of the cross-platform compatibility decision. Boot-only applications
+use the current stable Spring Boot line.
 
 Helidon's upstream line is JDK-aligned: Tip releases at major 27 and later require the JDK their
 major number names, while Helidon 4.5 remains the supported long-term line. The Java 25 baseline
@@ -51,14 +49,19 @@ capabilities it needs:
 - Spring Boot-only applications use `jfoundry-spring-boot-dependencies` or
   `jfoundry-spring-boot-parent`.
 - Spring Cloud applications use their own compatible Spring Boot parent and import
-  `jfoundry-spring-cloud-dependencies` before `jfoundry-dependencies`.
+  `jfoundry-spring-boot-dependencies` followed by the official Spring Cloud and Alibaba BOMs.
 - Quarkus and Helidon applications import their matching runtime BOM before
   `jfoundry-dependencies`.
 
-Runtime BOMs manage platform ecosystem versions only. They do not add runtime capabilities to the
-classpath, manage JFoundry module versions, or import Foundation. Foundation supplies only
+Runtime BOMs manage their platform ecosystem and matching JFoundry runtime module versions. They do
+not add runtime capabilities to the classpath or import Foundation. Foundation supplies only
 runtime-neutral coordinates the platform BOM does not already own. Applications still select each
 starter, adapter, database, and broker explicitly.
+
+The aggregate `jfoundry-dependencies` BOM manages framework-neutral JFoundry modules. Spring Boot,
+Quarkus, and Helidon BOMs manage their matching JFoundry runtime modules; the shared
+`jfoundry-jakarta-dependencies` BOM is imported by the Quarkus and Helidon BOMs for portable Jakarta
+adapters. These management entries do not add capabilities to the application classpath.
 
 ## Validated Capability Scope
 

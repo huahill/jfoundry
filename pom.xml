@@ -74,10 +74,9 @@
     </properties>
 
     <subprojects>
-        <subproject>jfoundry-boms/jfoundry-modules-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-foundation-dependencies</subproject>
+        <subproject>jfoundry-boms/jfoundry-jakarta-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-spring-boot-dependencies</subproject>
-        <subproject>jfoundry-boms/jfoundry-spring-cloud-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-quarkus-dependencies</subproject>
         <subproject>jfoundry-boms/jfoundry-quarkus-build</subproject>
         <subproject>jfoundry-boms/jfoundry-helidon-dependencies</subproject>

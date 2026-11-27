@@ -17,8 +17,8 @@ owning runtime BOM supplies the exact Helidon patch version used by each release
 ## Dependency Composition
 
 Import the Helidon BOM before the core JFoundry BOM, using the same JFoundry version for both. The Helidon BOM manages
-the selected Helidon platform ecosystem and its narrow Jackson annotations compatibility alignment;
-it does not manage JFoundry module versions:
+the selected Helidon platform ecosystem, Helidon module versions, and its narrow Jackson annotations compatibility
+alignment. It imports `jfoundry-jakarta-dependencies` for the portable Jakarta adapters:
 
 ```xml
 <dependencyManagement>
@@ -210,66 +210,17 @@ Helidon MP's guaranteed facade is `System.Logger`, which has no standard MDC or 
 arbitrary application log records do not receive an automatic `request_id` field; include it explicitly from
 the request context. The provider restores request-thread state in the terminal response callback.
 
-## PostgreSQL/JTA Middleware Verification
+## Verification
 
-The runtime-local JVM integration profile starts PostgreSQL through Testcontainers and verifies a
-real JTA `TransactionRunner` callback with a JPA `EntityManager`. Helidon's CDI JPA integration
-uses the standard `META-INF/persistence.xml` persistence-unit descriptor and resolves its named JTA
-datasource through CDI; this is the same integration model the verification exercises. The profile
-is opt-in so ordinary module tests do not require Docker:
-
-```bash
-./mvnw -B \
-  -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
-  -am -Pjvm-integration verify
-```
-
-## Native Image Status
-
-The Helidon consumer is built with GraalVM Native Image and has verified CDI discovery, application
-startup, and the Problem Details HTTP response. Use GraalVM 25 with the repository's Maven 4 wrapper
-and Native Image profile:
-
-```bash
-GRAALVM_HOME=/path/to/graalvm-25 \
-JAVA_HOME="$GRAALVM_HOME" PATH="$GRAALVM_HOME/bin:$PATH" \
-./mvnw -pl jfoundry-runtime/jfoundry-helidon/jfoundry-helidon-integration-tests \
-  -am -Pnative-image package
-```
-
-The Native consumer also verifies JSON-B request deserialization, Bean Validation, and the request-
-validation Problem Details response. Because Helidon embeds CDI metadata into the image, the profile
-initializes the validation provider, EL implementation, and ClassMate metadata at build time and
-registers its request DTO fields for reflection. Downstream Native applications must provide
-equivalent reflection metadata for their own JSON and validated request types.
-
-The supported Helidon MP version documents Narayana JTA Native Image support as experimental. In the
-tested GraalVM Community environment on macOS ARM64, the JPA-enabled consumer fails during image generation because
-`org.xml.sax.helpers.LocatorImpl` reaches the image heap through
-`JpaExtension.processPersistenceXmls`. The Native CDI/Web-only consumer starts and serves Problem
-Details, but executing `TransactionRunner` currently fails because Helidon's CDI transaction-manager
-delegate is not initialized in the generated image. JVM JTA remains supported. The reproducible
-environment, JVM control result, and Native failure trace are recorded on
-[Helidon issue #8863](https://github.com/helidon-io/helidon/issues/8863#issuecomment-5078931015).
-JFoundry does not duplicate or replace Narayana to hide this upstream limitation, so Native JTA and
-JPA are not acceptance claims until Helidon provides working supported paths. Exact tested versions
-are recorded in the [compatibility matrix](../../../release/compatibility.md).
-
-### CI-Aligned Local Verification
-
-Run the Helidon CI stages locally with Java 25, Docker, and GraalVM Native Image:
+Helidon middleware and Native Image claims are validated by the direct Helidon integration-test
+module. Native JTA/JPA limitations and the accepted CDI/Web scope are recorded in the
+[compatibility matrix](../../../release/compatibility.md).
 
 ```bash
 JAVA_25_HOME=/path/to/java-25 \
 GRAALVM_HOME=/path/to/graalvm-25 \
 bash scripts/verify-runtime-ci.sh helidon
 ```
-
-Use `--stage middleware`, `--stage jvm-redisson`, or `--stage native` to run one stage. The
-`jvm-redisson` stage verifies the JVM Redisson lock assembly against Redis. The native stage verifies
-the supported CDI/Web consumer, ordinary Problem Details response, and request-validation response; it
-does not claim Native JTA, JPA, or Redisson support. The general `scripts/verify-ci-matrix.sh` remains
-the Docker-free Java 25 baseline.
 
 ## Deferred Integrations
 

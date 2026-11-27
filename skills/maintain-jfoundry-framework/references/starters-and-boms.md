@@ -10,8 +10,8 @@ create a published parent or inheritance boundary.
   parent. It may import JUnit, Jackson, OpenTelemetry, SLF4J, Mockito, and AssertJ BOMs for compiling JFoundry itself, but must not pin those GAs
   directly, or Maven would override the nearer runtime BOM. Give those BOM versions property names the runtime platform does not use.
 - `jfoundry-spring-boot-parent` is the consumer-facing Boot-only parent. It directly inherits
-  the supported Spring Boot parent declared in its POM and imports `jfoundry-spring-boot-dependencies` before
-  `jfoundry-dependencies`.
+  the supported Spring Boot parent declared in its POM and imports only `jfoundry-spring-boot-dependencies`,
+  which carries the aggregate BOM for Boot consumers.
 - `jfoundry-quarkus-build` is an internal Quarkus runtime build parent. It inherits `jfoundry-parent`,
   pins `quarkus.version` for Quarkus plugins and `quarkus-extension-processor`, and is not a consumer
   BOM. The Quarkus runtime aggregator inherits it and must not redeclare `quarkus.version`.
@@ -30,24 +30,22 @@ create a published parent or inheritance boundary.
   Helidon and Spring Cloud have one version source each and do not need a reactor. Helidon keeps
   the only Maven ignore rule: `io.helidon:helidon-dependencies` ignores JDK-aligned Tip versions
   `>= 27` while the Java baseline is 25; move the floor in the same change that raises the baseline.
-- Cloud applications use their own or a standard Maven parent compatible with the supported Cloud
-  line and explicitly import `jfoundry-spring-cloud-dependencies`
-  before `jfoundry-dependencies`.
+- Cloud applications use their own or a standard Maven parent compatible with the chosen Cloud line,
+  import `jfoundry-spring-boot-dependencies`, and then import the official Spring Cloud and Alibaba BOMs.
 - `jfoundry-foundation-dependencies` manages low-level, runtime-neutral dependency versions and
   coordinates that the selected runtime platform BOM does not already own. It does not manage
   runtime starters, deployment artifacts, runtime-specific Native Image integrations, or platform
   stacks such as JUnit, Mockito, Jackson, SLF4J, OpenTelemetry, Kafka/RabbitMQ/RocketMQ clients,
   Hibernate, and JDBC drivers.
-- `jfoundry-modules-dependencies` manages JFoundry module versions.
 - `jfoundry-dependencies` is the aggregate, framework-neutral public BOM. It imports only the
-  foundation and module BOMs and is the required JFoundry BOM for every external application.
+  framework-neutral JFoundry module coordinates and Foundation dependencies, and is the required
+  JFoundry BOM for every external application.
   Applications with a platform parent still import it; Foundation no longer fights that parent for
   JUnit or Jackson versions.
-- `jfoundry-spring-boot-dependencies`, `jfoundry-spring-cloud-dependencies`,
-  `jfoundry-quarkus-dependencies`, and `jfoundry-helidon-dependencies` are standalone runtime BOMs.
-  They do not import `jfoundry-dependencies` or `jfoundry-foundation-dependencies`; they manage only
-  their runtime platform ecosystem. The aggregate `jfoundry-dependencies` BOM is the single public
-  entry point for runtime-neutral, Foundation-managed coordinates.
+- `jfoundry-spring-boot-dependencies` is the standalone Spring Boot consumer BOM. It imports
+  `jfoundry-dependencies` and manages Spring Boot runtime modules. Spring Cloud applications use the
+  official Spring Cloud and Alibaba BOMs alongside it. Quarkus and Helidon import
+  `jfoundry-jakarta-dependencies` for their shared portable Jakarta adapters.
 
 Every published BOM is an independent, self-describing POM: it must not inherit a JFoundry parent,
 and it must directly declare its coordinates, project metadata (including licenses, developers, and
@@ -76,9 +74,9 @@ platform BOM and official Cloud or integration BOMs that business applications c
 that runtime. It never adds those libraries to an application's runtime classpath by itself; the
 application still declares each selected starter or client explicitly.
 
-`jfoundry-spring-boot-dependencies` manages only the supported Boot-only Spring Boot line. The separate
-`jfoundry-spring-cloud-dependencies` line manages the supported Spring Cloud and Spring Cloud Alibaba
-line; the Cloud application's parent or another explicit BOM manages Spring Boot. Runtime BOM POMs are
+`jfoundry-spring-boot-dependencies` manages the supported Spring Boot line and Spring-specific
+JFoundry modules. Spring Cloud and Spring Cloud Alibaba remain official upstream BOM choices; the
+Cloud application's parent or another explicit Boot BOM manages the platform line. Runtime BOM POMs are
 the executable source of exact platform versions. `docs/release/compatibility.md` records the
 composite supported lines and owning BOMs — Spring Boot-only follows the current stable Spring Boot
 line and is validated by the full CI matrix instead — and is checked against the BOMs in CI without
